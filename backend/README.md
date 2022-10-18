@@ -7,3 +7,9 @@
 
 Start the following script in the quickTA directory:
 `./manage.py runserver`
+
+### To make migrations 
+`./manage.py makemigrations`
+
+### To migrate files
+`./manage.py migrate`
