@@ -19,6 +19,5 @@ from students import views as student_views
 urlpatterns = [
     # path('app/', include('myapp.urls')),
     path('admin/', admin.site.urls),
-    path('api/', include('rest_framework.urls')),
-    # path('api/users/', student_views.get_users)
+    path('api/', include('students.urls', namespace='user')),
 ]
