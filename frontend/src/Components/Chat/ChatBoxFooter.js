@@ -43,7 +43,7 @@ return(
               onChange={(currVal) => setSliderVal(currVal)}
               onMouseEnter={() => setSliderTooltip(true)}
               onMouseLeave={() => setSliderTooltip(false)}
-              step={0.01}
+              step={1}
             >
                 <SliderMark value={1} mt={1} fontSize={'smaller'}>1</SliderMark>
                 <SliderMark value={2} mt={1} fontSize={'smaller'}>2</SliderMark>
