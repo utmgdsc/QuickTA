@@ -10,11 +10,13 @@ import {
   useDisclosure
 } from '@chakra-ui/react'
 import {useState} from "react";
+import axios from "axios";
 
 const ChatBoxFooter = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [sliderVal, setSliderVal] = useState(0);
   const [showTooltip, setSliderTooltip] = useState(false);
+  const [text, setText] = useState("");
 
 return(
 
@@ -67,9 +69,8 @@ return(
          </ModalBody>
 
          <ModalFooter>
-           <Button bg={'teal'} color={'white'}>
+           <Button colorScheme={'green'}>
              Send
-           {/*  MODAL REDIRECT FOR MORE INFO IF BELOW 4 STARS*/}
            </Button>
            <Spacer/>
            <Button onClick={onClose}>
@@ -78,8 +79,13 @@ return(
          </ModalFooter>
        </ModalContent>
      </Modal>
-     <Input variant={'filled'}/>
-     <Button colorScheme={'blue'} fontSize={'sm'}>
+     <Input variant={'filled'} placeholder={"Enter your message here"} onChange={(e) => setText(setText + e)}/>
+     <Button colorScheme={'blue'} fontSize={'sm'} onClick={
+       // Send a POST request
+       axios.post("localhost:8000/api/chatlog", {
+
+       }).then().catch(err => console.error(err))
+     }>
        Send
      </Button>
   </HStack>
