@@ -89,12 +89,38 @@ class FeedbackDetail(generics.RetrieveUpdateDestroyAPIView):
     pass
 
 @api_view(['POST'])
+def user_detail(request):
+    """
+    Creates a new user.
+    """
+    try:
+        request.data['user_id'] = str(uuid.uuid4())
+        # print(type(request.data['user_id'].toString()))
+        # request.data['conversations'] = [{'conversation_id': ''}]
+        serializer = UserSerializer(data=request.data)
+        serializer.is_valid()
+        serializer.save()
+
+        return Response(request.data, status=status.HTTP_201_CREATED)
+    except:
+        error = []
+        if 'name' not in request.data.keys():
+            error.append("Name")
+        if 'utorid' not in request.data.keys():
+            error.append("Utor ID")
+        if 'user_role' not in request.data.keys():
+            error.append("User Role")
+        err = {"msg": "User details missing fields:"}
+
+        return Response(err, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['POST'])
 def conversation_detail(request):
     """
     Retrieves a request to start a session.
     """
     try:
-        request.data['conversation_id'] = uuid.uuid4()
+        request.data['conversation_id'] = str(uuid.uuid4())
         request.data['status'] = 'A'
         serializer = ConversationSerializer(data=request.data)
         serializer.is_valid()
@@ -107,7 +133,7 @@ def conversation_detail(request):
             error.append("User ID")
         if 'semester' not in request.data.keys():
             error.append("Semester")
-        err = {"msg": "Conversation details are missing: " + ','.join(error) + '.'}
+        err = {"msg": "Conversation details missing fields: " + ','.join(error) + '.'}
 
         return Response(err, status=status.HTTP_404_NOT_FOUND)
 
@@ -141,6 +167,6 @@ def chatlog_detail(request):
                 error.append("Chatlog ID")
             if 'chatlog' not in request.data.keys():
                 error.append("Chatlog message")
-            err = {"msg": "Chatlog details are missing: " + ','.join(error) + '.'}
+            err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
 
             return Response(err, status=status.HTTP_404_NOT_FOUND)

@@ -1,12 +1,26 @@
-from django.db import models
+from djongo import models
 from django.utils.timezone import now
 
+
 # Create your models here.
+
+
 class User(models.Model):
+    class UserConversation(models.Model):
+        conversation_id = models.CharField(max_length=100)
+
+        class Meta:
+            abstract =  True
+
     user_id = models.CharField(max_length=50)
     name = models.CharField(max_length=200)
     utorid = models.CharField(max_length=10)
     user_role = models.CharField(max_length=2)
+    # conversations = models.ArrayField(
+    #     model_container=UserConversation,
+    #     blank=True,
+    #     null=True
+    # )
 
     def __str__(self):
         return self.name
@@ -34,6 +48,7 @@ class Conversation(models.Model):
 
     def __str__(self):
         return "Conversation " + self.conversation_id + "(" + self.user_id + ")"
+
 
 
 class Chatlog(models.Model):
