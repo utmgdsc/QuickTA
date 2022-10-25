@@ -1,4 +1,6 @@
+import uuid
 from datetime import datetime
+from http.client import responses
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.utils.timezone import now
@@ -85,6 +87,31 @@ class FeedbackDetail(generics.RetrieveUpdateDestroyAPIView):
 
     serializer = FeedbackSerializer(queryset, many=True)
     pass
+
+@api_view(['POST'])
+def conversation_detail(request):
+    """
+    Retrieves a request to start a session.
+    """
+    try:
+        request.data['conversation_id'] = uuid.uuid4()
+        request.data['status'] = 'A'
+        serializer = ConversationSerializer(data=request.data)
+        serializer.is_valid()
+        serializer.save()
+
+        return Response(request.data, status=status.HTTP_201_CREATED)
+    except:
+        error = []
+        if 'user_id' not in request.data.keys():
+            error.append("User ID")
+        if 'semester' not in request.data.keys():
+            error.append("Semester")
+        err = {"msg": "Conversation details are missing: " + ','.join(error) + '.'}
+
+        return Response(err, status=status.HTTP_404_NOT_FOUND)
+
+
 
 @api_view(['POST'])
 def chatlog_detail(request):

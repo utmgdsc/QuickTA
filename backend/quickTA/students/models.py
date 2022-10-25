@@ -27,8 +27,8 @@ class Model(models.Model):
 class Conversation(models.Model):
     conversation_id = models.CharField(max_length=100)
     user_id = models.CharField(max_length=50)  
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
+    start_time = models.DateTimeField(default=now)
+    end_time = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=1)
     semester = models.CharField(max_length=20)
 

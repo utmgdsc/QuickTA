@@ -10,6 +10,8 @@ urlpatterns = [
     path('course/<int:pk>/', CourseDetail.as_view(), name='course-detail'),
     path('course', CourseList.as_view(), name='course-list'),
     path('conversation/<int:pk>/', ConversationDetail.as_view(), name='conversation-detail'),
-    path('conversation', ConversationList.as_view(), name='conversation-list'),
+    # path('conversation', ConversationList.as_view(), name='conversation-list'),
+    
     path('chatlog', views.chatlog_detail),
+    path('conversation', views.conversation_detail),
 ]
