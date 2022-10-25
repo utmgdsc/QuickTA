@@ -1,5 +1,7 @@
+from datetime import datetime
 from django.shortcuts import render
 from django.http import JsonResponse
+from django.utils.timezone import now
 from .models import Chatlog, Conversation, Course, Feedback, User
 from .serializers import ConversationSerializer, CourseSerializer, FeedbackSerializer, UserSerializer, ChatlogSerializer
 
@@ -11,14 +13,13 @@ from rest_framework import generics
 
 """
 Serializers 
-======================================
+======================================================================================================
 - ensuring data returned is in the right format (JSON)
 - allows data from querysets and models to be converted into python datatypes to be rendered into JSON
 """
 class UserList(generics.ListCreateAPIView):
     serializer_class = UserSerializer
     queryset = User.objects.all()
-    
     serializer = UserSerializer(queryset, many=True)
     pass
 
@@ -50,7 +51,7 @@ class ConversationList(generics.ListCreateAPIView):
     serializer = CourseSerializer(queryset, many=True)
     pass
 
-class ConversationDetail(generics.ListCreateAPIView):
+class ConversationDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ConversationSerializer
     queryset = Conversation.objects.all()
 
@@ -64,7 +65,7 @@ class ChatlogList(generics.ListCreateAPIView):
     serializer = ChatlogSerializer(queryset)
     pass
 
-class ChatlogDetail(generics.ListCreateAPIView):
+class ChatlogDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ChatlogSerializer
     queryset = Chatlog.objects.all()
 
@@ -78,10 +79,26 @@ class FeedbackList(generics.ListCreateAPIView):
     serializer = FeedbackSerializer(queryset)
     pass
 
-class FeedbackDetail(generics.ListCreateAPIView):
+class FeedbackDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = FeedbackSerializer
     queryset = Feedback.objects.all()
 
     serializer = FeedbackSerializer(queryset, many=True)
     pass
 
+@api_view(['POST'])
+def chatlog_detail(request):
+    """
+    Retrieves a chatlog from the user, posts it and also
+    returns a response from the OpenAI model.
+    """
+    if request.method == 'POST':
+        serializer = ChatlogSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            
+            # Get response from Model
+            model_response = "hi"
+            response = { "msg": model_response }
+            
+            return Response(response, status=status.HTTP_201_CREATED)
