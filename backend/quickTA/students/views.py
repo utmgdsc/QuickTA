@@ -93,8 +93,10 @@ def chatlog_detail(request):
     returns a response from the OpenAI model.
     """
     if request.method == 'POST':
+        request.data['is_user'] = True
         serializer = ChatlogSerializer(data=request.data)
-        if serializer.is_valid():
+        try:
+            serializer.is_valid()
             serializer.save()
             
             # Get response from Model
@@ -102,3 +104,16 @@ def chatlog_detail(request):
             response = { "msg": model_response }
             
             return Response(response, status=status.HTTP_201_CREATED)
+        
+        except:
+            # Error handling
+            error = []
+            if 'conversation_id' not in request.data.keys():
+                error.append("Conversation ID")
+            if 'chatlog_id' not in request.data.keys():
+                error.append("Chatlog ID")
+            if 'chatlog' not in request.data.keys():
+                error.append("Chatlog message")
+            err = {"msg": "Chatlog details are missing: " + ','.join(error) + '.'}
+
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
