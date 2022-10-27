@@ -143,6 +143,7 @@ def chatlog_detail(request):
     """
     if request.method == 'POST':
         request.data['is_user'] = True
+        request.data['chatlog_id'] = str(uuid.uuid4())
         serializer = ChatlogSerializer(data=request.data)
         try:
             serializer.is_valid()
