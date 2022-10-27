@@ -18,6 +18,12 @@ const ChatBoxFooter = () => {
   const [showTooltip, setSliderTooltip] = useState(false);
   const [text, setText] = useState("");
 
+  const postChatlog = async () => {
+    await axios.get(`http://localhost:8000/api/user/1/`).then((response) => {
+        console.log(response)
+    });
+}
+
 return(
 
    <HStack bgColor={'white'} p={5} >
@@ -80,10 +86,14 @@ return(
        </ModalContent>
      </Modal>
      <Input variant={'filled'} placeholder={"Enter your message here"} onChange={(e) => setText(setText + e)}/>
+<<<<<<< HEAD
      <Button colorScheme={'blue'} fontSize={'sm'} onClick={ async ()=> {
        // Send a POST request
        await axios.get("http://localhost:8000/api/user/1/").then((res) => console.log(res)).catch(err => console.error(err)).finally();
      }}>
+=======
+     <Button colorScheme={'blue'} fontSize={'sm'} onClick={() => postChatlog()}>
+>>>>>>> 7ab35dce5750752abef697d6086ed9b6cb02b1c8
        Send
      </Button>
   </HStack>
