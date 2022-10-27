@@ -82,7 +82,7 @@ return(
      <Input variant={'filled'} placeholder={"Enter your message here"} onChange={(e) => setText(setText + e)}/>
      <Button colorScheme={'blue'} fontSize={'sm'} onClick={ async ()=> {
        // Send a POST request
-       await axios.get("http://localhost:8000/api/user/1").then((res) => console.log(res)).catch(err => console.error(err)).finally((res) => console.log(res));
+       await axios.get("http://localhost:8000/api/user/1/").then((res) => console.log(res)).catch(err => console.error(err)).finally();
      }}>
        Send
      </Button>
