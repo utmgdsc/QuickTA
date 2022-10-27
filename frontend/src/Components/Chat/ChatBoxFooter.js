@@ -80,12 +80,10 @@ return(
        </ModalContent>
      </Modal>
      <Input variant={'filled'} placeholder={"Enter your message here"} onChange={(e) => setText(setText + e)}/>
-     <Button colorScheme={'blue'} fontSize={'sm'} onClick={
+     <Button colorScheme={'blue'} fontSize={'sm'} onClick={ async ()=> {
        // Send a POST request
-       axios.post("localhost:8000/api/chatlog", {
-
-       }).then().catch(err => console.error(err))
-     }>
+       await axios.get("http://localhost:8000/api/user/1").then((res) => console.log(res)).catch(err => console.error(err)).finally((res) => console.log(res));
+     }}>
        Send
      </Button>
   </HStack>
