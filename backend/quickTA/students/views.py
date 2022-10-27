@@ -95,8 +95,6 @@ def user_detail(request):
     """
     try:
         request.data['user_id'] = str(uuid.uuid4())
-        # print(type(request.data['user_id'].toString()))
-        # request.data['conversations'] = [{'conversation_id': ''}]
         serializer = UserSerializer(data=request.data)
         serializer.is_valid()
         serializer.save()
@@ -137,8 +135,6 @@ def conversation_detail(request):
 
         return Response(err, status=status.HTTP_404_NOT_FOUND)
 
-
-
 @api_view(['POST'])
 def chatlog_detail(request):
     """
@@ -151,12 +147,25 @@ def chatlog_detail(request):
         try:
             serializer.is_valid()
             serializer.save()
-            
+
             # Get response from Model
             model_response = "hi"
             response = { "msg": model_response }
             
-            return Response(response, status=status.HTTP_201_CREATED)
+            # Save message from the Model
+            data = request.data
+            model_chatlog_id = str(uuid.uuid4())
+            model_chatlog_data = {
+                "conversation_id": data['conversation_id'],
+                "chatlog_id" :  model_chatlog_id,
+                "is_user": False,
+                "chatlog": model_response
+            }
+            serializer = ChatlogSerializer(data=model_chatlog_data)
+            serializer.is_valid()
+            serializer.save()
+
+            return Response(model_chatlog_data, status=status.HTTP_201_CREATED)
         
         except:
             # Error handling
@@ -168,5 +177,63 @@ def chatlog_detail(request):
             if 'chatlog' not in request.data.keys():
                 error.append("Chatlog message")
             err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
+
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['POST'])
+def feedback_detail(request):
+    """
+    Retrieves and saves a feedback from the user to the database.
+    """
+    if request.method == 'POST':
+        serializer = ChatlogSerializer(data=request.data)
+        try:
+            serializer.is_valid()
+            serializer.save()
+            
+            return Response(serializer, status=status.HTTP_201_CREATED)
+        
+        except:
+            # Error handling
+            error = []
+            if 'conversation_id' not in request.data.keys():
+                error.append("Conversation ID")
+            if 'rating' not in request.data.keys():
+                error.append("Chatlog ID")
+            if 'feedback_msg' not in request.data.keys():
+                error.append("Chatlog message")
+            err = {"msg": "Feedback details missing fields: " + ','.join(error) + '.'}
+
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['POST'])
+def report_detail(request):
+    """
+    Retrieves the conversation id and returns a copy of the chatlog
+    """
+    if request.method == 'POST':
+        try:
+            cid = request.data['conversation_id']
+            uid = Conversation.objects.filter(conversation_id=cid)
+            user = User.objects.filter(user_id=uid)
+
+            chatlogs = Chatlog.objects.filter(conversation_id=cid)       
+            
+            convo = { 'msg': [] }
+            for chatlog in chatlogs:
+                if chatlog.is_user:
+                    log = '[' + str(chatlog.time) + '] ' +  str(user.name) + ': ' + str(chatlog.chatlog) + '\n'
+                else: 
+                    log = '['+ str(chatlog.time) + '] QuickTA: ' + str(chatlog.chatlog) + '\n'
+                convo['msg'].append(log)
+            
+            return Response(convo, status=status.HTTP_201_CREATED)
+        
+        except:
+            # Error handling
+            error = []
+            if 'conversation_id' not in request.data.keys():
+                error.append("Conversation ID")
+            err = {"msg": "Feedback details missing fields: " + ','.join(error) + '.'}
 
             return Response(err, status=status.HTTP_404_NOT_FOUND)
