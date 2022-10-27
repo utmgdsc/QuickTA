@@ -61,7 +61,7 @@ class Chatlog(models.Model):
     
 class Report(models.Model): 
     conversation_id = models.CharField(max_length=100)
-    report_msg = models.TextField(max_length = 3000)
+    report_msg = models.TextField(max_length=3000)
     time = models.DateTimeField(default=now)
 
 class Feedback(models.Model):
