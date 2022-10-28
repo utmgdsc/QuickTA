@@ -16,8 +16,27 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from students import views as student_views
+
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view as swagger_get_schema_view
+
+schema_view = swagger_get_schema_view(
+    openapi.Info(
+        title="QuickTA API",
+        default_version="1.0.0",
+        descrpition="API documentation of QuickTA"
+    ),
+    public=True,
+)
+
 urlpatterns = [
     # path('app/', include('myapp.urls')),
     path('admin/', admin.site.urls),
-    path('api/', include('students.urls', namespace='user')),
+    path('api/', 
+        include([
+            path('', include('students.urls', namespace='user')),
+            path('swagger/schema/', schema_view.with_ui('swagger', cache_timeout=0), name="swagger-schema"),
+        ])
+    ),
+        
 ]
