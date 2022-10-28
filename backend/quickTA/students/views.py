@@ -1,7 +1,9 @@
+import csv
 import uuid
 from datetime import datetime
 from http.client import responses
 from django.shortcuts import render
+from django.http import HttpResponse
 from django.http import JsonResponse
 from django.utils.timezone import now
 from .models import Chatlog, Conversation, Course, Feedback, User
@@ -215,21 +217,44 @@ def report_detail(request):
     if request.method == 'POST':
         try:
             cid = request.data['conversation_id']
-            uid = Conversation.objects.filter(conversation_id=cid)
-            user = User.objects.filter(user_id=uid)
+            conversation = Conversation.objects.filter(conversation_id__in=cid)
 
-            chatlogs = Chatlog.objects.filter(conversation_id=cid)       
-            
-            convo = { 'msg': [] }
-            for chatlog in chatlogs:
-                if chatlog.is_user:
-                    log = '[' + str(chatlog.time) + '] ' +  str(user.name) + ': ' + str(chatlog.chatlog) + '\n'
-                else: 
-                    log = '['+ str(chatlog.time) + '] QuickTA: ' + str(chatlog.chatlog) + '\n'
-                convo['msg'].append(log)
-            
-            return Response(convo, status=status.HTTP_201_CREATED)
+            # Checks if conversation is found
+            if (len(conversation) > 0):
+                uid = conversation[0].user_id
+            else:
+                raise ConversationNotFoundError
+
+            # Checks if user is found
+            user = User.objects.filter(user_id=uid)
+            if (len(user) > 0):
+                user = user[0]
+            else:
+                raise UserNotFoundError
+
+            chatlogs = Chatlog.objects.filter(conversation_id=cid).order_by('time')
         
+            response = HttpResponse(
+                content_type='text/csv',
+                headers={
+                    'Content-Disposition': 'attachement; filename="convo-report.csv"'
+                }
+            )
+
+            writer = csv.writer(response)
+            
+            for chatlog in chatlogs:
+                chatlog.time = chatlog.time.strftime("%m/%d/%Y %H:%M:%S")
+                if chatlog.is_user:
+                    writer.writerow(['[' + str(chatlog.time) + ']', str(user.name), str(chatlog.chatlog)])
+                else: 
+                    writer.writerow(['[' + str(chatlog.time) + ']', 'QuickTA', str(chatlog.chatlog)])
+
+            return response
+        except ConversationNotFoundError:
+            return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_404_NOT_FOUND) 
+        except UserNotFoundError:
+            return Response({"msg": "Error: User not Found."}, status=status.HTTP_404_NOT_FOUND) 
         except:
             # Error handling
             error = []
@@ -237,4 +262,8 @@ def report_detail(request):
                 error.append("Conversation ID")
             err = {"msg": "Feedback details missing fields: " + ','.join(error) + '.'}
 
-            return Response(err, status=status.HTTP_404_NOT_FOUND)
+            return Response(err, status=status.HTTP_404_NOT_FOUND) 
+        
+# Exceptions
+class UserNotFoundError(Exception): pass
+class ConversationNotFoundError(Exception): pass

@@ -19,7 +19,10 @@ const ChatBoxFooter = () => {
   const [text, setText] = useState("");
 
   const postChatlog = async () => {
-    await axios.get(`http://localhost:8000/api/user/1/`).then((response) => {
+    await axios.post(`http://localhost:8000/api/chatlog`, {
+      conversation_id: "1",
+      chatlog: "test"
+    }).then((response) => {
         console.log(response)
     });
 }
