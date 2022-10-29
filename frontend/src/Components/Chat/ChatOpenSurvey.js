@@ -15,7 +15,7 @@ const ChatOpenSurvey = () => {
     const [showTooltip, setSliderTooltip] = useState(false);
     
     return (
-        <Modal isOpen={isOpen} onClose={onClose} onOpen={onOpen}>
+        <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay/>
         <ModalContent>
           <ModalHeader>

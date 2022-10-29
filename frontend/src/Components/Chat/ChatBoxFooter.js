@@ -48,8 +48,8 @@ return(
          </ModalHeader>
          <ModalBody>
             <Slider
-              defaultValue={0}
-              min={0}
+              defaultValue={1}
+              min={1}
               max={5}
               onChange={(currVal) => setSliderVal(currVal)}
               onMouseEnter={() => setSliderTooltip(true)}
@@ -79,7 +79,7 @@ return(
 
          <ModalFooter>
            <Button colorScheme={'green'}>
-             Send
+             Submit
            </Button>
            <Spacer/>
            <Button onClick={onClose}>
