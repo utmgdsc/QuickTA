@@ -1,6 +1,6 @@
 from djongo import models
 from django.utils.timezone import now
-
+from datetime import datetime 
 
 # Create your models here.
 
@@ -23,7 +23,7 @@ class User(models.Model):
     # )
 
     def __str__(self):
-        return self.name
+        return self.name + '(' + self.user_id + ')'
 
 class Course(models.Model):
     course_id = models.CharField(max_length=20)
@@ -54,7 +54,7 @@ class Conversation(models.Model):
 class Chatlog(models.Model):
     conversation_id = models.CharField(max_length=100)
     chatlog_id = models.CharField(max_length=100)
-    time = models.DateTimeField(default=now)
+    time = models.DateTimeField(default=datetime.now)
     is_user = models.BooleanField()
     chatlog = models.TextField(max_length = 3000)
 
@@ -76,5 +76,3 @@ class Feedback(models.Model):
     
     rating = models.IntegerField(choices=Rating.choices)
     feedback_msg = models.TextField(max_length=1000)
-
-
