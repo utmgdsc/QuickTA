@@ -16,5 +16,6 @@ urlpatterns = [
     path('user', views.user_detail),
     path('chatlog', views.chatlog_detail),
     path('conversation', views.conversation_detail),
+    path('feedback', views.feedback_detail),
     path('report', views.report_detail),
 ]

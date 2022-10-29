@@ -189,7 +189,7 @@ def feedback_detail(request):
     Retrieves and saves a feedback from the user to the database.
     """
     if request.method == 'POST':
-        serializer = ChatlogSerializer(data=request.data)
+        serializer = FeedbackSerializer(data=request.data)
         try:
             serializer.is_valid()
             serializer.save()
@@ -202,9 +202,9 @@ def feedback_detail(request):
             if 'conversation_id' not in request.data.keys():
                 error.append("Conversation ID")
             if 'rating' not in request.data.keys():
-                error.append("Chatlog ID")
+                error.append("Rating")
             if 'feedback_msg' not in request.data.keys():
-                error.append("Chatlog message")
+                error.append("Feedback Message")
             err = {"msg": "Feedback details missing fields: " + ','.join(error) + '.'}
 
             return Response(err, status=status.HTTP_404_NOT_FOUND)
