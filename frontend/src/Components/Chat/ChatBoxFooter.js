@@ -1,6 +1,6 @@
 import {
   Button, Center,
-  HStack,
+  HStack, VStack,
   Input,
   Modal, ModalBody, ModalContent, ModalFooter,
   ModalHeader,
@@ -9,26 +9,19 @@ import {
   SliderMark, SliderThumb, SliderTrack, Spacer, Tooltip,
   useDisclosure
 } from '@chakra-ui/react'
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import axios from "axios";
 
-const ChatBoxFooter = () => {
+const ChatBoxFooter = ({messages, updateMessages}) => {
+
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [sliderVal, setSliderVal] = useState(0);
   const [showTooltip, setSliderTooltip] = useState(false);
   const [text, setText] = useState("");
 
-  const postChatlog = async () => {
-    await axios.post(`http://localhost:8000/api/chatlog`, {
-      conversation_id: "1",
-      chatlog: "test"
-    }).then((response) => {
-        console.log(response)
-    });
-}
-
 return(
-
+  <VStack>
+    {/* <div>{messages}</div> */}
    <HStack bgColor={'white'} p={5} >
     <Button colorScheme={'red'} fontSize={'sm'} onClick={onOpen}>
       End chat
@@ -48,8 +41,8 @@ return(
          </ModalHeader>
          <ModalBody>
             <Slider
-              defaultValue={0}
-              min={0}
+              defaultValue={1}
+              min={1}
               max={5}
               onChange={(currVal) => setSliderVal(currVal)}
               onMouseEnter={() => setSliderTooltip(true)}
@@ -79,7 +72,7 @@ return(
 
          <ModalFooter>
            <Button colorScheme={'green'}>
-             Send
+             Submit
            </Button>
            <Spacer/>
            <Button onClick={onClose}>
@@ -88,11 +81,34 @@ return(
          </ModalFooter>
        </ModalContent>
      </Modal>
-     <Input variant={'filled'} placeholder={"Enter your message here"} onChange={(e) => setText(setText + e)}/>
-     <Button colorScheme={'blue'} fontSize={'sm'} onClick={() => postChatlog()}>
+     <Input variant={'filled'} placeholder={"Enter your message here"} onChange={(e) => {
+       setText(e.target.value)
+     }}/>
+
+     <Button colorScheme={'blue'} fontSize={'sm'} onClick={() => {
+      const temp1 = {
+        message: text,
+        dateSent: Date().toString(),
+        isUser: "true"
+        }
+       // Load user message on click
+      updateMessages((oldMessage) => [...oldMessage, temp1])
+       axios.post("http://localhost:8000/api/chatlog", {conversation_id: "1", chatlog: text})
+          .then((response) => {
+            const temp2 = {
+              message: response.data.chatlog,
+              dateSent: Date().toString(),
+              isUser: "false"
+              }
+              console.log(messages)
+            updateMessages((oldMessage) => [...oldMessage, temp2])
+          })
+          .catch((err) => console.log(err))}
+     }>
        Send
      </Button>
   </HStack>
+  </VStack>
  )
 }
 
