@@ -16,7 +16,7 @@ const ChatBubble = ({message, dateSent, isUser}) => {
         py={4}
         borderTopLeftRadius={30}
         borderTopRightRadius={30}
-        boderBottomLeftRadius={bottomLeftRadius}
+        borderBottomLeftRadius={bottomLeftRadius}
         borderBottomRightRadius={bottomRightRadius}
       >
         {message}

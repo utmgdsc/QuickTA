@@ -1,6 +1,6 @@
 import {
   Button, Center,
-  HStack,
+  HStack, VStack,
   Input,
   Modal, ModalBody, ModalContent, ModalFooter,
   ModalHeader,
@@ -9,7 +9,7 @@ import {
   SliderMark, SliderThumb, SliderTrack, Spacer, Tooltip,
   useDisclosure
 } from '@chakra-ui/react'
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import axios from "axios";
 
 const ChatBoxFooter = ({messages, updateMessages}) => {
@@ -19,14 +19,19 @@ const ChatBoxFooter = ({messages, updateMessages}) => {
   const [showTooltip, setSliderTooltip] = useState(false);
   const [text, setText] = useState("");
 
+  useEffect(() => {
+    console.log(messages)
+  }, [messages]);
+
   const postChatlog = async (convo_id, message) => {
     await axios.post("http://localhost:8000/api/chatlog", {
     conversation_id: convo_id, chatlog: message
-  }).then((response) => response.json()).catch((err) => console.log(err));
+  }).then((response) => response).catch((err) => console.log(err));
 }
 
 return(
-
+  <VStack>
+    {/* <div>{messages}</div> */}
    <HStack bgColor={'white'} p={5} >
     <Button colorScheme={'red'} fontSize={'sm'} onClick={onOpen}>
       End chat
@@ -87,33 +92,33 @@ return(
        </ModalContent>
      </Modal>
      <Input variant={'filled'} placeholder={"Enter your message here"} onChange={(e) => {
-       setText(text + e)
+       setText(e.target.value)
      }}/>
 
      <Button colorScheme={'blue'} fontSize={'sm'} onClick={() => {
+      const temp1 = {
+        message: text,
+        dateSent: Date().toString(),
+        isUser: "true"
+        }
        // Load user message on click
-       updateMessages((messages) => [ ...messages, {
-           message: text,
-           dateSent: Date().toString(),
-           isUser: "true"
-         }]
-       )
-       const res = postChatlog("1", text);
-       const resAiMessage = res
-       // Add AI response
-       updateMessages((messages) => [ ...messages, {
-         message: resAiMessage,
-         dateSent: Date().toString(),
-         isUser: "false"
-         }]
-       )
-       setText("");
-       console.log(messages);
-     }
+      updateMessages((oldMessage) => [...oldMessage, temp1])
+       axios.post("http://localhost:8000/api/chatlog", {conversation_id: "1", chatlog: text})
+          .then((response) => {
+            const temp2 = {
+              message: response.data.chatlog,
+              dateSent: Date().toString(),
+              isUser: "false"
+              }
+              console.log(messages)
+            updateMessages((oldMessage) => [...oldMessage, temp2])
+          })
+          .catch((err) => console.log(err))}
      }>
        Send
      </Button>
   </HStack>
+  </VStack>
  )
 }
 
