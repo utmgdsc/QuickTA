@@ -19,16 +19,6 @@ const ChatBoxFooter = ({messages, updateMessages}) => {
   const [showTooltip, setSliderTooltip] = useState(false);
   const [text, setText] = useState("");
 
-  useEffect(() => {
-    console.log(messages)
-  }, [messages]);
-
-  const postChatlog = async (convo_id, message) => {
-    await axios.post("http://localhost:8000/api/chatlog", {
-    conversation_id: convo_id, chatlog: message
-  }).then((response) => response).catch((err) => console.log(err));
-}
-
 return(
   <VStack>
     {/* <div>{messages}</div> */}
