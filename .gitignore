@@ -23,7 +23,6 @@ frontend/npm-debug.log*
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
 
-# backend dependencies & caches
-backend/env/*
 backend/env
-*/__pycache__
+ __pycache__/
+ *.pyc
