@@ -263,7 +263,6 @@ def report_detail(request):
             err = {"msg": "Feedback details missing fields: " + ','.join(error) + '.'}
 
             return Response(err, status=status.HTTP_404_NOT_FOUND) 
-        
 # Exceptions
 class UserNotFoundError(Exception): pass
 class ConversationNotFoundError(Exception): pass
