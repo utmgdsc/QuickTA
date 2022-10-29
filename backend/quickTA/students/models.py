@@ -49,14 +49,13 @@ class Conversation(models.Model):
     def __str__(self):
         return "Conversation " + self.conversation_id + "(" + self.user_id + ")"
 
-
-
 class Chatlog(models.Model):
     conversation_id = models.CharField(max_length=100)
     chatlog_id = models.CharField(max_length=100)
     time = models.DateTimeField(default=datetime.now)
     is_user = models.BooleanField()
     chatlog = models.TextField(max_length = 3000)
+    status = models.CharField(max_length=1, blank=True, null=True)
 
     
 class Report(models.Model): 

@@ -249,8 +249,8 @@ def report_detail(request):
                     writer.writerow(['[' + str(chatlog.time) + ']', str(user.name), str(chatlog.chatlog)])
                 else: 
                     writer.writerow(['[' + str(chatlog.time) + ']', 'QuickTA', str(chatlog.chatlog)])
-
             return response
+
         except ConversationNotFoundError:
             return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_404_NOT_FOUND) 
         except UserNotFoundError:
@@ -263,7 +263,45 @@ def report_detail(request):
             err = {"msg": "Feedback details missing fields: " + ','.join(error) + '.'}
 
             return Response(err, status=status.HTTP_404_NOT_FOUND) 
-        
+
+@api_view(['POST'])
+def report_incorrect_answers(request):
+    """
+    Flags the given answer of a particular chatlog as wrong.
+    The corresponding field, chatlog.status:
+        'I' - stands for incorrect
+        'C' - stands for correct
+    Request: 
+        - conversation_id
+        - chatlog_id
+    """
+    if request.method == 'POST':
+        try:
+            convo_id = request.data["conversation_id"]
+            chatlog_id = request.data["chatlog_id"]
+
+            conversation = Conversation.objects.filter(conversation_id=convo_id)
+            
+            if (len(conversation) == 0):
+                raise ConversationNotFoundError
+
+            chatlog = Chatlog.objects.filter(chatlog_id=chatlog_id)
+            if (len(chatlog) == 0):
+                raise ChatlogNotFoundError
+            
+            chatlog = chatlog[0]
+            chatlog.status = 'I'
+            chatlog.save()
+
+            return Response(status=status.HTTP_200_OK)
+
+        except:
+            error=[]
+            err = {"msg": "Report incorrect answers: " + ','.join(error) +  '.'}
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
+    return 
+
 # Exceptions
 class UserNotFoundError(Exception): pass
 class ConversationNotFoundError(Exception): pass
+class ChatlogNotFoundError(Exception): pass
