@@ -17,6 +17,6 @@ urlpatterns = [
     path('chatlog', views.chatlog_detail),
     path('conversation', views.conversation_detail),
     path('feedback', views.feedback_detail),
-    path('report', views.report_detail)
+    path('report', views.report_detail),
     path('incorrect-answer', views.report_incorrect_answers),
 ]
