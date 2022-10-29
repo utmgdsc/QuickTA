@@ -12,16 +12,17 @@ import {
 import {useState} from "react";
 import axios from "axios";
 
-const ChatBoxFooter = () => {
+const ChatBoxFooter = ({messages, updateMessages}) => {
+
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [sliderVal, setSliderVal] = useState(0);
   const [showTooltip, setSliderTooltip] = useState(false);
   const [text, setText] = useState("");
 
-  const postChatlog = async () => {
-    await axios.get(`http://localhost:8000/api/user/1/`).then((response) => {
-        console.log(response)
-    });
+  const postChatlog = async (convo_id, message) => {
+    await axios.post("http://localhost:8000/api/chatlog", {
+    conversation_id: convo_id, chatlog: message
+  }).then((response) => response.json()).catch((err) => console.log(err));
 }
 
 return(
@@ -85,15 +86,31 @@ return(
          </ModalFooter>
        </ModalContent>
      </Modal>
-     <Input variant={'filled'} placeholder={"Enter your message here"} onChange={(e) => setText(setText + e)}/>
-<<<<<<< HEAD
-     <Button colorScheme={'blue'} fontSize={'sm'} onClick={ async ()=> {
-       // Send a POST request
-       await axios.get("http://localhost:8000/api/user/1/").then((res) => console.log(res)).catch(err => console.error(err)).finally();
-     }}>
-=======
-     <Button colorScheme={'blue'} fontSize={'sm'} onClick={() => postChatlog()}>
->>>>>>> 7ab35dce5750752abef697d6086ed9b6cb02b1c8
+     <Input variant={'filled'} placeholder={"Enter your message here"} onChange={(e) => {
+       setText(text + e)
+     }}/>
+
+     <Button colorScheme={'blue'} fontSize={'sm'} onClick={() => {
+       // Load user message on click
+       updateMessages((messages) => [ ...messages, {
+           message: text,
+           dateSent: Date().toString(),
+           isUser: "true"
+         }]
+       )
+       const res = postChatlog("1", text);
+       const resAiMessage = res
+       // Add AI response
+       updateMessages((messages) => [ ...messages, {
+         message: resAiMessage,
+         dateSent: Date().toString(),
+         isUser: "false"
+         }]
+       )
+       setText("");
+       console.log(messages);
+     }
+     }>
        Send
      </Button>
   </HStack>

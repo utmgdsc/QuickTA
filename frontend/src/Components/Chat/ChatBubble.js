@@ -2,8 +2,8 @@ import {Box, Flex, HStack, Input, Text, VStack} from "@chakra-ui/react";
 
 
 
-const ChatBubble = ({message, dateSent, from}) => {
-  const isMe = from === "user";
+const ChatBubble = ({message, dateSent, isUser}) => {
+  const isMe = isUser === "true";
   const alignment = isMe ? "flex-end" : "flex-start";
   const bottomRightRadius = isMe ? 0 : 32;
   const bottomLeftRadius = isMe ? 32 : 0;
