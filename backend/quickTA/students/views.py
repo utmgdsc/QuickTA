@@ -137,9 +137,54 @@ def user_detail(request):
                 error.append("Utor ID")
             if 'user_role' not in request.data.keys():
                 error.append("User Role")
-            err = {"msg": "User details missing fields:"}
+            err = {"msg": "User details missing fields:" + ','.join(error)}
 
             return Response(err, status=status.HTTP_404_NOT_FOUND)
+
+@swagger_auto_schema(methods=['post'], request_body=CourseSerializer)
+@api_view(['POST'])
+def course_detail(request):
+    """
+    Creates a new course.
+
+    API endpoint: /api/course
+    Supported operations: /POST
+
+    Request:
+    {
+        course_code: str,
+        semester: str
+    }
+    Response: {
+        course_id: str,
+        course_code: str,
+        semester: str
+    }
+    """
+    if request.method == 'POST':
+        try:
+            request.data['course_id'] = str(uuid.uuid4())
+            serializer = CourseSerializer(data=request.data)
+            serializer.is_valid()
+            serializer.save()
+
+            response = {
+                "course_id": request.data['course_id'],
+                "course_code": request.data['course_code'],
+                "semester": request.data['semester']
+            }
+
+            return Response(response, status=status.HTTP_201_CREATED)
+
+        except CourseDuplicationError:
+            return Response({"msg": "Course already exists."}, status=status.HTTP_403_FORBIDDEN)
+        except:
+            error = []
+            if 'course_code' not in request.data.keys():
+                error.append("Course Code")
+            if 'semester' not in request.data.keys():
+                error.append("Semester")
+            err = {"msg": "Course missing fields:" + ','.join(error)}
 
 @swagger_auto_schema(methods=['post'], request_body=ConversationSerializer)
 @api_view(['POST'])
@@ -447,3 +492,4 @@ def report_incorrect_answers(request):
 class UserNotFoundError(Exception): pass
 class ConversationNotFoundError(Exception): pass
 class ChatlogNotFoundError(Exception): pass
+class CourseDuplicationError(Exception): pass
