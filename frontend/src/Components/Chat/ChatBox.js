@@ -1,10 +1,16 @@
 import {VStack} from "@chakra-ui/react";
 import ChatBubble from "./ChatBubble";
-import {useState} from "react";
+import {useRef, useEffect} from "react";
 
 
 
 const ChatBox = ({messages}) => {
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages])
+
   return(
     <VStack background={'gray.100'} style={{
       maxHeight: "50vh",
@@ -17,7 +23,10 @@ const ChatBox = ({messages}) => {
         dateSent={dateSent}
         isUser={isUser}
         />
+        
       ))}
+
+      <div ref={messagesEndRef}/>
     </VStack>
   );
 

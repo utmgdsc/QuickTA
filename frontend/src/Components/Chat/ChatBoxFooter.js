@@ -96,7 +96,7 @@ return(
        axios.post("http://localhost:8000/api/chatlog", {conversation_id: "1", chatlog: text})
           .then((response) => {
             const temp2 = {
-              message: response.data.chatlog,
+              message: response.data.agent.chatlog,
               dateSent: Date().toString(),
               isUser: "false"
               }
