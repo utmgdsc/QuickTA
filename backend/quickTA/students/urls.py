@@ -8,14 +8,14 @@ urlpatterns = [
     # path('user/<int:pk>/', UserDetail.as_view(), name='user-detail'),
     # path('course/<int:pk>/', CourseDetail.as_view(), name='course-detail'),
     # path('conversation/<int:pk>/', ConversationDetail.as_view(), name='conversation-detail'),
-    
+
     path('user/all', UserList.as_view(), name='user-list'),
     path('course/all', CourseList.as_view(), name='course-list'),
     path('conversation/all', ConversationList.as_view(), name='conversation-list'),
     path('chatlog/all', ChatlogList.as_view(), name='chatlog-detail'),
     
     path('user', views.user_detail),
-    path('course', views.course_details),
+    path('course', views.course_detail),
     path('chatlog', views.chatlog_detail),
     path('conversation', views.conversation_detail),
     path('feedback', views.feedback_detail),
