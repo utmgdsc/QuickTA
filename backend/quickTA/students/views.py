@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.utils.timezone import now
 from .models import Chatlog, Conversation, Course, Feedback, User
-from .serializers import ConversationSerializer, CourseSerializer, FeedbackSerializer, UserSerializer, ChatlogSerializer
+from .serializers import ConversationSerializer, CourseSerializer, FeedbackSerializer, IncorrectChatlogSerializer, UserSerializer, ChatlogSerializer, ReportSerializer
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -15,6 +15,7 @@ from rest_framework import status
 from rest_framework.parsers import JSONParser
 from rest_framework import generics
 
+from drf_yasg.utils import swagger_auto_schema
 """
 Serializers 
 ======================================================================================================
@@ -90,10 +91,12 @@ class FeedbackDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer = FeedbackSerializer(queryset, many=True)
     pass
 
+@swagger_auto_schema(methods=['post'], request_body=UserSerializer)
 @api_view(['POST'])
 def user_detail(request):
     """
     Creates a new user.
+
     A User can be of the following roles:
         
         - ST: student
@@ -138,6 +141,7 @@ def user_detail(request):
 
             return Response(err, status=status.HTTP_404_NOT_FOUND)
 
+@swagger_auto_schema(methods=['post'], request_body=ConversationSerializer)
 @api_view(['POST'])
 def conversation_detail(request):
     """
@@ -180,6 +184,7 @@ def conversation_detail(request):
 
             return Response(err, status=status.HTTP_404_NOT_FOUND)
 
+@swagger_auto_schema(methods=['post'], request_body=ChatlogSerializer)
 @api_view(['POST'])
 def chatlog_detail(request):
     """
@@ -209,7 +214,7 @@ def chatlog_detail(request):
             chatlog_id: str
             is_user: boolean
             chatlog: str
-            status: C
+            status: C [Correct]
         }
     }
     """
@@ -277,6 +282,7 @@ def chatlog_detail(request):
 
             return Response(err, status=status.HTTP_404_NOT_FOUND)
 
+@swagger_auto_schema(methods=['post'], request_body=FeedbackSerializer)
 @api_view(['POST'])
 def feedback_detail(request):
     """
@@ -318,10 +324,11 @@ def feedback_detail(request):
 
             return Response(err, status=status.HTTP_404_NOT_FOUND)
 
+@swagger_auto_schema(methods=['post'], request_body=ReportSerializer)
 @api_view(['POST'])
 def report_detail(request):
     """
-    Retrieves the conversation id and returns a copy of the chatlog
+    Retrieves the conversation id and returns a copy of the chatlog.
 
     API Endpoint: /api/report
     Supported operations: /POST
@@ -384,10 +391,12 @@ def report_detail(request):
 
             return Response(err, status=status.HTTP_404_NOT_FOUND) 
 
+@swagger_auto_schema(methods=['post'], request_body=IncorrectChatlogSerializer)
 @api_view(['POST'])
 def report_incorrect_answers(request):
     """
     Flags the given answer of a particular chatlog as wrong.
+
     The corresponding field, chatlog.status:
         'I' - stands for incorrect
         'C' - stands for correct
@@ -406,9 +415,13 @@ def report_incorrect_answers(request):
     """
     if request.method == 'POST':
         try:
+            
             convo_id = request.data["conversation_id"]
             chatlog_id = request.data["chatlog_id"]
-
+        
+            serializer = IncorrectChatlogSerializer(data=request.data)
+            serializer.is_valid()
+            
             conversation = Conversation.objects.filter(conversation_id=convo_id)
             
             if (len(conversation) == 0):
