@@ -92,16 +92,16 @@ return(
        // Load user message on click
       updateMessages((oldMessage) => [...oldMessage, temp1])
        axios.post("http://localhost:8000/api/chatlog", {conversation_id: "1", chatlog: text})
-        .then((response) => {
-          const temp2 = {
-            message: response.data.chatlog,
-            dateSent: Date().toString(),
-            isUser: "false"
-            }
-            console.log(messages)
-          updateMessages((oldMessage) => [...oldMessage, temp2])
-        })
-        .catch((err) => console.log(err))}
+          .then((response) => {
+            const temp2 = {
+              message: response.data.agent.chatlog,
+              dateSent: Date().toString(),
+              isUser: "false"
+              }
+              console.log(messages)
+            updateMessages((oldMessage) => [...oldMessage, temp2])
+          })
+          .catch((err) => console.log(err))}
      }>
        Send
      </Button>

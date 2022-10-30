@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.utils.timezone import now
 from .models import Chatlog, Conversation, Course, Feedback, User
-from .serializers import ConversationSerializer, CourseSerializer, FeedbackSerializer, UserSerializer, ChatlogSerializer
+from .serializers import ConversationSerializer, CourseSerializer, FeedbackSerializer, IncorrectChatlogSerializer, UserSerializer, ChatlogSerializer, ReportSerializer
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -15,6 +15,7 @@ from rest_framework import status
 from rest_framework.parsers import JSONParser
 from rest_framework import generics
 
+from drf_yasg.utils import swagger_auto_schema
 """
 Serializers 
 ======================================================================================================
@@ -90,64 +91,195 @@ class FeedbackDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer = FeedbackSerializer(queryset, many=True)
     pass
 
+@swagger_auto_schema(methods=['post'], request_body=UserSerializer)
 @api_view(['POST'])
 def user_detail(request):
     """
     Creates a new user.
+
+    A User can be of the following roles:
+        
+        - ST: student
+        - IS: instructor
+        - RS: researcher
+        - AM: admin
+
+    API endpoint: /api/user
+    Supported operations: /POST
+
+    Request:
+    {
+        name: str,
+        utorid: str,
+        user_role: str
+    }
+    Response: {
+        user_id: str
+    }
     """
-    try:
-        request.data['user_id'] = str(uuid.uuid4())
-        serializer = UserSerializer(data=request.data)
-        serializer.is_valid()
-        serializer.save()
 
-        return Response(request.data, status=status.HTTP_201_CREATED)
-    except:
-        error = []
-        if 'name' not in request.data.keys():
-            error.append("Name")
-        if 'utorid' not in request.data.keys():
-            error.append("Utor ID")
-        if 'user_role' not in request.data.keys():
-            error.append("User Role")
-        err = {"msg": "User details missing fields:"}
+    if request.method == 'POST':
+        try:
+            request.data['user_id'] = str(uuid.uuid4())
+            serializer = UserSerializer(data=request.data)
+            serializer.is_valid()
+            serializer.save()
 
-        return Response(err, status=status.HTTP_404_NOT_FOUND)
+            response = {
+                "user_id": request.data['user_id']
+            }
+            return Response(response, status=status.HTTP_201_CREATED)
+        except:
+            error = []
+            if 'name' not in request.data.keys():
+                error.append("Name")
+            if 'utorid' not in request.data.keys():
+                error.append("Utor ID")
+            if 'user_role' not in request.data.keys():
+                error.append("User Role")
+            err = {"msg": "User details missing fields:" + ','.join(error)}
 
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
+
+@swagger_auto_schema(methods=['post'], request_body=CourseSerializer)
+@api_view(['POST'])
+def course_detail(request):
+    """
+    Creates a new course.
+
+    API endpoint: /api/course
+    Supported operations: /POST
+
+    Request:
+    {
+        course_code: str,
+        semester: str
+    }
+    Response: {
+        course_id: str,
+        course_code: str,
+        semester: str
+    }
+    """
+    if request.method == 'POST':
+        try:
+            request.data['course_id'] = str(uuid.uuid4())
+            serializer = CourseSerializer(data=request.data)
+            serializer.is_valid()
+            serializer.save()
+
+            response = {
+                "course_id": request.data['course_id'],
+                "course_code": request.data['course_code'],
+                "semester": request.data['semester']
+            }
+
+            return Response(response, status=status.HTTP_201_CREATED)
+
+        except CourseDuplicationError:
+            return Response({"msg": "Course already exists."}, status=status.HTTP_403_FORBIDDEN)
+        except:
+            error = []
+            if 'course_code' not in request.data.keys():
+                error.append("Course Code")
+            if 'semester' not in request.data.keys():
+                error.append("Semester")
+            err = {"msg": "Course missing fields:" + ','.join(error)}
+
+@swagger_auto_schema(methods=['post'], request_body=ConversationSerializer)
 @api_view(['POST'])
 def conversation_detail(request):
     """
     Retrieves a request to start a session.
+
+    API endpoint: /api/conversation
+    Supported operations: /POST
+
+    Request: 
+    {
+        user_id: str,
+        semester: str
+    }
+
+    Response: {
+        conversation_id
+    }
     """
-    try:
-        request.data['conversation_id'] = str(uuid.uuid4())
-        request.data['status'] = 'A'
-        serializer = ConversationSerializer(data=request.data)
-        serializer.is_valid()
-        serializer.save()
 
-        return Response(request.data, status=status.HTTP_201_CREATED)
-    except:
-        error = []
-        if 'user_id' not in request.data.keys():
-            error.append("User ID")
-        if 'semester' not in request.data.keys():
-            error.append("Semester")
-        err = {"msg": "Conversation details missing fields: " + ','.join(error) + '.'}
+    if request.method == 'POST':
+        try:
+            request.data['conversation_id'] = str(uuid.uuid4())
+            request.data['status'] = 'A'
+            
+            serializer = ConversationSerializer(data=request.data)
+            serializer.is_valid()
+            serializer.save()
 
-        return Response(err, status=status.HTTP_404_NOT_FOUND)
+            response = {
+                "conversation_id": request.data['conversation_id']
+            }
+            return Response(response, status=status.HTTP_201_CREATED)
+        except:
+            error = []
+            if 'user_id' not in request.data.keys():
+                error.append("User ID")
+            if 'semester' not in request.data.keys():
+                error.append("Semester")
+            err = {"msg": "Conversation details missing fields: " + ','.join(error) + '.'}
 
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
+
+@swagger_auto_schema(methods=['post'], request_body=ChatlogSerializer)
 @api_view(['POST'])
 def chatlog_detail(request):
     """
     Retrieves a chatlog from the user, posts it and also
     returns a response from the OpenAI model.
+
+    API endpoint: /api/chatlog
+    Supported operations: /POST
+
+    Request: 
+    {
+        conversation_id: str
+        chatlog: str
+    }
+
+    Response:
+    {
+        'agent': {
+            conversation_id: str
+            chatlog_id: str
+            is_user: boolean
+            chatlog: str
+            status: str
+        },
+        'user': {
+            conversation_id: str
+            chatlog_id: str
+            is_user: boolean
+            chatlog: str
+            status: C [Correct]
+        }
+    }
     """
     if request.method == 'POST':
+
         request.data['is_user'] = True
-        request.data['chatlog_id'] = str(uuid.uuid4())
+        user_chatlog_id = str(uuid.uuid4())
+        request.data['chatlog_id'] = user_chatlog_id
+        request.data['status'] = 'C'
         serializer = ChatlogSerializer(data=request.data)
         try:
+
+            # Check if conversation exists
+            cid = request.data['conversation_id']
+            conversation = Conversation.objects.filter(conversation_id__in=cid)
+
+            if (len(conversation) == 0):
+                raise ConversationNotFoundError          
+            
+            # Saves user chatlog 
             serializer.is_valid()
             serializer.save()
 
@@ -162,13 +294,25 @@ def chatlog_detail(request):
                 "conversation_id": data['conversation_id'],
                 "chatlog_id" :  model_chatlog_id,
                 "is_user": False,
-                "chatlog": model_response
+                "chatlog": model_response,
+                "status": 'C'
             }
             serializer = ChatlogSerializer(data=model_chatlog_data)
             serializer.is_valid()
             serializer.save()
-
-            return Response(model_chatlog_data, status=status.HTTP_201_CREATED)
+            
+            # Formatting response
+            response = {
+                "agent": model_chatlog_data,
+                "user": {
+                    "conversation_id": data['conversation_id'],
+                    "chatlog_id": user_chatlog_id,
+                    "is_user": True,
+                    "chatlog": data['chatlog'],
+                    "status": data['status']
+                }
+            }
+            return Response(response, status=status.HTTP_201_CREATED)
         
         except:
             # Error handling
@@ -183,13 +327,29 @@ def chatlog_detail(request):
 
             return Response(err, status=status.HTTP_404_NOT_FOUND)
 
+@swagger_auto_schema(methods=['post'], request_body=FeedbackSerializer)
 @api_view(['POST'])
 def feedback_detail(request):
     """
     Retrieves and saves a feedback from the user to the database.
+
+    Rating is an integer from 1 to 5.
+
+    API Endpoint: /api/feedback
+    Supported operations: /POST
+
+    Request:
+    {
+        conversation_id: str,
+        rating: int,
+        feedback_msg: str
+    }
+
+    Response: 
+        HTTP status code 201: CREATED
     """
     if request.method == 'POST':
-        serializer = ChatlogSerializer(data=request.data)
+        serializer = FeedbackSerializer(data=request.data)
         try:
             serializer.is_valid()
             serializer.save()
@@ -202,17 +362,29 @@ def feedback_detail(request):
             if 'conversation_id' not in request.data.keys():
                 error.append("Conversation ID")
             if 'rating' not in request.data.keys():
-                error.append("Chatlog ID")
+                error.append("Rating")
             if 'feedback_msg' not in request.data.keys():
-                error.append("Chatlog message")
+                error.append("Feedback Message")
             err = {"msg": "Feedback details missing fields: " + ','.join(error) + '.'}
 
             return Response(err, status=status.HTTP_404_NOT_FOUND)
 
+@swagger_auto_schema(methods=['post'], request_body=ReportSerializer)
 @api_view(['POST'])
 def report_detail(request):
     """
-    Retrieves the conversation id and returns a copy of the chatlog
+    Retrieves the conversation id and returns a copy of the chatlog.
+
+    API Endpoint: /api/report
+    Supported operations: /POST
+
+    Request:
+    {
+        conversation_id: str
+    }
+
+    Response: 
+        CSV file containing all the chatlogs
     """
     if request.method == 'POST':
         try:
@@ -249,8 +421,8 @@ def report_detail(request):
                     writer.writerow(['[' + str(chatlog.time) + ']', str(user.name), str(chatlog.chatlog)])
                 else: 
                     writer.writerow(['[' + str(chatlog.time) + ']', 'QuickTA', str(chatlog.chatlog)])
-
             return response
+
         except ConversationNotFoundError:
             return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_404_NOT_FOUND) 
         except UserNotFoundError:
@@ -263,7 +435,61 @@ def report_detail(request):
             err = {"msg": "Feedback details missing fields: " + ','.join(error) + '.'}
 
             return Response(err, status=status.HTTP_404_NOT_FOUND) 
+
+@swagger_auto_schema(methods=['post'], request_body=IncorrectChatlogSerializer)
+@api_view(['POST'])
+def report_incorrect_answers(request):
+    """
+    Flags the given answer of a particular chatlog as wrong.
+
+    The corresponding field, chatlog.status:
+        'I' - stands for incorrect
+        'C' - stands for correct
+
+    API Endpoint: /api/incorrect-answer
+    Supported operations: /POST
+
+    Request:
+    {
+        conversation_id: str
+        chatlog_id: str
+    }
+
+    Response: 
+        HTTP status code 200: OK
+    """
+    if request.method == 'POST':
+        try:
+            
+            convo_id = request.data["conversation_id"]
+            chatlog_id = request.data["chatlog_id"]
         
+            serializer = IncorrectChatlogSerializer(data=request.data)
+            serializer.is_valid()
+            
+            conversation = Conversation.objects.filter(conversation_id=convo_id)
+            
+            if (len(conversation) == 0):
+                raise ConversationNotFoundError
+
+            chatlog = Chatlog.objects.filter(chatlog_id=chatlog_id)
+            if (len(chatlog) == 0):
+                raise ChatlogNotFoundError
+            
+            chatlog = chatlog[0]
+            chatlog.status = 'I'
+            chatlog.save()
+
+            return Response(status=status.HTTP_200_OK)
+
+        except:
+            error=[]
+            err = {"msg": "Report incorrect answers: " + ','.join(error) +  '.'}
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
+    return 
+
 # Exceptions
 class UserNotFoundError(Exception): pass
 class ConversationNotFoundError(Exception): pass
+class ChatlogNotFoundError(Exception): pass
+class CourseDuplicationError(Exception): pass
