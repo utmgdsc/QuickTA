@@ -6,19 +6,20 @@ import {useState} from "react";
 
 const ChatBox = ({messages}) => {
   return(
-    <VStack background={'gray.100'} style={{
-      maxHeight: "50vh",
-      overflowY: "scroll"
-    }}>
-      {messages.map(({message, dateSent, isUser}, index) => (
-        <ChatBubble
-        key={index}
-        message={message}
-        dateSent={dateSent}
-        isUser={isUser}
-        />
-      ))}
-    </VStack>
+      <VStack background={'#F9F9F9'} style={{
+        height: "50vh",
+        overflowY: "scroll",
+        padding: "0vw 1.5vw 0vw 1.5vw"
+      }}>
+        {messages.map(({message, dateSent, isUser}, index) => (
+          <ChatBubble
+          key={index}
+          message={message}
+          dateSent={dateSent}
+          isUser={isUser}
+          />
+        ))}
+      </VStack>
   );
 
 }

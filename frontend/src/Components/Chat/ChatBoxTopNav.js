@@ -3,7 +3,8 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faBug, faDownload} from "@fortawesome/free-solid-svg-icons";
 
 const ChatBoxTopNav = (props) => {
-  return (<HStack paddingY={"4vh"} paddingX={"4vw"}>
+  return (
+  <HStack paddingY={"4vh"} paddingX={"3vw"} borderBottom={'2px solid #EAEAEA'}>
     <Avatar>
       <AvatarBadge boxSize={'1em'} bg={'green.300'}/>
     </Avatar>

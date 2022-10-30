@@ -44,7 +44,7 @@ const TopNav = (props) => {
           </ModalBody>
 
           <ModalFooter>
-            <Button backgroundColor="#3278cd" marginRight="1vw" color="white">
+            <Button backgroundColor="#3278cd" marginRight="1vw" color="white" colorScheme="blue">
               Logout
             </Button>
             <Button onClick={onClose} backgroundColor="#EFEFEF" color="#2D2D2D" >

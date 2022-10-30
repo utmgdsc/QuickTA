@@ -20,9 +20,7 @@ const ChatBoxFooter = ({messages, updateMessages}) => {
   const [text, setText] = useState("");
 
 return(
-  <VStack>
-    {/* <div>{messages}</div> */}
-   <HStack bgColor={'white'} p={5} >
+   <HStack bgColor={'white'} p={5} paddingX={"3vw"} borderTop={'2px solid #EAEAEA'}>
     <Button colorScheme={'red'} fontSize={'sm'} onClick={onOpen}>
       End chat
     </Button>
@@ -85,7 +83,7 @@ return(
        setText(e.target.value)
      }}/>
 
-     <Button colorScheme={'blue'} fontSize={'sm'} onClick={() => {
+     <Button backgroundColor={"#3278cd"} colorScheme={'blue'} fontSize={'sm'} onClick={() => {
       const temp1 = {
         message: text,
         dateSent: Date().toString(),
@@ -108,7 +106,6 @@ return(
        Send
      </Button>
   </HStack>
-  </VStack>
  )
 }
 
