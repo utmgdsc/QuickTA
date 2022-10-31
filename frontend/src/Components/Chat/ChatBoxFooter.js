@@ -18,10 +18,9 @@ const ChatBoxFooter = ({messages, updateMessages}) => {
   const [sliderVal, setSliderVal] = useState(0);
   const [showTooltip, setSliderTooltip] = useState(false);
   const [text, setText] = useState("");
-
+  useEffect(() => console.log(messages), [messages])
 return(
   <VStack>
-    {/* <div>{messages}</div> */}
    <HStack bgColor={'white'} p={5} >
     <Button colorScheme={'red'} fontSize={'sm'} onClick={onOpen}>
       End chat
@@ -100,7 +99,6 @@ return(
               dateSent: Date().toString(),
               isUser: "false"
               }
-              console.log(messages)
             updateMessages((oldMessage) => [...oldMessage, temp2])
           })
           .catch((err) => console.log(err))}

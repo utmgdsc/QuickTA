@@ -361,6 +361,8 @@ def report_detail(request):
                 }
             )
 
+            response["Access-Control-Expose-Headers"] = "Content-Type, Content-Disposition"
+
             writer = csv.writer(response)
             
             for chatlog in chatlogs:
