@@ -332,6 +332,7 @@ def chatlog_detail(request):
 def feedback_detail(request):
     """
     Retrieves and saves a feedback from the user to the database.
+    Logs the conversation as inactive (I) afterwards.
 
     Rating is an integer from 1 to 5.
 
@@ -351,9 +352,15 @@ def feedback_detail(request):
     if request.method == 'POST':
         serializer = FeedbackSerializer(data=request.data)
         try:
+            # Validate and save feedback
             serializer.is_valid()
             serializer.save()
-            
+
+            # Flags the conversation as inactive
+            convo = Conversation.objects.filter(conversation_id=request.data['conversation_id'])
+            convo['status'] = 'I'
+            convo.save()
+
             return Response(serializer, status=status.HTTP_201_CREATED)
         
         except:

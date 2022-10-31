@@ -16,11 +16,7 @@ class User(models.Model):
     name = models.CharField(max_length=200)
     utorid = models.CharField(max_length=10)
     user_role = models.CharField(max_length=2)
-    # conversations = models.ArrayField(
-    #     model_container=UserConversation,
-    #     blank=True,
-    #     null=True
-    # )
+
 
     def __str__(self):
         return self.name + '(' + self.user_id + ')'
