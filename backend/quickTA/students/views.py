@@ -6,8 +6,8 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.utils.timezone import now
-from .models import Chatlog, Conversation, Course, Feedback, User
-from .serializers import ConversationSerializer, CourseSerializer, FeedbackSerializer, UserSerializer, ChatlogSerializer
+from .models import Chatlog, Conversation, Course, Feedback, User, Report
+from .serializers import ConversationSerializer, CourseSerializer, FeedbackSerializer, IncorrectChatlogSerializer, UserSerializer, ChatlogSerializer, ReportSerializer
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -15,13 +15,14 @@ from rest_framework import status
 from rest_framework.parsers import JSONParser
 from rest_framework import generics
 
+from drf_yasg.utils import swagger_auto_schema
 """
 Serializers 
 ======================================================================================================
 - ensuring data returned is in the right format (JSON)
 - allows data from querysets and models to be converted into python datatypes to be rendered into JSON
 """
-class UserList(generics.ListCreateAPIView):
+class UserList(generics.ListAPIView):
     serializer_class = UserSerializer
     queryset = User.objects.all()
     serializer = UserSerializer(queryset, many=True)
@@ -34,7 +35,7 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer = UserSerializer(queryset)
     pass
 
-class CourseList(generics.ListCreateAPIView):
+class CourseList(generics.ListAPIView):
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
 
@@ -48,7 +49,7 @@ class CourseDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer = CourseSerializer(queryset)
     pass
 
-class ConversationList(generics.ListCreateAPIView):
+class ConversationList(generics.ListAPIView):
     serializer_class = ConversationSerializer
     queryset = Conversation.objects.all()
 
@@ -62,7 +63,7 @@ class ConversationDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer = CourseSerializer(queryset)
     pass
 
-class ChatlogList(generics.ListCreateAPIView):
+class ChatlogList(generics.ListAPIView):
     serializer_class = ChatlogSerializer
     queryset = Chatlog.objects.all()
 
@@ -76,7 +77,7 @@ class ChatlogDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer = ChatlogSerializer(queryset)
     pass
 
-class FeedbackList(generics.ListCreateAPIView):
+class FeedbackList(generics.ListAPIView):
     serializer_class = FeedbackSerializer
     queryset = Feedback.objects.all()
 
@@ -90,10 +91,12 @@ class FeedbackDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer = FeedbackSerializer(queryset, many=True)
     pass
 
+@swagger_auto_schema(methods=['post'], request_body=UserSerializer)
 @api_view(['POST'])
 def user_detail(request):
     """
     Creates a new user.
+
     A User can be of the following roles:
         
         - ST: student
@@ -134,10 +137,57 @@ def user_detail(request):
                 error.append("Utor ID")
             if 'user_role' not in request.data.keys():
                 error.append("User Role")
-            err = {"msg": "User details missing fields:"}
+            err = {"msg": "User details missing fields:" + ','.join(error)}
 
-            return Response(err, status=status.HTTP_404_NOT_FOUND)
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
+@swagger_auto_schema(methods=['post'], request_body=CourseSerializer)
+@api_view(['POST'])
+def course_detail(request):
+    """
+    Creates a new course.
+
+    API endpoint: /api/course
+    Supported operations: /POST
+
+    Request:
+    {
+        course_code: str,
+        semester: str
+    }
+    Response: {
+        course_id: str,
+        course_code: str,
+        semester: str
+    }
+    """
+    if request.method == 'POST':
+        try:
+            request.data['course_id'] = str(uuid.uuid4())
+            serializer = CourseSerializer(data=request.data)
+            serializer.is_valid()
+            serializer.save()
+
+            response = {
+                "course_id": request.data['course_id'],
+                "course_code": request.data['course_code'],
+                "semester": request.data['semester']
+            }
+
+            return Response(response, status=status.HTTP_201_CREATED)
+
+        except CourseDuplicationError:
+            return Response({"msg": "Course already exists."}, status=status.HTTP_403_FORBIDDEN)
+        except:
+            error = []
+            if 'course_code' not in request.data.keys():
+                error.append("Course Code")
+            if 'semester' not in request.data.keys():
+                error.append("Semester")
+            err = {"msg": "Course missing fields:" + ','.join(error)}
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+
+@swagger_auto_schema(methods=['post'], request_body=ConversationSerializer)
 @api_view(['POST'])
 def conversation_detail(request):
     """
@@ -178,8 +228,9 @@ def conversation_detail(request):
                 error.append("Semester")
             err = {"msg": "Conversation details missing fields: " + ','.join(error) + '.'}
 
-            return Response(err, status=status.HTTP_404_NOT_FOUND)
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
+@swagger_auto_schema(methods=['post'], request_body=ChatlogSerializer)
 @api_view(['POST'])
 def chatlog_detail(request):
     """
@@ -209,7 +260,7 @@ def chatlog_detail(request):
             chatlog_id: str
             is_user: boolean
             chatlog: str
-            status: C
+            status: C [Correct]
         }
     }
     """
@@ -275,12 +326,14 @@ def chatlog_detail(request):
                 error.append("Chatlog message")
             err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
 
-            return Response(err, status=status.HTTP_404_NOT_FOUND)
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
+@swagger_auto_schema(methods=['post'], request_body=FeedbackSerializer)
 @api_view(['POST'])
 def feedback_detail(request):
     """
     Retrieves and saves a feedback from the user to the database.
+    Logs the conversation as inactive (I) afterwards.
 
     Rating is an integer from 1 to 5.
 
@@ -300,9 +353,15 @@ def feedback_detail(request):
     if request.method == 'POST':
         serializer = FeedbackSerializer(data=request.data)
         try:
+            # Validate and save feedback
             serializer.is_valid()
             serializer.save()
-            
+
+            # Flags the conversation as inactive
+            convo = Conversation.objects.filter(conversation_id=request.data['conversation_id'])
+            convo['status'] = 'I'
+            convo.save()
+
             return Response(serializer, status=status.HTTP_201_CREATED)
         
         except:
@@ -316,12 +375,13 @@ def feedback_detail(request):
                 error.append("Feedback Message")
             err = {"msg": "Feedback details missing fields: " + ','.join(error) + '.'}
 
-            return Response(err, status=status.HTTP_404_NOT_FOUND)
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
+@swagger_auto_schema(methods=['post'], request_body=ReportSerializer)
 @api_view(['POST'])
 def report_detail(request):
     """
-    Retrieves the conversation id and returns a copy of the chatlog
+    Retrieves the conversation id and returns a copy of the chatlog.
 
     API Endpoint: /api/report
     Supported operations: /POST
@@ -371,12 +431,16 @@ def report_detail(request):
                     writer.writerow(['[' + str(chatlog.time) + ']', str(user.name), str(chatlog.chatlog)])
                 else: 
                     writer.writerow(['[' + str(chatlog.time) + ']', 'QuickTA', str(chatlog.chatlog)])
+            
+            report = Report(conversation_id=cid)
+            report.save()
+
             return response
 
         except ConversationNotFoundError:
-            return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_404_NOT_FOUND) 
+            return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_401_UNAUTHORIZED) 
         except UserNotFoundError:
-            return Response({"msg": "Error: User not Found."}, status=status.HTTP_404_NOT_FOUND) 
+            return Response({"msg": "Error: User not Found."}, status=status.HTTP_401_UNAUTHORIZED) 
         except:
             # Error handling
             error = []
@@ -384,12 +448,14 @@ def report_detail(request):
                 error.append("Conversation ID")
             err = {"msg": "Feedback details missing fields: " + ','.join(error) + '.'}
 
-            return Response(err, status=status.HTTP_404_NOT_FOUND) 
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED) 
 
+@swagger_auto_schema(methods=['post'], request_body=IncorrectChatlogSerializer)
 @api_view(['POST'])
 def report_incorrect_answers(request):
     """
     Flags the given answer of a particular chatlog as wrong.
+
     The corresponding field, chatlog.status:
         'I' - stands for incorrect
         'C' - stands for correct
@@ -408,9 +474,13 @@ def report_incorrect_answers(request):
     """
     if request.method == 'POST':
         try:
+            
             convo_id = request.data["conversation_id"]
             chatlog_id = request.data["chatlog_id"]
-
+        
+            serializer = IncorrectChatlogSerializer(data=request.data)
+            serializer.is_valid()
+            
             conversation = Conversation.objects.filter(conversation_id=convo_id)
             
             if (len(conversation) == 0):
@@ -429,10 +499,11 @@ def report_incorrect_answers(request):
         except:
             error=[]
             err = {"msg": "Report incorrect answers: " + ','.join(error) +  '.'}
-            return Response(err, status=status.HTTP_404_NOT_FOUND)
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
     return 
 
 # Exceptions
 class UserNotFoundError(Exception): pass
 class ConversationNotFoundError(Exception): pass
 class ChatlogNotFoundError(Exception): pass
+class CourseDuplicationError(Exception): pass

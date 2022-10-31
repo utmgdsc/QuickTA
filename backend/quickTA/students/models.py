@@ -16,11 +16,7 @@ class User(models.Model):
     name = models.CharField(max_length=200)
     utorid = models.CharField(max_length=10)
     user_role = models.CharField(max_length=2)
-    # conversations = models.ArrayField(
-    #     model_container=UserConversation,
-    #     blank=True,
-    #     null=True
-    # )
+
 
     def __str__(self):
         return self.name + '(' + self.user_id + ')'
@@ -35,8 +31,11 @@ class Course(models.Model):
 
 class Model(models.Model):
     model_id = models.CharField(max_length=20)
+    model_name = models.TextField(max_length=40)
     course_id = models.CharField(max_length=20)
 
+    def __str__(self):
+        return self.model_id + " " + self.model_name
 
 class Conversation(models.Model):
     conversation_id = models.CharField(max_length=100)
@@ -57,11 +56,16 @@ class Chatlog(models.Model):
     chatlog = models.TextField(max_length = 3000)
     status = models.CharField(max_length=1, blank=True, null=True)
 
+    def __str__(self):
+        return "[" + self.conversation_id + "] Chatlog -" + self.chatlog_id
+
     
 class Report(models.Model): 
     conversation_id = models.CharField(max_length=100)
-    report_msg = models.TextField(max_length=3000)
     time = models.DateTimeField(default=now)
+
+    def __str__(self):
+        return "[ " + self.conversation_id + "] " + self.time
 
 class Feedback(models.Model):
     conversation_id = models.CharField(max_length=20)
@@ -75,3 +79,6 @@ class Feedback(models.Model):
     
     rating = models.IntegerField(choices=Rating.choices)
     feedback_msg = models.TextField(max_length=1000)
+
+    def __str__(self):
+        return "[ " + self.conversation_id +  " ] Feedback" 

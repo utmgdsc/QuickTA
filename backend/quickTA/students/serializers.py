@@ -1,16 +1,16 @@
 from rest_framework import serializers
-from .models import Chatlog, Conversation, Feedback, User, Course, Model
+from .models import Chatlog, Conversation, Feedback, Report, User, Course, Model
 # from rest_framework_mongoengine.serializers import DocumentSerializer
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['user_id', 'name', 'utorid', 'user_role']
+        fields = ['name', 'utorid', 'user_role']
 
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
-        fields = ['course_id', 'semester', 'course_code']
+        fields = ['course_code', 'semester']
 
 class ModelSerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,7 +20,7 @@ class ModelSerializer(serializers.ModelSerializer):
 class ConversationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conversation
-        fields = ['user_id', 'start_time', 'end_time', 'status', 'semester']
+        fields = ['user_id', 'semester']
     
 class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,6 +30,14 @@ class FeedbackSerializer(serializers.ModelSerializer):
 class ChatlogSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chatlog
-        fields = ['conversation_id', 'chatlog_id', 'time', 'is_user', 'chatlog', 'status']
+        fields = ['conversation_id', 'chatlog']
 
+class ReportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Report
+        fields = ['conversation_id']
 
+class IncorrectChatlogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Chatlog
+        fields = ['conversation_id', 'chatlog_id']
