@@ -6,7 +6,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.utils.timezone import now
-from .models import Chatlog, Conversation, Course, Feedback, User
+from .models import Chatlog, Conversation, Course, Feedback, User, Report
 from .serializers import ConversationSerializer, CourseSerializer, FeedbackSerializer, IncorrectChatlogSerializer, UserSerializer, ChatlogSerializer, ReportSerializer
 
 from rest_framework.decorators import api_view
@@ -22,7 +22,7 @@ Serializers
 - ensuring data returned is in the right format (JSON)
 - allows data from querysets and models to be converted into python datatypes to be rendered into JSON
 """
-class UserList(generics.ListCreateAPIView):
+class UserList(generics.ListAPIView):
     serializer_class = UserSerializer
     queryset = User.objects.all()
     serializer = UserSerializer(queryset, many=True)
@@ -35,7 +35,7 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer = UserSerializer(queryset)
     pass
 
-class CourseList(generics.ListCreateAPIView):
+class CourseList(generics.ListAPIView):
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
 
@@ -49,7 +49,7 @@ class CourseDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer = CourseSerializer(queryset)
     pass
 
-class ConversationList(generics.ListCreateAPIView):
+class ConversationList(generics.ListAPIView):
     serializer_class = ConversationSerializer
     queryset = Conversation.objects.all()
 
@@ -63,7 +63,7 @@ class ConversationDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer = CourseSerializer(queryset)
     pass
 
-class ChatlogList(generics.ListCreateAPIView):
+class ChatlogList(generics.ListAPIView):
     serializer_class = ChatlogSerializer
     queryset = Chatlog.objects.all()
 
@@ -77,7 +77,7 @@ class ChatlogDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer = ChatlogSerializer(queryset)
     pass
 
-class FeedbackList(generics.ListCreateAPIView):
+class FeedbackList(generics.ListAPIView):
     serializer_class = FeedbackSerializer
     queryset = Feedback.objects.all()
 
@@ -429,6 +429,10 @@ def report_detail(request):
                     writer.writerow(['[' + str(chatlog.time) + ']', str(user.name), str(chatlog.chatlog)])
                 else: 
                     writer.writerow(['[' + str(chatlog.time) + ']', 'QuickTA', str(chatlog.chatlog)])
+            
+            report = Report(conversation_id=cid)
+            report.save()
+
             return response
 
         except ConversationNotFoundError:
