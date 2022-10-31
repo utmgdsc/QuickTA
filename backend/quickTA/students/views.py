@@ -139,7 +139,7 @@ def user_detail(request):
                 error.append("User Role")
             err = {"msg": "User details missing fields:" + ','.join(error)}
 
-            return Response(err, status=status.HTTP_404_NOT_FOUND)
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
 @swagger_auto_schema(methods=['post'], request_body=CourseSerializer)
 @api_view(['POST'])
@@ -185,6 +185,7 @@ def course_detail(request):
             if 'semester' not in request.data.keys():
                 error.append("Semester")
             err = {"msg": "Course missing fields:" + ','.join(error)}
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
 @swagger_auto_schema(methods=['post'], request_body=ConversationSerializer)
 @api_view(['POST'])
@@ -227,7 +228,7 @@ def conversation_detail(request):
                 error.append("Semester")
             err = {"msg": "Conversation details missing fields: " + ','.join(error) + '.'}
 
-            return Response(err, status=status.HTTP_404_NOT_FOUND)
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
 @swagger_auto_schema(methods=['post'], request_body=ChatlogSerializer)
 @api_view(['POST'])
@@ -325,7 +326,7 @@ def chatlog_detail(request):
                 error.append("Chatlog message")
             err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
 
-            return Response(err, status=status.HTTP_404_NOT_FOUND)
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
 @swagger_auto_schema(methods=['post'], request_body=FeedbackSerializer)
 @api_view(['POST'])
@@ -374,7 +375,7 @@ def feedback_detail(request):
                 error.append("Feedback Message")
             err = {"msg": "Feedback details missing fields: " + ','.join(error) + '.'}
 
-            return Response(err, status=status.HTTP_404_NOT_FOUND)
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
 @swagger_auto_schema(methods=['post'], request_body=ReportSerializer)
 @api_view(['POST'])
@@ -431,9 +432,9 @@ def report_detail(request):
             return response
 
         except ConversationNotFoundError:
-            return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_404_NOT_FOUND) 
+            return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_401_UNAUTHORIZED) 
         except UserNotFoundError:
-            return Response({"msg": "Error: User not Found."}, status=status.HTTP_404_NOT_FOUND) 
+            return Response({"msg": "Error: User not Found."}, status=status.HTTP_401_UNAUTHORIZED) 
         except:
             # Error handling
             error = []
@@ -441,7 +442,7 @@ def report_detail(request):
                 error.append("Conversation ID")
             err = {"msg": "Feedback details missing fields: " + ','.join(error) + '.'}
 
-            return Response(err, status=status.HTTP_404_NOT_FOUND) 
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED) 
 
 @swagger_auto_schema(methods=['post'], request_body=IncorrectChatlogSerializer)
 @api_view(['POST'])
@@ -492,7 +493,7 @@ def report_incorrect_answers(request):
         except:
             error=[]
             err = {"msg": "Report incorrect answers: " + ','.join(error) +  '.'}
-            return Response(err, status=status.HTTP_404_NOT_FOUND)
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
     return 
 
 # Exceptions
