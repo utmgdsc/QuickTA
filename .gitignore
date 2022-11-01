@@ -26,3 +26,5 @@ frontend/yarn-error.log*
 backend/env
  __pycache__/
  *.pyc
+
+docs/node_modules/*
