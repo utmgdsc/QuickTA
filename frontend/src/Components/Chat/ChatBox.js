@@ -1,23 +1,33 @@
 import {VStack} from "@chakra-ui/react";
 import ChatBubble from "./ChatBubble";
-import {useState} from "react";
+import {useRef, useEffect} from "react";
 
 
 
 const ChatBox = ({messages}) => {
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages])
+
   return(
-    <VStack background={'gray.100'} style={{
-      maxHeight: "50vh",
-      overflowY: "scroll"
+    <VStack background={'#F9F9F9'} style={{
+      height: "50vh",
+      overflowY: "scroll",
+      padding: "0vw 1.5vw 0vw 1.5vw"
     }}>
       {messages.map(({message, dateSent, isUser}, index) => (
         <ChatBubble
-        key={index}
-        message={message}
-        dateSent={dateSent}
-        isUser={isUser}
+          key={index}
+          message={message}
+          dateSent={dateSent}
+          isUser={isUser}
         />
+        
       ))}
+
+      <div ref={messagesEndRef}/>
     </VStack>
   );
 

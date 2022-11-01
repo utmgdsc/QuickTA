@@ -18,11 +18,9 @@ const ChatBoxFooter = ({messages, updateMessages}) => {
   const [sliderVal, setSliderVal] = useState(0);
   const [showTooltip, setSliderTooltip] = useState(false);
   const [text, setText] = useState("");
-
+  useEffect(() => console.log(messages), [messages])
 return(
-  <VStack>
-    {/* <div>{messages}</div> */}
-   <HStack bgColor={'white'} p={5} >
+   <HStack bgColor={'white'} p={5} paddingX={"3vw"} borderTop={'2px solid #EAEAEA'}>
     <Button colorScheme={'red'} fontSize={'sm'} onClick={onOpen}>
       End chat
     </Button>
@@ -49,13 +47,13 @@ return(
               onMouseLeave={() => setSliderTooltip(false)}
               step={1}
             >
-                <SliderMark value={1} mt={1} fontSize={'smaller'}>1</SliderMark>
-                <SliderMark value={2} mt={1} fontSize={'smaller'}>2</SliderMark>
-                <SliderMark value={3} mt={1} fontSize={'smaller'}>3</SliderMark>
-                <SliderMark value={4} mt={1} fontSize={'smaller'}>4</SliderMark>
-                <SliderMark value={5} mt={1} fontSize={'smaller'}>5</SliderMark>
+              <SliderMark value={1} mt={1} fontSize={'smaller'}>1</SliderMark>
+              <SliderMark value={2} mt={1} fontSize={'smaller'}>2</SliderMark>
+              <SliderMark value={3} mt={1} fontSize={'smaller'}>3</SliderMark>
+              <SliderMark value={4} mt={1} fontSize={'smaller'}>4</SliderMark>
+              <SliderMark value={5} mt={1} fontSize={'smaller'}>5</SliderMark>
               <SliderTrack>
-                <SliderFilledTrack/>
+              <SliderFilledTrack/>
               </SliderTrack>
               <Tooltip
                 hasArrow
@@ -85,7 +83,7 @@ return(
        setText(e.target.value)
      }}/>
 
-     <Button colorScheme={'blue'} fontSize={'sm'} onClick={() => {
+     <Button backgroundColor={"#3278cd"} colorScheme={'blue'} fontSize={'sm'} onClick={() => {
       const temp1 = {
         message: text,
         dateSent: Date().toString(),
@@ -96,11 +94,10 @@ return(
        axios.post("http://localhost:8000/api/chatlog", {conversation_id: "1", chatlog: text})
           .then((response) => {
             const temp2 = {
-              message: response.data.chatlog,
+              message: response.data.agent.chatlog,
               dateSent: Date().toString(),
               isUser: "false"
               }
-              console.log(messages)
             updateMessages((oldMessage) => [...oldMessage, temp2])
           })
           .catch((err) => console.log(err))}
@@ -108,7 +105,6 @@ return(
        Send
      </Button>
   </HStack>
-  </VStack>
  )
 }
 
