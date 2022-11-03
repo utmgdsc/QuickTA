@@ -57,7 +57,7 @@ class Chatlog(models.Model):
     status = models.CharField(max_length=1, blank=True, null=True)
 
     def __str__(self):
-        return "[" + self.conversation_id + "] Chatlog -" + self.chatlog_id
+        return "[" + self.conversation_id + "] Chatlog - " + self.chatlog_id + " " + self.chatlog
 
     
 class Report(models.Model): 
