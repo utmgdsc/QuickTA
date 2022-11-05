@@ -3,7 +3,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faBug, faDownload} from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 
-const ChatBoxTopNav = (props) => {
+const ChatBoxTopNav = ({courseCode, currConvoID}) => {
   const fileDownload = require('js-file-download');
   return (
     <HStack paddingY={"4vh"} paddingX={"4vw"}>
@@ -15,12 +15,12 @@ const ChatBoxTopNav = (props) => {
         fontSize: "lg",
         marginLeft: "0.5vw",
       }}>Automated teaching assistant for</Text>
-      <Heading as='h2' size="lg" style={{color: "#012E8A", marginLeft: "0.5vw", lineHeight: "0.9"}}>{props.courseCode}</Heading>
+      <Heading as='h2' size="lg" style={{color: "#012E8A", marginLeft: "0.5vw", lineHeight: "0.9"}}>{courseCode}</Heading>
     </Text>
     <Spacer/>
 
     <Button variant={'ghost'} onClick={() => {
-      axios.post('http://localhost:8000/api/report', {conversation_id: "1"})
+      axios.post('http://localhost:8000/api/report', {conversation_id: currConvoID})
         .then((response) => {
           if(response.headers['content-disposition']){
             fileDownload(response.data, response.headers['content-disposition'].split('"')[1]);
