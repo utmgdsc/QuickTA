@@ -1,30 +1,57 @@
 import {
-  Button, Center,
-  HStack, VStack,
-  Input,
-  Modal, ModalBody, ModalContent, ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Slider, SliderFilledTrack,
-  SliderMark, SliderThumb, SliderTrack, Spacer, Tooltip,
+  Button, HStack, Input,
   useDisclosure
 } from '@chakra-ui/react'
 import {useState, useEffect} from "react";
 import axios from "axios";
 
-const ChatBoxFooter = ({messages, updateMessages}) => {
+const ChatBoxFooter = ({
+  messages, 
+  updateMessages, 
+  inConvo, 
+  updateIsConvo, 
+  currConvoID, 
+  updateConvoID
+}) => {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [sliderVal, setSliderVal] = useState(0);
   const [showTooltip, setSliderTooltip] = useState(false);
   const [text, setText] = useState("");
   useEffect(() => console.log(messages), [messages])
-return(
+
+  return(
    <HStack bgColor={'white'} p={5} paddingX={"3vw"} borderTop={'2px solid #EAEAEA'}>
-    <Button colorScheme={'red'} fontSize={'sm'} onClick={onOpen}>
+    <Button colorScheme={'green'} fontSize={'sm'} onClick={() => {
+      if(inConvo){
+        console.log("You're already in a conversation!")
+      }else{
+        console.log("Started a conversation!")
+        axios.post("http://localhost:8000/api/conversation", {"user_id": "testuser1", "semester": "2022F"})
+        .then(
+          (response) => {
+            updateConvoID(response.data.conversation_id);
+            updateIsConvo(true);
+            console.log(currConvoID, inConvo);
+          }
+        )
+        .catch((err) => {console.log(err)})        
+      }
+    }}>
+      Start Conversation
+    </Button>
+    <Button colorScheme={'red'} fontSize={'sm'} onClick={() => {
+      if(inConvo){
+        updateConvoID("");
+        updateIsConvo(false);
+        // onOpen();
+      }else{
+        console.log("Must be in a convo to leave one :>")
+      }
+    }}>
       End chat
     </Button>
-     <Modal isOpen={isOpen} onClose={onClose} >
+     {/* <Modal isOpen={isOpen} onClose={onClose} >
        <ModalOverlay/>
        <ModalContent>
          <ModalHeader>
@@ -67,7 +94,6 @@ return(
               </Tooltip>
             </Slider>
          </ModalBody>
-
          <ModalFooter>
            <Button colorScheme={'green'}>
              Submit
@@ -78,30 +104,35 @@ return(
            </Button>
          </ModalFooter>
        </ModalContent>
-     </Modal>
+     </Modal> */}
      <Input variant={'filled'} placeholder={"Enter your message here"} onChange={(e) => {
        setText(e.target.value)
      }}/>
 
      <Button backgroundColor={"#3278cd"} colorScheme={'blue'} fontSize={'sm'} onClick={() => {
-      const temp1 = {
-        message: text,
-        dateSent: Date().toString(),
-        isUser: "true"
-        }
-       // Load user message on click
-      updateMessages((oldMessage) => [...oldMessage, temp1])
-       axios.post("http://localhost:8000/api/chatlog", {conversation_id: "1", chatlog: text})
-          .then((response) => {
-            const temp2 = {
-              message: response.data.agent.chatlog,
-              dateSent: Date().toString(),
-              isUser: "false"
-              }
-            updateMessages((oldMessage) => [...oldMessage, temp2])
-          })
-          .catch((err) => console.log(err))}
-     }>
+      if(inConvo){
+        const temp1 = {
+          message: text,
+          dateSent: Date().toString(),
+          isUser: "true"
+          }
+         // Load user message on click
+        updateMessages((oldMessage) => [...oldMessage, temp1])
+         axios.post("http://localhost:8000/api/chatlog", {conversation_id: currConvoID, chatlog: text})
+            .then((response) => {
+              const temp2 = {
+                message: response.data.agent.chatlog,
+                dateSent: Date().toString(),
+                isUser: "false"
+                }
+              updateMessages((oldMessage) => [...oldMessage, temp2])
+            })
+            .catch((err) => console.log(err))
+      }else{
+        console.log("must start a conversation to send a message to AI!")
+      }
+      
+    }}>
        Send
      </Button>
   </HStack>
