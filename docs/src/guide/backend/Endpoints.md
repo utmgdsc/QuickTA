@@ -1,16 +1,7 @@
-# Backend
+# Chatlog Endpoints
 ---
+## getAgentResponse
 
-## Models
-
-
-## Endpoints
-
-
-### <p style="color:green;">Chatlog Endpoints</p>
----
-### getAgentResponse
----
 Retrieves a chatlog from the user, posts it and also returns a response from the corresponding model assigned to the course.
 
 #### <p style="color:green;">Request URL</p>
@@ -64,8 +55,8 @@ curl -X 'POST' \
 }
 ```
 
-### getAllResponses
----
+## getAllResponses
+
 Retrieves all chatlog from all users.
 
 #### <p style="color:green;">Request URL</p>

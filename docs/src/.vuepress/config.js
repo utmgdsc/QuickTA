@@ -49,11 +49,11 @@ module.exports = {
     sidebar: {
       '/guide/': [
         {
-          title: 'Guide',
+          title: 'Backend',
           collapsable: false,
           children: [
-            '',
-            'backend/backend',
+            'backend/Models',
+            'backend/Endpoints',
           ]
         }
       ],

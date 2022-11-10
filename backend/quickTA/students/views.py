@@ -211,6 +211,7 @@ def conversation_detail(request):
         try:
             request.data['conversation_id'] = str(uuid.uuid4())
             request.data['status'] = 'A'
+            request.data['report'] = False
             
             serializer = ConversationSerializer(data=request.data)
             serializer.is_valid()
@@ -271,68 +272,68 @@ def chatlog_detail(request):
         request.data['chatlog_id'] = user_chatlog_id
         request.data['status'] = 'C'
         serializer = ChatlogSerializer(data=request.data)
-        # try:
+        try:
 
-        # Check if conversation exists
-        cid = request.data['conversation_id']
-        conversation = Conversation.objects.filter(conversation_id__in=cid)
+            # Check if conversation exists
+            cid = request.data['conversation_id']
+            conversation = Conversation.objects.filter(conversation_id__in=cid)
 
-        if (len(conversation) == 0):
-            raise ConversationNotFoundError          
-        
-        # Saves user chatlog 
-        serializer.is_valid()
-        serializer.save()
+            if (len(conversation) == 0):
+                raise ConversationNotFoundError          
+            
+            # Saves user chatlog 
+            serializer.is_valid()
+            serializer.save()
 
-        # Get response from Model
-        model_response = "hi"
-        
-        # Save message from the Model
-        data = request.data
-        model_chatlog_id = str(uuid.uuid4())
-        model_chatlog_data = {
-            "conversation_id": data['conversation_id'],
-            "chatlog_id" :  model_chatlog_id,
-            "is_user": False,
-            "chatlog": model_response,
-            "status": 'C'
-        }
-        serializer = ChatlogSerializer(data=model_chatlog_data)
-        serializer.is_valid()
-        serializer.save()
-        
-        user_chatlog_datetime = Chatlog.objects.get(chatlog_id=user_chatlog_id)
-        model_chatlog_datetime = Chatlog.objects.get(chatlog_id=model_chatlog_id)
-        model_chatlog_data['time'] = model_chatlog_datetime.time
-
-
-        # Formatting response
-        response = {
-            "agent": model_chatlog_data,
-            "user": {
+            # Get response from Model
+            model_response = "hi"
+            
+            # Save message from the Model
+            data = request.data
+            model_chatlog_id = str(uuid.uuid4())
+            model_chatlog_data = {
                 "conversation_id": data['conversation_id'],
-                "chatlog_id": user_chatlog_id,
-                "is_user": True,
-                "chatlog": data['chatlog'],
-                "status": data['status'],
-                "time": user_chatlog_datetime.time
-                
+                "chatlog_id" :  model_chatlog_id,
+                "is_user": False,
+                "chatlog": model_response,
+                "status": 'C'
             }
-        }
-        return Response(response, status=status.HTTP_201_CREATED)
-        
-        # except:
-            # Error handling
-            # error = []
-            # if 'conversation_id' not in request.data.keys():
-            #     error.append("Conversation ID")
-            # if 'chatlog_id' not in request.data.keys():
-            #     error.append("Chatlog ID")
-            # if 'chatlog' not in request.data.keys():
-            #     error.append("Chatlog message")
-            # err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
+            serializer = ChatlogSerializer(data=model_chatlog_data)
+            serializer.is_valid()
+            serializer.save()
+            
+            user_chatlog_datetime = Chatlog.objects.get(chatlog_id=user_chatlog_id)
+            model_chatlog_datetime = Chatlog.objects.get(chatlog_id=model_chatlog_id)
+            model_chatlog_data['time'] = model_chatlog_datetime.time
 
-            # return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+
+            # Formatting response
+            response = {
+                "agent": model_chatlog_data,
+                "user": {
+                    "conversation_id": data['conversation_id'],
+                    "chatlog_id": user_chatlog_id,
+                    "is_user": True,
+                    "chatlog": data['chatlog'],
+                    "status": data['status'],
+                    "time": user_chatlog_datetime.time
+                    
+                }
+            }
+            return Response(response, status=status.HTTP_201_CREATED)
+        
+        except:
+            # Error handling
+            error = []
+            if 'conversation_id' not in request.data.keys():
+                error.append("Conversation ID")
+            if 'chatlog_id' not in request.data.keys():
+                error.append("Chatlog ID")
+            if 'chatlog' not in request.data.keys():
+                error.append("Chatlog message")
+            err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
+
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
 @swagger_auto_schema(methods=['post'], request_body=FeedbackSerializer)
 @api_view(['POST'])
@@ -482,31 +483,35 @@ def report_incorrect_answers(request):
         try:
             
             convo_id = request.data["conversation_id"]
-            chatlog_id = request.data["chatlog_id"]
+            # chatlog_id = request.data["chatlog_id"]
         
             serializer = IncorrectChatlogSerializer(data=request.data)
             serializer.is_valid()
             
-            conversation = Conversation.objects.filter(conversation_id=convo_id)
+            conversation = Conversation.objects.get(conversation_id=convo_id)
             
             if (len(conversation) == 0):
                 raise ConversationNotFoundError
-
-            chatlog = Chatlog.objects.filter(chatlog_id=chatlog_id)
-            if (len(chatlog) == 0):
-                raise ChatlogNotFoundError
             
-            chatlog = chatlog[0]
-            chatlog.status = 'I'
-            chatlog.save()
+            conversation.status = True
+            conversation.save()
+
+            # chatlog = Chatlog.objects.filter(chatlog_id=chatlog_id)
+            # if (len(chatlog) == 0):
+            #     raise ChatlogNotFoundError
+            
+            # chatlog = chatlog[0]
+            # chatlog.status = 'I'
+            # chatlog.save()
 
             return Response(status=status.HTTP_200_OK)
 
         except:
             error=[]
+            if 'conversation_id' not in request.data.keys():
+                error.append("Conversation ID")
             err = {"msg": "Report incorrect answers: " + ','.join(error) +  '.'}
             return Response(err, status=status.HTTP_401_UNAUTHORIZED)
-    return 
 
 # Exceptions
 class UserNotFoundError(Exception): pass
