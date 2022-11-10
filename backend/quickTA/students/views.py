@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.utils.timezone import now
 from .models import Chatlog, Conversation, Course, Feedback, User, Report
-from .serializers import ConversationSerializer, CourseSerializer, FeedbackSerializer, IncorrectChatlogSerializer, UserSerializer, ChatlogSerializer, ReportSerializer
+from .serializers import ConversationSerializer, CourseSerializer, FeedbackSerializer, IncorrectChatlogSerializer, UserSerializer, ChatlogSerializer, ReportSerializer, ChatlogDetailSerializer
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -80,10 +80,10 @@ class ChatlogList(generics.ListAPIView):
 
 
 class ChatlogDetail(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = ChatlogSerializer
+    serializer_class = ChatlogDetailSerializer
     queryset = Chatlog.objects.all()
 
-    serializer = ChatlogSerializer(queryset)
+    serializer = ChatlogDetailSerializer(queryset)
     pass
 
 
@@ -225,6 +225,7 @@ def conversation_detail(request):
         try:
             request.data['conversation_id'] = str(uuid.uuid4())
             request.data['status'] = 'A'
+            request.data['report'] = False
             
             serializer = ConversationSerializer(data=request.data)
             serializer.is_valid()
@@ -301,7 +302,6 @@ def chatlog_detail(request):
 
             # Get response from Model
             model_response = "hi"
-            response = { "msg": model_response }
             
             # Save message from the Model
             data = request.data
@@ -317,6 +317,11 @@ def chatlog_detail(request):
             serializer.is_valid()
             serializer.save()
             
+            user_chatlog_datetime = Chatlog.objects.get(chatlog_id=user_chatlog_id)
+            model_chatlog_datetime = Chatlog.objects.get(chatlog_id=model_chatlog_id)
+            model_chatlog_data['time'] = model_chatlog_datetime.time
+
+
             # Formatting response
             response = {
                 "agent": model_chatlog_data,
@@ -325,7 +330,9 @@ def chatlog_detail(request):
                     "chatlog_id": user_chatlog_id,
                     "is_user": True,
                     "chatlog": data['chatlog'],
-                    "status": data['status']
+                    "status": data['status'],
+                    "time": user_chatlog_datetime.time
+                    
                 }
             }
             return Response(response, status=status.HTTP_201_CREATED)
@@ -494,31 +501,35 @@ def report_incorrect_answers(request):
         try:
             
             convo_id = request.data["conversation_id"]
-            chatlog_id = request.data["chatlog_id"]
+            # chatlog_id = request.data["chatlog_id"]
         
             serializer = IncorrectChatlogSerializer(data=request.data)
             serializer.is_valid()
             
-            conversation = Conversation.objects.filter(conversation_id=convo_id)
+            conversation = Conversation.objects.get(conversation_id=convo_id)
             
             if (len(conversation) == 0):
                 raise ConversationNotFoundError
-
-            chatlog = Chatlog.objects.filter(chatlog_id=chatlog_id)
-            if (len(chatlog) == 0):
-                raise ChatlogNotFoundError
             
-            chatlog = chatlog[0]
-            chatlog.status = 'I'
-            chatlog.save()
+            conversation.status = True
+            conversation.save()
+
+            # chatlog = Chatlog.objects.filter(chatlog_id=chatlog_id)
+            # if (len(chatlog) == 0):
+            #     raise ChatlogNotFoundError
+            
+            # chatlog = chatlog[0]
+            # chatlog.status = 'I'
+            # chatlog.save()
 
             return Response(status=status.HTTP_200_OK)
 
         except:
             error=[]
+            if 'conversation_id' not in request.data.keys():
+                error.append("Conversation ID")
             err = {"msg": "Report incorrect answers: " + ','.join(error) +  '.'}
             return Response(err, status=status.HTTP_401_UNAUTHORIZED)
-    return 
 
 # Exceptions
 class UserNotFoundError(Exception): pass

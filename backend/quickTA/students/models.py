@@ -45,6 +45,7 @@ class Conversation(models.Model):
     start_time = models.DateTimeField(default=now)
     end_time = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=1)
+    report = models.BooleanField()
     semester = models.CharField(max_length=20)
 
     def __str__(self):
@@ -60,7 +61,7 @@ class Chatlog(models.Model):
     status = models.CharField(max_length=1, blank=True, null=True)
 
     def __str__(self):
-        return "[" + self.conversation_id + "] Chatlog -" + self.chatlog_id
+        return "[" + self.conversation_id + "] Chatlog - " + self.chatlog_id + " " + self.chatlog
 
 
 class Report(models.Model): 

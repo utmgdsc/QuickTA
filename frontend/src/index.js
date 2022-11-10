@@ -5,19 +5,17 @@ import {
   ChakraProvider,
 } from "@chakra-ui/react";
 import theme from "./assets/theme";
+import { Router, Route, RouterProvider } from 'react-router';
+import { createBrowserRouter } from 'react-router-dom';
+import StudentPage from './Pages/StudentPage';
+import { createBrowserHistory } from "history";
 
+const history = createBrowserHistory();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <div style={{
-    background: "#F1F1F1",
-    width: "100vw",
-    height: "100vh"
-  }}>
     <ChakraProvider theme={theme}>
       <App/>
     </ChakraProvider>
-  </div>
-
 );
 
