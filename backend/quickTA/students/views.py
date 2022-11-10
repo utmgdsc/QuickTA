@@ -22,11 +22,14 @@ Serializers
 - ensuring data returned is in the right format (JSON)
 - allows data from querysets and models to be converted into python datatypes to be rendered into JSON
 """
+
+
 class UserList(generics.ListAPIView):
     serializer_class = UserSerializer
     queryset = User.objects.all()
     serializer = UserSerializer(queryset, many=True)
     pass
+
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
@@ -35,12 +38,14 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer = UserSerializer(queryset)
     pass
 
+
 class CourseList(generics.ListAPIView):
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
 
     serializer = CourseSerializer(queryset, many=True)
     pass
+
 
 class CourseDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CourseSerializer
@@ -49,12 +54,14 @@ class CourseDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer = CourseSerializer(queryset)
     pass
 
+
 class ConversationList(generics.ListAPIView):
     serializer_class = ConversationSerializer
     queryset = Conversation.objects.all()
 
     serializer = CourseSerializer(queryset, many=True)
     pass
+
 
 class ConversationDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ConversationSerializer
@@ -63,12 +70,14 @@ class ConversationDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer = CourseSerializer(queryset)
     pass
 
+
 class ChatlogList(generics.ListAPIView):
     serializer_class = ChatlogSerializer
     queryset = Chatlog.objects.all()
 
     serializer = ChatlogSerializer(queryset)
     pass
+
 
 class ChatlogDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ChatlogSerializer
@@ -77,6 +86,7 @@ class ChatlogDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer = ChatlogSerializer(queryset)
     pass
 
+
 class FeedbackList(generics.ListAPIView):
     serializer_class = FeedbackSerializer
     queryset = Feedback.objects.all()
@@ -84,12 +94,14 @@ class FeedbackList(generics.ListAPIView):
     serializer = FeedbackSerializer(queryset)
     pass
 
+
 class FeedbackDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = FeedbackSerializer
     queryset = Feedback.objects.all()
 
     serializer = FeedbackSerializer(queryset, many=True)
     pass
+
 
 @swagger_auto_schema(methods=['post'], request_body=UserSerializer)
 @api_view(['POST'])
@@ -141,6 +153,7 @@ def user_detail(request):
 
             return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
+
 @swagger_auto_schema(methods=['post'], request_body=CourseSerializer)
 @api_view(['POST'])
 def course_detail(request):
@@ -187,6 +200,7 @@ def course_detail(request):
             err = {"msg": "Course missing fields:" + ','.join(error)}
             return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
+
 @swagger_auto_schema(methods=['post'], request_body=ConversationSerializer)
 @api_view(['POST'])
 def conversation_detail(request):
@@ -229,6 +243,7 @@ def conversation_detail(request):
             err = {"msg": "Conversation details missing fields: " + ','.join(error) + '.'}
 
             return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+
 
 @swagger_auto_schema(methods=['post'], request_body=ChatlogSerializer)
 @api_view(['POST'])
@@ -328,6 +343,7 @@ def chatlog_detail(request):
 
             return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
+
 @swagger_auto_schema(methods=['post'], request_body=FeedbackSerializer)
 @api_view(['POST'])
 def feedback_detail(request):
@@ -376,6 +392,7 @@ def feedback_detail(request):
             err = {"msg": "Feedback details missing fields: " + ','.join(error) + '.'}
 
             return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+
 
 @swagger_auto_schema(methods=['post'], request_body=ReportSerializer)
 @api_view(['POST'])
@@ -449,6 +466,7 @@ def report_detail(request):
             err = {"msg": "Feedback details missing fields: " + ','.join(error) + '.'}
 
             return Response(err, status=status.HTTP_401_UNAUTHORIZED) 
+
 
 @swagger_auto_schema(methods=['post'], request_body=IncorrectChatlogSerializer)
 @api_view(['POST'])

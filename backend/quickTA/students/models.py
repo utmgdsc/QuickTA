@@ -17,9 +17,9 @@ class User(models.Model):
     utorid = models.CharField(max_length=10)
     user_role = models.CharField(max_length=2)
 
-
     def __str__(self):
         return self.name + '(' + self.user_id + ')'
+
 
 class Course(models.Model):
     course_id = models.CharField(max_length=20)
@@ -29,6 +29,7 @@ class Course(models.Model):
     def __str__(self):
         return self.course_id 
 
+
 class Model(models.Model):
     model_id = models.CharField(max_length=20)
     model_name = models.TextField(max_length=40)
@@ -36,6 +37,7 @@ class Model(models.Model):
 
     def __str__(self):
         return self.model_id + " " + self.model_name
+
 
 class Conversation(models.Model):
     conversation_id = models.CharField(max_length=100)
@@ -48,6 +50,7 @@ class Conversation(models.Model):
     def __str__(self):
         return "Conversation " + self.conversation_id + "(" + self.user_id + ")"
 
+
 class Chatlog(models.Model):
     conversation_id = models.CharField(max_length=100)
     chatlog_id = models.CharField(max_length=100)
@@ -59,13 +62,14 @@ class Chatlog(models.Model):
     def __str__(self):
         return "[" + self.conversation_id + "] Chatlog -" + self.chatlog_id
 
-    
+
 class Report(models.Model): 
     conversation_id = models.CharField(max_length=100)
     time = models.DateTimeField(default=now)
-
+    
     def __str__(self):
         return "[ " + self.conversation_id + "] " + self.time
+
 
 class Feedback(models.Model):
     conversation_id = models.CharField(max_length=20)
