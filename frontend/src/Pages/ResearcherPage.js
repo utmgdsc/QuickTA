@@ -1,9 +1,11 @@
+import TopNav from "../Components/TopNav";
 
 
-const ResearcherPage = () => {
+const ResearcherPage = ({UTORid, courseCode}) => {
     return(
         <div>
-            Researcher Page
+            <TopNav UTORid={UTORid}/>
+            
         </div>
     );
 };
