@@ -4,6 +4,7 @@ import {
 } from '@chakra-ui/react'
 import {useState, useEffect} from "react";
 import axios from "axios";
+import { Temporal } from '@js-temporal/polyfill';
 
 const ChatBoxFooter = ({
   messages, 
@@ -111,18 +112,19 @@ const ChatBoxFooter = ({
 
      <Button backgroundColor={"#3278cd"} colorScheme={'blue'} fontSize={'sm'} onClick={() => {
       if(inConvo){
+        const now = Temporal.Now.zonedDateTimeISO().toString();
         const temp1 = {
           message: text,
-          dateSent: Date().toString(),
+          timeSent: now,
           isUser: "true"
           }
          // Load user message on click
         updateMessages((oldMessage) => [...oldMessage, temp1])
-         axios.post("http://localhost:8000/api/chatlog", {conversation_id: currConvoID, chatlog: text})
+         axios.post("http://localhost:8000/api/chatlog", { conversation_id: currConvoID, chatlog: text, time: now })
             .then((response) => {
               const temp2 = {
                 message: response.data.agent.chatlog,
-                dateSent: Date().toString(),
+                dateSent: response.data.agent.timeSent,
                 isUser: "false"
                 }
               updateMessages((oldMessage) => [...oldMessage, temp2])
