@@ -59,11 +59,21 @@ def average_ratings(request):
 def list_reported_conversations(request):
     """
     Returns all reported conversations of a given course.
+    
+    - User Information
+        - name
+        - utorid
+    
+    - Conversation Information
+        - conversation_id: used to retrieve all chatlogs of the conversation
+
+    - Report Information
+        - report message
     """
     # try:
         # Retrieve all reported conversations
     reported_convos = Conversation.objects.filter(
-            course_id=request.data['course_code'], 
+            course_id=request.data['course_id'], 
         )
     
     response = {}
@@ -72,9 +82,7 @@ def list_reported_conversations(request):
         curr = reported_convos[i]
         response[curr.conversation_id] = {
             'user_id': curr.user_id,
-            'course_id': curr.course_id,
             'report': curr.report,
-            'semester': curr.semester,
             'start_time': curr.start_time,
             'end_time': curr.end_time
         }

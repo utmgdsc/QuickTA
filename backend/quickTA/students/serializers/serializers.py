@@ -52,5 +52,5 @@ class ReportSerializer(serializers.ModelSerializer):
 
 class IncorrectChatlogSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Chatlog
-        fields = ['conversation_id']
+        model = Report
+        fields = ['conversation_id', 'msg']

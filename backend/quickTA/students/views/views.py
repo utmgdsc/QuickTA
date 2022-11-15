@@ -616,6 +616,9 @@ def report_conversation(request):
     if request.method == 'POST':
         
         try:
+            if not(request.data['msg']):
+                raise MissingReportMessageError
+
             convo_id = request.data["conversation_id"]
             convo = Conversation.objects.get(conversation_id=convo_id)
             
@@ -623,17 +626,54 @@ def report_conversation(request):
                 raise ConversationNotFoundError
             
             Conversation.objects.filter(conversation_id=convo_id).update(report=True)
-            
+            user = User.objects.get(user_id=convo.user_id)
+
+            # Save this report 
+            report = Report.objects.get(conversation_id=convo_id)
+            report_time = timezone.now()
+            if (report):
+                    Report.objects.filter(conversation_id=convo_id).update(
+                    conversation_id= convo.conversation_id,
+                    course_id=convo.course_id,
+                    user_id=user.user_id,
+                    name=user.name,
+                    utorid=user.utorid,
+                    time=report_time,
+                    status='O',
+                    msg=request.data['msg']
+                    )
+            else:
+                report = Report(
+                    conversation_id= convo.conversation_id,
+                    course_id=convo.course_id,
+                    user_id=user.user_id,
+                    name=user.name,
+                    utorid=user.utorid,
+                    time=report_time,
+                    status='O',
+                    msg=request.data['msg']
+                )
+                report.save()
+
             response = {
                 'conversation_id': convo.conversation_id,
                 'course_id': convo.course_id,
                 'user_id': convo.user_id,
-                'start_time': convo.start_time,
-                'end_time': convo.end_time,
-                'status': convo.status,
-                'report': True
+                'name': user.name,
+                'utorid': user.utorid,
+                'time': report_time,
+                'status': 'O',
+                'msg': request.data['msg']
             }
             return Response(response, status=status.HTTP_200_OK)
+        
+        except MissingReportMessageError:
+            err = {"msg": "Please enter a report message."}
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
+
+        except ConversationNotFoundError:
+            err = {"msg": "Conversation not found."}
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
 
         except:
             error=[]
@@ -653,3 +693,4 @@ class CourseNotFoundError(Exception): pass
 class CourseDuplicationError(Exception): pass
 class OverRatingLimitError(Exception): pass
 class FeedbackExistsError(Exception): pass
+class MissingReportMessageError(Exception): pass
