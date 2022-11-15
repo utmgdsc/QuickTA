@@ -26,14 +26,15 @@ def average_ratings(request):
     """
     if request.method == 'POST':
         try:
-            # Retrieve all convesrations from the course
+          # Retrieve all convesrations from the course
             q1 = Conversation.objects.filter(course_id=request.data['course_id'])
-            
+
+
             # Retrieve all feedback from the conversations
             ratings = []
-            for conversation in q1:
-                q2 = Feedback.objects.get(conversation_id=conversation['conversation_id'])
-                ratings.append(q2['rating'])
+            for convo in q1:
+                q2 = Feedback.objects.get(conversation_id=convo.conversation_id)
+                ratings.append(q2.rating)
 
             # Find average of all the ratings of that particular course
             response = { 
