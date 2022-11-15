@@ -1,3 +1,5 @@
+import csv
+
 from django.shortcuts import render
 from django.http import HttpResponse
 
@@ -54,6 +56,75 @@ def average_ratings(request):
             else:
                 err = {"msg": "Average Ratings missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+
+@swagger_auto_schema(methods=['post'], request_body=AverageRatingSerializer)
+@api_view(['POST'])
+def average_ratings_csv(request):
+    """
+    Retrieves the average ratings given a course id and returns a copy of
+    all the ratings of the chatbot from the course.
+    """
+    if request.method == 'POST':
+        try:
+            course = Course.objects.filter(course_id=request.data['course_id'])
+            if len(course) == 0:
+                raise CourseNotFoundError
+
+            # Retrieve all convesrations from the course
+            convos = get_courses_convos(request.data['course_id'])
+            if len(convos) == 0:
+                raise ConversationNotFoundError
+
+            response = HttpResponse(
+                content_type='text/csv',
+                headers={
+                    'Content-Disposition': 'attachement; filename="convo-report.csv"'
+                }
+            )
+            response["Access-Control-Expose-Headers"] = "Content-Type, Content-Disposition"
+            
+            # Retrieve all feedback from the conversations
+            writer = csv.writer(response)
+            writer.writerow([
+                'Course ID',
+                'Conversation ID',
+                'User Name',
+                'Utorid',
+                'Rating',
+                'Feedback Message'
+            ])
+            for convo in convos:
+                feedback = Feedback.objects.filter(conversation_id=convo.conversation_id)
+                if len(feedback) != 0:
+                    feedback = feedback[0]
+                    user = User.objects.get(user_id=convo.user_id)
+
+                    writer.writerow([
+                        str(convo.course_id),
+                        str(convo.conversation_id),
+                        str(user.name),
+                        str(user.utorid),
+                        str(feedback.rating),
+                        str(feedback.feedback_msg)
+                    ])
+            return response
+        except CourseNotFoundError:
+            return Response({"msg": "Error: Course not Found."}, status=status.HTTP_400_BAD_REQUEST)
+        except ConversationNotFoundError:
+            return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            error = []
+            if 'course_id' not in request.data.keys():
+                error.append("Course ID")
+            
+            if (not(error)): 
+                err = {"msg": "Internal Server Error"}
+                return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                err = {"msg": "Average Ratings CSV missing fields: " + ','.join(error) + '.'}
+                return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 @swagger_auto_schema(methods=['post'], request_body=ReportedListSerializer)
 @api_view(['POST'])
@@ -199,19 +270,19 @@ def get_most_common_words(request):
         }
         return Response(response, status=status.HTTP_200_OK)
 
-@swagger_auto_schema(methods=['post'], request_body=rs.CourseComfortabilitySerializer)
+@swagger_auto_schema(methods=['post'], request_body=rs.CourseComfortabilityListSerializer)
 @api_view(['POST'])
 def get_course_comfortability(request):
     if request.method == 'POST':
         try:
-            serializer = rs.CourseComfortabilitySerailizer(data=request.data)
+            serializer = rs.CourseComfortabilityListSerializer(data=request.data)
             serializer.is_valid()
 
             course = Course.objects.filter(course_id=request.data['course_id'])
             if len(course) == 0:
                 raise CourseNotFoundError
 
-            convos = get_courses_convos(convos)
+            convos = get_courses_convos(request.data['course_id'])
             if len(convos) == 0:
                 raise ConversationNotFoundError
 
@@ -225,7 +296,7 @@ def get_course_comfortability(request):
                 "comfortability_ratings": all_ratings,
                 "avg_comfortability_rating": sum(all_ratings) / len(all_ratings)
             }
-            
+
             return Response(response, status=status.HTTP_200_OK)
         except CourseNotFoundError:
             return Response({"msg": "Error: Course not Found."}, status=status.HTTP_400_BAD_REQUEST)

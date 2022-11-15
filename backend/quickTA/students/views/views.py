@@ -574,9 +574,6 @@ def chatlog_history_detail(request):
                     writer.writerow(['[' + str(chatlog.time) + ']', str(user.name), str(chatlog.chatlog)])
                 else: 
                     writer.writerow(['[' + str(chatlog.time) + ']', 'QuickTA', str(chatlog.chatlog)])
-            
-            report = Report(conversation_id=cid)
-            report.save()
 
             return response
 

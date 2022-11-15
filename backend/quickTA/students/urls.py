@@ -24,6 +24,7 @@ urlpatterns = [
     path('comfortability-rating', views.course_comfortability),
 
     path('researcher/average-ratings', researcher_views.average_ratings),
+    path('researcher/average-ratings-csv', researcher_views.average_ratings_csv),
     path('researcher/reported-conversations', researcher_views.list_reported_conversations),
     path('researcher/report-chatlogs', researcher_views.get_reported_chatlogs),
     path('researcher/avg-response-rate', researcher_views.get_average_response_rate),
