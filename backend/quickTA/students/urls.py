@@ -23,11 +23,22 @@ urlpatterns = [
     path('incorrect-answer', views.report_conversation),
     path('comfortability-rating', views.course_comfortability),
 
+
+    # Instructor/Researcher views
     path('researcher/average-ratings', researcher_views.average_ratings),
     path('researcher/average-ratings-csv', researcher_views.average_ratings_csv),
+    
     path('researcher/reported-conversations', researcher_views.list_reported_conversations),
+    path('researcher/reported-conversations-csv', researcher_views.list_reported_conversations_csv),
+    
     path('researcher/report-chatlogs', researcher_views.get_reported_chatlogs),
+    path('researcher/reported-chatlogs-csv', researcher_views.get_reported_chatlogs_csv),
+    
     path('researcher/avg-response-rate', researcher_views.get_average_response_rate),
+    path('researcher/avg-response-rate-csv', researcher_views.get_average_response_rate_csv),
+    
     path('researcher/most-common-words', researcher_views.get_most_common_words),
-    path('researcher/avg-comfortability-rating', researcher_views.get_course_comfortability)
+    
+    path('researcher/avg-comfortability-rating', researcher_views.get_course_comfortability),
+    path('researcher/avg-comfortability-rating-csv', researcher_views.get_course_comfortability_csv)
 ]

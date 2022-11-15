@@ -1,4 +1,5 @@
 import csv
+from datetime import datetime
 
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -77,9 +78,7 @@ def average_ratings_csv(request):
 
             response = HttpResponse(
                 content_type='text/csv',
-                headers={
-                    'Content-Disposition': 'attachement; filename="convo-report.csv"'
-                }
+                headers={ 'Content-Disposition': 'attachement; filename="average-ratings-{}.csv"'.format(datetime.now())}
             )
             response["Access-Control-Expose-Headers"] = "Content-Type, Content-Disposition"
             
@@ -124,8 +123,6 @@ def average_ratings_csv(request):
                 err = {"msg": "Average Ratings CSV missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-
-
 @swagger_auto_schema(methods=['post'], request_body=ReportedListSerializer)
 @api_view(['POST'])
 def list_reported_conversations(request):
@@ -148,7 +145,6 @@ def list_reported_conversations(request):
                 course_id=request.data['course_id'], 
                 status='O'
             ).order_by('-time')
-        print(reported_convos)
         response = {}
 
         for i, report in enumerate(reported_convos):
@@ -166,6 +162,49 @@ def list_reported_conversations(request):
     except:
         err = {"msg": "Internal Server Error"}
         return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@swagger_auto_schema(methods=['post'], request_body=ReportedListSerializer)
+@api_view(['POST'])
+def list_reported_conversations_csv(request):
+    if request.method == 'POST':
+        try:
+            reported_convos = Report.objects.filter(
+                    course_id=request.data['course_id'], 
+                    status='O'
+                ).order_by('-time')
+
+            # Initialize CSV response
+            response = HttpResponse(
+                content_type='text/csv',
+                headers={ 'Content-Disposition': 'attachement; filename="reported-conversations-{}.csv"'.format(datetime.now())}
+            )
+            response["Access-Control-Expose-Headers"] = "Content-Type, Content-Disposition"
+
+            # Write all reported conversation information to CSV response
+            writer = csv.writer(response)
+            writer.writerow([
+                'Course ID',
+                'Conversation ID',
+                'User Name',
+                'Utorid',
+                'Time'
+                'Status',
+                'Report Message'
+            ])
+            for report in reported_convos:
+                writer.writerow([
+                    str(report.course_id),
+                    str(report.conversation_id),
+                    str(report.name),
+                    str(report.utorid),
+                    str(report.time),
+                    str(report.status),
+                    str(report.msg)
+                ])
+            return response
+        except:
+            err = {"msg": "Internal Server Error"}
+            return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @swagger_auto_schema(methods=['post'], request_body=ChatlogListSerializer)
 @api_view(['POST'])
@@ -208,6 +247,65 @@ def get_reported_chatlogs(request):
         err = {"msg": "Internal Server Error"}
         return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@swagger_auto_schema(methods=['post'], request_body=ChatlogListSerializer)
+@api_view(['POST'])
+def get_reported_chatlogs_csv(request):
+    """
+    Retrieves the reported conversation id and returns a CSV copy of the chatlog.
+    """
+    if request.method == 'POST':
+        try:
+            cid = request.data['conversation_id']
+            conversation = Conversation.objects.filter(conversation_id=cid)
+
+            # Checks if conversation is found
+            if (len(conversation) > 0):
+                uid = conversation[0].user_id
+            else:
+                raise ConversationNotFoundError
+
+            # Checks if user is found
+            user = User.objects.filter(user_id=uid)
+            if (len(user) > 0):
+                user = user[0]
+            else:
+                raise UserNotFoundError
+
+            chatlogs = Chatlog.objects.filter(conversation_id=cid).order_by('time')
+        
+            response = HttpResponse(
+                content_type='text/csv',
+                headers={
+                    'Content-Disposition': 'attachement; filename="convo-report.csv"'
+                }
+            )
+
+            response["Access-Control-Expose-Headers"] = "Content-Type, Content-Disposition"
+
+            writer = csv.writer(response)
+            
+            for chatlog in chatlogs:
+                chatlog.time = chatlog.time.strftime("%m/%d/%Y %H:%M:%S")
+                if chatlog.is_user:
+                    writer.writerow(['[' + str(chatlog.time) + ']', str(user.name), str(chatlog.chatlog)])
+                else: 
+                    writer.writerow(['[' + str(chatlog.time) + ']', 'QuickTA', str(chatlog.chatlog)])
+
+            return response
+
+        except ConversationNotFoundError:
+            return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_401_UNAUTHORIZED) 
+        except UserNotFoundError:
+            return Response({"msg": "Error: User not Found."}, status=status.HTTP_401_UNAUTHORIZED) 
+        except:
+            # Error handling
+            error = []
+            if 'conversation_id' not in request.data.keys():
+                error.append("Conversation ID")
+            err = {"msg": "Feedback details missing fields: " + ','.join(error) + '.'}
+
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED) 
+
 @swagger_auto_schema(methods=['post'], request_body=ResponseRateSerializer)
 @api_view(['POST'])
 def get_average_response_rate(request):
@@ -220,7 +318,6 @@ def get_average_response_rate(request):
             total_chatlogs = 0
             
             for convo in q1:
-                print(convo)
                 q2 = Chatlog.objects.filter(conversation_id=convo.conversation_id)
                 for chatlog in q2:
                     if chatlog.is_user:                    
@@ -238,7 +335,59 @@ def get_average_response_rate(request):
         except:
             err = {"msg": "Internal Server Error"}
             return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+
+@swagger_auto_schema(methods=['post'], request_body=ResponseRateSerializer)
+@api_view(['POST'])
+def get_average_response_rate_csv(request):
+    """
+    Retrieves the response rates given a course id and returns a copy of
+    all the relevant chatlog response rates of a course.
+    """
+    if request.method == 'POST':
+        try:
+            q1 = Conversation.objects.filter(course_id=request.data['course_id'])
+            
+            # Initialize CSV Response
+            response = HttpResponse(
+                content_type='text/csv',
+                headers={
+                    'Content-Disposition': 'attachement; filename="convo-report.csv"'
+                }
+            )
+            response["Access-Control-Expose-Headers"] = "Content-Type, Content-Disposition"
+            
+            # Write all response rates information to CSV response
+            writer = csv.writer(response)
+            writer.writerow([
+                'Course Code',
+                'Conversation ID',
+                'Chatlog ID',
+                'User Name'
+                'Utorid',
+                'Delta Time'
+            ])
+
+            for convo in q1:
+                q2 = Chatlog.objects.filter(conversation_id=convo.conversation_id)
+                course = Course.objects.get(course_id=convo.course_id)
+                user = User.objects.get(user_id=convo.user_id)
+                for chatlog in q2:
+                    if chatlog.is_user:                    
+                        delta = chatlog.delta.total_seconds() 
+                        if delta != 0:
+                            writer.writerow([
+                                str(convo.course_id),
+                                str(chatlog.chatlog_id),
+                                str(course.course_code),
+                                str(user.name),
+                                str(user.utorid),
+                                str(delta)
+                            ])
+            return response
+        except:
+            err = {"msg": "Internal Server Error"}
+            return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 @swagger_auto_schema(methods=['post'], request_body=rs.MostCommonWordsSerializer)
 @api_view(['POST'])
 def get_most_common_words(request):
@@ -314,7 +463,72 @@ def get_course_comfortability(request):
                 err = {"msg": "Course comfortability missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
         
-        
+@swagger_auto_schema(methods=['post'], request_body=rs.CourseComfortabilityListSerializer)
+@api_view(['POST'])
+def get_course_comfortability_csv(request):
+    """
+    Retrieves a CSV copy of all the course comfortability ratings of a given course id.
+    """
+    if request.method == 'POST':
+        try:
+            serializer = rs.CourseComfortabilityListSerializer(data=request.data)
+            serializer.is_valid()
+
+            course = Course.objects.filter(course_id=request.data['course_id'])
+            if len(course) == 0:
+                raise CourseNotFoundError
+
+            convos = get_courses_convos(request.data['course_id'])
+            if len(convos) == 0:
+                raise ConversationNotFoundError
+
+             # Initialize CSV Response
+            response = HttpResponse(
+                content_type='text/csv',
+                headers={
+                    'Content-Disposition': 'attachement; filename="convo-report.csv"'
+                }
+            )
+            response["Access-Control-Expose-Headers"] = "Content-Type, Content-Disposition"
+            
+            # Write all response rates information to CSV response
+            writer = csv.writer(response)
+            writer.writerow([
+                'Course Code',
+                'Conversation ID',
+                'User Name'
+                'Utorid',
+                'Comfortability Rating'
+            ])
+
+            for convo in convos:
+                course = Course.objects.get(course_id=convo.course_id)
+                user = User.objects.get(user_id=convo.user_id)
+                writer.writerow([
+                    str(convo.course_id),
+                    str(convo.conversation_id),
+                    str(user.name),
+                    str(user.utorid),
+                    str(convo.comfortability_rating)
+                ])
+
+            return response
+
+        except CourseNotFoundError:
+            return Response({"msg": "Error: Course not Found."}, status=status.HTTP_400_BAD_REQUEST)
+        except ConversationNotFoundError:
+            return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            error = []
+            if 'course_id' not in request.data.keys():
+                error.append("Course ID")
+            
+            if (not(error)): 
+                err = {"msg": "Internal Server Error"}
+                return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                err = {"msg": "Course comfortability missing fields: " + ','.join(error) + '.'}
+                return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 # Helper functions
 def get_courses_convos(course_id):
