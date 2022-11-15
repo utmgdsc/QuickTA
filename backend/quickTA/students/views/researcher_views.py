@@ -8,7 +8,7 @@ from rest_framework import status
 
 from ..models import User, Chatlog, Conversation, Feedback, Report
 from ..serializers.serializers import ConversationSerializer
-from ..serializers.researcher_serializers import ResearchersSerializer, ReportedListSerializer, AverageRatingSerializer, ChatlogListSerializer
+from ..serializers.researcher_serializers import ResearchersSerializer, ReportedListSerializer, AverageRatingSerializer, ChatlogListSerializer, ResponseRateSerializer
 
 from drf_yasg.utils import swagger_auto_schema
 
@@ -126,6 +126,7 @@ def get_reported_chatlogs(request):
             })
         
         response = {
+            "total_reported_count": len(conversation),
             "conversations": conversations
         }
         return Response(response, status=status.HTTP_200_OK)
@@ -136,8 +137,37 @@ def get_reported_chatlogs(request):
         err = {"msg": "Internal Server Error"}
         return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@swagger_auto_schema()
-@api_view()
+@swagger_auto_schema(methods=['post'], request_body=ResponseRateSerializer)
+@api_view(['POST'])
+def get_average_response_rate(request):
+    if request.method == 'POST':
+        try:
+            q1 = Conversation.objects.filter(course_id=request.data['course_id'])
+            
+            deltas = []
+            total_delta = 0
+            total_chatlogs = 0
+            
+            for convo in q1:
+                print(convo)
+                q2 = Chatlog.objects.filter(conversation_id=convo.conversation_id)
+                for chatlog in q2:
+                    if chatlog.is_user:                    
+                        delta = chatlog.delta.total_seconds() 
+                        if delta != 0:
+                            deltas.append(delta)
+                            total_delta += delta
+                            total_chatlogs += 1
+            avg_response_rate = total_delta / total_chatlogs
+            response = {
+                "avg_response_rate": avg_response_rate,
+                "all_response_rates": deltas
+            }
+            return Response(response, status=status.HTTP_200_OK)
+        except:
+            err = {"msg": "Internal Server Error"}
+            return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 
 # Exceptions
 class CourseNotFoundError(Exception): pass

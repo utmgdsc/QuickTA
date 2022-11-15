@@ -20,3 +20,8 @@ class ChatlogListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chatlog
         fields = ['conversation_id']
+
+class ResponseRateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = ['course_id']        
