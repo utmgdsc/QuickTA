@@ -42,7 +42,6 @@ class Model(models.Model):
 class Conversation(models.Model):
     conversation_id = models.CharField(max_length=100)
     course_id = models.CharField(max_length=100)
-    semester = models.CharField(max_length=20)
     user_id = models.CharField(max_length=50)  
     start_time = models.DateTimeField(default=now)
     end_time = models.DateTimeField(blank=True, null=True)
@@ -59,7 +58,7 @@ class Chatlog(models.Model):
     time = models.DateTimeField(default=datetime.now)
     is_user = models.BooleanField()
     chatlog = models.TextField(max_length = 3000)
-    status = models.CharField(max_length=1, blank=True, null=True)
+    delta = models.DurationField(blank=True, null=True)
 
     def __str__(self):
         return "[" + self.conversation_id + "] Chatlog - " + self.chatlog_id + " " + self.chatlog

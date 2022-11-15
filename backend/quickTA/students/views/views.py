@@ -5,6 +5,7 @@ from http.client import responses
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
+from django.utils import timezone
 from django.utils.timezone import now
 from ..models import Chatlog, Conversation, Course, Feedback, User, Report
 from ..serializers.serializers import ConversationSerializer, CourseSerializer, FeedbackSerializer, IncorrectChatlogSerializer, UserSerializer, ChatlogSerializer, ReportSerializer, ChatlogDetailSerializer
@@ -262,9 +263,12 @@ def conversation_detail(request):
 
     if request.method == 'POST':
         try:
-            
             serializer = ConversationSerializer(data=request.data)
             serializer.is_valid()
+
+            course = Course.objects.get(course_id=request.data['course_id'])
+            if not(course):
+                raise CourseNotFoundError
 
             convo_id = str(uuid.uuid4())
 
@@ -272,7 +276,6 @@ def conversation_detail(request):
             convo = Conversation(
                 conversation_id=convo_id,
                 course_id=data['course_id'],
-                semester=data['semester'],
                 user_id=data['user_id'],
                 status='A',
                 report=False
@@ -282,12 +285,14 @@ def conversation_detail(request):
             response = {
                 "conversation_id": convo_id,
                 "course_id": data['course_id'],
-                "semester": data['semester'],
                 "user_id": data['user_id'],
                 "status": 'A',
                 "report": "False",
             }
             return Response(response, status=status.HTTP_201_CREATED)
+        except CourseNotFoundError:
+            err = {'msg': 'Course not found.'}
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
         except:
             error = []
             if 'user_id' not in request.data.keys():
@@ -335,57 +340,86 @@ def chatlog_detail(request):
     """
     if request.method == 'POST':
 
-        request.data['is_user'] = True
-        user_chatlog_id = str(uuid.uuid4())
-        request.data['chatlog_id'] = user_chatlog_id
-        request.data['status'] = 'C'
-        serializer = ChatlogSerializer(data=request.data)
         try:
+            current_time = timezone.now()
+            if 'time' not in request.data.keys() and request.data['time']:
+                request.data['time'] = current_time
+            serializer = ChatlogSerializer(data=request.data)
+            serializer.is_valid()
 
             # Check if conversation exists
             cid = request.data['conversation_id']
-            conversation = Conversation.objects.filter(conversation_id__in=cid)
+            conversation = Conversation.objects.get(conversation_id=cid)
 
-            if (len(conversation) == 0):
+            if not(conversation):
                 raise ConversationNotFoundError          
             
+            # Get last message's time from this conversation from the user
+            convo_chatlogs = Chatlog.objects.filter(
+                conversation_id=cid,
+            ).order_by('-time')
+            
+            last_chatlog_time = ''
+            for chatlog in convo_chatlogs:
+                if not(chatlog.is_user):
+                    last_chatlog_time = chatlog.time
+                    break
+            
+            # Difference in time from last agent response and current user response
+            if (last_chatlog_time):
+                delta = current_time - last_chatlog_time
+            else:
+                # First message of the conversation
+                delta = current_time - current_time
+
             # Saves user chatlog 
-            serializer.is_valid()
-            serializer.save()
+            user_chatlog_id = str(uuid.uuid4())
+            
+            data = request.data
+            user_chatlog = Chatlog(
+                conversation_id=cid,
+                chatlog_id=user_chatlog_id,
+                time=data['time'],
+                is_user=True,
+                chatlog=data['chatlog'],
+                delta=delta
+            )
+            user_chatlog.save()
+
 
             # Get response from Model
             model_response = "hi"
             
             # Save message from the Model
-            data = request.data
             model_chatlog_id = str(uuid.uuid4())
-            model_chatlog_data = {
-                "conversation_id": data['conversation_id'],
-                "chatlog_id" :  model_chatlog_id,
-                "is_user": False,
-                "chatlog": model_response,
-                "status": 'C'
-            }
-            serializer = ChatlogSerializer(data=model_chatlog_data)
-            serializer.is_valid()
-            serializer.save()
+            model_time = timezone.now()
+            model_chatlog = Chatlog(
+                conversation_id=cid,
+                chatlog_id=model_chatlog_id,
+                time=model_time,
+                is_user=False,
+                chatlog=model_response,
+            )
+            model_chatlog.save()
             
             user_chatlog_datetime = Chatlog.objects.get(chatlog_id=user_chatlog_id)
-            model_chatlog_datetime = Chatlog.objects.get(chatlog_id=model_chatlog_id)
-            model_chatlog_data['time'] = model_chatlog_datetime.time
-
 
             # Formatting response
             response = {
-                "agent": model_chatlog_data,
+                "agent": {
+                    "conversation_id": data['conversation_id'],
+                    "chatlog_id" :  model_chatlog_id,
+                    "time": model_time,
+                    "is_user": False,
+                    "chatlog": model_response,
+                },
                 "user": {
                     "conversation_id": data['conversation_id'],
                     "chatlog_id": user_chatlog_id,
+                    "time": user_chatlog_datetime.time,
                     "is_user": True,
                     "chatlog": data['chatlog'],
-                    "status": data['status'],
-                    "time": user_chatlog_datetime.time
-                    
+                    "delta": delta
                 }
             }
             return Response(response, status=status.HTTP_201_CREATED)
@@ -395,8 +429,6 @@ def chatlog_detail(request):
             error = []
             if 'conversation_id' not in request.data.keys():
                 error.append("Conversation ID")
-            if 'chatlog_id' not in request.data.keys():
-                error.append("Chatlog ID")
             if 'chatlog' not in request.data.keys():
                 error.append("Chatlog message")
             err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
@@ -584,4 +616,5 @@ class CourseAlreadyExistsError(Exception): pass
 class UserNotFoundError(Exception): pass
 class ConversationNotFoundError(Exception): pass
 class ChatlogNotFoundError(Exception): pass
+class CourseNotFoundError(Exception): pass
 class CourseDuplicationError(Exception): pass
