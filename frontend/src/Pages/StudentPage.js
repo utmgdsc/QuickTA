@@ -1,7 +1,7 @@
 import TopNav from "../Components/TopNav";
 import Chat from "../Components/Chat/Chat";
 
-const StudentPage = () => {
+const StudentPage = ({UTORid, courseCode}) => {
     return (
     <div style={{
         backgroundColor: "#F1F1F1",
