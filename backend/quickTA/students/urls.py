@@ -1,6 +1,6 @@
 from django.urls import path
 from .views.views import ChatlogList, ChatlogDetail, UserList, UserDetail, CourseDetail, CourseList, ConversationDetail, ConversationList
-from students.views import views, researcher_views
+from students.views import views, researcher_views, admin_views
 
 app_name = 'student_api'
 
@@ -40,5 +40,8 @@ urlpatterns = [
     path('researcher/most-common-words', researcher_views.get_most_common_words),
     
     path('researcher/avg-comfortability-rating', researcher_views.get_course_comfortability),
-    path('researcher/avg-comfortability-rating-csv', researcher_views.get_course_comfortability_csv)
+    path('researcher/avg-comfortability-rating-csv', researcher_views.get_course_comfortability_csv),
+
+    # Admin view
+    path('admin/add-user', admin_views.create_user)
 ]
