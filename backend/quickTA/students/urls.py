@@ -1,5 +1,5 @@
 from django.urls import path
-from .views.views import ChatlogList, ChatlogDetail, UserList, UserDetail, CourseDetail, CourseList, ConversationDetail, ConversationList, report_incorrect_answers
+from .views.views import ChatlogList, ChatlogDetail, UserList, UserDetail, CourseDetail, CourseList, ConversationDetail, ConversationList
 from students.views import views, researcher_views
 
 app_name = 'student_api'
@@ -19,8 +19,8 @@ urlpatterns = [
     path('chatlog', views.chatlog_detail),
     path('conversation', views.conversation_detail),
     path('feedback', views.feedback_detail),
-    path('report', views.report_detail),
-    path('incorrect-answer', views.report_incorrect_answers),
+    path('report', views.chatlog_history_detail),
+    path('incorrect-answer', views.report_conversation),
 
     path('researcher/average-ratings', researcher_views.average_ratings),
     path('researcher/reported-conversations', researcher_views.list_reported_conversations),

@@ -516,7 +516,7 @@ def feedback_detail(request):
 
 @swagger_auto_schema(methods=['post'], request_body=ReportSerializer)
 @api_view(['POST'])
-def report_detail(request):
+def chatlog_history_detail(request):
     """
     Retrieves the conversation id and returns a copy of the chatlog.
 
@@ -587,10 +587,9 @@ def report_detail(request):
 
             return Response(err, status=status.HTTP_401_UNAUTHORIZED) 
 
-
 @swagger_auto_schema(methods=['post'], request_body=IncorrectChatlogSerializer)
 @api_view(['POST'])
-def report_incorrect_answers(request):
+def report_conversation(request):
     """
     Flags the given answer of a particular conversation as wrong.
 
@@ -611,26 +610,33 @@ def report_incorrect_answers(request):
         HTTP status code 200: OK
     """
     if request.method == 'POST':
-        # try:
+        
+        try:
+            convo_id = request.data["conversation_id"]
+            convo = Conversation.objects.get(conversation_id=convo_id)
             
-        convo_id = request.data["conversation_id"]
-        
-        conversation = Conversation.objects.get(conversation_id=convo_id)
-        
-        # if (len(conversation) == 0):
-            # raise ConversationNotFoundError
-        
-        conversation.report = True
-        conversation.save()
+            if not(convo):
+                raise ConversationNotFoundError
+            
+            Conversation.objects.filter(conversation_id=convo_id).update(report=True)
+            
+            response = {
+                'conversation_id': convo.conversation_id,
+                'course_id': convo.course_id,
+                'user_id': convo.user_id,
+                'start_time': convo.start_time,
+                'end_time': convo.end_time,
+                'status': convo.status,
+                'report': True
+            }
+            return Response(response, status=status.HTTP_200_OK)
 
-        return Response(status=status.HTTP_200_OK)
-
-        # except:
-        #     error=[]
-        #     if 'conversation_id' not in request.data.keys():
-        #         error.append("Conversation ID")
-        #     err = {"msg": "Report incorrect answers: " + ','.join(error) +  '.'}
-        #     return Response(err, status=status.HTTP_404_NOT_FOUND)
+        except:
+            error=[]
+            if 'conversation_id' not in request.data.keys():
+                error.append("Conversation ID")
+            err = {"msg": "Report incorrect answers: " + ','.join(error) +  '.'}
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
 
 # Exceptions
 class UserAlreadyExistsError(Exception): pass
