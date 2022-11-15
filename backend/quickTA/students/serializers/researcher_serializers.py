@@ -30,3 +30,8 @@ class MostCommonWordsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = ['course_id'] 
+
+class CourseComfortabilitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = ['course_id']

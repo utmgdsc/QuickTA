@@ -6,10 +6,10 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
-from ..models import User, Chatlog, Conversation, Feedback, Report
+from ..models import User, Chatlog, Conversation, Feedback, Report, Course
 from ..serializers.serializers import ConversationSerializer
 from ..serializers.researcher_serializers import ResearchersSerializer, ReportedListSerializer, AverageRatingSerializer, ChatlogListSerializer, ResponseRateSerializer, MostCommonWordsSerializer
-
+from ..serializers import researcher_serializers as rs
 from drf_yasg.utils import swagger_auto_schema
 from ..functions.common_topics import generate_wordcloud
 # Create your views here.
@@ -17,7 +17,7 @@ class ResearchersView(generics.CreateAPIView):
     queryset = Chatlog.objects.all()
     serializer_class = ResearchersSerializer
 
-
+# Endpoints
 @swagger_auto_schema(methods=['post'], request_body=AverageRatingSerializer)
 @api_view(['POST'])
 def average_ratings(request):
@@ -168,7 +168,7 @@ def get_average_response_rate(request):
             err = {"msg": "Internal Server Error"}
             return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-@swagger_auto_schema(methods=['post'], request_body=MostCommonWordsSerializer)
+@swagger_auto_schema(methods=['post'], request_body=rs.MostCommonWordsSerializer)
 @api_view(['POST'])
 def get_most_common_words(request):
     if request.method == 'POST':
@@ -199,6 +199,53 @@ def get_most_common_words(request):
         }
         return Response(response, status=status.HTTP_200_OK)
 
+@swagger_auto_schema(methods=['post'], request_body=rs.CourseComfortabilitySerializer)
+@api_view(['POST'])
+def get_course_comfortability(request):
+    if request.method == 'POST':
+        try:
+            serializer = rs.CourseComfortabilitySerailizer(data=request.data)
+            serializer.is_valid()
+
+            course = Course.objects.filter(course_id=request.data['course_id'])
+            if len(course) == 0:
+                raise CourseNotFoundError
+
+            convos = get_courses_convos(convos)
+            if len(convos) == 0:
+                raise ConversationNotFoundError
+
+            all_ratings = []
+
+            for convo in convos:
+                all_ratings.append(convo.comfortability_rating)
+
+            response = {
+                "total_conversations": len(all_ratings),
+                "comfortability_ratings": all_ratings,
+                "avg_comfortability_rating": sum(all_ratings) / len(all_ratings)
+            }
+            
+            return Response(response, status=status.HTTP_200_OK)
+        except CourseNotFoundError:
+            return Response({"msg": "Error: Course not Found."}, status=status.HTTP_400_BAD_REQUEST)
+        except ConversationNotFoundError:
+            return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            error = []
+            if 'course_id' not in request.data.keys():
+                error.append("Course ID")
+            
+            if (not(error)): 
+                err = {"msg": "Internal Server Error"}
+                return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                err = {"msg": "Course comfortability missing fields: " + ','.join(error) + '.'}
+                return Response(err, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+
+# Helper functions
 def get_courses_convos(course_id):
     return Conversation.objects.filter(course_id=course_id)
 
