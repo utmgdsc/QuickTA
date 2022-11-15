@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from .models import Chatlog
-from ..students.models import Course
+from ..models import Chatlog, Course
 
 class ResearchersSerializer(serializers.ModelSerializer):
     class Meta:
@@ -10,12 +9,12 @@ class ResearchersSerializer(serializers.ModelSerializer):
 class AverageRatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
-        fields = ['course_id']
+        fields = ['course_code']
 
 class ReportedListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
-        fields = ['course_id']
+        fields = ['course_code']
 
 class ChatlogListSerializer(serializers.ModelSerializer):
     class Meta:

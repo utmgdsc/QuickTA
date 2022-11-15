@@ -41,12 +41,13 @@ class Model(models.Model):
 
 class Conversation(models.Model):
     conversation_id = models.CharField(max_length=100)
+    course_id = models.CharField(max_length=100)
+    semester = models.CharField(max_length=20)
     user_id = models.CharField(max_length=50)  
     start_time = models.DateTimeField(default=now)
     end_time = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=1)
     report = models.BooleanField()
-    semester = models.CharField(max_length=20)
 
     def __str__(self):
         return "Conversation " + self.conversation_id + "(" + self.user_id + ")"
@@ -74,15 +75,7 @@ class Report(models.Model):
 
 class Feedback(models.Model):
     conversation_id = models.CharField(max_length=20)
-
-    class Rating(models.IntegerChoices):
-        POOR = 1
-        UNSATISFACTORY = 2
-        AVERAGE = 3
-        GOOD = 4
-        EXCELLENT = 5
-    
-    rating = models.IntegerField(choices=Rating.choices)
+    rating = models.CharField(max_length=1)
     feedback_msg = models.TextField(max_length=1000)
 
     def __str__(self):

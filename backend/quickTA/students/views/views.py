@@ -6,8 +6,8 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.utils.timezone import now
-from .models import Chatlog, Conversation, Course, Feedback, User, Report
-from .serializers import ConversationSerializer, CourseSerializer, FeedbackSerializer, IncorrectChatlogSerializer, UserSerializer, ChatlogSerializer, ReportSerializer, ChatlogDetailSerializer
+from ..models import Chatlog, Conversation, Course, Feedback, User, Report
+from ..serializers.serializers import ConversationSerializer, CourseSerializer, FeedbackSerializer, IncorrectChatlogSerializer, UserSerializer, ChatlogSerializer, ReportSerializer, ChatlogDetailSerializer
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -59,7 +59,7 @@ class ConversationList(generics.ListAPIView):
     serializer_class = ConversationSerializer
     queryset = Conversation.objects.all()
 
-    serializer = CourseSerializer(queryset, many=True)
+    serializer = ConversationSerializer(queryset, many=True)
     pass
 
 
@@ -67,7 +67,7 @@ class ConversationDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ConversationSerializer
     queryset = Conversation.objects.all()
 
-    serializer = CourseSerializer(queryset)
+    serializer = ConversationSerializer(queryset)
     pass
 
 
@@ -132,15 +132,35 @@ def user_detail(request):
 
     if request.method == 'POST':
         try:
-            request.data['user_id'] = str(uuid.uuid4())
+            # Response validation
             serializer = UserSerializer(data=request.data)
             serializer.is_valid()
-            serializer.save()
+            
+            request.data['user_id'] = str(uuid.uuid4())
+            
+            utorid = User.objects.get(utorid=request.data['utorid'])
+            if (utorid):
+                raise UserAlreadyExistsError
+
+            # Save newly created user
+            data = request.data
+            user = User(
+                user_id=data['user_id'],
+                name=data['name'],
+                utorid=data['utorid'],
+                user_role=data['user_role']                
+            )
+            user.save()
 
             response = {
-                "user_id": request.data['user_id']
+                "user_id": user.user_id,
+                "name": user.name,
+                "utorid": user.utorid,
+                "user_role": user.user_role
             }
             return Response(response, status=status.HTTP_201_CREATED)
+        except UserAlreadyExistsError:
+            return Response({"msg": "User already exists."}, status=status.HTTP_400_BAD_REQUEST)
         except:
             error = []
             if 'name' not in request.data.keys():
@@ -176,20 +196,38 @@ def course_detail(request):
     """
     if request.method == 'POST':
         try:
-            request.data['course_id'] = str(uuid.uuid4())
+            # Response Validation
             serializer = CourseSerializer(data=request.data)
             serializer.is_valid()
-            serializer.save()
+
+            # Check for duplicated courses
+            course_code = Course.objects.get(
+                course_code=request.data['course_code'],
+                semester=request.data['semester']
+            )
+
+            if (course_code):
+                raise CourseAlreadyExistsError
+
+            # Save new course
+            course_id = str(uuid.uuid4())
+
+            course = Course(
+                course_id=course_id,
+                course_code=request.data['course_code'],
+                semester=request.data['semester']
+            )
+            course.save()
 
             response = {
-                "course_id": request.data['course_id'],
+                "course_id": course_id,
                 "course_code": request.data['course_code'],
                 "semester": request.data['semester']
             }
 
             return Response(response, status=status.HTTP_201_CREATED)
 
-        except CourseDuplicationError:
+        except CourseAlreadyExistsError:
             return Response({"msg": "Course already exists."}, status=status.HTTP_403_FORBIDDEN)
         except:
             error = []
@@ -213,6 +251,7 @@ def conversation_detail(request):
     Request: 
     {
         user_id: str,
+        course_id: str,
         semester: str
     }
 
@@ -223,16 +262,30 @@ def conversation_detail(request):
 
     if request.method == 'POST':
         try:
-            request.data['conversation_id'] = str(uuid.uuid4())
-            request.data['status'] = 'A'
-            request.data['report'] = False
             
             serializer = ConversationSerializer(data=request.data)
             serializer.is_valid()
-            serializer.save()
+
+            convo_id = str(uuid.uuid4())
+
+            data = request.data
+            convo = Conversation(
+                conversation_id=convo_id,
+                course_id=data['course_id'],
+                semester=data['semester'],
+                user_id=data['user_id'],
+                status='A',
+                report=False
+            )
+            convo.save()
 
             response = {
-                "conversation_id": request.data['conversation_id']
+                "conversation_id": convo_id,
+                "course_id": data['course_id'],
+                "semester": data['semester'],
+                "user_id": data['user_id'],
+                "status": 'A',
+                "report": "False",
             }
             return Response(response, status=status.HTTP_201_CREATED)
         except:
@@ -374,31 +427,36 @@ def feedback_detail(request):
         HTTP status code 201: CREATED
     """
     if request.method == 'POST':
-        serializer = FeedbackSerializer(data=request.data)
-        try:
+        # try:
             # Validate and save feedback
-            serializer.is_valid()
-            serializer.save()
+        serializer = FeedbackSerializer(data=request.data)
+        serializer.is_valid()
+        serializer.save()
 
-            # Flags the conversation as inactive
-            convo = Conversation.objects.filter(conversation_id=request.data['conversation_id'])
-            convo['status'] = 'I'
-            convo.save()
+        # Flags the conversation as inactive
+        # convo = Conversation.objects.filter(conversation_id=request.data['conversation_id'])
+        # convo['status'] = 'I'
+        # convo.save()
+        response = {
+            "conversation_id": request.data['conversation_id'],
+            "rating": request.data['rating'],
+            "feedback_msg": request.data['feedback_msg']
+        }
 
-            return Response(serializer, status=status.HTTP_201_CREATED)
+        return Response(response, status=status.HTTP_201_CREATED)
         
-        except:
-            # Error handling
-            error = []
-            if 'conversation_id' not in request.data.keys():
-                error.append("Conversation ID")
-            if 'rating' not in request.data.keys():
-                error.append("Rating")
-            if 'feedback_msg' not in request.data.keys():
-                error.append("Feedback Message")
-            err = {"msg": "Feedback details missing fields: " + ','.join(error) + '.'}
+        # except:
+            # # Error handling
+            # error = []
+            # if 'conversation_id' not in request.data.keys():
+            #     error.append("Conversation ID")
+            # if 'rating' not in request.data.keys():
+            #     error.append("Rating")
+            # if 'feedback_msg' not in request.data.keys():
+            #     error.append("Feedback Message")
+            # err = {"msg": "Feedback details missing fields: " + ','.join(error) + '.'}
 
-            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+            # return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
 
 @swagger_auto_schema(methods=['post'], request_body=ReportSerializer)
@@ -479,7 +537,7 @@ def report_detail(request):
 @api_view(['POST'])
 def report_incorrect_answers(request):
     """
-    Flags the given answer of a particular chatlog as wrong.
+    Flags the given answer of a particular conversation as wrong.
 
     The corresponding field, chatlog.status:
         'I' - stands for incorrect
@@ -498,40 +556,31 @@ def report_incorrect_answers(request):
         HTTP status code 200: OK
     """
     if request.method == 'POST':
-        try:
+        # try:
             
-            convo_id = request.data["conversation_id"]
-            # chatlog_id = request.data["chatlog_id"]
+        convo_id = request.data["conversation_id"]
         
-            serializer = IncorrectChatlogSerializer(data=request.data)
-            serializer.is_valid()
-            
-            conversation = Conversation.objects.get(conversation_id=convo_id)
-            
-            if (len(conversation) == 0):
-                raise ConversationNotFoundError
-            
-            conversation.status = True
-            conversation.save()
+        conversation = Conversation.objects.get(conversation_id=convo_id)
+        
+        # if (len(conversation) == 0):
+            # raise ConversationNotFoundError
+        
+        conversation.report = True
+        conversation.save()
 
-            # chatlog = Chatlog.objects.filter(chatlog_id=chatlog_id)
-            # if (len(chatlog) == 0):
-            #     raise ChatlogNotFoundError
-            
-            # chatlog = chatlog[0]
-            # chatlog.status = 'I'
-            # chatlog.save()
+        return Response(status=status.HTTP_200_OK)
 
-            return Response(status=status.HTTP_200_OK)
-
-        except:
-            error=[]
-            if 'conversation_id' not in request.data.keys():
-                error.append("Conversation ID")
-            err = {"msg": "Report incorrect answers: " + ','.join(error) +  '.'}
-            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+        # except:
+        #     error=[]
+        #     if 'conversation_id' not in request.data.keys():
+        #         error.append("Conversation ID")
+        #     err = {"msg": "Report incorrect answers: " + ','.join(error) +  '.'}
+        #     return Response(err, status=status.HTTP_404_NOT_FOUND)
 
 # Exceptions
+class UserAlreadyExistsError(Exception): pass
+class CourseAlreadyExistsError(Exception): pass
+
 class UserNotFoundError(Exception): pass
 class ConversationNotFoundError(Exception): pass
 class ChatlogNotFoundError(Exception): pass
