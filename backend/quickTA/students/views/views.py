@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.utils.timezone import now
 from ..models import Chatlog, Conversation, Course, Feedback, User, Report
-from ..serializers.serializers import ConversationSerializer, CourseSerializer, FeedbackSerializer, IncorrectChatlogSerializer, UserSerializer, ChatlogSerializer, ReportSerializer, ChatlogDetailSerializer
+from ..serializers.serializers import ConversationSerializer, CourseSerializer, FeedbackSerializer, IncorrectChatlogSerializer, UserSerializer, ChatlogSerializer, ReportSerializer, ChatlogDetailSerializer, CourseComfortabilitySerializer
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -682,6 +682,35 @@ def report_conversation(request):
             return Response(err, status=status.HTTP_404_NOT_FOUND)
         except UserNotFoundError:
             err = {"msg": "User not found."}
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
+        except:
+            error=[]
+            if 'conversation_id' not in request.data.keys():
+                error.append("Conversation ID")
+            err = {"msg": "Report incorrect answers: " + ','.join(error) +  '.'}
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
+
+@swagger_auto_schema(methods=['post'], request_body=CourseComfortabilitySerializer)
+@api_view(['POST'])
+def course_comfortability(request):
+    if request.method == 'POST':
+        try: 
+            serializer = CourseComfortabilitySerializer(data=request.data)
+            serializer.is_valid()
+            
+            convo = Conversation.objects.filter(conversation_id=request.data['conversation_id'])
+            if (len(convo) == 0):
+                raise ConversationNotFoundError
+
+            convo = Conversation.objects.filter(conversation_id=request.data['conversation_id']).update(comfortability_rating=request.data['comfortability_rating'])
+            data = request.data
+            response = {
+                "conversation": data.conversation_id,
+                "comfortability_rating": data.comfortability_rating
+            }
+            return Response(response, status=status.HTTP_200_OK)
+        except ConversationNotFoundError: 
+            err = {"msg": "Conversation not found."}
             return Response(err, status=status.HTTP_404_NOT_FOUND)
         except:
             error=[]

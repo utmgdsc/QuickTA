@@ -54,3 +54,9 @@ class IncorrectChatlogSerializer(serializers.ModelSerializer):
     class Meta:
         model = Report
         fields = ['conversation_id', 'msg']
+
+class CourseComfortabilitySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Conversation
+        fields = ['conversation_id', 'comfortability_rating']

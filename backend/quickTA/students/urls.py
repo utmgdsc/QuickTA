@@ -21,6 +21,7 @@ urlpatterns = [
     path('feedback', views.feedback_detail),
     path('report', views.chatlog_history_detail),
     path('incorrect-answer', views.report_conversation),
+    path('comfortability-rating', views.course_comfortability),
 
     path('researcher/average-ratings', researcher_views.average_ratings),
     path('researcher/reported-conversations', researcher_views.list_reported_conversations),

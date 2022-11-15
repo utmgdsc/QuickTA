@@ -47,6 +47,7 @@ class Conversation(models.Model):
     end_time = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=1)
     report = models.BooleanField()
+    comfortability_rating = models.IntegerField()
 
     def __str__(self):
         return "Conversation " + self.conversation_id + "(" + self.user_id + ")"
