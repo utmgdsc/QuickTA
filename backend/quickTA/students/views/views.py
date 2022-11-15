@@ -472,8 +472,12 @@ def feedback_detail(request):
             if convo.status == 'I':
                 raise FeedbackExistsError
 
-            convo.status = 'I'
-            convo.save()
+            Conversation.objects.filter(
+                conversation_id=request.data['conversation_id']
+            ).update(
+                status="I",
+                end_time=timezone.now()
+            )
 
             # Save Feedback
             data = request.data
