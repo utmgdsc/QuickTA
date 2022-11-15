@@ -435,7 +435,6 @@ def chatlog_detail(request):
 
             return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
-
 @swagger_auto_schema(methods=['post'], request_body=FeedbackSerializer)
 @api_view(['POST'])
 def feedback_detail(request):
@@ -459,37 +458,61 @@ def feedback_detail(request):
         HTTP status code 201: CREATED
     """
     if request.method == 'POST':
-        # try:
-            # Validate and save feedback
-        serializer = FeedbackSerializer(data=request.data)
-        serializer.is_valid()
-        serializer.save()
+        try:
+            serializer = FeedbackSerializer(data=request.data)
+            serializer.is_valid()
+            if request.data['rating'] > 5:
+                raise OverRatingLimitError
+            
+            # Flags the conversation as inactive
+            convo = Conversation.objects.get(conversation_id=request.data['conversation_id'])
+            if not(convo):
+                raise ConversationNotFoundError
 
-        # Flags the conversation as inactive
-        # convo = Conversation.objects.filter(conversation_id=request.data['conversation_id'])
-        # convo['status'] = 'I'
-        # convo.save()
-        response = {
-            "conversation_id": request.data['conversation_id'],
-            "rating": request.data['rating'],
-            "feedback_msg": request.data['feedback_msg']
-        }
+            if convo.status == 'I':
+                raise FeedbackExistsError
 
-        return Response(response, status=status.HTTP_201_CREATED)
+            convo.status = 'I'
+            convo.save()
+
+            # Save Feedback
+            data = request.data
+            feedback = Feedback(
+                conversation_id=data['conversation_id'],
+                rating=data['rating'],
+                feedback_msg=data['feedback_msg']
+            )
+            feedback.save()
+
+            response = {
+                'conversation_id': data['conversation_id'],
+                'rating': data['rating'],
+                'feedback_msg': data['feedback_msg']
+            }
+            return Response(response, status=status.HTTP_201_CREATED)
         
-        # except:
-            # # Error handling
-            # error = []
-            # if 'conversation_id' not in request.data.keys():
-            #     error.append("Conversation ID")
-            # if 'rating' not in request.data.keys():
-            #     error.append("Rating")
-            # if 'feedback_msg' not in request.data.keys():
-            #     error.append("Feedback Message")
-            # err = {"msg": "Feedback details missing fields: " + ','.join(error) + '.'}
-
-            # return Response(err, status=status.HTTP_401_UNAUTHORIZED)
-
+        except OverRatingLimitError:
+            err = {"msg": "Rating exceeded limit of 5."}
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+        
+        except ConversationNotFoundError:
+            err = {"msg": "Conversation does not exist."}
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+        
+        except FeedbackExistsError:
+            err = {"msg": "Feedback already exists."}
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+        
+        except:
+            # Error handling
+            error = []
+            if 'conversation_id' not in request.data.keys():
+                error.append("Conversation ID")
+            if 'rating' not in request.data.keys():
+                error.append("Rating")
+            if 'feedback_msg' not in request.data.keys():
+                error.append("Feedback Message")
+            err = {"msg": "Feedback details missing fields: " + ','.join(error) + '.'}
 
 @swagger_auto_schema(methods=['post'], request_body=ReportSerializer)
 @api_view(['POST'])
@@ -618,3 +641,5 @@ class ConversationNotFoundError(Exception): pass
 class ChatlogNotFoundError(Exception): pass
 class CourseNotFoundError(Exception): pass
 class CourseDuplicationError(Exception): pass
+class OverRatingLimitError(Exception): pass
+class FeedbackExistsError(Exception): pass

@@ -73,8 +73,8 @@ class Report(models.Model):
 
 
 class Feedback(models.Model):
-    conversation_id = models.CharField(max_length=20)
-    rating = models.CharField(max_length=1)
+    conversation_id = models.CharField(max_length=100)
+    rating = models.FloatField()
     feedback_msg = models.TextField(max_length=1000)
 
     def __str__(self):
