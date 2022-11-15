@@ -8,3 +8,4 @@ pymongo==3.12.3
 pytz==2022.4
 sqlparse==0.2.4
 drf_yasg
+wordcloud

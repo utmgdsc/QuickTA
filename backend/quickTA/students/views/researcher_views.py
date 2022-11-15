@@ -8,10 +8,10 @@ from rest_framework import status
 
 from ..models import User, Chatlog, Conversation, Feedback, Report
 from ..serializers.serializers import ConversationSerializer
-from ..serializers.researcher_serializers import ResearchersSerializer, ReportedListSerializer, AverageRatingSerializer, ChatlogListSerializer, ResponseRateSerializer
+from ..serializers.researcher_serializers import ResearchersSerializer, ReportedListSerializer, AverageRatingSerializer, ChatlogListSerializer, ResponseRateSerializer, MostCommonWordsSerializer
 
 from drf_yasg.utils import swagger_auto_schema
-
+from ..functions.common_topics import generate_wordcloud
 # Create your views here.
 class ResearchersView(generics.CreateAPIView):
     queryset = Chatlog.objects.all()
@@ -168,7 +168,42 @@ def get_average_response_rate(request):
             err = {"msg": "Internal Server Error"}
             return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+@swagger_auto_schema(methods=['post'], request_body=MostCommonWordsSerializer)
+@api_view(['POST'])
+def get_most_common_words(request):
+    if request.method == 'POST':
+        serializer = MostCommonWordsSerializer(data=request.data)
+        serializer.is_valid()
 
+        # Gather all user chatlogs
+        sentences = []
+        convo_count = 0
+        chatlog_count = []
+        convos = get_courses_convos(request.data['course_id'])
+        for convo in convos:
+            convo_count += 1
+            chatlog_count.append(0)
+            chatlogs = get_convo_chatlogs(convo.conversation_id)
+            for chatlog in chatlogs:
+                chatlog_count[convo_count-1] += 1
+                if chatlog.is_user:
+                    sentences.append(chatlog.chatlog)
+        
+        generate_wordcloud(sentences)
+
+        response = {
+            "avg_chatlog_count": sum(chatlog_count) / convo_count,
+            "total_chatlog_count": sum(chatlog_count),
+            "avg_chatlog_length": sum([len(chatlog) for chatlog in sentences]) / sum(chatlog_count),
+            "sentences": sentences
+        }
+        return Response(response, status=status.HTTP_200_OK)
+
+def get_courses_convos(course_id):
+    return Conversation.objects.filter(course_id=course_id)
+
+def get_convo_chatlogs(cid):
+    return Chatlog.objects.filter(conversation_id=cid)
 # Exceptions
 class CourseNotFoundError(Exception): pass
 class UserNotFoundError(Exception): pass

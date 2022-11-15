@@ -139,8 +139,8 @@ def user_detail(request):
             
             request.data['user_id'] = str(uuid.uuid4())
             
-            utorid = User.objects.get(utorid=request.data['utorid'])
-            if (utorid):
+            utorid = User.objects.filter(utorid=request.data['utorid'])
+            if (len(utorid) != 0):
                 raise UserAlreadyExistsError
 
             # Save newly created user
@@ -202,12 +202,12 @@ def course_detail(request):
             serializer.is_valid()
 
             # Check for duplicated courses
-            course_code = Course.objects.get(
+            course_code = Course.objects.filter(
                 course_code=request.data['course_code'],
                 semester=request.data['semester']
             )
 
-            if (course_code):
+            if (len(course_code) != 0):
                 raise CourseAlreadyExistsError
 
             # Save new course
@@ -266,9 +266,10 @@ def conversation_detail(request):
             serializer = ConversationSerializer(data=request.data)
             serializer.is_valid()
 
-            course = Course.objects.get(course_id=request.data['course_id'])
-            if not(course):
+            course = Course.objects.filter(course_id=request.data['course_id'])
+            if len(course) == 0:
                 raise CourseNotFoundError
+            course = course[0]
 
             convo_id = str(uuid.uuid4())
 
@@ -342,16 +343,16 @@ def chatlog_detail(request):
 
         try:
             current_time = timezone.now()
-            if 'time' not in request.data.keys() and request.data['time']:
+            if 'time' not in request.data.keys():
                 request.data['time'] = current_time
             serializer = ChatlogSerializer(data=request.data)
             serializer.is_valid()
 
             # Check if conversation exists
             cid = request.data['conversation_id']
-            conversation = Conversation.objects.get(conversation_id=cid)
+            conversation = Conversation.objects.filter(conversation_id=cid)
 
-            if not(conversation):
+            if len(conversation) == 0:
                 raise ConversationNotFoundError          
             
             # Get last message's time from this conversation from the user
@@ -465,10 +466,11 @@ def feedback_detail(request):
                 raise OverRatingLimitError
             
             # Flags the conversation as inactive
-            convo = Conversation.objects.get(conversation_id=request.data['conversation_id'])
-            if not(convo):
+            convo = Conversation.objects.filter(conversation_id=request.data['conversation_id'])
+            if len(convo) == 0:
                 raise ConversationNotFoundError
-
+            
+            convo = convo[0]
             if convo.status == 'I':
                 raise FeedbackExistsError
 
@@ -538,7 +540,7 @@ def chatlog_history_detail(request):
     if request.method == 'POST':
         try:
             cid = request.data['conversation_id']
-            conversation = Conversation.objects.filter(conversation_id__in=cid)
+            conversation = Conversation.objects.filter(conversation_id=cid)
 
             # Checks if conversation is found
             if (len(conversation) > 0):
@@ -620,19 +622,24 @@ def report_conversation(request):
                 raise MissingReportMessageError
 
             convo_id = request.data["conversation_id"]
-            convo = Conversation.objects.get(conversation_id=convo_id)
+            convo = Conversation.objects.filter(conversation_id=convo_id)
             
-            if not(convo):
+            if len(convo) == 0:
                 raise ConversationNotFoundError
-            
+            convo = convo[0]
+
             Conversation.objects.filter(conversation_id=convo_id).update(report=True)
-            user = User.objects.get(user_id=convo.user_id)
+            user = User.objects.filter(user_id=convo.user_id)
+
+            if len(user) == 0:
+                raise UserNotFoundError
+            user = user[0]
 
             # Save this report 
-            report = Report.objects.get(conversation_id=convo_id)
+            report = Report.objects.filter(conversation_id=convo_id)
             report_time = timezone.now()
-            if (report):
-                    Report.objects.filter(conversation_id=convo_id).update(
+            if len(report) != 0:
+                Report.objects.filter(conversation_id=convo_id).update(
                     conversation_id= convo.conversation_id,
                     course_id=convo.course_id,
                     user_id=user.user_id,
@@ -641,7 +648,7 @@ def report_conversation(request):
                     time=report_time,
                     status='O',
                     msg=request.data['msg']
-                    )
+                )
             else:
                 report = Report(
                     conversation_id= convo.conversation_id,
@@ -670,11 +677,12 @@ def report_conversation(request):
         except MissingReportMessageError:
             err = {"msg": "Please enter a report message."}
             return Response(err, status=status.HTTP_404_NOT_FOUND)
-
         except ConversationNotFoundError:
             err = {"msg": "Conversation not found."}
             return Response(err, status=status.HTTP_404_NOT_FOUND)
-
+        except UserNotFoundError:
+            err = {"msg": "User not found."}
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
         except:
             error=[]
             if 'conversation_id' not in request.data.keys():

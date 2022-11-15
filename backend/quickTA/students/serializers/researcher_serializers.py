@@ -24,4 +24,9 @@ class ChatlogListSerializer(serializers.ModelSerializer):
 class ResponseRateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
-        fields = ['course_id']        
+        fields = ['course_id']       
+
+class MostCommonWordsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = ['course_id'] 

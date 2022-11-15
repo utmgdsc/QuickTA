@@ -36,7 +36,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
 class ChatlogSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chatlog
-        fields = ['conversation_id', 'chatlog', 'time']
+        fields = ['conversation_id', 'chatlog']
 
 class ChatlogDetailSerializer(serializers.ModelSerializer):
     class Meta:
