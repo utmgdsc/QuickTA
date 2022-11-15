@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
-from ..models import Chatlog, Conversation, Feedback
+from ..models import User, Chatlog, Conversation, Feedback, Report
 from ..serializers.serializers import ConversationSerializer
 from ..serializers.researcher_serializers import ResearchersSerializer, ReportedListSerializer, AverageRatingSerializer, ChatlogListSerializer
 
@@ -60,36 +60,40 @@ def list_reported_conversations(request):
     """
     Returns all reported conversations of a given course.
     
-    - User Information
-        - name
-        - utorid
-    
-    - Conversation Information
-        - conversation_id: used to retrieve all chatlogs of the conversation
-
-    - Report Information
-        - report message
+    Information returned includes:
+    - Conversation ID
+    - Course ID
+    - User ID
+    - User name
+    - User utorid
+    - Report time
+    - Report status ('O' - opened, 'C' - closed)
+    - Report message
     """
-    # try:
+    try:
         # Retrieve all reported conversations
-    reported_convos = Conversation.objects.filter(
-            course_id=request.data['course_id'], 
-        )
-    
-    response = {}
+        reported_convos = Report.objects.filter(
+                course_id=request.data['course_id'], 
+                status='O'
+            ).order_by('-time')
+        print(reported_convos)
+        response = {}
 
-    for i in range(len(reported_convos)):
-        curr = reported_convos[i]
-        response[curr.conversation_id] = {
-            'user_id': curr.user_id,
-            'report': curr.report,
-            'start_time': curr.start_time,
-            'end_time': curr.end_time
-        }
-    return Response(response, status=status.HTTP_200_OK)  
-    # except:
-    #     err = {"msg": "Internal Server Error"}
-    #     return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        for i, report in enumerate(reported_convos):
+            response[i] = {
+                'conversation_id': report.conversation_id,
+                'course_id': report.course_id,
+                'user_id': report.user_id,
+                'name': report.name,
+                'utorid': report.utorid,
+                'time': report.time,
+                'status': report.status,
+                'msg': report.msg
+            }
+        return Response(response, status=status.HTTP_200_OK)  
+    except:
+        err = {"msg": "Internal Server Error"}
+        return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @swagger_auto_schema(methods=['post'], request_body=ChatlogListSerializer)
 @api_view(['POST'])
@@ -97,35 +101,39 @@ def get_reported_chatlogs(request):
     """
     Returns all of the chatlogs of a given conversation ID 
     """
-    # try:
-    cid = request.data['conversation_id']
-    conversation = Conversation.objects.get(conversation_id=cid)
+    try:
+        cid = request.data['conversation_id']
+        conversation = Conversation.objects.get(conversation_id=cid)
 
-    if not(conversation):
-        raise ConversationNotFoundError
-    
-    chatlogs = Chatlog.objects.filter(conversation_id=cid).order_by('time')
-
-    response = {}
-    for (i, chatlog) in enumerate(chatlogs):
-        if chatlog.is_user:
-            speaker = 'Test User 3'
-        else:
-            speaker = 'Agent'
-        response[str(i)] = {
-            'chatlog_id': chatlog.chatlog_id,
-            'speaker': speaker,
-            'chatlog': chatlog.chatlog,
-            'time': chatlog.time
+        if not(conversation):
+            raise ConversationNotFoundError
+        
+        chatlogs = Chatlog.objects.filter(conversation_id=cid).order_by('time')
+        user = User.objects.get(user_id=conversation.user_id)
+        conversations = []
+        for chatlog in chatlogs:
+            if chatlog.is_user:
+                speaker = user.name
+            else:
+                speaker = 'Agent'
+            conversations.append({
+                'chatlog_id': chatlog.chatlog_id,
+                'speaker': speaker,
+                'chatlog': chatlog.chatlog,
+                'time': chatlog.time,
+                'delta': chatlog.delta
+            })
+        
+        response = {
+            "conversations": conversations
         }
-    
-    return Response(response, status=status.HTTP_200_OK)
+        return Response(response, status=status.HTTP_200_OK)
 
-    # except ConversationNotFoundError:
-    #     return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_401_UNAUTHORIZED) 
-    # except:
-    #     err = {"msg": "Internal Server Error"}
-    #     return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except ConversationNotFoundError:
+        return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_401_UNAUTHORIZED) 
+    except:
+        err = {"msg": "Internal Server Error"}
+        return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @swagger_auto_schema()
 @api_view()

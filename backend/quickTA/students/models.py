@@ -75,7 +75,7 @@ class Report(models.Model):
     msg = models.TextField(max_length=3000)
 
     def __str__(self):
-        return "[ " + self.conversation_id + "] " + self.time
+        return "[ " + self.conversation_id + "] " + self.msg
 
 
 class Feedback(models.Model):
