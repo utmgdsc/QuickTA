@@ -115,12 +115,14 @@ const ChatBoxFooter = ({
         const now = Temporal.Now.zonedDateTimeISO().toString();
         const temp1 = {
           message: text,
-          timeSent: now,
+          dateSent: now,
           isUser: "true"
           }
          // Load user message on click
         updateMessages((oldMessage) => [...oldMessage, temp1])
-         axios.post("http://localhost:8000/api/chatlog", { conversation_id: currConvoID, chatlog: text, time: now })
+         axios.post("http://localhost:8000/api/chatlog", { conversation_id: currConvoID, chatlog: text, 
+         time: now 
+        })
             .then((response) => {
               const temp2 = {
                 message: response.data.agent.chatlog,
