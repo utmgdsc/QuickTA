@@ -6,7 +6,7 @@ app_name = 'student_api'
 
 urlpatterns = [
     path('user/<str:user_id>/', UserDetail.as_view(), name='user-detail'),
-    path('course/<str:course_id>/', CourseDetail.as_view(), name='course-detail'),
+    path('course/<str:pk>/', CourseDetail.as_view(), name='course-detail'),
     path('conversation/<str:conversation_id>/', ConversationDetail.as_view(), name='conversation-detail'),
 
     path('user/all', UserList.as_view(), name='user-list'),

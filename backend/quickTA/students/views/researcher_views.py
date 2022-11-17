@@ -28,36 +28,36 @@ def average_ratings(request):
     Finds the average rating of a particular course given the course id
     """
     if request.method == 'POST':
-        # try:
-        # Retrieve all convesrations from the course
-        q1 = Conversation.objects.filter(course_id=request.data['course_id'])
+        try:
+            # Retrieve all convesrations from the course
+            q1 = Conversation.objects.filter(course_id=request.data['course_id'])
 
 
-        # Retrieve all feedback from the conversations
-        ratings = []
-        for convo in q1:
-            q2 = Feedback.objects.filter(conversation_id=convo.conversation_id)
-            if (len(q2) != 0):
-                ratings.append(q2[0].rating)
+            # Retrieve all feedback from the conversations
+            ratings = []
+            for convo in q1:
+                q2 = Feedback.objects.filter(conversation_id=convo.conversation_id)
+                if (len(q2) != 0):
+                    ratings.append(q2[0].rating)
 
-        # Find average of all the ratings of that particular course
-        response = { 
-            'avg_ratings': sum(ratings) / len(ratings),  
-            'all_ratings': ratings
-        }
+            # Find average of all the ratings of that particular course
+            response = { 
+                'avg_ratings': sum(ratings) / len(ratings),  
+                'all_ratings': ratings
+            }
 
-        return Response(response, status=status.HTTP_200_OK)
-        # except:
-        #     error = []
-        #     if 'course_id' not in request.data.keys():
-        #         error.append("Course ID")
+            return Response(response, status=status.HTTP_200_OK)
+        except:
+            error = []
+            if 'course_id' not in request.data.keys():
+                error.append("Course ID")
             
-        #     if (not(error)): 
-        #         err = {"msg": "Internal Server Error"}
-        #         return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        #     else:
-        #         err = {"msg": "Average Ratings missing fields: " + ','.join(error) + '.'}
-        #         return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+            if (not(error)): 
+                err = {"msg": "Internal Server Error"}
+                return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                err = {"msg": "Average Ratings missing fields: " + ','.join(error) + '.'}
+                return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
 @swagger_auto_schema(methods=['post'], request_body=AverageRatingSerializer)
 @api_view(['POST'])
@@ -211,17 +211,19 @@ def list_reported_conversations_csv(request):
 @api_view(['POST'])
 def get_reported_chatlogs(request):
     """
-    Returns all of the chatlogs of a given conversation ID 
+    Returns all of the chatlogs of a reported conversation ID 
     """
     try:
         cid = request.data['conversation_id']
-        conversation = Conversation.objects.get(conversation_id=cid)
+        conversation = Conversation.objects.filter(conversation_id=cid)
 
         if not(conversation):
             raise ConversationNotFoundError
-        
+
+
+        user = User.objects.get(user_id=conversation[0].user_id)
+
         chatlogs = Chatlog.objects.filter(conversation_id=cid).order_by('time')
-        user = User.objects.get(user_id=conversation.user_id)
         conversations = []
         for chatlog in chatlogs:
             if chatlog.is_user:
@@ -237,7 +239,7 @@ def get_reported_chatlogs(request):
             })
         
         response = {
-            "total_reported_count": len(conversation),
+            "total_reported_count": len(conversations),
             "conversations": conversations
         }
         return Response(response, status=status.HTTP_200_OK)
@@ -245,9 +247,17 @@ def get_reported_chatlogs(request):
     except ConversationNotFoundError:
         return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_401_UNAUTHORIZED) 
     except:
-        err = {"msg": "Internal Server Error"}
-        return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+        error = []
+        if 'conversation_id' not in request.data.keys():
+            error.append("Conversation ID")
+        
+        if (not(error)): 
+            err = {"msg": "Internal Server Error"}
+            return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            err = {"msg": "Course comfortability missing fields: " + ','.join(error) + '.'}
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+       
 @swagger_auto_schema(methods=['post'], request_body=ChatlogListSerializer)
 @api_view(['POST'])
 def get_reported_chatlogs_csv(request):
@@ -439,12 +449,18 @@ def get_course_comfortability(request):
             all_ratings = []
 
             for convo in convos:
-                all_ratings.append(convo.comfortability_rating)
-
+                if convo.comfortability_rating:
+                    all_ratings.append(convo.comfortability_rating)
+            
+            
+            if all_ratings:
+                avg = sum(all_ratings) / len(all_ratings)
+            else:
+                avg = 0
             response = {
                 "total_conversations": len(all_ratings),
                 "comfortability_ratings": all_ratings,
-                "avg_comfortability_rating": sum(all_ratings) / len(all_ratings)
+                "avg_comfortability_rating": avg
             }
 
             return Response(response, status=status.HTTP_200_OK)

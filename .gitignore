@@ -27,5 +27,6 @@ backend/env/*
 */__pycache__
  */__pycache__/*
  *.pyc
+*/img
 
 docs/node_modules/*
