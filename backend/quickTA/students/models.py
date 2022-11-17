@@ -22,7 +22,7 @@ class User(models.Model):
 
 
 class Course(models.Model):
-    course_id = models.CharField(max_length=20)
+    course_id = models.CharField(max_length=50)
     semester = models.CharField(max_length=10)
     course_code = models.CharField(max_length=9)
 
@@ -33,7 +33,7 @@ class Course(models.Model):
 class Model(models.Model):
     model_id = models.CharField(max_length=20)
     model_name = models.TextField(max_length=40)
-    course_id = models.CharField(max_length=20)
+    course_id = models.CharField(max_length=50)
 
     def __str__(self):
         return self.model_id + " " + self.model_name
@@ -41,12 +41,13 @@ class Model(models.Model):
 
 class Conversation(models.Model):
     conversation_id = models.CharField(max_length=100)
+    course_id = models.CharField(max_length=100)
     user_id = models.CharField(max_length=50)  
     start_time = models.DateTimeField(default=now)
     end_time = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=1)
     report = models.BooleanField()
-    semester = models.CharField(max_length=20)
+    comfortability_rating = models.IntegerField()
 
     def __str__(self):
         return "Conversation " + self.conversation_id + "(" + self.user_id + ")"
@@ -58,7 +59,7 @@ class Chatlog(models.Model):
     time = models.DateTimeField(default=datetime.now)
     is_user = models.BooleanField()
     chatlog = models.TextField(max_length = 3000)
-    status = models.CharField(max_length=1, blank=True, null=True)
+    delta = models.DurationField(blank=True, null=True)
 
     def __str__(self):
         return "[" + self.conversation_id + "] Chatlog - " + self.chatlog_id + " " + self.chatlog
@@ -66,23 +67,21 @@ class Chatlog(models.Model):
 
 class Report(models.Model): 
     conversation_id = models.CharField(max_length=100)
+    course_id = models.CharField(max_length=50)
+    user_id = models.CharField(max_length=50)
+    name = models.CharField(max_length=200)
+    utorid = models.CharField(max_length=10)
     time = models.DateTimeField(default=now)
-    
+    status = models.CharField(max_length=1)
+    msg = models.TextField(max_length=3000)
+
     def __str__(self):
-        return "[ " + self.conversation_id + "] " + self.time
+        return "[ " + self.conversation_id + "] " + self.msg
 
 
 class Feedback(models.Model):
-    conversation_id = models.CharField(max_length=20)
-
-    class Rating(models.IntegerChoices):
-        POOR = 1
-        UNSATISFACTORY = 2
-        AVERAGE = 3
-        GOOD = 4
-        EXCELLENT = 5
-    
-    rating = models.IntegerField(choices=Rating.choices)
+    conversation_id = models.CharField(max_length=100)
+    rating = models.FloatField()
     feedback_msg = models.TextField(max_length=1000)
 
     def __str__(self):

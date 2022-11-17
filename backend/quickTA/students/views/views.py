@@ -5,9 +5,10 @@ from http.client import responses
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
+from django.utils import timezone
 from django.utils.timezone import now
-from .models import Chatlog, Conversation, Course, Feedback, User, Report
-from .serializers import ConversationSerializer, CourseSerializer, FeedbackSerializer, IncorrectChatlogSerializer, UserSerializer, ChatlogSerializer, ReportSerializer, ChatlogDetailSerializer
+from ..models import Chatlog, Conversation, Course, Feedback, User, Report
+from ..serializers.serializers import ConversationSerializer, CourseSerializer, FeedbackSerializer, IncorrectChatlogSerializer, UserSerializer, ChatlogSerializer, ReportSerializer, ChatlogDetailSerializer, CourseComfortabilitySerializer
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -59,7 +60,7 @@ class ConversationList(generics.ListAPIView):
     serializer_class = ConversationSerializer
     queryset = Conversation.objects.all()
 
-    serializer = CourseSerializer(queryset, many=True)
+    serializer = ConversationSerializer(queryset, many=True)
     pass
 
 
@@ -67,7 +68,7 @@ class ConversationDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ConversationSerializer
     queryset = Conversation.objects.all()
 
-    serializer = CourseSerializer(queryset)
+    serializer = ConversationSerializer(queryset)
     pass
 
 
@@ -132,15 +133,35 @@ def user_detail(request):
 
     if request.method == 'POST':
         try:
-            request.data['user_id'] = str(uuid.uuid4())
+            # Response validation
             serializer = UserSerializer(data=request.data)
             serializer.is_valid()
-            serializer.save()
+            
+            request.data['user_id'] = str(uuid.uuid4())
+            
+            utorid = User.objects.filter(utorid=request.data['utorid'])
+            if (len(utorid) != 0):
+                raise UserAlreadyExistsError
+
+            # Save newly created user
+            data = request.data
+            user = User(
+                user_id=data['user_id'],
+                name=data['name'],
+                utorid=data['utorid'],
+                user_role=data['user_role']                
+            )
+            user.save()
 
             response = {
-                "user_id": request.data['user_id']
+                "user_id": user.user_id,
+                "name": user.name,
+                "utorid": user.utorid,
+                "user_role": user.user_role
             }
             return Response(response, status=status.HTTP_201_CREATED)
+        except UserAlreadyExistsError:
+            return Response({"msg": "User already exists."}, status=status.HTTP_400_BAD_REQUEST)
         except:
             error = []
             if 'name' not in request.data.keys():
@@ -176,20 +197,38 @@ def course_detail(request):
     """
     if request.method == 'POST':
         try:
-            request.data['course_id'] = str(uuid.uuid4())
+            # Response Validation
             serializer = CourseSerializer(data=request.data)
             serializer.is_valid()
-            serializer.save()
+
+            # Check for duplicated courses
+            course_code = Course.objects.filter(
+                course_code=request.data['course_code'],
+                semester=request.data['semester']
+            )
+
+            if (len(course_code) != 0):
+                raise CourseAlreadyExistsError
+
+            # Save new course
+            course_id = str(uuid.uuid4())
+
+            course = Course(
+                course_id=course_id,
+                course_code=request.data['course_code'],
+                semester=request.data['semester']
+            )
+            course.save()
 
             response = {
-                "course_id": request.data['course_id'],
+                "course_id": course_id,
                 "course_code": request.data['course_code'],
                 "semester": request.data['semester']
             }
 
             return Response(response, status=status.HTTP_201_CREATED)
 
-        except CourseDuplicationError:
+        except CourseAlreadyExistsError:
             return Response({"msg": "Course already exists."}, status=status.HTTP_403_FORBIDDEN)
         except:
             error = []
@@ -213,6 +252,7 @@ def conversation_detail(request):
     Request: 
     {
         user_id: str,
+        course_id: str,
         semester: str
     }
 
@@ -223,18 +263,37 @@ def conversation_detail(request):
 
     if request.method == 'POST':
         try:
-            request.data['conversation_id'] = str(uuid.uuid4())
-            request.data['status'] = 'A'
-            request.data['report'] = False
-            
             serializer = ConversationSerializer(data=request.data)
             serializer.is_valid()
-            serializer.save()
+
+            course = Course.objects.filter(course_id=request.data['course_id'])
+            if len(course) == 0:
+                raise CourseNotFoundError
+            course = course[0]
+
+            convo_id = str(uuid.uuid4())
+
+            data = request.data
+            convo = Conversation(
+                conversation_id=convo_id,
+                course_id=data['course_id'],
+                user_id=data['user_id'],
+                status='A',
+                report=False
+            )
+            convo.save()
 
             response = {
-                "conversation_id": request.data['conversation_id']
+                "conversation_id": convo_id,
+                "course_id": data['course_id'],
+                "user_id": data['user_id'],
+                "status": 'A',
+                "report": "False",
             }
             return Response(response, status=status.HTTP_201_CREATED)
+        except CourseNotFoundError:
+            err = {'msg': 'Course not found.'}
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
         except:
             error = []
             if 'user_id' not in request.data.keys():
@@ -282,57 +341,86 @@ def chatlog_detail(request):
     """
     if request.method == 'POST':
 
-        request.data['is_user'] = True
-        user_chatlog_id = str(uuid.uuid4())
-        request.data['chatlog_id'] = user_chatlog_id
-        request.data['status'] = 'C'
-        serializer = ChatlogSerializer(data=request.data)
         try:
+            current_time = timezone.now()
+            if 'time' not in request.data.keys():
+                request.data['time'] = current_time
+            serializer = ChatlogSerializer(data=request.data)
+            serializer.is_valid()
 
             # Check if conversation exists
             cid = request.data['conversation_id']
-            conversation = Conversation.objects.filter(conversation_id__in=cid)
+            conversation = Conversation.objects.filter(conversation_id=cid)
 
-            if (len(conversation) == 0):
+            if len(conversation) == 0:
                 raise ConversationNotFoundError          
             
+            # Get last message's time from this conversation from the user
+            convo_chatlogs = Chatlog.objects.filter(
+                conversation_id=cid,
+            ).order_by('-time')
+            
+            last_chatlog_time = ''
+            for chatlog in convo_chatlogs:
+                if not(chatlog.is_user):
+                    last_chatlog_time = chatlog.time
+                    break
+            
+            # Difference in time from last agent response and current user response
+            if (last_chatlog_time):
+                delta = current_time - last_chatlog_time
+            else:
+                # First message of the conversation
+                delta = current_time - current_time
+
             # Saves user chatlog 
-            serializer.is_valid()
-            serializer.save()
+            user_chatlog_id = str(uuid.uuid4())
+            
+            data = request.data
+            user_chatlog = Chatlog(
+                conversation_id=cid,
+                chatlog_id=user_chatlog_id,
+                time=data['time'],
+                is_user=True,
+                chatlog=data['chatlog'],
+                delta=delta
+            )
+            user_chatlog.save()
+
 
             # Get response from Model
             model_response = "hi"
             
             # Save message from the Model
-            data = request.data
             model_chatlog_id = str(uuid.uuid4())
-            model_chatlog_data = {
-                "conversation_id": data['conversation_id'],
-                "chatlog_id" :  model_chatlog_id,
-                "is_user": False,
-                "chatlog": model_response,
-                "status": 'C'
-            }
-            serializer = ChatlogSerializer(data=model_chatlog_data)
-            serializer.is_valid()
-            serializer.save()
+            model_time = timezone.now()
+            model_chatlog = Chatlog(
+                conversation_id=cid,
+                chatlog_id=model_chatlog_id,
+                time=model_time,
+                is_user=False,
+                chatlog=model_response,
+            )
+            model_chatlog.save()
             
             user_chatlog_datetime = Chatlog.objects.get(chatlog_id=user_chatlog_id)
-            model_chatlog_datetime = Chatlog.objects.get(chatlog_id=model_chatlog_id)
-            model_chatlog_data['time'] = model_chatlog_datetime.time
-
 
             # Formatting response
             response = {
-                "agent": model_chatlog_data,
+                "agent": {
+                    "conversation_id": data['conversation_id'],
+                    "chatlog_id" :  model_chatlog_id,
+                    "time": model_time,
+                    "is_user": False,
+                    "chatlog": model_response,
+                },
                 "user": {
                     "conversation_id": data['conversation_id'],
                     "chatlog_id": user_chatlog_id,
+                    "time": user_chatlog_datetime.time,
                     "is_user": True,
                     "chatlog": data['chatlog'],
-                    "status": data['status'],
-                    "time": user_chatlog_datetime.time
-                    
+                    "delta": delta
                 }
             }
             return Response(response, status=status.HTTP_201_CREATED)
@@ -342,14 +430,11 @@ def chatlog_detail(request):
             error = []
             if 'conversation_id' not in request.data.keys():
                 error.append("Conversation ID")
-            if 'chatlog_id' not in request.data.keys():
-                error.append("Chatlog ID")
             if 'chatlog' not in request.data.keys():
                 error.append("Chatlog message")
             err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
 
             return Response(err, status=status.HTTP_401_UNAUTHORIZED)
-
 
 @swagger_auto_schema(methods=['post'], request_body=FeedbackSerializer)
 @api_view(['POST'])
@@ -374,18 +459,55 @@ def feedback_detail(request):
         HTTP status code 201: CREATED
     """
     if request.method == 'POST':
-        serializer = FeedbackSerializer(data=request.data)
         try:
-            # Validate and save feedback
+            serializer = FeedbackSerializer(data=request.data)
             serializer.is_valid()
-            serializer.save()
-
+            if request.data['rating'] > 5:
+                raise OverRatingLimitError
+            
             # Flags the conversation as inactive
             convo = Conversation.objects.filter(conversation_id=request.data['conversation_id'])
-            convo['status'] = 'I'
-            convo.save()
+            if len(convo) == 0:
+                raise ConversationNotFoundError
+            
+            convo = convo[0]
+            if convo.status == 'I':
+                raise FeedbackExistsError
 
-            return Response(serializer, status=status.HTTP_201_CREATED)
+            Conversation.objects.filter(
+                conversation_id=request.data['conversation_id']
+            ).update(
+                status="I",
+                end_time=timezone.now()
+            )
+
+            # Save Feedback
+            data = request.data
+            feedback = Feedback(
+                conversation_id=data['conversation_id'],
+                rating=data['rating'],
+                feedback_msg=data['feedback_msg']
+            )
+            feedback.save()
+
+            response = {
+                'conversation_id': data['conversation_id'],
+                'rating': data['rating'],
+                'feedback_msg': data['feedback_msg']
+            }
+            return Response(response, status=status.HTTP_201_CREATED)
+        
+        except OverRatingLimitError:
+            err = {"msg": "Rating exceeded limit of 5."}
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+        
+        except ConversationNotFoundError:
+            err = {"msg": "Conversation does not exist."}
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+        
+        except FeedbackExistsError:
+            err = {"msg": "Feedback already exists."}
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
         
         except:
             # Error handling
@@ -398,12 +520,9 @@ def feedback_detail(request):
                 error.append("Feedback Message")
             err = {"msg": "Feedback details missing fields: " + ','.join(error) + '.'}
 
-            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
-
-
 @swagger_auto_schema(methods=['post'], request_body=ReportSerializer)
 @api_view(['POST'])
-def report_detail(request):
+def chatlog_history_detail(request):
     """
     Retrieves the conversation id and returns a copy of the chatlog.
 
@@ -421,7 +540,7 @@ def report_detail(request):
     if request.method == 'POST':
         try:
             cid = request.data['conversation_id']
-            conversation = Conversation.objects.filter(conversation_id__in=cid)
+            conversation = Conversation.objects.filter(conversation_id=cid)
 
             # Checks if conversation is found
             if (len(conversation) > 0):
@@ -455,9 +574,6 @@ def report_detail(request):
                     writer.writerow(['[' + str(chatlog.time) + ']', str(user.name), str(chatlog.chatlog)])
                 else: 
                     writer.writerow(['[' + str(chatlog.time) + ']', 'QuickTA', str(chatlog.chatlog)])
-            
-            report = Report(conversation_id=cid)
-            report.save()
 
             return response
 
@@ -474,12 +590,11 @@ def report_detail(request):
 
             return Response(err, status=status.HTTP_401_UNAUTHORIZED) 
 
-
 @swagger_auto_schema(methods=['post'], request_body=IncorrectChatlogSerializer)
 @api_view(['POST'])
-def report_incorrect_answers(request):
+def report_conversation(request):
     """
-    Flags the given answer of a particular chatlog as wrong.
+    Flags the given answer of a particular conversation as wrong.
 
     The corresponding field, chatlog.status:
         'I' - stands for incorrect
@@ -498,41 +613,118 @@ def report_incorrect_answers(request):
         HTTP status code 200: OK
     """
     if request.method == 'POST':
-        try:
-            
-            convo_id = request.data["conversation_id"]
-            # chatlog_id = request.data["chatlog_id"]
         
-            serializer = IncorrectChatlogSerializer(data=request.data)
-            serializer.is_valid()
+        try:
+            if not(request.data['msg']):
+                raise MissingReportMessageError
+
+            convo_id = request.data["conversation_id"]
+            convo = Conversation.objects.filter(conversation_id=convo_id)
             
-            conversation = Conversation.objects.get(conversation_id=convo_id)
-            
-            if (len(conversation) == 0):
+            if len(convo) == 0:
                 raise ConversationNotFoundError
-            
-            conversation.status = True
-            conversation.save()
+            convo = convo[0]
 
-            # chatlog = Chatlog.objects.filter(chatlog_id=chatlog_id)
-            # if (len(chatlog) == 0):
-            #     raise ChatlogNotFoundError
-            
-            # chatlog = chatlog[0]
-            # chatlog.status = 'I'
-            # chatlog.save()
+            Conversation.objects.filter(conversation_id=convo_id).update(report=True)
+            user = User.objects.filter(user_id=convo.user_id)
 
-            return Response(status=status.HTTP_200_OK)
+            if len(user) == 0:
+                raise UserNotFoundError
+            user = user[0]
 
+            # Save this report 
+            report = Report.objects.filter(conversation_id=convo_id)
+            report_time = timezone.now()
+            if len(report) != 0:
+                Report.objects.filter(conversation_id=convo_id).update(
+                    conversation_id= convo.conversation_id,
+                    course_id=convo.course_id,
+                    user_id=user.user_id,
+                    name=user.name,
+                    utorid=user.utorid,
+                    time=report_time,
+                    status='O',
+                    msg=request.data['msg']
+                )
+            else:
+                report = Report(
+                    conversation_id= convo.conversation_id,
+                    course_id=convo.course_id,
+                    user_id=user.user_id,
+                    name=user.name,
+                    utorid=user.utorid,
+                    time=report_time,
+                    status='O',
+                    msg=request.data['msg']
+                )
+                report.save()
+
+            response = {
+                'conversation_id': convo.conversation_id,
+                'course_id': convo.course_id,
+                'user_id': convo.user_id,
+                'name': user.name,
+                'utorid': user.utorid,
+                'time': report_time,
+                'status': 'O',
+                'msg': request.data['msg']
+            }
+            return Response(response, status=status.HTTP_200_OK)
+        
+        except MissingReportMessageError:
+            err = {"msg": "Please enter a report message."}
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
+        except ConversationNotFoundError:
+            err = {"msg": "Conversation not found."}
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
+        except UserNotFoundError:
+            err = {"msg": "User not found."}
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
         except:
             error=[]
             if 'conversation_id' not in request.data.keys():
                 error.append("Conversation ID")
             err = {"msg": "Report incorrect answers: " + ','.join(error) +  '.'}
-            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
+
+@swagger_auto_schema(methods=['post'], request_body=CourseComfortabilitySerializer)
+@api_view(['POST'])
+def course_comfortability(request):
+    if request.method == 'POST':
+        try: 
+            serializer = CourseComfortabilitySerializer(data=request.data)
+            serializer.is_valid()
+            
+            convo = Conversation.objects.filter(conversation_id=request.data['conversation_id'])
+            if (len(convo) == 0):
+                raise ConversationNotFoundError
+
+            convo = Conversation.objects.filter(conversation_id=request.data['conversation_id']).update(comfortability_rating=request.data['comfortability_rating'])
+            data = request.data
+            response = {
+                "conversation": data.conversation_id,
+                "comfortability_rating": data.comfortability_rating
+            }
+            return Response(response, status=status.HTTP_200_OK)
+        except ConversationNotFoundError: 
+            err = {"msg": "Conversation not found."}
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
+        except:
+            error=[]
+            if 'conversation_id' not in request.data.keys():
+                error.append("Conversation ID")
+            err = {"msg": "Report incorrect answers: " + ','.join(error) +  '.'}
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
 
 # Exceptions
+class UserAlreadyExistsError(Exception): pass
+class CourseAlreadyExistsError(Exception): pass
+
 class UserNotFoundError(Exception): pass
 class ConversationNotFoundError(Exception): pass
 class ChatlogNotFoundError(Exception): pass
+class CourseNotFoundError(Exception): pass
 class CourseDuplicationError(Exception): pass
+class OverRatingLimitError(Exception): pass
+class FeedbackExistsError(Exception): pass
+class MissingReportMessageError(Exception): pass

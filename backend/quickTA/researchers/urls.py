@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import ResearchersView
 
+app_name = 'researchers_api'
 
 urlpatterns = [
-    path('', ResearchersView.as_view())
+
 ]
