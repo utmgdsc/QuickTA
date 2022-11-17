@@ -7,8 +7,19 @@ import {
   } from '@chakra-ui/react'
 
 const StatCard = ({title, num, delta, unit}) => {
-    const cardStyle = {backgroundColor: 'white', boxShadow: '1px 2px 3px 1px rgba(0,0,0,0.12)', borderRadius: '15px', padding: '10px'};
-    const titleStyle = {fontSize: '16px', fontWeight: '700', lineHeight: '0px'};
+    const cardStyle = {
+      backgroundColor: 'white', 
+      boxShadow: '1px 2px 3px 1px rgba(0,0,0,0.12)', 
+      borderRadius: '15px', 
+      padding: '15px 15px 7px 15px',
+      width: '100%',
+    };
+    const titleStyle = {
+      display: 'block',
+      fontSize: '18px', 
+      fontWeight: '700', 
+      lineHeight: '20px'
+    };
 
     return (
         <Stat style = {cardStyle}>
