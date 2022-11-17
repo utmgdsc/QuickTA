@@ -1,9 +1,22 @@
-import {Box, Container} from "@chakra-ui/react";
-import { Tabs, TabList, TabPanels, Tab, TabPanel} from "@chakra-ui/react";
+import { 
+    Box,
+    Container,
+    Tabs, 
+    TabList, 
+    TabPanels, 
+    Tab, 
+    TabPanel
+} from "@chakra-ui/react";
 import DatedStats from "./DatedStats/DatedStats";
+import ReportTable from "./ReportTable/ReportTable";
 
 const DashboardBody = () => {
-    const tabStyle = { borderRadius: 'lg',color: 'white', bg: '#2C54A7', padding: "sm"};
+    const tabStyle = {
+        borderRadius: 'lg',
+        color: 'white',
+        bg: '#2C54A7',
+        padding: "sm"
+    };
 
     return (
         <Box>
@@ -21,9 +34,7 @@ const DashboardBody = () => {
                     </TabPanel>
                 </TabPanels>
             </Tabs>
-            <Container>
-
-            </Container>
+            <ReportTable/>
         </Box>
     );
 }
