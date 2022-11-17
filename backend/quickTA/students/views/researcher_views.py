@@ -28,35 +28,36 @@ def average_ratings(request):
     Finds the average rating of a particular course given the course id
     """
     if request.method == 'POST':
-        try:
-          # Retrieve all convesrations from the course
-            q1 = Conversation.objects.filter(course_id=request.data['course_id'])
+        # try:
+        # Retrieve all convesrations from the course
+        q1 = Conversation.objects.filter(course_id=request.data['course_id'])
 
 
-            # Retrieve all feedback from the conversations
-            ratings = []
-            for convo in q1:
-                q2 = Feedback.objects.get(conversation_id=convo.conversation_id)
-                ratings.append(q2.rating)
+        # Retrieve all feedback from the conversations
+        ratings = []
+        for convo in q1:
+            q2 = Feedback.objects.filter(conversation_id=convo.conversation_id)
+            if (len(q2) != 0):
+                ratings.append(q2[0].rating)
 
-            # Find average of all the ratings of that particular course
-            response = { 
-                'avg_ratings': sum(ratings) / len(ratings),  
-                'all_ratings': ratings
-            }
+        # Find average of all the ratings of that particular course
+        response = { 
+            'avg_ratings': sum(ratings) / len(ratings),  
+            'all_ratings': ratings
+        }
 
-            return Response(response, status=status.HTTP_200_OK)
-        except:
-            error = []
-            if 'course_id' not in request.data.keys():
-                error.append("Course ID")
+        return Response(response, status=status.HTTP_200_OK)
+        # except:
+        #     error = []
+        #     if 'course_id' not in request.data.keys():
+        #         error.append("Course ID")
             
-            if (not(error)): 
-                err = {"msg": "Internal Server Error"}
-                return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            else:
-                err = {"msg": "Average Ratings missing fields: " + ','.join(error) + '.'}
-                return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+        #     if (not(error)): 
+        #         err = {"msg": "Internal Server Error"}
+        #         return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        #     else:
+        #         err = {"msg": "Average Ratings missing fields: " + ','.join(error) + '.'}
+        #         return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
 @swagger_auto_schema(methods=['post'], request_body=AverageRatingSerializer)
 @api_view(['POST'])
