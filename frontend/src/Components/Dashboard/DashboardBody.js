@@ -8,6 +8,7 @@ import {
     TabPanel
 } from "@chakra-ui/react";
 import DatedStats from "./DatedStats/DatedStats";
+import ReportTable from "./ReportTable/ReportTable";
 
 const DashboardBody = () => {
     const tabStyle = {
@@ -33,9 +34,7 @@ const DashboardBody = () => {
                     </TabPanel>
                 </TabPanels>
             </Tabs>
-            <Container>
-                {/* Table here */}
-            </Container>
+            <ReportTable/>
         </Box>
     );
 }

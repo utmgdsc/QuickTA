@@ -7,7 +7,7 @@ const ResearcherPage = ({UTORid, courseCode, courseName}) => {
         <div style={{
             backgroundColor: "#F1F1F1",
             width: "100vw",
-            height: '110vh'
+            height: '165vh'
         }}>
             <TopNav UTORid={"UTORid"}/>
             <Dashboard courseCode={"CSC108"} courseName={"Introduction to Computer Programming"} style={{position: 'relative'}}/>

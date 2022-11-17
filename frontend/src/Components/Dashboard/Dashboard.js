@@ -6,7 +6,7 @@ const Dashboard = (props) => {
 
     return (
         <>
-        <Box overflow={'hidden'} ml={'5vw'} mr={'5vw'}>
+        <Box overflow={'hidden'} ml={'12vw'} mr={'12vw'}>
             <DashboardHeader courseCode={props.courseCode} courseName={props.courseName}/>
             <DashboardBody/>
         </Box>
