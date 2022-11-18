@@ -19,7 +19,7 @@ const ReportTable = () => {
         boxShadow: '1px 2px 3px 1px rgba(0,0,0,0.12)', 
         borderRadius: '15px', 
         padding: '5px 15px 15px 20px',
-        width: '100%',
+        width: '99%',
     };
 
     const titleStyle = {
@@ -35,7 +35,7 @@ const ReportTable = () => {
             <VStack style= {{
                     height: "40vh",
                     overflowY: "scroll",
-                    maxWidth: '100%',
+                    maxWidth: '99%',
                     overflowX: 'hidden',
                 }}>
             <Table variant='unstyled'>
