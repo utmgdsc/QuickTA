@@ -553,6 +553,7 @@ def get_courses_convos(course_id):
 
 def get_convo_chatlogs(cid):
     return Chatlog.objects.filter(conversation_id=cid)
+
 # Exceptions
 class CourseNotFoundError(Exception): pass
 class UserNotFoundError(Exception): pass

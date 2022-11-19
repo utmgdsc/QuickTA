@@ -1,11 +1,13 @@
 import csv
 import uuid
+import re
+import zoneinfo
 from datetime import datetime
 from http.client import responses
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
-from django.utils import timezone
+from django.utils import timezone, dateparse
 from django.utils.timezone import now
 from ..models import Chatlog, Conversation, Course, Feedback, User, Report
 from ..serializers.serializers import ConversationSerializer, CourseSerializer, FeedbackSerializer, IncorrectChatlogSerializer, UserSerializer, ChatlogSerializer, ReportSerializer, ChatlogDetailSerializer, CourseComfortabilitySerializer
@@ -31,14 +33,12 @@ class UserList(generics.ListAPIView):
     serializer = UserSerializer(queryset, many=True)
     pass
 
-
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
     queryset = User.objects.all()
     
     serializer = UserSerializer(queryset)
     pass
-
 
 class CourseList(generics.ListAPIView):
     serializer_class = CourseSerializer
@@ -47,14 +47,12 @@ class CourseList(generics.ListAPIView):
     serializer = CourseSerializer(queryset, many=True)
     pass
 
-
 class CourseDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
 
     serializer = CourseSerializer(queryset)
     pass
-
 
 class ConversationList(generics.ListAPIView):
     serializer_class = ConversationSerializer
@@ -63,14 +61,12 @@ class ConversationList(generics.ListAPIView):
     serializer = ConversationSerializer(queryset, many=True)
     pass
 
-
 class ConversationDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ConversationSerializer
     queryset = Conversation.objects.all()
 
     serializer = ConversationSerializer(queryset)
     pass
-
 
 class ChatlogList(generics.ListAPIView):
     serializer_class = ChatlogSerializer
@@ -79,7 +75,6 @@ class ChatlogList(generics.ListAPIView):
     serializer = ChatlogSerializer(queryset)
     pass
 
-
 class ChatlogDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ChatlogDetailSerializer
     queryset = Chatlog.objects.all()
@@ -87,14 +82,12 @@ class ChatlogDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer = ChatlogDetailSerializer(queryset)
     pass
 
-
 class FeedbackList(generics.ListAPIView):
     serializer_class = FeedbackSerializer
     queryset = Feedback.objects.all()
 
     serializer = FeedbackSerializer(queryset)
     pass
-
 
 class FeedbackDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = FeedbackSerializer
@@ -239,6 +232,42 @@ def course_detail(request):
             err = {"msg": "Course missing fields:" + ','.join(error)}
             return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
+@swagger_auto_schema(methods=['post'], request_body=CourseSerializer)
+@api_view(['POST'])
+def course_get(request):
+ if request.method == 'POST':
+        try:
+            # Response Validation
+            serializer = CourseSerializer(data=request.data)
+            serializer.is_valid()
+
+            # Check for duplicated courses
+            course_code = Course.objects.filter(
+                course_code=request.data['course_code'],
+                semester=request.data['semester']
+            )
+
+            if (len(course_code) != 0):
+                raise CourseAlreadyExistsError
+
+            response = {
+                "course_id": course_code[0].course_id,
+                "course_code": request.data['course_code'],
+                "semester": request.data['semester']
+            }
+
+            return Response(response, status=status.HTTP_201_CREATED)
+        
+        except CourseAlreadyExistsError:
+            return Response({"msg": "Course does not exists."}, status=status.HTTP_403_FORBIDDEN)
+        except:
+            error = []
+            if 'course_code' not in request.data.keys():
+                error.append("Course Code")
+            if 'semester' not in request.data.keys():
+                error.append("Semester")
+            err = {"msg": "Course missing fields:" + ','.join(error)}
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
 @swagger_auto_schema(methods=['post'], request_body=ConversationSerializer)
 @api_view(['POST'])
@@ -341,100 +370,116 @@ def chatlog_detail(request):
     """
     if request.method == 'POST':
 
-        try:
-            current_time = timezone.now()
-            if 'time' not in request.data.keys():
-                request.data['time'] = current_time
-            serializer = ChatlogSerializer(data=request.data)
-            serializer.is_valid()
+        # try:
+        # Set current chatlog's time if not provided
+        current_time = timezone.now()
+        if 'time' not in request.data.keys():
+            request.data['time'] = current_time
+        # Parse given chatlog time
+        else: 
+            time = request.data['time']
+            # Time format
+            # 2022-11-17T18:14:18.376858359-05:00[America/Toronto]
+            location = re.search(r"\[(.*?)\]", time).group()[1:-1]
+            tz = dateparse.parse_datetime('2022-11-17T18:14:18.376858359')
+            # curr = tz.replace(tzinfo=zoneinfo.ZoneInfo(location))
+            print(location)
+            # print(curr)
+            print(tz.astimezone(zoneinfo.ZoneInfo(location)))
+            request.data['time'] = tz
 
-            # Check if conversation exists
-            cid = request.data['conversation_id']
-            conversation = Conversation.objects.filter(conversation_id=cid)
+                
+        serializer = ChatlogSerializer(data=request.data)
+        serializer.is_valid()
 
-            if len(conversation) == 0:
-                raise ConversationNotFoundError          
-            
-            # Get last message's time from this conversation from the user
-            convo_chatlogs = Chatlog.objects.filter(
-                conversation_id=cid,
-            ).order_by('-time')
-            
-            last_chatlog_time = ''
-            for chatlog in convo_chatlogs:
-                if not(chatlog.is_user):
-                    last_chatlog_time = chatlog.time
-                    break
-            
-            # Difference in time from last agent response and current user response
-            if (last_chatlog_time):
-                delta = current_time - last_chatlog_time
-            else:
-                # First message of the conversation
-                delta = current_time - current_time
+        # Check if conversation exists
+        cid = request.data['conversation_id']
+        conversation = Conversation.objects.filter(conversation_id=cid)
 
-            # Saves user chatlog 
-            user_chatlog_id = str(uuid.uuid4())
-            
-            data = request.data
-            user_chatlog = Chatlog(
-                conversation_id=cid,
-                chatlog_id=user_chatlog_id,
-                time=data['time'],
-                is_user=True,
-                chatlog=data['chatlog'],
-                delta=delta
-            )
-            user_chatlog.save()
-
-
-            # Get response from Model
-            model_response = "hi"
-            
-            # Save message from the Model
-            model_chatlog_id = str(uuid.uuid4())
-            model_time = timezone.now()
-            model_chatlog = Chatlog(
-                conversation_id=cid,
-                chatlog_id=model_chatlog_id,
-                time=model_time,
-                is_user=False,
-                chatlog=model_response,
-            )
-            model_chatlog.save()
-            
-            user_chatlog_datetime = Chatlog.objects.get(chatlog_id=user_chatlog_id)
-
-            # Formatting response
-            response = {
-                "agent": {
-                    "conversation_id": data['conversation_id'],
-                    "chatlog_id" :  model_chatlog_id,
-                    "time": model_time,
-                    "is_user": False,
-                    "chatlog": model_response,
-                },
-                "user": {
-                    "conversation_id": data['conversation_id'],
-                    "chatlog_id": user_chatlog_id,
-                    "time": user_chatlog_datetime.time,
-                    "is_user": True,
-                    "chatlog": data['chatlog'],
-                    "delta": delta
-                }
-            }
-            return Response(response, status=status.HTTP_201_CREATED)
+        if len(conversation) == 0:
+            raise ConversationNotFoundError          
         
-        except:
-            # Error handling
-            error = []
-            if 'conversation_id' not in request.data.keys():
-                error.append("Conversation ID")
-            if 'chatlog' not in request.data.keys():
-                error.append("Chatlog message")
-            err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
+        # Get last message's time from this conversation from the user
+        convo_chatlogs = Chatlog.objects.filter(
+            conversation_id=cid,
+        ).order_by('-time')
+        
+        last_chatlog_time = ''
+        for chatlog in convo_chatlogs:
+            if not(chatlog.is_user):
+                last_chatlog_time = chatlog.time
+                break
+        
+        # Difference in time from last agent response and current user response
+        if (last_chatlog_time):
+            delta = current_time - last_chatlog_time
+        else:
+            # First message of the conversation
+            delta = current_time - current_time
 
-            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+        # Saves user chatlog 
+        user_chatlog_id = str(uuid.uuid4())
+        
+        data = request.data
+        user_chatlog = Chatlog(
+            conversation_id=cid,
+            chatlog_id=user_chatlog_id,
+            time=data['time'],
+            is_user=True,
+            chatlog=data['chatlog'],
+            delta=delta
+        )
+        # user_chatlog.save()
+
+
+        # Get response from Model
+        model_response = "hi"
+        
+        # Save message from the Model
+        model_chatlog_id = str(uuid.uuid4())
+        model_time = timezone.now()
+        model_chatlog = Chatlog(
+            conversation_id=cid,
+            chatlog_id=model_chatlog_id,
+            time=model_time,
+            is_user=False,
+            chatlog=model_response,
+        )
+        # model_chatlog.save()
+        
+        # user_chatlog_datetime = Chatlog.objects.get(chatlog_id=user_chatlog_id)
+
+        # Formatting response
+        response = {
+            "agent": {
+                "conversation_id": data['conversation_id'],
+                "chatlog_id" :  model_chatlog_id,
+                "time": model_time,
+                "is_user": False,
+                "chatlog": model_response,
+            },
+            "user": {
+                "conversation_id": data['conversation_id'],
+                "chatlog_id": user_chatlog_id,
+                # "time": user_chatlog_datetime.time,
+                "time": request.data['time'],
+                "is_user": True,
+                "chatlog": data['chatlog'],
+                "delta": delta
+            }
+        }
+        return Response(response, status=status.HTTP_201_CREATED)
+        
+        # except:
+        #     # Error handling
+        #     error = []
+        #     if 'conversation_id' not in request.data.keys():
+        #         error.append("Conversation ID")
+        #     if 'chatlog' not in request.data.keys():
+        #         error.append("Chatlog message")
+        #     err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
+
+        #     return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
 @swagger_auto_schema(methods=['post'], request_body=FeedbackSerializer)
 @api_view(['POST'])
