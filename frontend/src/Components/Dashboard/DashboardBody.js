@@ -10,7 +10,7 @@ import {
 import DatedStats from "./DatedStats/DatedStats";
 import ReportTable from "./ReportTable/ReportTable";
 
-const DashboardBody = () => {
+const DashboardBody = ({ courseCode }) => {
     const tabStyle = {
         borderRadius: 'lg',
         color: 'white',
@@ -21,20 +21,23 @@ const DashboardBody = () => {
     return (
         <Box>
             <Tabs variant='solid-rounded' mt={7}>
+
                 <TabList>
                 <Tab _selected={tabStyle}><span style={{fontSize: '13px'}}>Weekly</span></Tab>
                 <Tab _selected={tabStyle}><span style={{fontSize: '13px'}}>Monthly</span></Tab>
                 </TabList>
+
                 <TabPanels>
                     <TabPanel paddingLeft={'0'} paddingRight={'0'}>
-                        <DatedStats isWeekly={1}/>
+                        <DatedStats isWeekly={1} courseCode={courseCode}/>
                     </TabPanel>
                     <TabPanel paddingLeft={'0'} paddingRight={'0'}>
-                        <DatedStats isWeekly={0}/>
+                        <DatedStats isWeekly={0} courseCode={courseCode}/>
                     </TabPanel>
                 </TabPanels>
+
             </Tabs>
-            <ReportTable/>
+            <ReportTable course_ID={courseCode}/>
         </Box>
     );
 }

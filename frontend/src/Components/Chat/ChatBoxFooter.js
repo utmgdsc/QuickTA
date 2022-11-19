@@ -5,6 +5,7 @@ import {
 import {useState, useEffect} from "react";
 import axios from "axios";
 import { Temporal } from '@js-temporal/polyfill';
+import FeedbackSurvey from "./FeedbackSurvey";
 
 const ChatBoxFooter = ({
   messages, 
@@ -15,7 +16,7 @@ const ChatBoxFooter = ({
   updateConvoID
 }) => {
 
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpenFeedback, onOpenFeedback, onCloseFeedback } = useDisclosure();
   const [sliderVal, setSliderVal] = useState(0);
   const [showTooltip, setSliderTooltip] = useState(false);
   const [text, setText] = useState("");
@@ -45,69 +46,16 @@ const ChatBoxFooter = ({
       if(inConvo){
         updateConvoID("");
         updateIsConvo(false);
-        // onOpen();
+        onOpenFeedback();
       }else{
         console.log("Must be in a convo to leave one :>")
       }
     }}>
       End chat
     </Button>
-     {/* <Modal isOpen={isOpen} onClose={onClose} >
-       <ModalOverlay/>
-       <ModalContent>
-         <ModalHeader>
-           <span style={{
-             fontFamily: "Poppins"
-           }}>Please rate your experience with Quick<span style={{
-             fontFamily: "Poppins",
-             color: "#012E8A",
-             fontWeight: "bold"
-           }}>TA</span>
-        </span>
-         </ModalHeader>
-         <ModalBody>
-            <Slider
-              defaultValue={1}
-              min={1}
-              max={5}
-              onChange={(currVal) => setSliderVal(currVal)}
-              onMouseEnter={() => setSliderTooltip(true)}
-              onMouseLeave={() => setSliderTooltip(false)}
-              step={1}
-            >
-              <SliderMark value={1} mt={1} fontSize={'smaller'}>1</SliderMark>
-              <SliderMark value={2} mt={1} fontSize={'smaller'}>2</SliderMark>
-              <SliderMark value={3} mt={1} fontSize={'smaller'}>3</SliderMark>
-              <SliderMark value={4} mt={1} fontSize={'smaller'}>4</SliderMark>
-              <SliderMark value={5} mt={1} fontSize={'smaller'}>5</SliderMark>
-              <SliderTrack>
-              <SliderFilledTrack/>
-              </SliderTrack>
-              <Tooltip
-                hasArrow
-                bg='#012E8A'
-                color='white'
-                placement='top'
-                isOpen={showTooltip}
-                label={`${sliderVal}`}
-              >
-                <SliderThumb />
-              </Tooltip>
-            </Slider>
-         </ModalBody>
-         <ModalFooter>
-           <Button colorScheme={'green'}>
-             Submit
-           </Button>
-           <Spacer/>
-           <Button onClick={onClose}>
-             Close
-           </Button>
-         </ModalFooter>
-       </ModalContent>
-     </Modal> */}
+     <FeedbackSurvey isOpen={isOpenFeedback} onClose={onCloseFeedback}/>
      <Input variant={'filled'} placeholder={"Enter your message here"} onChange={(e) => {
-       setText(e.target.value)
+       setText(e.target.value.slice(0, 250))
      }}/>
 
      <Button backgroundColor={"#3278cd"} colorScheme={'blue'} fontSize={'sm'} onClick={() => {
@@ -135,7 +83,6 @@ const ChatBoxFooter = ({
       }else{
         console.log("must start a conversation to send a message to AI!")
       }
-      
     }}>
        Send
      </Button>

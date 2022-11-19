@@ -13,7 +13,7 @@ import {
     VStack
 } from "@chakra-ui/react";
 
-const ReportTable = () => {
+const ReportTable = ( { course_ID } ) => {
     const cardStyle = {
         backgroundColor: 'white', 
         boxShadow: '1px 2px 3px 1px rgba(0,0,0,0.12)', 
@@ -47,36 +47,7 @@ const ReportTable = () => {
                 </Tr>
                 </Thead>
                 <Tbody>
-                <Tr>
-                    <Td>32962087</Td>
-                    <Td>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.</Td>
-                    <Td>Reply now</Td>
-                </Tr>
-                <Tr>
-                    <Td>70024852</Td>
-                    <Td>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.</Td>
-                    <Td>Reply now</Td>
-                </Tr>
-                <Tr>
-                    <Td>32296408</Td>
-                    <Td>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.</Td>
-                    <Td>Reply now</Td>
-                </Tr>
-                <Tr>
-                    <Td>21633508</Td>
-                    <Td>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.</Td>
-                    <Td>Reply now</Td>
-                </Tr>
-                <Tr>
-                    <Td>98090402</Td>
-                    <Td>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.</Td>
-                    <Td>Reply now</Td>
-                </Tr>
-                <Tr>
-                    <Td>41859055</Td>
-                    <Td>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.</Td>
-                    <Td>Reply now</Td>
-                </Tr>
+                {/*    MAP THE MESSAGES FROM POST REQUEST */}
                 </Tbody>
             </Table>
             </VStack>
