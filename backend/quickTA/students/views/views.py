@@ -245,15 +245,19 @@ def course_get(request):
 
             # Check for duplicated courses
             course_code = Course.objects.filter(
-                course_code=request.data['course_code'],
-                semester=request.data['semester']
+                course_code=request.data['course_code']
             )
 
-            if (len(course_code) != 0):
+            if (len(course_code) == 0):
                 raise CourseAlreadyExistsError
 
+            course_id = 0
+            for course in course_code:
+                if course.semester == request.data['semester']:
+                    course_id = course.course_id    
+
             response = {
-                "course_id": course_code[0].course_id,
+                "course_id": course_id,
                 "course_code": request.data['course_code'],
                 "semester": request.data['semester']
             }
