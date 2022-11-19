@@ -2,12 +2,12 @@ import DashboardHeader from "./DashboardHeader";
 import DashboardBody from "./DashboardBody";
 import {Box} from "@chakra-ui/react";
 
-const Dashboard = (props) => {
+const Dashboard = ({ courseCode, courseName }) => {
 
     return (
         <>
         <Box overflow={'hidden'} ml={'12vw'} mr={'12vw'}>
-            <DashboardHeader courseCode={props.courseCode} courseName={props.courseName}/>
+            <DashboardHeader courseCode={courseCode} courseName={courseName}/>
             <DashboardBody/>
         </Box>
         </>

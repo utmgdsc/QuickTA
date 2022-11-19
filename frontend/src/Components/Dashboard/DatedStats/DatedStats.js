@@ -6,7 +6,7 @@ import {
 import StatCard from "./StatCard";
 import DatedGraph from "./DatedGraph"
 
-const DatedStats = ({isWeekly}) => {
+const DatedStats = ({isWeekly, courseCode}) => {
     return (
         <Flex flexWrap='wrap'>
             <VStack minWidth='320px' w='22vw' spacing='20px'>
@@ -16,7 +16,7 @@ const DatedStats = ({isWeekly}) => {
                 <StatCard title={"Reported Conversations"} num={14} delta={15.29} unit={""}/>
             </VStack>
             <Spacer/>
-            <DatedGraph isWeekly={{isWeekly}}/>
+            <DatedGraph isWeekly={{isWeekly, courseCode}}/>
         </Flex>
     );
 }
