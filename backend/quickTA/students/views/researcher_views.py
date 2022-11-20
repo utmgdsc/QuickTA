@@ -14,7 +14,7 @@ from ..serializers.serializers import ConversationSerializer
 from ..serializers.researcher_serializers import ResearchersSerializer, ReportedListSerializer, AverageRatingSerializer, ChatlogListSerializer, ResponseRateSerializer, MostCommonWordsSerializer
 from ..serializers import researcher_serializers as rs
 from drf_yasg.utils import swagger_auto_schema
-# from ..functions.common_topics import generate_wordcloud
+from ..functions.common_topics import generate_wordcloud
 # Create your views here.
 class ResearchersView(generics.CreateAPIView):
     queryset = Chatlog.objects.all()
@@ -146,10 +146,13 @@ def list_reported_conversations(request):
                 course_id=request.data['course_id'], 
                 status='O'
             ).order_by('-time')
-        response = {}
+        response = {
+            "total_reported": len(reported_convos),
+            "reported_conversations": {}
+        }
 
         for i, report in enumerate(reported_convos):
-            response[i] = {
+            response['reported_conversations'][i] = {
                 'conversation_id': report.conversation_id,
                 'course_id': report.course_id,
                 'user_id': report.user_id,
@@ -420,13 +423,14 @@ def get_most_common_words(request):
                 if chatlog.is_user:
                     sentences.append(chatlog.chatlog)
         
-#         generate_wordcloud(sentences)
+        words = generate_wordcloud(sentences)
 
         response = {
             "avg_chatlog_count": sum(chatlog_count) / convo_count,
             "total_chatlog_count": sum(chatlog_count),
             "avg_chatlog_length": sum([len(chatlog) for chatlog in sentences]) / sum(chatlog_count),
-            "sentences": sentences
+            "sentences": sentences,
+            "most_common_words": words
         }
         return Response(response, status=status.HTTP_200_OK)
 

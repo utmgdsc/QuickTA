@@ -9,7 +9,7 @@ class ResearchersSerializer(serializers.ModelSerializer):
 class AverageRatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
-        fields = ['course_code']
+        fields = ['course_id']
 
 class ReportedListSerializer(serializers.ModelSerializer):
     class Meta:

@@ -44,5 +44,6 @@ urlpatterns = [
     path('researcher/avg-comfortability-rating-csv', researcher_views.get_course_comfortability_csv),
 
     # Admin view
-    path('admin/add-user', admin_views.create_user)
+    path('admin/add-user', admin_views.create_user),
+    path('admin/add-user-course', admin_views.add_user_course)
 ]

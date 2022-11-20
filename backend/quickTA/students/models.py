@@ -6,11 +6,11 @@ from datetime import datetime
 
 
 class User(models.Model):
-    class UserConversation(models.Model):
-        conversation_id = models.CharField(max_length=100)
 
+    class UserCourses(models.Model):
+        course_id = models.CharField(max_length=50)
         class Meta:
-            abstract =  True
+            abstract = True    
 
     user_id = models.CharField(max_length=50)
     name = models.CharField(max_length=200)
@@ -18,7 +18,8 @@ class User(models.Model):
     user_role = models.CharField(max_length=2)
 
     def __str__(self):
-        return self.name + '(' + self.user_id + ')'
+        return self.name + '(' + self.user_id + ')' + '[' + ','.join(self.courses) + ']'
+
 
 
 class Course(models.Model):
