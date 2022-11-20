@@ -24,6 +24,7 @@ frontend/yarn-debug.log*
 frontend/yarn-error.log*
 
 backend/env/*
+backend/venv/*
 */__pycache__
  */__pycache__/*
  *.pyc
