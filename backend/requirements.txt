@@ -8,8 +8,5 @@ pymongo==3.12.3
 pytz==2022.4
 sqlparse==0.2.4
 drf_yasg
-<<<<<<< HEAD
-=======
 git+https://github.com/LIAAD/yake
->>>>>>> 46af3f020931b0c0fca7a39db2ddc71b87ea1ca0
 django-cors-headers

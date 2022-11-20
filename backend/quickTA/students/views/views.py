@@ -253,11 +253,7 @@ def course_get(request):
             course_id = 0
             for course in course_code:
                 if course.semester == request.data['semester']:
-<<<<<<< HEAD
                     course_id = course.course_id
-=======
-                    course_id = course.course_id    
->>>>>>> 46af3f020931b0c0fca7a39db2ddc71b87ea1ca0
 
             response = {
                 "course_id": course_id,

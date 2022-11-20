@@ -23,7 +23,7 @@ const ReportTable = ( { course_ID } ) => {
     boxShadow: '1px 2px 3px 1px rgba(0,0,0,0.12)',
     borderRadius: '15px',
     padding: '5px 15px 15px 20px',
-    width: '99%',
+    maxWidth: 'fit-content',
   };
 
   const titleStyle = {
@@ -41,10 +41,10 @@ const ReportTable = ( { course_ID } ) => {
       return await axios.post(process.env.REACT_APP_API_URL + "/researcher/reported-conversations", {course_id: course_ID})
         .then((res) => {
           const entries = [];
-          for (const obj in Object.keys(res.data)) {
+          for (const obj in Object.keys(res.data.reported_conversations)) {
             entries.push({
-              conversation_id: res.data[obj]["conversation_id"],
-              user_id: res.data[obj]["user_id"], time: res.data[obj]["time"], msg: res.data[obj]["msg"]
+              conversation_id: res.data.reported_conversations[obj]["conversation_id"],
+              user_id: res.data.reported_conversations[obj]["user_id"], time: res.data.reported_conversations[obj]["time"], msg: res.data.reported_conversations[obj]["msg"]
             });
           }
           changeReportList(entries);
@@ -61,8 +61,8 @@ const ReportTable = ( { course_ID } ) => {
             <VStack style= {{
                     height: "40vh",
                     overflowY: "scroll",
-                    maxWidth: '99%',
-                    overflowX: 'hidden',
+                    overflowX: "hidden",
+                    maxWidth: 'fit-content',
                 }}>
             <Table variant='unstyled'>
                 <Thead>

@@ -71,7 +71,7 @@ const DatedStats = ({isWeekly, courseID}) => {
       if (endpoint.endsWith("reported-conversations")){
         return await axios.post(process.env.REACT_APP_API_URL + (isWeekly === 1 ? "" : "") + endpoint, {course_id: courseID})
           .then((res) => {
-            setNumReport(res.data.length);
+            setNumReport(res.data.total_reported);
           })
           .catch((err) => {console.log(err)})
       }
