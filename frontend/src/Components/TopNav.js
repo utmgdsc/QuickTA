@@ -20,7 +20,7 @@ const TopNav = (props) => {
       fontFamily: "Poppins",
       marginBottom: "5vh",
       boxShadow: '0px 1px 2px 1px rgba(0,0,0,0.12)'
-    }}>
+    }} as={"div"}>
       <Heading as='h1' size='lg' fontWeight="400">
         Quick<span style={{color: "#012E8A", fontWeight: "700"}}>TA</span>
       </Heading>

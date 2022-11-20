@@ -2,7 +2,7 @@ import TopNav from "../Components/TopNav";
 import Dashboard from "../Components/Dashboard/Dashboard"
 
 
-const ResearcherPage = ({UTORid, courseCode, courseName}) => {
+const ResearcherPage = ({UTORid, courseCode, courseName, semester}) => {
     return(
         <div style={{
             backgroundColor: "#F1F1F1",
@@ -10,7 +10,8 @@ const ResearcherPage = ({UTORid, courseCode, courseName}) => {
             height: '165vh'
         }}>
             <TopNav UTORid={"UTORid"}/>
-            <Dashboard courseCode={"CSC108"} courseName={"Introduction to Computer Programming"} style={{position: 'relative'}}/>
+            <Dashboard courseCode={"CSC311H5"} semester={"2022F"} courseName={"Introduction to Computer Programming"}
+                       style={{position: 'relative'}}/>
         </div>
     );
 };

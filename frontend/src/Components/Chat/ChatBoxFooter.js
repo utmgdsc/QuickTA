@@ -26,10 +26,10 @@ const ChatBoxFooter = ({
    <HStack bgColor={'white'} p={5} paddingX={"3vw"} borderTop={'2px solid #EAEAEA'}>
     <Button colorScheme={'green'} fontSize={'sm'} onClick={() => {
       if(inConvo){
-        console.log("You're already in a conversation!")
+        console.log("You're already in a conversation!");
       }else{
         console.log("Started a conversation!")
-        axios.post("http://localhost:8000/api/conversation", {"user_id": "testuser1", "semester": "2022F"})
+        axios.post(process.env.REACT_APP_API_URL + "/conversation", {user_id: "76d1c94d-48c2-4b7a-9ec9-1390732d84a0", course_id: "3ecdd45c-d0ff-41ec-8926-5d4f9abeb0a5"})
         .then(
           (response) => {
             updateConvoID(response.data.conversation_id);
@@ -68,7 +68,7 @@ const ChatBoxFooter = ({
           }
          // Load user message on click
         updateMessages((oldMessage) => [...oldMessage, temp1])
-         axios.post("http://localhost:8000/api/chatlog", { conversation_id: currConvoID, chatlog: text, 
+         axios.post(process.env.REACT_APP_API_URL + "/chatlog", { conversation_id: currConvoID, chatlog: text,
          time: now 
         })
             .then((response) => {
