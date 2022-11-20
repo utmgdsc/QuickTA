@@ -146,10 +146,13 @@ def list_reported_conversations(request):
                 course_id=request.data['course_id'], 
                 status='O'
             ).order_by('-time')
-        response = {}
+        response = {
+            "total_reported": len(reported_convos),
+            "reported_conversations": {}
+        }
 
         for i, report in enumerate(reported_convos):
-            response[i] = {
+            response['reported_conversations'][i] = {
                 'conversation_id': report.conversation_id,
                 'course_id': report.course_id,
                 'user_id': report.user_id,

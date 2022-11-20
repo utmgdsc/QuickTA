@@ -169,7 +169,6 @@ def user_detail(request):
 
             return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
-
 @swagger_auto_schema(methods=['post'], request_body=CourseSerializer)
 @api_view(['POST'])
 def course_detail(request):
@@ -237,7 +236,7 @@ def course_detail(request):
 @swagger_auto_schema(methods=['post'], request_body=CourseSerializer)
 @api_view(['POST'])
 def course_get(request):
- if request.method == 'POST':
+    if request.method == 'POST':
         try:
             # Response Validation
             serializer = CourseSerializer(data=request.data)

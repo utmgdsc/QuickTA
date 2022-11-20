@@ -5,3 +5,8 @@ class CreateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['user_id', 'name', 'utorid', 'user_role']
+    
+class AddUserCourseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['user_id']

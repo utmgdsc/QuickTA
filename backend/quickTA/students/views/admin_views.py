@@ -1,13 +1,13 @@
 import uuid
 
 from django.http import HttpResponse
-from ..serializers.admin_serializers import CreateUserSerializer
+from ..serializers.admin_serializers import CreateUserSerializer, AddUserCourseSerializer
 from ..models import User
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-
+from ..functions import user_functions, course_functions
 from drf_yasg.utils import swagger_auto_schema
 
 @swagger_auto_schema(methods=['post'], request_body=CreateUserSerializer)
@@ -56,4 +56,23 @@ def create_user(request):
 
             return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
+@swagger_auto_schema(methods=['post'], request_body=AddUserCourseSerializer)
+@api_view(['POST'])
+def add_user_course(request):
+    if request.method == 'POST':
+        try:
+            add_user = user_functions.add_user_to_course(request.data['user_id'], request.data['course_id'])
+            if (add_user):
+                op = course_functions.update_course_students_list(request.data['course_id'], request.data['user_id'])
+                if not(op): raise AddUserToCourseFailedError
+            else:
+                raise AddUserToCourseFailedError
+
+            return Response(status=status.HTTP_200_OK)
+        except AddUserToCourseFailedError:
+            return Response({"msg": "Failed to add course to user."}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
 class UserAlreadyExistsError(Exception): pass
+class AddUserToCourseFailedError(Exception): pass
