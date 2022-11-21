@@ -45,5 +45,9 @@ urlpatterns = [
 
     # Admin view
     path('admin/add-user', admin_views.create_user),
-    path('admin/add-user-course', admin_views.add_user_course)
+    path('admin/add-multiple-user', admin_views.create_multiple_users),
+    
+    path('admin/add-user-course', admin_views.add_user_course),
+    path('admin/add-multiple-user-course', admin_views.add_multiple_user_course),
+    path('admin/remove-user-course', admin_views.remove_user_course),
 ]
