@@ -15,6 +15,7 @@ from ..serializers.researcher_serializers import ResearchersSerializer, Reported
 from ..serializers import researcher_serializers as rs
 from drf_yasg.utils import swagger_auto_schema
 from ..functions.common_topics import generate_wordcloud
+from ..functions import user_functions, course_functions
 # Create your views here.
 class ResearchersView(generics.CreateAPIView):
     queryset = Chatlog.objects.all()
@@ -550,6 +551,59 @@ def get_course_comfortability_csv(request):
             else:
                 err = {"msg": "Course comfortability missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+@swagger_auto_schema(methods=['post'], request_body=rs.CourseUserListSerializer)
+@api_view(['POST'])
+def get_course_users(request):
+    """
+    Acquires the information of all students of a course given the course_id.
+
+    Request:
+    - course_id
+
+    Response:
+    - total_students: number of students that has accessibility to the course
+    - users: contains all user data
+        - user_id
+        - name
+        - utorid
+        - user_role
+    """
+    try:
+        # Form validation
+        serializer = rs.CourseUserListSerializer(data=request.data)
+        serializer.is_valid()
+
+        course_id = request.data['course_id']
+
+        # Acquire the course's list of students
+        users = course_functions.get_all_courses_users(course_id)
+        if not(users):
+            raise CourseNotFoundError
+
+        # Acquire all user's information 
+        users_info = user_functions.get_users_info(users)
+
+        response = {
+            "total_students": len(users),
+            "users": users_info
+        }
+        
+        return Response(response, status=status.HTTP_200_OK)
+
+    except CourseNotFoundError:
+        return Response({"msg": "Error: Course not Found."}, status=status.HTTP_400_BAD_REQUEST)
+    except:
+        error = []
+        if 'course_id' not in request.data.keys():
+            error.append("Course ID")
+        
+        if (not(error)): 
+            err = {"msg": "Internal Server Error"}
+            return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            err = {"msg": "Course comfortability missing fields: " + ','.join(error) + '.'}
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 # Helper functions
 def get_courses_convos(course_id):

@@ -130,4 +130,33 @@ def remove_user_from_course(user_id: str, course_id: str) -> bool:
         return OPERATION_SUCCESSFUL
     except:
         return OPERATION_FAILED
-        
+
+def get_user_info(user_id):
+    """
+    Acquires a user's information given their <user_id>.
+    """
+    user = User.objects.filter(user_id=user_id)
+    if len(user) == 0:
+        return OPERATION_FAILED
+    
+    user = user[0]
+    ret = {
+        "user_id": user.user_id,
+        "name": user.name,
+        "utorid": user.utorid,
+        "user_role": user.user_role
+    }
+    return ret
+
+def get_users_info(users):
+    """
+    Acquires all users' information in a given list of <users>
+    which contain their user_ids.
+    """
+    response = {}
+    for i, user in enumerate(users):
+        user_data = get_user_info(user)
+        if not(user_data):
+            return OPERATION_FAILED
+        response[i] = user_data
+    return response

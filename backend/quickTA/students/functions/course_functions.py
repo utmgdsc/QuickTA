@@ -11,6 +11,14 @@ def get_course_cluster():
     courses = cluster[CLUSTER][COURSE_COLLECTION]
     return courses
 
+def get_course(course_id):
+    """
+    Retrieves the course data given a <course_id>
+    """
+    courses = get_course_cluster()
+    course = list(courses.find({"course_id": course_id}))
+    return course
+
 def get_course_existence(course_id):
     """
     Returns whether a course exists by its given <course_id>
@@ -92,3 +100,21 @@ def remove_course_students_list(course_id, user_id):
         return OPERATION_SUCCESSFUL
     except:
         return OPERATION_FAILED
+
+def get_all_course_users(course_id: str):
+    """
+    Returns a list of user_ids of the users that has access to the course.
+    If the course does not exist, return OPERATION_FAILED.
+    """
+    try:
+        course = get_course(course_id)
+        if len(course) == 0:
+            return OPERATION_FAILED
+        
+        course = course[0]
+        users_ls = course['users'][:]
+
+        return users_ls
+    except:
+        return OPERATION_FAILED
+        
