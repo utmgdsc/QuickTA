@@ -47,6 +47,7 @@ const ChatBoxFooter = ({
         updateConvoID("");
         updateIsConvo(false);
         onOpenFeedback();
+        updateMessages([])
       }else{
         console.log("Must be in a convo to leave one :>")
       }

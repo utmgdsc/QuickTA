@@ -10,7 +10,7 @@ const ResearcherPage = ({UTORid, courseCode, courseName, semester}) => {
             height: '165vh'
         }}>
             <TopNav UTORid={"UTORid"}/>
-            <Dashboard courseCode={"CSC311H5"} semester={"2022F"} courseName={"Introduction to Computer Programming"}
+            <Dashboard courseCode={"CSC311H5"} semester={"2022F"} courseName={"Introduction to Machine Learning"}
                        style={{position: 'relative'}}/>
         </div>
     );

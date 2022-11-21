@@ -9,7 +9,7 @@ const StudentPage = ({UTORid, courseCode}) => {
         height: '110vh'
       }}>
         <TopNav UTORid={"UTORid"}/>
-        <Chat courseCode={"courseid"} style={{position: 'relative'}}/>
+        <Chat courseCode={"CSC108H%"} semester={"2022F"} style={{position: 'relative'}}/>
     </div>
     );
 };
