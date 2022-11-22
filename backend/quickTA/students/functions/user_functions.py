@@ -153,10 +153,10 @@ def get_users_info(users):
     Acquires all users' information in a given list of <users>
     which contain their user_ids.
     """
-    response = {}
-    for i, user in enumerate(users):
+    response = []
+    for user in users:
         user_data = get_user_info(user)
         if not(user_data):
             return OPERATION_FAILED
-        response[i] = user_data
+        response.append(user_data)
     return response

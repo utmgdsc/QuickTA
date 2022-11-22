@@ -40,3 +40,8 @@ class CourseUserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = ['course_id']
+
+class InteractionFrequencySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = ['course_id']
