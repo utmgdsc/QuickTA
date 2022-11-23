@@ -34,7 +34,9 @@ const ReportTable = ( { course_ID } ) => {
   const [reportList, changeReportList] = useState([{}]);
 
     useEffect(() => {
-      fetchReports();
+      if (course_ID.length != 0){
+        fetchReports();
+      }
     }, [course_ID]);
 
     const fetchReports = async () => {
