@@ -1,28 +1,21 @@
 import csv
 from datetime import datetime, date
 
-from django.shortcuts import render
+from ..functions import *
+from ..functions.common_topics import generate_wordcloud
+
 from django.http import HttpResponse
 
-from rest_framework import generics
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
-from ..models import User, Chatlog, Conversation, Feedback, Report, Course
-from ..serializers.serializers import ConversationSerializer
-from ..serializers.researcher_serializers import ResearchersSerializer, ReportedListSerializer, AverageRatingSerializer, ChatlogListSerializer, ResponseRateSerializer, MostCommonWordsSerializer
+from ..models import *
 from ..serializers import researcher_serializers as rs
 from drf_yasg.utils import swagger_auto_schema
-from ..functions.common_topics import generate_wordcloud
-from ..functions import user_functions, course_functions, time_utils
-
-class ResearchersView(generics.CreateAPIView):
-    queryset = Chatlog.objects.all()
-    serializer_class = ResearchersSerializer
 
 # Endpoints
-@swagger_auto_schema(methods=['post'], request_body=AverageRatingSerializer)
+@swagger_auto_schema(methods=['post'], request_body=rs.AverageRatingSerializer)
 @api_view(['POST'])
 def average_ratings(request):
     """
@@ -35,18 +28,8 @@ def average_ratings(request):
                 raise CourseNotFoundError
 
             data = request.data
-            date = time_utils.get_dates(data['filter'], data['timezone'])
+            convos = conversation_functions.get_filtered_convos(data['course_id'], data['filter'], data['timezone'])
 
-            # Retrieve all convesrations from the course given the particular datetime
-            if date:
-                convos = Conversation.objects.filter(
-                        course_id=request.data['course_id']
-                    ).filter(
-                        start_time__gte=date
-                    )
-            else:
-                convos = Conversation.objects.filter(course_id=request.data['course_id'])
-            
             # Retrieve all feedback from the conversations
             ratings = []
             for convo in convos:
@@ -77,7 +60,7 @@ def average_ratings(request):
                 err = {"msg": "Average Ratings missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=AverageRatingSerializer)
+@swagger_auto_schema(methods=['post'], request_body=rs.AverageRatingSerializer)
 @api_view(['POST'])
 def average_ratings_csv(request):
     """
@@ -91,17 +74,7 @@ def average_ratings_csv(request):
                 raise CourseNotFoundError
 
             data = request.data
-            date = time_utils.get_dates(data['filter'], data['timezone'])
-
-            # Retrieve all convesrations from the course
-            if date:
-                convos = Conversation.objects.filter(
-                        course_id=request.data['course_id']
-                    ).filter(
-                        start_time__gte=date
-                    )
-            else:
-                convos = Conversation.objects.filter(course_id=request.data['course_id'])
+            convos = conversation_functions.get_filtered_convos(data['course_id'], data['filter'], data['timezone'])
 
             response = HttpResponse(
                 content_type='text/csv',
@@ -150,7 +123,7 @@ def average_ratings_csv(request):
                 err = {"msg": "Average Ratings CSV missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=ReportedListSerializer)
+@swagger_auto_schema(methods=['post'], request_body=rs.ReportedListSerializer)
 @api_view(['POST'])
 def list_reported_conversations(request):
     """
@@ -166,58 +139,44 @@ def list_reported_conversations(request):
     - Report status ('O' - opened, 'C' - closed)
     - Report message
     """
-    try:
-
-        data = request.data
-        date = time_utils.get_dates(data['filter'], data['timezone'])
-        if date:
-            reported_convos = Report.objects.filter(
-                    course_id=request.data['course_id']
-                ).filter(
-                    status='O'
-                ).filter(
-                    time__gte=date
-                ).order_by('-time')
-        else:
-            reported_convos = Report.objects.filter(
-                    course_id=request.data['course_id']
-                ).filter(
-                    status='O'
-                ).order_by('-time')
-        
-        # Retrieve all reported conversations
-        response = {
-            "total_reported": len(reported_convos),
-            "reported_conversations": {}
-        }
-
-        for i, report in enumerate(reported_convos):
-            response['reported_conversations'][i] = {
-                'conversation_id': report.conversation_id,
-                'course_id': report.course_id,
-                'user_id': report.user_id,
-                'name': report.name,
-                'utorid': report.utorid,
-                'time': report.time,
-                'status': report.status,
-                'msg': report.msg
+    if request.method == 'POST':
+        try:
+            data = request.data
+            reported_convos = report_functions.get_filtered_convos(data['course_id'], data['filter'], data['timezone'])
+            
+            # Retrieve all reported conversations
+            response = {
+                "total_reported": len(reported_convos),
+                "reported_conversations": {}
             }
-        return Response(response, status=status.HTTP_200_OK)  
-    except:
-        error = []
-        keys = request.data.keys()
-        if 'course_id' not in keys: error.append("Course ID")
-        if 'filter' not in keys: error.append("Filter view")
-        if 'timezone' not in keys: error.append("Timezone")
-        
-        if (not(error)): 
-            err = {"msg": "Internal Server Error"}
-            return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        else:
-            err = {"msg": "Reported Conversations missing fields: " + ','.join(error) + '.'}
-            return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=ReportedListSerializer)
+            for i, report in enumerate(reported_convos):
+                response['reported_conversations'][i] = {
+                    'conversation_id': report.conversation_id,
+                    'course_id': report.course_id,
+                    'user_id': report.user_id,
+                    'name': report.name,
+                    'utorid': report.utorid,
+                    'time': report.time,
+                    'status': report.status,
+                    'msg': report.msg
+                }
+            return Response(response, status=status.HTTP_200_OK)  
+        except:
+            error = []
+            keys = request.data.keys()
+            if 'course_id' not in keys: error.append("Course ID")
+            if 'filter' not in keys: error.append("Filter view")
+            if 'timezone' not in keys: error.append("Timezone")
+            
+            if (not(error)): 
+                err = {"msg": "Internal Server Error"}
+                return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                err = {"msg": "Reported Conversations missing fields: " + ','.join(error) + '.'}
+                return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+@swagger_auto_schema(methods=['post'], request_body=rs.ReportedListSerializer)
 @api_view(['POST'])
 def list_reported_conversations_csv(request):
     """
@@ -237,21 +196,7 @@ def list_reported_conversations_csv(request):
         try:
             # Acquire reported conversations based on filter view and timezone 
             data = request.data
-            date = time_utils.get_dates(data['filter'], data['timezone'])
-            if date:
-                reported_convos = Report.objects.filter(
-                        course_id=request.data['course_id']
-                    ).filter(
-                        status='O'
-                    ).filter(
-                        time__gte=date
-                    ).order_by('-time')
-            else:
-                reported_convos = Report.objects.filter(
-                        course_id=request.data['course_id']
-                    ).filter(
-                        status='O'
-                    ).order_by('-time')
+            reported_convos = report_functions.get_filtered_convos(data['course_id'], data['filter'], data['timezone'])
 
             # Initialize CSV response
             response = HttpResponse(
@@ -296,7 +241,7 @@ def list_reported_conversations_csv(request):
                 err = {"msg": "Reported Conversations missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=ChatlogListSerializer)
+@swagger_auto_schema(methods=['post'], request_body=rs.ChatlogListSerializer)
 @api_view(['POST'])
 def get_reported_chatlogs(request):
     """
@@ -347,7 +292,7 @@ def get_reported_chatlogs(request):
             err = {"msg": "Reported Chatlogs missing fields: " + ','.join(error) + '.'}
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
        
-@swagger_auto_schema(methods=['post'], request_body=ChatlogListSerializer)
+@swagger_auto_schema(methods=['post'], request_body=rs.ChatlogListSerializer)
 @api_view(['POST'])
 def get_reported_chatlogs_csv(request):
     """
@@ -406,7 +351,7 @@ def get_reported_chatlogs_csv(request):
 
             return Response(err, status=status.HTTP_400_BAD_REQUEST) 
 
-@swagger_auto_schema(methods=['post'], request_body=ResponseRateSerializer)
+@swagger_auto_schema(methods=['post'], request_body=rs.ResponseRateSerializer)
 @api_view(['POST'])
 def get_average_response_rate(request):
     if request.method == 'POST':
@@ -416,17 +361,7 @@ def get_average_response_rate(request):
                 raise CourseNotFoundError
 
             data = request.data
-            date = time_utils.get_dates(data['filter'], data['timezone'])
-
-            # Retrieve all convesrations from the course given the particular datetime
-            if date:
-                convos = Conversation.objects.filter(
-                        course_id=request.data['course_id']
-                    ).filter(
-                        start_time__gte=date
-                    )
-            else:
-                convos = Conversation.objects.filter(course_id=request.data['course_id'])
+            convos = conversation_functions.get_filtered_convos(data['course_id'], data['filter'], data['timezone'])
             
             deltas = []
             total_delta = 0
@@ -461,7 +396,7 @@ def get_average_response_rate(request):
                 err = {"msg": "Average Response Rate missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=ResponseRateSerializer)
+@swagger_auto_schema(methods=['post'], request_body=rs.ResponseRateSerializer)
 @api_view(['POST'])
 def get_average_response_rate_csv(request):
     """
@@ -475,17 +410,7 @@ def get_average_response_rate_csv(request):
                 raise CourseNotFoundError
 
             data = request.data
-            date = time_utils.get_dates(data['filter'], data['timezone'])
-
-            # Retrieve all convesrations from the course given the particular datetime
-            if date:
-                convos = Conversation.objects.filter(
-                        course_id=request.data['course_id']
-                    ).filter(
-                        start_time__gte=date
-                    )
-            else:
-                convos = Conversation.objects.filter(course_id=request.data['course_id'])
+            convos = conversation_functions.get_filtered_convos(data['course_id'], data['filter'], data['timezone'])
             
             # Initialize CSV Response
             response = HttpResponse(
@@ -556,17 +481,7 @@ def get_most_common_words(request):
                 raise CourseNotFoundError
 
             data = request.data
-            date = time_utils.get_dates(data['filter'], data['timezone'])
-
-            # Retrieve all convesrations from the course given the particular datetime
-            if date:
-                convos = Conversation.objects.filter(
-                        course_id=request.data['course_id']
-                    ).filter(
-                        start_time__gte=date
-                    )
-            else:
-                convos = Conversation.objects.filter(course_id=request.data['course_id'])
+            convos = conversation_functions.get_filtered_convos(data['course_id'], data['filter'], data['timezone'])
 
             for convo in convos:
                 convo_count += 1
@@ -614,17 +529,15 @@ def get_course_comfortability(request):
             course = Course.objects.filter(course_id=request.data['course_id'])
             if len(course) == 0:
                 raise CourseNotFoundError
-
-            convos = get_courses_convos(request.data['course_id'])
-            if len(convos) == 0:
-                raise ConversationNotFoundError
+            
+            data = request.data
+            convos = conversation_functions.get_filtered_convos(data['course_id'], data['filter'], data['timezone'])
 
             all_ratings = []
 
             for convo in convos:
                 if convo.comfortability_rating:
                     all_ratings.append(convo.comfortability_rating)
-            
             
             if all_ratings:
                 avg = sum(all_ratings) / len(all_ratings)
@@ -639,8 +552,6 @@ def get_course_comfortability(request):
             return Response(response, status=status.HTTP_200_OK)
         except CourseNotFoundError:
             return Response({"msg": "Error: Course not Found."}, status=status.HTTP_400_BAD_REQUEST)
-        except ConversationNotFoundError:
-            return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_400_BAD_REQUEST)
         except:
             error = []
             if 'course_id' not in request.data.keys():
@@ -669,7 +580,7 @@ def get_course_comfortability_csv(request):
                 raise CourseNotFoundError
 
             data = request.data
-            date = time_utils.get_dates(data['filter'], data['timezone'])
+            convos = conversation_functions.get_filtered_convos(data['course_id'], data['filter'], data['timezone'])
 
             # Retrieve all convesrations from the course given the particular datetime
             if date:
@@ -745,49 +656,11 @@ def get_interaction_frequency(request):
             if len(course) == 0:
                 raise CourseNotFoundError
 
-            # Check for monthly or weekly
+            # Get all dates in range for a particular filter view (Weekly or Monthly)
             data = request.data
             dates = time_utils.get_all_dates(data['filter'], data['timezone'])
-            """
-            date variable:
-            [
-                (datetime.datetime(2022, 11, 15, 12, 19, 42, 585102, tzinfo=zoneinfo.ZoneInfo(key='America/Toronto')), 
-                'Tuesday'),
-                ...
-                (datetime.datetime(2022, 11, 21, 12, 19, 42, 585153, tzinfo=zoneinfo.ZoneInfo(key='America/Toronto')),
-                'Monday')
-            ]
-            """
 
-            interactions = []
-
-            # Retrieve all convesrations from the course given the particular datetime
-            if dates:
-                for _date in dates:
-                    day, weekday = _date
-                    
-                    year_of_day = int(day.year)
-                    month_of_day = int(day.month)
-                    day_of_day = int(day.day)
-                    
-                    start_date = date(year_of_day, month_of_day, day_of_day)
-                    try:
-                        offset_date = date(year_of_day, month_of_day, day_of_day + 1)
-                    except:
-                        try:
-                            offset_date = date(year_of_day, month_of_day + 1, 1)
-                        except:
-                            offset_date = date(year_of_day + 1, 1, 1)
-                    convos = Conversation.objects.filter(
-                            course_id=request.data['course_id']
-                        ).filter(
-                            start_time__gte=start_date
-                        ).filter(
-                            start_time__lte=offset_date
-                        )
-                    
-                    day_f = day.strftime('%Y-%m-%d')
-                    interactions.append((day_f, weekday, len(convos)))
+            interactions = conversation_functions.get_filtered_interactions(data['course_id'], dates)
 
             response = {
                 "interactions": interactions 

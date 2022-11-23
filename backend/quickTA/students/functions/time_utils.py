@@ -1,3 +1,4 @@
+import calendar
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -21,30 +22,41 @@ def get_all_dates(view, timezone):
 
 def get_weekly_time(timezone):
     """
-    Returns the datetime of a particular timezone <timezone> 
-    7 days ago.
+    Returns the datetime 7 days ago, and the current datetime 
+    of a particular timezone <timezone>.
     
     Parameters: 
     - timezone (ie. America/Toronto)
     """
     tz = ZoneInfo(timezone)
+    
     t1 = datetime.now() + timedelta(days=-7)
-    print(t1.strftime('%Y-%m-%d %H:%M:%S'))
-    t2 = t1.astimezone(tz)
-    return t2 
+    t1 = t1.replace(hour=0, minute=0, second=0, microsecond=0)
+    t1 = t1.astimezone(tz)
+    
+    t2 = datetime.now() + timedelta(days=+1)
+    t2 = t2.replace(hour=0, minute=0, second=0, microsecond=0)
+    t2 = t2.astimezone(tz)
+    
+    return t1, t2
 
 def get_monthly_time(timezone):
     """
     Returns the datetime of a particular timezone <timezone>
-    7 days ago.
+    starting from this month and the first day of next month
     
     Parameters: 
     - timezone (ie. America/Toronto)
     """
     tz = ZoneInfo(timezone)
-    t1 = datetime.now() + timedelta(days=-30)
-    t2 = t1.astimezone(tz)
-    return t2 
+
+    t1 = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    t2 = t1.replace(month=t1.month+1)
+    
+    t1 = t1.astimezone(tz)
+    t2 = t2.astimezone(tz)
+    
+    return t1, t2
 
 def get_weekly_times(timezone):
     """
@@ -78,13 +90,20 @@ def get_monthly_times(timezone):
     ie. [('2022-11-15 10:48:18', 'Tuesday'), ... ]
     """
     tz = ZoneInfo(timezone)
-    week = []
-    for day in range(30):
-        t1 = datetime.now() + timedelta(days=-30+day)
+    month_dates = []
+
+    today = datetime.now()
+    year = today.year
+    month = today.month    
+
+    days_in_month = calendar.monthrange(year, month)[1]
+
+    for day in range(1, days_in_month + 1):
+        t1 = datetime.now().replace(day=day)
         t2 = t1.astimezone(tz)
         weekday = get_weekday_name(t2.weekday())
-        week.append((t2, weekday))
-    return week
+        month_dates.append((t2, weekday))
+    return month_dates
 
 def get_weekday_name(weekday):
     """
@@ -103,4 +122,10 @@ def get_weekday_name(weekday):
 # print(get_weekly_times("America/Toronto"))
 # print(get_monthly_times("America/Toronto"))
 
+
 # print(get_all_dates('Weekly', 'America/Toronto'))
+
+# import calendar
+# for i in range(5):
+#     s = calendar.monthrange(2022+i, 2)
+    # print(s)
