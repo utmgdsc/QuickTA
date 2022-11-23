@@ -14,6 +14,8 @@ urlpatterns = [
     path('conversation/all', ConversationList.as_view(), name='conversation-list'),
     path('chatlog/all', ChatlogList.as_view(), name='chatlog-detail'),
 
+    # Student view
+    # ================================================================================================
     path('user', views.user_detail),
     path('course', views.course_detail),
     path('get-course', views.course_get),
@@ -26,6 +28,7 @@ urlpatterns = [
 
 
     # Instructor/Researcher views
+    # ================================================================================================
     path('researcher/average-ratings', researcher_views.average_ratings),
     path('researcher/average-ratings-csv', researcher_views.average_ratings_csv),
     
@@ -43,7 +46,16 @@ urlpatterns = [
     path('researcher/avg-comfortability-rating', researcher_views.get_course_comfortability),
     path('researcher/avg-comfortability-rating-csv', researcher_views.get_course_comfortability_csv),
 
+    path('researcher/interaction-frequency', researcher_views.get_interaction_frequency),
+
+    path('researcher/course-student-list', researcher_views.get_course_users),
+
     # Admin view
+    # ================================================================================================
     path('admin/add-user', admin_views.create_user),
-    path('admin/add-user-course', admin_views.add_user_course)
+    path('admin/add-multiple-user', admin_views.create_multiple_users),
+
+    path('admin/add-user-course', admin_views.add_user_course),
+    path('admin/add-multiple-user-course', admin_views.add_multiple_user_course),
+    path('admin/remove-user-course', admin_views.remove_user_course),
 ]
