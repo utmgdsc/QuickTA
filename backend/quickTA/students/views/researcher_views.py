@@ -1,7 +1,8 @@
+import time
 import csv
 from datetime import datetime, date
 
-from ..functions import user_functions, course_functions, report_functions, conversation_functions
+from ..functions import user_functions, course_functions, report_functions, conversation_functions,  time_utils
 from ..functions.common_topics import generate_wordcloud
 
 from django.http import HttpResponse
@@ -23,19 +24,28 @@ def average_ratings(request):
     """
     if request.method == 'POST':
         try:
+            start = time.time()
             course = Course.objects.filter(course_id=request.data['course_id'])
-            if len(course) == 0:
+            if not(course.count()): 
                 raise CourseNotFoundError
+            end = time.time()
+            print("Time elapsed (Course filtering):", (end-start) * 1000)
 
+            start = time.time()
             data = request.data
             convos = conversation_functions.get_filtered_convos(data['course_id'], data['filter'], data['timezone'])
+            end = time.time()
+            print("Time elapsed (Conversations filtering):", (end-start) * 1000)
 
             # Retrieve all feedback from the conversations
             ratings = []
+            start = time.time()
             for convo in convos:
                 q2 = Feedback.objects.filter(conversation_id=convo.conversation_id)
                 if (len(q2) != 0):
                     ratings.append(q2[0].rating)
+            end = time.time()
+            print("Time elapsed (Feedback filtering):", (end-start) * 1000)
 
             # Find average of all the ratings of that particular course
             response = { 

@@ -1,3 +1,4 @@
+import time
 from datetime import date
 
 from . import time_utils
@@ -13,6 +14,8 @@ def get_filtered_convos(course_id, view, timezone):
 
     # Retrieve all convesrations from the course given the particular datetime
     if start_date and end_date:
+        
+        start = time.time()
         convos = Conversation.objects.filter(
                 course_id=course_id
             ).filter(
@@ -20,6 +23,9 @@ def get_filtered_convos(course_id, view, timezone):
             ).filter(
                 start_time__lt=end_date
             )
+        end = time.time()
+        print("Time elapsed (Conversation filtering):", (end-start) * 1000)
+
     else:
         convos = Conversation.objects.filter(course_id=course_id)
     return convos
