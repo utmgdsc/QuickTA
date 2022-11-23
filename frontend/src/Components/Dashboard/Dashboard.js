@@ -7,13 +7,16 @@ import {useEffect, useState} from "react";
 const Dashboard = ({ courseCode, courseName, semester }) => {
     const [course_id, setCourseID] = useState("");
     useEffect(() => {
-        fetchCourseID();
+        if (courseCode.length != 0){
+            fetchCourseID();
+        }
     }, [courseCode, semester]);
 
     const fetchCourseID = async () => {
         return axios.post(process.env.REACT_APP_API_URL + "/get-course", {course_code: courseCode, semester: semester})
           .then((res) => {
               setCourseID(res.data.course_id);
+              console.log(course_id);
           })
           .catch((err) => console.log(err))
     }
