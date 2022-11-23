@@ -1,7 +1,7 @@
 import csv
 from datetime import datetime, date
 
-from ..functions import *
+from ..functions import user_functions, course_functions, report_functions, conversation_functions
 from ..functions.common_topics import generate_wordcloud
 
 from django.http import HttpResponse
