@@ -81,7 +81,6 @@ const DatedStats = ({isWeekly, courseID}) => {
           .catch((err) => {console.log(err)})
       }
   }
-
     return (
         <Flex flexWrap='wrap'>
             <VStack minWidth='320px' w='22vw' spacing='20px'>
@@ -91,7 +90,7 @@ const DatedStats = ({isWeekly, courseID}) => {
                 <StatCard title={"Reported Conversations"} num={numReport.numReport} delta={0} unit={""}/>
             </VStack>
             <Spacer/>
-            {/*<DatedGraph isWeekly={{isWeekly, courseID}}/>*/}
+            <DatedGraph isWeekly={isWeekly} courseID={{courseID}}/>
         </Flex>
     );
 }
