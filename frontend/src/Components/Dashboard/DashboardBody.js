@@ -1,6 +1,5 @@
 import { 
     Box,
-    Container,
     Tabs, 
     TabList, 
     TabPanels, 
@@ -9,8 +8,10 @@ import {
 } from "@chakra-ui/react";
 import DatedStats from "./DatedStats/DatedStats";
 import ReportTable from "./ReportTable/ReportTable";
+import React, { Component, useState, useEffect } from "react";
 
 const DashboardBody = ({ courseID }) => {
+    const [isWeekly, setTime] = useState(1);
     const tabStyle = {
         borderRadius: 'lg',
         color: 'white',
@@ -22,16 +23,16 @@ const DashboardBody = ({ courseID }) => {
             <Tabs variant='solid-rounded' mt={7}>
 
                 <TabList>
-                <Tab _selected={tabStyle}><span style={{fontSize: '13px'}}>Weekly</span></Tab>
-                <Tab _selected={tabStyle}><span style={{fontSize: '13px'}}>Monthly</span></Tab>
+                <Tab _selected={tabStyle} onClick={() => setTime(1)}><span style={{fontSize: '13px'}}>Weekly</span></Tab>
+                <Tab _selected={tabStyle} onClick={() => setTime(0)}><span style={{fontSize: '13px'}}>Monthly</span></Tab>
                 </TabList>
 
                 <TabPanels>
                     <TabPanel paddingLeft={'0'} paddingRight={'0'}>
-                        <DatedStats isWeekly={1} courseID={courseID}/>
+                        <DatedStats isWeekly={isWeekly} courseID={courseID}/>
                     </TabPanel>
                     <TabPanel paddingLeft={'0'} paddingRight={'0'}>
-                        <DatedStats isWeekly={0} courseID={courseID}/>
+                        <DatedStats isWeekly={isWeekly} courseID={courseID}/>
                     </TabPanel>
                 </TabPanels>
 
