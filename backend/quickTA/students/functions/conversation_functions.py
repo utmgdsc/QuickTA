@@ -1,5 +1,6 @@
 import time
 from datetime import date
+from zoneinfo import ZoneInfo
 
 from . import time_utils
 from ..models import *
@@ -30,14 +31,15 @@ def get_filtered_convos(course_id, view, timezone):
         convos = Conversation.objects.filter(course_id=course_id)
     return convos
 
-def get_filtered_interactions(course_id, dates):
+def get_filtered_interactions(course_id, dates, timezone):
     """
     Returns a list of interactions of certain <dates> for course <course_id>.
     """
     interactions = []
-
+    tz = ZoneInfo(timezone)
     # Retrieve all convesrations from the course given the particular datetime
     if dates:
+        total = 0
         for _date in dates:
             day, weekday = _date
             
@@ -45,17 +47,18 @@ def get_filtered_interactions(course_id, dates):
             month_of_day = int(day.month)
             day_of_day = int(day.day)
         
-            start_date = date(year_of_day, month_of_day, day_of_day)
+            start_date = datetime(year_of_day, month_of_day, day_of_day, tzinfo=tz)
             
             # Handle offset_date day increment
             try:
-                offset_date = date(year_of_day, month_of_day, day_of_day + 1)
+                offset_date = datetime(year_of_day, month_of_day, day_of_day + 1, tzinfo=tz)
+                
             except:
                 try:
-                    offset_date = date(year_of_day, month_of_day + 1, 1)
+                    offset_date = datetime(year_of_day, month_of_day + 1, 1, tzinfo=tz)
                 except:
-                    offset_date = date(year_of_day + 1, 1, 1)
-            
+                    offset_date = datetime(year_of_day + 1, 1, 1, tzinfo=tz)
+
             convos = Conversation.objects.filter(
                     course_id=course_id
                 ).filter(
@@ -65,6 +68,12 @@ def get_filtered_interactions(course_id, dates):
                 )
             
             day_f = day.strftime('%Y-%m-%d')
+            
+            start = time.time()
             interactions.append((day_f, weekday, len(convos)))
+            end = time.time()
+            print("Time elapsed (Date [" + str(day_of_day) + "])", (end-start) * 1000)
+            total += end-start
+        print("Time elapsed (Date)", total * 1000)
 
     return interactions

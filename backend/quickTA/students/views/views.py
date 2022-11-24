@@ -3,6 +3,7 @@ import uuid
 import re
 import zoneinfo
 import pytz 
+from ..openAI import quick_ta_model as model
 
 from datetime import datetime
 from http.client import responses
@@ -374,7 +375,7 @@ def chatlog_detail(request):
     """
     if request.method == 'POST':
 
-        try:
+        # try:
             # Set current chatlog's time if not provided
             current_time = timezone.now()
             location = 'America/Toronto'
@@ -434,10 +435,13 @@ def chatlog_detail(request):
 
 
             # Get response from Model
+            model_chatlog_id = str(uuid.uuid4())
             model_response = "hi"
+            # model_response = model.enquire_model(data['chatlog'])
+            # gpt_model = model.GPTChatlog()
+            # model_response = gpt_model.enquire_model(user_chatlog)
             
             # Save message from the Model
-            model_chatlog_id = str(uuid.uuid4())
             model_time = timezone.now()
             model_chatlog = Chatlog(
                 conversation_id=cid,
@@ -474,16 +478,16 @@ def chatlog_detail(request):
             }
             return Response(response, status=status.HTTP_201_CREATED)
         
-        except:
-            # Error handling
-            error = []
-            if 'conversation_id' not in request.data.keys():
-                error.append("Conversation ID")
-            if 'chatlog' not in request.data.keys():
-                error.append("Chatlog message")
-            err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
+        # except:
+        #     # Error handling
+        #     error = []
+        #     if 'conversation_id' not in request.data.keys():
+        #         error.append("Conversation ID")
+        #     if 'chatlog' not in request.data.keys():
+        #         error.append("Chatlog message")
+        #     err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
 
-            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+        #     return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
 @swagger_auto_schema(methods=['post'], request_body=FeedbackSerializer)
 @api_view(['POST'])

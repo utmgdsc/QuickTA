@@ -46,10 +46,15 @@ def average_ratings(request):
                     ratings.append(q2[0].rating)
             end = time.time()
             print("Time elapsed (Feedback filtering):", (end-start) * 1000)
+            
+            if len(ratings) == 0:
+                avg_ratings = 0
+            else:
+                avg_ratings = sum(ratings) / len(ratings)
 
             # Find average of all the ratings of that particular course
             response = { 
-                'avg_ratings': sum(ratings) / len(ratings),  
+                'avg_ratings': avg_ratings,  
                 'all_ratings': ratings
             }
 
@@ -386,7 +391,10 @@ def get_average_response_rate(request):
                             deltas.append(delta)
                             total_delta += delta
                             total_chatlogs += 1
-            avg_response_rate = total_delta / total_chatlogs
+            if total_chatlogs != 0:
+                avg_response_rate = total_delta / total_chatlogs
+            else:
+                avg_response_rate = 0
             response = {
                 "avg_response_rate": avg_response_rate,
                 "all_response_rates": deltas
@@ -478,8 +486,8 @@ def get_average_response_rate_csv(request):
 def get_most_common_words(request):
     if request.method == 'POST':
         try:
-            serializer = MostCommonWordsSerializer(data=request.data)
-            serializer.is_valid()
+            # serializer = MostCommonWordsSerializer(data=request.data)
+            # serializer.is_valid()
 
             # Gather all user chatlogs
             sentences = []
@@ -504,10 +512,20 @@ def get_most_common_words(request):
             
             words = generate_wordcloud(sentences)
 
+            if convo_count != 0:
+                avg_chatlog_count =  sum(chatlog_count) / convo_count
+            else: 
+                avg_chatlog_count = 0
+            
+            if sum(chatlog_count) != 0:
+                avg_chatlog_length = sum([len(chatlog) for chatlog in sentences]) / sum(chatlog_count)
+            else: 
+                avg_chatlog_length = 0
+
             response = {
-                "avg_chatlog_count": sum(chatlog_count) / convo_count,
+                "avg_chatlog_count": avg_chatlog_count,
                 "total_chatlog_count": sum(chatlog_count),
-                "avg_chatlog_length": sum([len(chatlog) for chatlog in sentences]) / sum(chatlog_count),
+                "avg_chatlog_length": avg_chatlog_length,
                 "sentences": sentences,
                 "most_common_words": words
             }
@@ -592,16 +610,6 @@ def get_course_comfortability_csv(request):
             data = request.data
             convos = conversation_functions.get_filtered_convos(data['course_id'], data['filter'], data['timezone'])
 
-            # Retrieve all convesrations from the course given the particular datetime
-            if date:
-                convos = Conversation.objects.filter(
-                        course_id=request.data['course_id']
-                    ).filter(
-                        start_time__gte=date
-                    )
-            else:
-                convos = Conversation.objects.filter(course_id=request.data['course_id'])
-
              # Initialize CSV Response
             response = HttpResponse(
                 content_type='text/csv',
@@ -670,7 +678,7 @@ def get_interaction_frequency(request):
             data = request.data
             dates = time_utils.get_all_dates(data['filter'], data['timezone'])
 
-            interactions = conversation_functions.get_filtered_interactions(data['course_id'], dates)
+            interactions = conversation_functions.get_filtered_interactions(data['course_id'], dates, data['timezone'])
 
             response = {
                 "interactions": interactions 
