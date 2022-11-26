@@ -58,7 +58,9 @@ def get_filtered_interactions(course_id, dates, timezone):
                     offset_date = datetime(year_of_day, month_of_day + 1, 1, tzinfo=tz)
                 except:
                     offset_date = datetime(year_of_day + 1, 1, 1, tzinfo=tz)
-
+            
+            # start = time.time()
+           
             convos = Conversation.objects.filter(
                     course_id=course_id
                 ).filter(
@@ -66,14 +68,17 @@ def get_filtered_interactions(course_id, dates, timezone):
                 ).filter(
                     start_time__lt=offset_date
                 )
+            # print(convos)
+            # end = time.time()
+            # print("Time elapsed (Conversation Filtering - Date [" + str(day_of_day) + "])", (end-start) * 1000)
             
             day_f = day.strftime('%Y-%m-%d')
             
-            start = time.time()
-            interactions.append((day_f, weekday, len(convos)))
-            end = time.time()
-            print("Time elapsed (Date [" + str(day_of_day) + "])", (end-start) * 1000)
-            total += end-start
-        print("Time elapsed (Date)", total * 1000)
+            # start = time.time()
+            interactions.append((day_f, weekday, convos.count()))
+            # end = time.time()
+        #     print("Time elapsed (Date [" + str(day_of_day) + "])", (end-start) * 1000)
+        #     total += end-start
+        # print("Time elapsed (Date)", total * 1000)
 
     return interactions

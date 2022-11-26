@@ -30,4 +30,5 @@ backend/venv/*
  *.pyc
 */img
 
+.env
 docs/node_modules/*

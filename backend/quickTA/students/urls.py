@@ -17,6 +17,7 @@ urlpatterns = [
     # Student view
     # ================================================================================================
     path('user', views.user_detail),
+    path('get-user',views.get_user),
     path('course', views.course_detail),
     path('get-course', views.course_get),
     path('chatlog', views.chatlog_detail),
