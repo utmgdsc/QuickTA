@@ -11,15 +11,6 @@ import {useState} from "react";
 
 const DatedStats = ({isWeekly, courseID}) => {
 
-  useEffect(() => {
-    if (courseID.length != 0){
-      fetchData("/researcher/average-ratings");
-      fetchData("/researcher/avg-comfortability-rating");
-      fetchData("/researcher/avg-response-rate");
-      fetchData("/researcher/reported-conversations");
-    }
-  }, [courseID])
-
   const [avgRating, setAvgRating] = useState({avgRating : 0, avgRatingDelta: 0});
   const [avgRespTime, setAvgRespTime] = useState({avgRespTime: 0, avgRespTimeDelta: 0});
   const [avgComfort, setAvgComfort] = useState({avgComfort: 0, avgComfortDelta: 0});
@@ -81,6 +72,14 @@ const DatedStats = ({isWeekly, courseID}) => {
           .catch((err) => {console.log(err)})
       }
   }
+
+    if(courseID){
+      fetchData("/researcher/average-ratings");
+      fetchData("/researcher/avg-comfortability-rating");
+      fetchData("/researcher/avg-response-rate");
+      fetchData("/researcher/reported-conversations");
+    }
+    
     return (
         <Flex flexWrap='wrap'>
             <VStack minWidth='320px' w='22vw' spacing='20px'>
@@ -90,7 +89,7 @@ const DatedStats = ({isWeekly, courseID}) => {
                 <StatCard title={"Reported Conversations"} num={numReport.numReport} delta={0} unit={""}/>
             </VStack>
             <Spacer/>
-            <DatedGraph isWeekly={isWeekly} courseID={{courseID}}/>
+            <DatedGraph isWeekly={isWeekly} courseID={courseID}/>
         </Flex>
     );
 }
