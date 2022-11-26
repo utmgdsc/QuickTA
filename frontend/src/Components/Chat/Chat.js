@@ -10,7 +10,7 @@ import axios from "axios";
 
 const Chat = ({ courseCode, semester }) => {
   const [messages, updateMessages] = useState([]);
-  const [inConvo, updateIsConvo] = useState(false);
+  const [inConvo, updateInConvo] = useState(false);
   const [currConvoID, updateConvoID] = useState("");
   const [courseID, setCourseID] = useState("");
 
@@ -32,11 +32,10 @@ const Chat = ({ courseCode, semester }) => {
         <ChatOpenSurvey/>
         <ChatBoxTopNav courseCode={courseCode} currConvoID={currConvoID}/>
         <ChatBox messages={messages}/>
-        <ChatBoxFooter 
-        messages={messages}
+        <ChatBoxFooter
         updateMessages={updateMessages}
         inConvo={inConvo} 
-        updateIsConvo={updateIsConvo}
+        updateInConvo={updateInConvo}
         currConvoID={currConvoID}
         updateConvoID={updateConvoID}
         course_ID={courseID}
