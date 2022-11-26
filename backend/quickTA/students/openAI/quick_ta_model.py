@@ -53,6 +53,10 @@ class GPTChatlog:
     def enquire_model(self, question: str) -> str:
     # response = openai.Completion.create(model="text-davinci-002", prompt="Say this is a test", temperature=0, max_tokens=6)
         prompt_text = f"{self.chatlog}{self.restart_sequence}{question}{self.start_sequence}"
+
+        # 1. Initialize prompt (arm) text 
+        # 2. Acquire all of the previous chatlogs for the conversation 
+        # 3. Append arm extension  
         self.filter_chatlog(prompt_text)
         response = openai.Completion.create(
             prompt=prompt_text,

@@ -13,7 +13,7 @@ from django.http import JsonResponse
 from django.utils import timezone, dateparse
 from django.utils.timezone import now
 from ..models import Chatlog, Conversation, Course, Feedback, User, Report
-from ..serializers.serializers import ConversationSerializer, CourseSerializer, FeedbackSerializer, IncorrectChatlogSerializer, UserSerializer, ChatlogSerializer, ReportSerializer, ChatlogDetailSerializer, CourseComfortabilitySerializer
+from ..serializers.serializers import GetUserSerializer, ConversationSerializer, CourseSerializer, FeedbackSerializer, IncorrectChatlogSerializer, UserSerializer, ChatlogSerializer, ReportSerializer, ChatlogDetailSerializer, CourseComfortabilitySerializer
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -98,6 +98,27 @@ class FeedbackDetail(generics.RetrieveUpdateDestroyAPIView):
 
     serializer = FeedbackSerializer(queryset, many=True)
     pass
+
+@swagger_auto_schema(methods=['post'], request_body=GetUserSerializer) 
+@api_view(['POST'])
+def get_user(request):
+    if request.method == 'POST':
+        try:
+            user = User.objects.get(utorid=request.data['utorid'])
+            res = { "user_id" : user.user_id}
+
+            return Response(res, status=status.HTTP_200_OK)
+        
+        except:
+            error = []
+            if 'utorid' not in request.data.keys():
+                error.append("Utor ID")
+                err = {"msg": "User details missing fields:" + ','.join(error)}
+            else:
+                err = {"msg": "User does not exist"}
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+            
+            
 
 
 @swagger_auto_schema(methods=['post'], request_body=UserSerializer)

@@ -8,6 +8,10 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['name', 'utorid', 'user_role']
 
+class GetUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['utorid']
 
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:

@@ -495,7 +495,7 @@ def get_most_common_words(request):
             chatlog_count = []
 
             course = Course.objects.filter(course_id=request.data['course_id'])
-            if len(course) == 0:
+            if len(course) == 0:  # 600 ms
                 raise CourseNotFoundError
 
             data = request.data
@@ -671,9 +671,12 @@ def get_interaction_frequency(request):
         try:
             # Check for course existence
             course = Course.objects.filter(course_id=request.data['course_id'])
+            print(course)
+            start = time.time()
             if len(course) == 0:
                 raise CourseNotFoundError
-
+            end = time.time()
+            print("len:", (end-start) * 1000)
             # Get all dates in range for a particular filter view (Weekly or Monthly)
             data = request.data
             dates = time_utils.get_all_dates(data['filter'], data['timezone'])
