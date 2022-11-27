@@ -90,6 +90,11 @@ const FeedbackSurvey = ({ isOpen, onClose, conversation_id, updateConvoID, updat
             if (sliderVal < 4){
               setFeedBackPopup(true);
               setIsSurveyDisabled(true);
+            }else{
+              (async () => {
+                await axios.post(process.env.REACT_APP_API_URL + "/feedback", {conversation_id: conversation_id,
+                rating: sliderVal, feedback_msg: ""})
+              })()
             }
           }}>
             Submit

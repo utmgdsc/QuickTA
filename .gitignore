@@ -23,6 +23,7 @@ frontend/npm-debug.log*
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
 
+backend/quickTA/quickTA/.env
 backend/env/*
 backend/venv/*
 */__pycache__
