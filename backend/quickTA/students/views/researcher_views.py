@@ -668,7 +668,7 @@ def get_interaction_frequency(request):
     with the model.
     """
     if request.method == 'POST':
-        try:
+        # try:
             # Check for course existence
             course = Course.objects.filter(course_id=request.data['course_id'])
             print(course)
@@ -689,21 +689,21 @@ def get_interaction_frequency(request):
             
             return Response(response, status=status.HTTP_200_OK)
 
-        except CourseNotFoundError:
-            return Response({"msg": "Error: Course not Found."}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            error = []
-            keys = request.data.keys()
-            if 'course_id' not in keys: error.append("Course ID")
-            if 'filter' not in keys: error.append("Filter view")
-            if 'timezone' not in keys: error.append("Timezone")
+        # except CourseNotFoundError:
+        #     return Response({"msg": "Error: Course not Found."}, status=status.HTTP_400_BAD_REQUEST)
+        # except:
+        #     error = []
+        #     keys = request.data.keys()
+        #     if 'course_id' not in keys: error.append("Course ID")
+        #     if 'filter' not in keys: error.append("Filter view")
+        #     if 'timezone' not in keys: error.append("Timezone")
             
-            if (not(error)): 
-                err = {"msg": "Internal Server Error"}
-                return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            else:
-                err = {"msg": "Average Ratings CSV missing fields: " + ','.join(error) + '.'}
-                return Response(err, status=status.HTTP_400_BAD_REQUEST)
+        #     if (not(error)): 
+        #         err = {"msg": "Internal Server Error"}
+        #         return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        #     else:
+        #         err = {"msg": "Average Ratings CSV missing fields: " + ','.join(error) + '.'}
+        #         return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 @swagger_auto_schema(methods=['post'], request_body=rs.CourseUserListSerializer)
 @api_view(['POST'])

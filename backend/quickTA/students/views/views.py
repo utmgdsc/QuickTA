@@ -457,8 +457,8 @@ def chatlog_detail(request):
 
             # Get response from Model
             model_chatlog_id = str(uuid.uuid4())
-            model_response = "hi"
-            # model_response = model.enquire_model(data['chatlog'])
+            # model_response = "hi"
+            model_response = model.enquire_model(cid, data['chatlog'])
             # gpt_model = model.GPTChatlog()
             # model_response = gpt_model.enquire_model(user_chatlog)
             

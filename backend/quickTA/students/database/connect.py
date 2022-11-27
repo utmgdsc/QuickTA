@@ -5,5 +5,3 @@ def get_cluster():
     return cluster
     # db = cluster["quickTA"]
     # collection = db["Users"]
-
-# collection.insert_one({'name': 'Marko'})

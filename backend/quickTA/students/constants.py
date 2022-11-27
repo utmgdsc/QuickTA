@@ -9,3 +9,4 @@ OBJECT_DOES_NOT_EXIST = False
 CLUSTER = "quickTA"
 STUDENT_COLLECTION = "students_user"
 COURSE_COLLECTION = "students_course"
+CONVERSATION_COLLECTION = "students_conversation"
