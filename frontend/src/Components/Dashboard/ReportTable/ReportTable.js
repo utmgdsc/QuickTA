@@ -16,7 +16,7 @@ import {
 import axios from "axios";
 import {useEffect, useState} from "react";
 
-const ReportTable = ( { course_ID } ) => {
+const ReportTable = ( { course_ID, isWeekly } ) => {
 
   const cardStyle = {
     backgroundColor: 'white',
@@ -37,10 +37,12 @@ const ReportTable = ( { course_ID } ) => {
       if (course_ID.length != 0){
         fetchReports();
       }
-    }, [course_ID]);
+      console.log("report table", course_ID, isWeekly);
+    }, [course_ID, isWeekly]);
 
     const fetchReports = async () => {
-      return await axios.post(process.env.REACT_APP_API_URL + "/researcher/reported-conversations", {course_id: course_ID})
+      return await axios.post(process.env.REACT_APP_API_URL + "/researcher/reported-conversations", {course_id: course_ID, filter: (isWeekly === 1 ? "Weekly" : "Monthly")
+      , timezone: "America/Toronto"})
         .then((res) => {
           const entries = [];
           for (const obj in Object.keys(res.data.reported_conversations)) {
