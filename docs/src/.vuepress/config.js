@@ -4,7 +4,7 @@ module.exports = {
   /**
    * Ref：https://v1.vuepress.vuejs.org/config/#title
    */
-  title: 'Vuepress Docs Boilerplate',
+  title: 'QuickTA Documentation',
   /**
    * Ref：https://v1.vuepress.vuejs.org/config/#description
    */
@@ -49,11 +49,11 @@ module.exports = {
     sidebar: {
       '/guide/': [
         {
-          title: 'Guide',
+          title: 'Backend',
           collapsable: false,
           children: [
-            '',
-            'backend/backend',
+            'backend/Models',
+            'backend/Endpoints',
           ]
         }
       ],

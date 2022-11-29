@@ -1,0 +1,36 @@
+version: '3'
+services:
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./frontend/.env
+  
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      - MAX_CHARACTER_LENGTH=1000
+    ports:
+      - "8000:8000"
+
+  nginx-proxy:
+    container_name: nginx
+    image: nginx
+    restart: unless-stopped
+    depends_on:
+      - frontend
+    networks:
+      backend:
+        - aliases:
+            - nginx
+    ports:
+      - "5000:80"
+    volumes:
+      - ./nginx.conf
