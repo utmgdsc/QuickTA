@@ -7,6 +7,7 @@ from ..functions import user_functions, course_functions, report_functions, conv
 from ..functions.common_topics import generate_wordcloud
 
 from django.http import HttpResponse
+from django.http import JsonResponse
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -842,6 +843,54 @@ def gptmodel_select(request):
             else:
                 err = {"msg": "GPT Model creation missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)                
+
+@swagger_auto_schema(methods=['post'], request_body=rs.CourseUserListSerializer)
+@api_view(['POST'])
+def gptmodel_get(request):
+    """
+    Returns all GPT models related to a course
+    """
+    if request.method == 'POST':
+        try:
+            data = request.data
+            gpt_models = gptmodel_functions.get_gptmodels(data['course_id'])
+
+            if not(gpt_models):
+                raise Exception
+            
+            return JsonResponse({"gpt_models": gpt_models})
+        except:
+            return Response("Internal server error", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@swagger_auto_schema(methods=['get'])
+@api_view(['GET'])
+def gptmodel_get_all(request):
+    """
+    Retrieves all GPT models from all courses
+    """
+    if request.method == 'GET':
+        try:
+            gpt_models = GPTModel.objects.all().values()
+            return JsonResponse({ "gpt_models": list(gpt_models)})
+        except:
+            return Response("Internal server error.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+@swagger_auto_schema(methods=['post'])
+@api_view(['POST'])
+def gptmodel_delete(request):
+    """
+    Deletes a GPT model configuration
+    """
+    if request.method == 'POST':
+        try:
+            data = request.data
+            ret = gptmodel_functions.delete_gptmodels(data['model_id'])
+            if not(ret):
+                raise Exception
+            return Response(status=status.HTTP_200_OK)
+        except:
+            return Response("Internal server error.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 # Helper functions
 def get_courses_convos(course_id):

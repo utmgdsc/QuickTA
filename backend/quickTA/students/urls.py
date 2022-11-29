@@ -51,10 +51,12 @@ urlpatterns = [
 
     path('researcher/course-student-list', researcher_views.get_course_users),
 
-    path('researcher/create-gptmodel', researcher_views.gptmodel_detail),
-    path('researcher/update-gptmodel', researcher_views.gptmodel_update),
-    path('researcher/activate-gptmodel', researcher_views.gptmodel_select),
-
+    path('researcher/gptmodel-create', researcher_views.gptmodel_detail),
+    path('researcher/gptmodel-update', researcher_views.gptmodel_update),
+    path('researcher/gptmodel-activate', researcher_views.gptmodel_select),
+    path('researcher/gptmodel-get', researcher_views.gptmodel_get),
+    path('researcher/gptmodel-get-all', researcher_views.gptmodel_get_all),
+    path('researcher/gptmodel-delete', researcher_views.gptmodel_delete),
     # Admin view
     # ================================================================================================
     path('admin/add-user', admin_views.create_user),

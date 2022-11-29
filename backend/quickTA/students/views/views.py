@@ -393,7 +393,7 @@ def chatlog_detail(request):
     """
     if request.method == 'POST':
 
-        try:
+        # try:
             # Set current chatlog's time if not provided
             current_time = timezone.now()
             location = 'America/Toronto'
@@ -494,16 +494,16 @@ def chatlog_detail(request):
             }
             return Response(response, status=status.HTTP_201_CREATED)
         
-        except:
-            # Error handling
-            error = []
-            if 'conversation_id' not in request.data.keys():
-                error.append("Conversation ID")
-            if 'chatlog' not in request.data.keys():
-                error.append("Chatlog message")
-            err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
+        # except:
+        #     # Error handling
+        #     error = []
+        #     if 'conversation_id' not in request.data.keys():
+        #         error.append("Conversation ID")
+        #     if 'chatlog' not in request.data.keys():
+        #         error.append("Chatlog message")
+        #     err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
 
-            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+        #     return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
 @swagger_auto_schema(methods=['post'], request_body=FeedbackSerializer)
 @api_view(['POST'])

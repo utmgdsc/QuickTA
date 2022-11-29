@@ -53,24 +53,24 @@ def get_active_model(course_id):
         "course_id": course_id,
         "status": True
     }
-    gpt_model = gptmodels.find(query)
+    gpt_model = list(gptmodels.find(query))[0]
     res = {
-        "model_id": gpt_model.model_id,
-        "model_name": gpt_model.model_name,
-        "course_id": gpt_model.course_id,
+        "model_id": gpt_model['model_id'],
+        "model_name": gpt_model['model_name'],
+        "course_id": gpt_model['course_id'],
 
-        "model": gpt_model.model,
-        "prompt": gpt_model.prompt,
-        "suffix": gpt_model.suffix,
-        "max_tokens": gpt_model.max_tokens,
-        "temperature": gpt_model.max_tokens,
-        "top_p": gpt_model.top_p,
-        "n": gpt_model.n,
-        "stream": gpt_model.stream,
-        "logprobs": gpt_model.logprobs,
-        "presence_penalty": gpt_model.presence_penalty,
-        "frequency_penalty": gpt_model.frequency_penalty,
-        "best_of": gpt_model.best_of
+        "model": gpt_model['model'],
+        "prompt": gpt_model['prompt'],
+        "suffix": gpt_model['suffix'],
+        "max_tokens": gpt_model['max_tokens'],
+        "temperature": gpt_model['temperature'],
+        "top_p": gpt_model['top_p'],
+        "n": gpt_model['n'],
+        "stream": gpt_model['stream'],
+        "logprobs": gpt_model['logprobs'],
+        "presence_penalty": gpt_model['presence_penalty'],
+        "frequency_penalty": gpt_model['frequency_penalty'],
+        "best_of": gpt_model['best_of']
     }
     return res
 
@@ -81,6 +81,7 @@ def create_gptmodel(data):
     """
     keys = data.keys()
     
+    if "suffix" not in keys: data['suffix'] = ''
     if "max_tokens" not in keys: data['max_tokens'] = 16
     if "temperature" not in keys: data['temperature'] = 1
     if "top_p" not in keys: data['top_p'] = 1
@@ -161,7 +162,7 @@ def update_gptmodel(data):
         }
 
         gptmodels.update_one(query, updated_values)
-        gpt_model = gptmodels.find(query)
+        gpt_model = list(gptmodels.find(query))[0]
         res = {
             "model_id": gpt_model.model_id,
             "model_name": gpt_model.model_name,
@@ -235,5 +236,25 @@ def switch_gptmodel(course_id, model_id):
         if ret:
             ret = activate_gptmodel(model_id)
             if not(ret): return OPERATION_FAILED
+    except:
+        return OPERATION_FAILED
+
+def get_gptmodels(course_id):
+    """
+    Gets all GPT Models for a particular course
+    """
+    try:
+        gpt_models = GPTModel.objects.filter(course_id=course_id).values()
+        return list(gpt_models)
+    except:
+        return OPERATION_FAILED
+
+def delete_gptmodels(model_id):
+    """
+    Deletes a GPT Model given <model_id>
+    """
+    try:
+        GPTModel.objects.filter(model_id=model_id).delete()
+        return OPERATION_SUCCESSFUL
     except:
         return OPERATION_FAILED

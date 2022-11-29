@@ -49,4 +49,4 @@ class InteractionFrequencySerializer(serializers.ModelSerializer):
 class GPTModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = GPTModel
-        fields = ['model_name', 'course_id', 'model', 'prompt', 'suffix', 'max_tokens', 'top_p', 'n', 'stream', 'logprobs', 'presence_penalty', 'frequency_penalty', 'best_of']
+        fields = ['model_name', 'course_id', 'model', 'prompt', 'max_tokens', 'top_p', 'presence_penalty', 'frequency_penalty']
