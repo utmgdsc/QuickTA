@@ -51,6 +51,10 @@ urlpatterns = [
 
     path('researcher/course-student-list', researcher_views.get_course_users),
 
+    path('researcher/create-gptmodel', researcher_views.gptmodel_detail),
+    path('researcher/update-gptmodel', researcher_views.gptmodel_update),
+    path('researcher/activate-gptmodel', researcher_views.gptmodel_select),
+
     # Admin view
     # ================================================================================================
     path('admin/add-user', admin_views.create_user),

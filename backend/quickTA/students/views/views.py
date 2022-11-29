@@ -117,9 +117,6 @@ def get_user(request):
             else:
                 err = {"msg": "User does not exist"}
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
-            
-            
-
 
 @swagger_auto_schema(methods=['post'], request_body=UserSerializer)
 @api_view(['POST'])
@@ -396,7 +393,7 @@ def chatlog_detail(request):
     """
     if request.method == 'POST':
 
-        # try:
+        try:
             # Set current chatlog's time if not provided
             current_time = timezone.now()
             location = 'America/Toronto'
@@ -457,10 +454,8 @@ def chatlog_detail(request):
 
             # Get response from Model
             model_chatlog_id = str(uuid.uuid4())
-            # model_response = "hi"
-            model_response = model.enquire_model(cid, data['chatlog'])
-            # gpt_model = model.GPTChatlog()
-            # model_response = gpt_model.enquire_model(user_chatlog)
+            course_id = conversation[0].course_id            
+            model_response = model.enquire_model(cid, data['chatlog'], course_id)
             
             # Save message from the Model
             model_time = timezone.now()
@@ -499,16 +494,16 @@ def chatlog_detail(request):
             }
             return Response(response, status=status.HTTP_201_CREATED)
         
-        # except:
-        #     # Error handling
-        #     error = []
-        #     if 'conversation_id' not in request.data.keys():
-        #         error.append("Conversation ID")
-        #     if 'chatlog' not in request.data.keys():
-        #         error.append("Chatlog message")
-        #     err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
+        except:
+            # Error handling
+            error = []
+            if 'conversation_id' not in request.data.keys():
+                error.append("Conversation ID")
+            if 'chatlog' not in request.data.keys():
+                error.append("Chatlog message")
+            err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
 
-        #     return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
 @swagger_auto_schema(methods=['post'], request_body=FeedbackSerializer)
 @api_view(['POST'])

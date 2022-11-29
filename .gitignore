@@ -26,8 +26,9 @@ frontend/yarn-error.log*
 backend/env/*
 backend/venv/*
 */__pycache__
- */__pycache__/*
- *.pyc
+*/__pycache__/*
+__pycache__/*
+*.pyc
 */img
 
 .env

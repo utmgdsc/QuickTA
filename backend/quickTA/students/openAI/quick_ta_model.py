@@ -3,12 +3,10 @@ import openai
 import environ
 
 from ..models import Conversation
-from ..functions import conversation_functions as convo_f
+from ..functions import conversation_functions as convo_f, gptmodel_functions as gptmodel_f
 
 env = environ.Env()
 environ.Env.read_env()
-# openai.organization =
-# openai.Model.list()
 openai.api_key = env('OPENAI_KEY')
 
 # CONVO_START = "\n\nHuman: Hello, who are you?\nAI: I am an AI created by OpenAI."
@@ -37,14 +35,14 @@ FILTERS = [
 START_SEQUENCE = f"\n{AGENT}: "
 RESTART_SEQUENCE = f"\n\n{USER}: "
 
-def enquire_model(conversation_id: str, question: str) -> str:
+def enquire_model(conversation_id: str, question: str, course_id: str) -> str:
     """
     Enquires the OpenAI GPT-3 model for a text-completion answer
     given a <conversation_id> and a <question>.
     """
     # Acquire all chatlogs for the particular conversation from the conversation_id
     chatlog = convo_f.get_conversation_chatlog(conversation_id)
-    print("PREVIOUS CHATLOG:", chatlog)
+    BOT_START, configs = get_configs(course_id)
 
     if chatlog == "":
         chatlog += BOT_START
@@ -54,7 +52,7 @@ def enquire_model(conversation_id: str, question: str) -> str:
     response = openai.Completion.create(
         prompt=prompt_text,
         stop=[" {}:".format(USER), " {}:".format(AGENT)],
-        **CONFIGS
+        **configs
     )
 
     res_text = response['choices'][0]['text']
@@ -72,3 +70,26 @@ def enquire_model(conversation_id: str, question: str) -> str:
 
 # def filter(self, prompt_text: str) -> str:
 #     return [" ".join([word for word in prompt.split() if not word in filter]) for prompt in prompt_text]
+
+def get_configs(course_id: str):
+    """
+    Get model parameters
+    """
+    params = gptmodel_f.get_active_model(course_id)
+
+    ret = {
+        "engine": params['model'],
+        "temperature": params['temperature'],
+        "max_tokens": params['max_tokens'],
+        "top_p": params['top_p'],
+        "n": params['n'],
+        "stream": params['stream'],
+        "logprobs": params['logprobs'],
+        "presence_penalty": params['presence_penalty'],
+        "frequency_penalty": params['frequency_penalty'],
+        "best_of": params['best_of'],
+    }
+    return params['prompt'], ret
+
+
+    
