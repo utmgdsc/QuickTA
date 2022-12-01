@@ -42,6 +42,7 @@ const Chat = ({ courseCode, semester }) => {
           currConvoID={currConvoID}
           updateConvoID={updateConvoID}
           course_ID={courseID}
+          messages={messages}
           />
         </Box>
       </Box>

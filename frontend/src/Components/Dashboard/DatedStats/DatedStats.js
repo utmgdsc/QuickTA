@@ -10,7 +10,6 @@ import axios from "axios";
 import {useState} from "react";
 
 const DatedStats = ({isWeekly, courseID}) => {
-
   const [avgRating, setAvgRating] = useState({avgRating : 0, avgRatingDelta: 0});
   const [avgRespTime, setAvgRespTime] = useState({avgRespTime: 0, avgRespTimeDelta: 0});
   const [avgComfort, setAvgComfort] = useState({avgComfort: 0, avgComfortDelta: 0});

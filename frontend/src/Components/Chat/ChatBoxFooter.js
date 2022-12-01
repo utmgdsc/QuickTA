@@ -29,6 +29,7 @@ const ChatBoxFooter = ({
 
     return(
     <HStack bgColor={'white'} p={5} paddingX={"3vw"} borderTop={'2px solid #EAEAEA'}>
+      
       <Button
         px={8}
         colorScheme={'green'}
@@ -53,6 +54,7 @@ const ChatBoxFooter = ({
       >
         Start Conversation
       </Button>
+
       <Button
         colorScheme={'red'}
         fontSize={'sm'}
@@ -68,11 +70,14 @@ const ChatBoxFooter = ({
       >
         End chat
       </Button>
+
       <FeedbackSurvey isOpen={isOpenFeedback} onClose={onCloseFeedback} conversation_id={currConvoID}
                       updateConvoID={updateConvoID} updateInConvo={updateInConvo} updateMessages={updateMessages}/>
+      
       <Input
         variant={'filled'}
         placeholder={"Enter your message here"}
+        value={text}
         onChange={(e) => {
         setText(e.target.value.slice(0, 250));
         }}
@@ -95,6 +100,7 @@ const ChatBoxFooter = ({
             }
             // Load user message on click
             updateMessages((oldMessage) => [...oldMessage, temp1])
+
             axios.post(process.env.REACT_APP_API_URL + "/chatlog", { conversation_id: currConvoID, chatlog: text,
               time: now
             })
@@ -106,6 +112,8 @@ const ChatBoxFooter = ({
                 }
                 updateMessages((oldMessage) => [...oldMessage, temp2]);
                 setWaitForResp(false);
+                setText("");
+                console.log(text);
               })
               .catch((err) => console.log(err))
           }else{
@@ -115,7 +123,7 @@ const ChatBoxFooter = ({
           console.log("must start a conversation to send a message to AI!");
         }
       }}
-      isDisabled={!inConvo}>
+      isDisabled={!inConvo || waitingForResp}>
         Send
       </Button>
     </HStack>
