@@ -157,7 +157,7 @@ def list_reported_conversations(request):
     - Report message
     """
     if request.method == 'POST':
-        try:
+        # try:
             data = request.data
             reported_convos = report_functions.get_filtered_convos(data['course_id'], data['filter'], data['timezone'])
             
@@ -179,19 +179,19 @@ def list_reported_conversations(request):
                     'msg': report.msg
                 }
             return Response(response, status=status.HTTP_200_OK)  
-        except:
-            error = []
-            keys = request.data.keys()
-            if 'course_id' not in keys: error.append("Course ID")
-            if 'filter' not in keys: error.append("Filter view")
-            if 'timezone' not in keys: error.append("Timezone")
+        # except:
+        #     error = []
+        #     keys = request.data.keys()
+        #     if 'course_id' not in keys: error.append("Course ID")
+        #     if 'filter' not in keys: error.append("Filter view")
+        #     if 'timezone' not in keys: error.append("Timezone")
             
-            if (not(error)): 
-                err = {"msg": "Internal Server Error"}
-                return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            else:
-                err = {"msg": "Reported Conversations missing fields: " + ','.join(error) + '.'}
-                return Response(err, status=status.HTTP_400_BAD_REQUEST)
+        #     if (not(error)): 
+        #         err = {"msg": "Internal Server Error"}
+        #         return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        #     else:
+        #         err = {"msg": "Reported Conversations missing fields: " + ','.join(error) + '.'}
+        #         return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 @swagger_auto_schema(methods=['post'], request_body=rs.ReportedListSerializer)
 @api_view(['POST'])

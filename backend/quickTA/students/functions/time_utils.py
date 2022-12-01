@@ -51,7 +51,13 @@ def get_monthly_time(timezone):
     tz = ZoneInfo(timezone)
 
     t1 = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-    t2 = t1.replace(month=t1.month+1)
+    
+    # Wraps December around to Jan
+    next_month = t1.month + 1
+    if (t1.month + 1 > 12):
+        next_month = 1
+
+    t2 = t1.replace(month=next_month)
     
     t1 = t1.astimezone(tz)
     t2 = t2.astimezone(tz)
