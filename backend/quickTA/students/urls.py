@@ -51,7 +51,7 @@ urlpatterns = [
 
     path('researcher/course-student-list', researcher_views.get_course_users),
 
-    path('researcher/gptmodel-create', researcher_views.gptmodel_detail),
+    path('researcher/gptmodel-create', researcher_views.gptmodel_create),
     path('researcher/gptmodel-update', researcher_views.gptmodel_update),
     path('researcher/gptmodel-activate', researcher_views.gptmodel_select),
     path('researcher/gptmodel-get', researcher_views.gptmodel_get),

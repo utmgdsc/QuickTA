@@ -762,7 +762,7 @@ def get_course_users(request):
 
 @swagger_auto_schema(methods=['post'], request_body=rs.GPTModelSerializer)
 @api_view(['POST'])
-def gptmodel_detail(request):
+def gptmodel_create(request):
     """
     Creates a GPT Model given the parameter specifications.
     """
@@ -816,7 +816,7 @@ def gptmodel_update(request):
                 err = {"msg": "GPT Model update missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)                
 
-@swagger_auto_schema(methods=['post'], request_body=rs.GPTModelSerializer)
+@swagger_auto_schema(methods=['post'], request_body=rs.GPTModelSelectSerializer)
 @api_view(['POST'])
 def gptmodel_select(request):
     """
@@ -875,7 +875,7 @@ def gptmodel_get_all(request):
         except:
             return Response("Internal server error.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-@swagger_auto_schema(methods=['post'])
+@swagger_auto_schema(methods=['post'], request_body=rs.GPTModelSelectSerializer)
 @api_view(['POST'])
 def gptmodel_delete(request):
     """

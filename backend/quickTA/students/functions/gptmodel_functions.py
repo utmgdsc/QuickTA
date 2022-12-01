@@ -93,11 +93,16 @@ def create_gptmodel(data):
     if "frequency_penalty" not in keys: data['frequency_penalty'] = 0
     if "best_of" not in keys: data['best_of'] = 1
     
+    has_existing_models = len(get_gptmodels(data['course_id'])) != 0 
+
+    if (has_existing_models): status = False
+    else: status = True
+
     gpt_model = GPTModel(
         model_id = uuid.uuid4(),
         model_name = data['model_name'],
         course_id = data['course_id'],
-        status = True,
+        status = status,
 
         # OpenAI Completion Parameters
         model = data['model'],

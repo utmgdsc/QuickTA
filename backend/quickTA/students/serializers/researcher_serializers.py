@@ -50,3 +50,8 @@ class GPTModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = GPTModel
         fields = ['model_name', 'course_id', 'model', 'prompt', 'max_tokens', 'top_p', 'presence_penalty', 'frequency_penalty']
+
+class GPTModelSelectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GPTModel
+        fields = ['course_id', 'model_id']
