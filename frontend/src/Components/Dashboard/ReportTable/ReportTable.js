@@ -59,7 +59,7 @@ const ReportTable = ( { course_ID, isWeekly } ) => {
 
     return (
         
-        <Box style={cardStyle}>
+        <Box style={cardStyle} mt={6}>
             <Heading as='h2'><span style={titleStyle}>Reported Conversations (Detailed)</span></Heading>
             <TableContainer>
             <VStack style= {{

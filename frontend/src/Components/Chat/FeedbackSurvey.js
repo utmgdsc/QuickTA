@@ -1,5 +1,5 @@
 import {
-  Button, Input,
+  Button, Center, HStack, Input,
   Modal, ModalBody, ModalContent, ModalFooter,
   ModalHeader,
   ModalOverlay,
@@ -62,7 +62,7 @@ const FeedbackSurvey = ({ isOpen, onClose, conversation_id, updateConvoID, updat
 
         <ModalFooter>
           {askFeedBack ?
-            <VStack>
+            <HStack>
               <Textarea
               size={'lg'}
               placeholder={'Any feedback would appreciated!'}
@@ -84,7 +84,7 @@ const FeedbackSurvey = ({ isOpen, onClose, conversation_id, updateConvoID, updat
                   .catch((err) => console.log(err))
               }
               }>Send</Button>
-            </VStack>
+            </HStack>
             : null}
           <Button colorScheme={'green'} onClick={() => {
             if (sliderVal < 4){

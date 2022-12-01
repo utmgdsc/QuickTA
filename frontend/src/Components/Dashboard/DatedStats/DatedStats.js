@@ -73,12 +73,15 @@ const DatedStats = ({isWeekly, courseID}) => {
       }
   }
 
+  useEffect(() => {
     if(courseID){
       fetchData("/researcher/average-ratings");
       fetchData("/researcher/avg-comfortability-rating");
       fetchData("/researcher/avg-response-rate");
       fetchData("/researcher/reported-conversations");
     }
+  }, [courseID])
+
     
     return (
         <Flex flexWrap='wrap'>
