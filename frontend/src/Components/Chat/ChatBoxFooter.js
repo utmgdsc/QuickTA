@@ -1,5 +1,5 @@
 import {
-  Button, HStack, Input,
+  Button, HStack, Input, Tooltip,
   useDisclosure
 } from '@chakra-ui/react'
 import {useState, useEffect} from "react";
@@ -13,20 +13,27 @@ const ChatBoxFooter = ({
     updateInConvo,
     currConvoID, 
     updateConvoID,
-    course_ID
+    course_ID,
+    messages
   }) => {
 
     const { isOpen: isOpenFeedback, onOpen: onOpenFeedback, onClose: onCloseFeedback } = useDisclosure();
+    // after conversations ends disclosure
+    
     const [sliderVal, setSliderVal] = useState(0);
-    const [showTooltip, setSliderTooltip] = useState(false);
     const [text, setText] = useState("");
+    const [waitingForResp, setWaitForResp] = useState(false);
 
 
     console.log(currConvoID);
 
     return(
     <HStack bgColor={'white'} p={5} paddingX={"3vw"} borderTop={'2px solid #EAEAEA'}>
-      <Button colorScheme={'green'} fontSize={'sm'} onClick={() => {
+      <Button
+        px={8}
+        colorScheme={'green'}
+        fontSize={'sm'}
+        onClick={() => {
         if(inConvo){
           console.log("You're already in a conversation!");
         }else{
@@ -41,27 +48,45 @@ const ChatBoxFooter = ({
           )
           .catch((err) => {console.log(err)})        
         }
-      }}>
+      }}
+      isDisabled={inConvo}
+      >
         Start Conversation
       </Button>
-      <Button colorScheme={'red'} fontSize={'sm'} onClick={() => {
-        if(inConvo){
+      <Button
+        colorScheme={'red'}
+        fontSize={'sm'}
+        onClick={() => {
+        if (inConvo && messages) {
+          console.log(messages);
           onOpenFeedback();
         }else{
-          console.log("Must be in a convo to leave one :>");
+        console.log("Must be in a convo to leave one :>");
         }
-      }}>
+      }}
+      isDisabled={!inConvo || (inConvo && !messages)}
+      >
         End chat
       </Button>
       <FeedbackSurvey isOpen={isOpenFeedback} onClose={onCloseFeedback} conversation_id={currConvoID}
                       updateConvoID={updateConvoID} updateInConvo={updateInConvo} updateMessages={updateMessages}/>
-      <Input variant={'filled'} placeholder={"Enter your message here"} onChange={(e) => {
+      <Input
+        variant={'filled'}
+        placeholder={"Enter your message here"}
+        onChange={(e) => {
         setText(e.target.value.slice(0, 250));
-      }}/>
+        }}
+        isDisabled={waitingForResp || !inConvo}
+      />
 
-      <Button backgroundColor={"#3278cd"} colorScheme={'blue'} fontSize={'sm'} onClick={() => {
+      <Button
+        backgroundColor={"#3278cd"}
+        colorScheme={'blue'}
+        fontSize={'sm'}
+        onClick={() => {
         if(inConvo){
           if (text){
+            setWaitForResp(true);
             const now = Temporal.Now.zonedDateTimeISO().toString();
             const temp1 = {
               message: text,
@@ -80,6 +105,7 @@ const ChatBoxFooter = ({
                   isUser: "false"
                 }
                 updateMessages((oldMessage) => [...oldMessage, temp2]);
+                setWaitForResp(false);
               })
               .catch((err) => console.log(err))
           }else{
@@ -88,7 +114,8 @@ const ChatBoxFooter = ({
         }else{
           console.log("must start a conversation to send a message to AI!");
         }
-      }}>
+      }}
+      isDisabled={!inConvo}>
         Send
       </Button>
     </HStack>
