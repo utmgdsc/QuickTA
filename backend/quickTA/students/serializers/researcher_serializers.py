@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import Chatlog, Course
+from ..models import Chatlog, Course, GPTModel
 
 class ResearchersSerializer(serializers.ModelSerializer):
     class Meta:
@@ -45,3 +45,8 @@ class InteractionFrequencySerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = ['course_id']
+
+class GPTModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GPTModel
+        fields = ['model_name', 'course_id', 'model', 'prompt', 'max_tokens', 'top_p', 'presence_penalty', 'frequency_penalty']

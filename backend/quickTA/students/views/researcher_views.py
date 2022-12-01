@@ -1,11 +1,13 @@
 import time
 import csv
 from datetime import datetime, date
+from ..constants import * 
 
-from ..functions import user_functions, course_functions, report_functions, conversation_functions,  time_utils
+from ..functions import user_functions, course_functions, report_functions, conversation_functions,  time_utils, gptmodel_functions
 from ..functions.common_topics import generate_wordcloud
 
 from django.http import HttpResponse
+from django.http import JsonResponse
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -668,7 +670,7 @@ def get_interaction_frequency(request):
     with the model.
     """
     if request.method == 'POST':
-        # try:
+        try:
             # Check for course existence
             course = Course.objects.filter(course_id=request.data['course_id'])
             print(course)
@@ -689,21 +691,21 @@ def get_interaction_frequency(request):
             
             return Response(response, status=status.HTTP_200_OK)
 
-        # except CourseNotFoundError:
-        #     return Response({"msg": "Error: Course not Found."}, status=status.HTTP_400_BAD_REQUEST)
-        # except:
-        #     error = []
-        #     keys = request.data.keys()
-        #     if 'course_id' not in keys: error.append("Course ID")
-        #     if 'filter' not in keys: error.append("Filter view")
-        #     if 'timezone' not in keys: error.append("Timezone")
+        except CourseNotFoundError:
+            return Response({"msg": "Error: Course not Found."}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            error = []
+            keys = request.data.keys()
+            if 'course_id' not in keys: error.append("Course ID")
+            if 'filter' not in keys: error.append("Filter view")
+            if 'timezone' not in keys: error.append("Timezone")
             
-        #     if (not(error)): 
-        #         err = {"msg": "Internal Server Error"}
-        #         return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        #     else:
-        #         err = {"msg": "Average Ratings CSV missing fields: " + ','.join(error) + '.'}
-        #         return Response(err, status=status.HTTP_400_BAD_REQUEST)
+            if (not(error)): 
+                err = {"msg": "Internal Server Error"}
+                return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                err = {"msg": "Average Ratings CSV missing fields: " + ','.join(error) + '.'}
+                return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 @swagger_auto_schema(methods=['post'], request_body=rs.CourseUserListSerializer)
 @api_view(['POST'])
@@ -757,6 +759,138 @@ def get_course_users(request):
         else:
             err = {"msg": "Course User List missing fields: " + ','.join(error) + '.'}
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+@swagger_auto_schema(methods=['post'], request_body=rs.GPTModelSerializer)
+@api_view(['POST'])
+def gptmodel_detail(request):
+    """
+    Creates a GPT Model given the parameter specifications.
+    """
+    if request.method == 'POST':
+        try:
+            data = request.data
+            res = gptmodel_functions.create_gptmodel(data)
+            return Response(res, status=status.HTTP_200_OK)
+        
+        except:
+            error = []
+            keys = request.data.keys()
+            if 'model_name' not in keys: error.append("Model Name")
+            if 'course_id' not in keys: error.append("Course ID")
+            if 'model' not in keys: error.append("Model")
+            if 'prompt' not in keys: error.append("Prompt")
+            if 'suffix' not in keys: error.append("Suffix")
+            
+            if (not(error)): 
+                err = {"msg": "Internal Server Error"}
+                return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                err = {"msg": "GPT Model creation missing fields: " + ','.join(error) + '.'}
+                return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+@swagger_auto_schema(methods=['post'], request_body=rs.GPTModelSerializer)
+@api_view(['POST'])
+def gptmodel_update(request):
+    """
+    Updates a particular GPT model
+    """
+    if request.method == 'POST':
+        try:
+            data = request.data
+            res = gptmodel_functions.update_gptmodel(data)
+            
+            if OPERATION_FAILED:
+                raise Exception
+            return Response(res, status=status.HTTP_200_OK)
+        
+        except:
+            error = []
+            keys = request.data.keys()
+            if 'model_name' not in keys: error.append("Model Name")
+            if 'course_id' not in keys: error.append("Course ID")
+            
+            if (not(error)): 
+                err = {"msg": "Internal Server Error"}
+                return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                err = {"msg": "GPT Model update missing fields: " + ','.join(error) + '.'}
+                return Response(err, status=status.HTTP_400_BAD_REQUEST)                
+
+@swagger_auto_schema(methods=['post'], request_body=rs.GPTModelSerializer)
+@api_view(['POST'])
+def gptmodel_select(request):
+    """
+    Activates a selected GPTModel
+    """
+    if request.method == 'POST':
+        try:
+            data = request.data
+            res = gptmodel_functions.switch_gptmodel(data['course_id'], data['model_id'])
+            
+            if OPERATION_FAILED:
+                raise Exception
+            return Response(res, status=status.HTTP_200_OK)
+        
+        except:
+            error = []
+            keys = request.data.keys()
+            if 'model_id' not in keys: error.append("Model ID")
+            if 'course_id' not in keys: error.append("Course ID")
+            
+            if (not(error)): 
+                err = {"msg": "Internal Server Error"}
+                return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                err = {"msg": "GPT Model creation missing fields: " + ','.join(error) + '.'}
+                return Response(err, status=status.HTTP_400_BAD_REQUEST)                
+
+@swagger_auto_schema(methods=['post'], request_body=rs.CourseUserListSerializer)
+@api_view(['POST'])
+def gptmodel_get(request):
+    """
+    Returns all GPT models related to a course
+    """
+    if request.method == 'POST':
+        try:
+            data = request.data
+            gpt_models = gptmodel_functions.get_gptmodels(data['course_id'])
+
+            if not(gpt_models):
+                raise Exception
+            
+            return JsonResponse({"gpt_models": gpt_models})
+        except:
+            return Response("Internal server error", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@swagger_auto_schema(methods=['get'])
+@api_view(['GET'])
+def gptmodel_get_all(request):
+    """
+    Retrieves all GPT models from all courses
+    """
+    if request.method == 'GET':
+        try:
+            gpt_models = GPTModel.objects.all().values()
+            return JsonResponse({ "gpt_models": list(gpt_models)})
+        except:
+            return Response("Internal server error.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+@swagger_auto_schema(methods=['post'])
+@api_view(['POST'])
+def gptmodel_delete(request):
+    """
+    Deletes a GPT model configuration
+    """
+    if request.method == 'POST':
+        try:
+            data = request.data
+            ret = gptmodel_functions.delete_gptmodels(data['model_id'])
+            if not(ret):
+                raise Exception
+            return Response(status=status.HTTP_200_OK)
+        except:
+            return Response("Internal server error.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 # Helper functions
 def get_courses_convos(course_id):
