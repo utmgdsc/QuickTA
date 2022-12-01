@@ -66,7 +66,7 @@ const ChatBoxFooter = ({
         console.log("Must be in a convo to leave one :>");
         }
       }}
-      isDisabled={!inConvo || (inConvo && !messages)}
+      isDisabled={!inConvo || (inConvo && (messages.length == 0))}
       >
         End chat
       </Button>
