@@ -42,6 +42,7 @@ urlpatterns = [
     
     path('researcher/avg-comfortability-rating', researcher_views.get_course_comfortability),
     path('researcher/avg-comfortability-rating-csv', researcher_views.get_course_comfortability_csv),
+    path('researcher/get-filtered-chatlogs', researcher_views.get_filtered_chatlogs),
 
     # Admin view
     path('admin/add-user', admin_views.create_user)

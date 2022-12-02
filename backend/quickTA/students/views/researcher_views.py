@@ -11,7 +11,7 @@ from rest_framework import status
 
 from ..models import User, Chatlog, Conversation, Feedback, Report, Course
 from ..serializers.serializers import ConversationSerializer
-from ..serializers.researcher_serializers import ResearchersSerializer, ReportedListSerializer, AverageRatingSerializer, ChatlogListSerializer, ResponseRateSerializer, MostCommonWordsSerializer
+from ..serializers.researcher_serializers import ResearchersSerializer, ReportedListSerializer, AverageRatingSerializer, ChatlogListSerializer, ResponseRateSerializer, MostCommonWordsSerializer, ChatlogSerializer
 from ..serializers import researcher_serializers as rs
 from drf_yasg.utils import swagger_auto_schema
 # from ..functions.common_topics import generate_wordcloud
@@ -546,6 +546,23 @@ def get_course_comfortability_csv(request):
             else:
                 err = {"msg": "Course comfortability missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', 'POST'])
+def get_filtered_chatlogs(request):
+    # id_contains = request.GET.get('id_contains')
+    # chatlog_contains = request.GET.get('chatlog_contains')
+
+    # qs = Chatlog.objects.all()
+    qs = Chatlog.objects.filter()
+    # qs = qs.filter()
+    # qs = qs.object.filter(chatlog='hi')
+    # qs = qs.object.filter(chatlog="test")
+    serializer = ChatlogSerializer(qs, context={'request': request}, many=True)
+
+    return Response(serializer.data)
+
+
 
 # Helper functions
 def get_courses_convos(course_id):

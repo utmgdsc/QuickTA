@@ -35,3 +35,9 @@ class CourseComfortabilityListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = ['course_id']
+
+class ChatlogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Chatlog
+        # fields = ['id', 'conversation_id', 'chatlog_id', 'time', 'is_user', 'chatlog', 'delta']
+        fields = '__all__'
