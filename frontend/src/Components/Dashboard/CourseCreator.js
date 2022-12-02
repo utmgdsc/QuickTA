@@ -40,6 +40,8 @@ const CourseCreator = () => {
                             <HStack spacing='24px'>
                             <Radio value='Fall'>Fall</Radio>
                             <Radio value='Winter'>Winter</Radio>
+                            <Radio value='Full Year'>Full Year</Radio>
+                            <Radio value='Summer'>Summer</Radio>
                             </HStack>
                         </RadioGroup>
                     </FormControl>

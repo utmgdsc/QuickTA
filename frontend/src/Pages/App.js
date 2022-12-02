@@ -8,7 +8,8 @@ import { Link } from "react-router-dom";
 import StudentPage from "./StudentPage";
 import LoginPage from "./LoginPage";
 import ProfessorPage from "./ProfessorPage";
-import ResearcherPage from "./ResearcherPage";
+import ResearcherAnalytics from "./ResearcherAnalytics";
+import ResearcherModels from "./ResearcherModels";
 
 
 function App() {
@@ -18,7 +19,8 @@ function App() {
         <Routes>
           <Route path="/Student" element={<StudentPage/>} />
           <Route path="/Professor" element={<ProfessorPage/>} />
-          <Route path="/Researcher" element={<ResearcherPage/>} />
+          <Route path="/ResearcherAnalytics" element={<ResearcherAnalytics/>} />
+          <Route path="/ResearcherModels" element={<ResearcherModels/>} />
         </Routes>
       </BrowserRouter>
     </div>

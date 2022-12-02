@@ -8,6 +8,7 @@ import React, { useState, useEffect } from "react";
 import Chart from "react-apexcharts";
 
 const DatedGraph = ({isWeekly, courseID}) => {
+    console.log(isWeekly);
     const [category, setCategory] = useState([]);
     const [data, setData] = useState ([]);
     const cardStyle = {
@@ -31,7 +32,7 @@ const DatedGraph = ({isWeekly, courseID}) => {
         })
         .then((res) => {
             // console.log(isWeekly, "Call");
-            if (isWeekly == 1) {
+            if (isWeekly === 1) {
                 
                 let x = {
                     day: [],
@@ -49,7 +50,7 @@ const DatedGraph = ({isWeekly, courseID}) => {
                 // console.log(dayData);
             
             } else {
-                console.log("rendering monthly data");
+                // console.log("rendering monthly data");
                 const currDate = Temporal.Now.plainDateISO().toString();
                 const currDay = currDate.substring(currDate.length-2);
                 let x = {
@@ -77,7 +78,7 @@ const DatedGraph = ({isWeekly, courseID}) => {
     }
 
     useEffect(()=>{
-        if(courseID && isWeekly){
+        if(courseID){
             fetchGraphData();
         }
     }, [courseID, isWeekly]);

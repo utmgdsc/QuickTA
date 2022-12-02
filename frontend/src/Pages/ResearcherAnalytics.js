@@ -2,7 +2,7 @@ import TopNav from "../Components/TopNav";
 import Dashboard from "../Components/Dashboard/Dashboard"
 
 
-const ResearcherPage = ({UTORid, courseCode, courseName, semester}) => {
+const ResearcherAnalytics = ({UTORid, courseCode, courseName, semester}) => {
     return(
         <div style={{
             backgroundColor: "#F1F1F1",
@@ -17,4 +17,4 @@ const ResearcherPage = ({UTORid, courseCode, courseName, semester}) => {
 };
 
 
-export default ResearcherPage;
+export default ResearcherAnalytics;
