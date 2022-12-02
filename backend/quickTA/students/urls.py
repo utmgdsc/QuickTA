@@ -15,6 +15,7 @@ urlpatterns = [
     # Student view
     # ================================================================================================
     path('user', views.user_detail),
+    path('user/courses', views.get_user_courses),
     path('get-user',views.get_user),
     path('course', views.course_detail),
     path('get-course', views.course_get),

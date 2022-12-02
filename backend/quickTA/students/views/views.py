@@ -12,6 +12,8 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.utils import timezone, dateparse
 from django.utils.timezone import now
+
+from ..functions import user_functions, course_functions
 from ..models import Chatlog, Conversation, Course, Feedback, User, Report
 from ..serializers.serializers import GetUserSerializer, ConversationSerializer, CourseSerializer, FeedbackSerializer, IncorrectChatlogSerializer, UserSerializer, ChatlogSerializer, ReportSerializer, ChatlogDetailSerializer, CourseComfortabilitySerializer
 
@@ -187,6 +189,26 @@ def user_detail(request):
             err = {"msg": "User details missing fields:" + ','.join(error)}
 
             return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+
+@swagger_auto_schema(methods=['post'], request_body=UserSerializer)
+@api_view(['POST'])
+def get_user_courses(request):
+    if request.method == 'POST':
+        try:
+            courses = user_functions.get_user_courses(request.data['user_id'])
+            res = course_functions.get_courses_info(courses)
+            response = {
+                "courses": res
+            }
+            return Response(response, status=status.HTTP_200_OK)
+        except:
+            error = []
+            if 'user_id' not in request.data.keys():
+                error.append("User ID")
+            err = {"msg": "Get user course missing fields:" + ','.join(error)}
+            return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
 @swagger_auto_schema(methods=['post'], request_body=CourseSerializer)
 @api_view(['POST'])

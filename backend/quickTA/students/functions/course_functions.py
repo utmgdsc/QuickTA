@@ -2,6 +2,7 @@ from ..database import connect
 from . import course_functions
 from ..models import *
 from ..constants import *
+from typing import List
 
 def get_course_cluster():
     """
@@ -133,4 +134,16 @@ def get_all_course_users(course_id: str):
         return users_ls
     except:
         return OPERATION_FAILED
-        
+
+def get_courses_info(course_ids: List[str]):
+    """
+    Get course information given a list of course_ids
+    """
+    try:
+        res = []
+        for course_id in course_ids:
+            course = Course.objects.find(course_id=course_id).values()
+            res.append(course[0])
+        return res
+    except:
+        return OPERATION_FAILED
