@@ -13,7 +13,7 @@ const ChatOpenSurvey = () => {
   const { isOpen, onOpen, onClose} = useDisclosure({defaultIsOpen: true});
   const [sliderVal, setSliderVal] = useState(0);
   const [showTooltip, setSliderTooltip] = useState(false);
-  
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
     <ModalOverlay/>

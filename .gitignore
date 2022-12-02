@@ -23,10 +23,14 @@ frontend/npm-debug.log*
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
 
+backend/quickTA/quickTA/.env
 backend/env/*
+backend/venv/*
 */__pycache__
- */__pycache__/*
- *.pyc
+*/__pycache__/*
+__pycache__/*
+*.pyc
 */img
 
+.env
 docs/node_modules/*

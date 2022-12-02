@@ -1,20 +1,22 @@
 import {
-  Button, Input,
+  Button, Center, HStack, Input,
   Modal, ModalBody, ModalContent, ModalFooter,
   ModalHeader,
   ModalOverlay,
   Slider, SliderFilledTrack,
-  SliderMark, SliderThumb, SliderTrack, Tooltip
+  SliderMark, SliderThumb, SliderTrack, Textarea, Tooltip, VStack
 } from '@chakra-ui/react'
 import {useState} from "react";
+import axios from "axios";
 
-const FeedbackSurvey = ({ isOpen, onClose }) => {
+const FeedbackSurvey = ({ isOpen, onClose, conversation_id, updateConvoID, updateInConvo, updateMessages }) => {
 
   const [sliderVal, setSliderVal] = useState(0);
   const [showTooltip, setSliderTooltip] = useState(false);
+
   const [askFeedBack, setFeedBackPopup] = useState(false);
   const [feedback, setFeedback] = useState("");
-  const [isSurveyDisabled, setIsSurveyDisabled] = useState(true);
+  const [isSurveyDisabled, setIsSurveyDisabled] = useState(false);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -31,7 +33,7 @@ const FeedbackSurvey = ({ isOpen, onClose }) => {
             defaultValue={1}
             min={1}
             max={5}
-            onChangeEnd={(currVal) => setSliderVal(currVal)}
+            onChange={(currVal) => setSliderVal(currVal)}
             onMouseEnter={() => setSliderTooltip(true)}
             onMouseLeave={() => setSliderTooltip(false)}
             step={1}
@@ -59,14 +61,40 @@ const FeedbackSurvey = ({ isOpen, onClose }) => {
         </ModalBody>
 
         <ModalFooter>
-          {askFeedBack ? <Input
-            size={'lg'}
-            placeholder={'Any feedback would appreciated!'}
-            onChange={(e) => {setFeedback(e.target.value)}}
-          /> : null}
+          {askFeedBack ?
+            <HStack>
+              <Textarea
+              size={'lg'}
+              placeholder={'Any feedback would appreciated!'}
+              onChange={(e) => {setFeedback(e.target.value)}}/>
+              <Button onClick={async () => {
+                console.log(conversation_id, sliderVal, feedback);
+                await axios.post(process.env.REACT_APP_API_URL + "/feedback", {
+                  conversation_id: conversation_id,
+                  rating: sliderVal, feedback_msg: feedback
+                })
+                  .then((res) => {
+                    updateConvoID("");
+                    updateInConvo(false);
+                    updateMessages([]);
+                    setFeedBackPopup(false);
+                    setIsSurveyDisabled(false);
+                    onClose();
+                  })
+                  .catch((err) => console.log(err))
+              }
+              }>Send</Button>
+            </HStack>
+            : null}
           <Button colorScheme={'green'} onClick={() => {
             if (sliderVal < 4){
-              setIsSurveyDisabled(false);
+              setFeedBackPopup(true);
+              setIsSurveyDisabled(true);
+            }else{
+              (async () => {
+                await axios.post(process.env.REACT_APP_API_URL + "/feedback", {conversation_id: conversation_id,
+                rating: sliderVal, feedback_msg: ""})
+              })()
             }
           }}>
             Submit

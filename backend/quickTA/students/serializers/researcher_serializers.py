@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import Chatlog, Course
+from ..models import Chatlog, Course, GPTModel
 
 class ResearchersSerializer(serializers.ModelSerializer):
     class Meta:
@@ -9,7 +9,7 @@ class ResearchersSerializer(serializers.ModelSerializer):
 class AverageRatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
-        fields = ['course_code']
+        fields = ['course_id']
 
 class ReportedListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -36,8 +36,30 @@ class CourseComfortabilityListSerializer(serializers.ModelSerializer):
         model = Course
         fields = ['course_id']
 
+<<<<<<< HEAD
 class ChatlogSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chatlog
         # fields = ['id', 'conversation_id', 'chatlog_id', 'time', 'is_user', 'chatlog', 'delta']
         fields = '__all__'
+=======
+class CourseUserListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = ['course_id']
+
+class InteractionFrequencySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = ['course_id']
+
+class GPTModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GPTModel
+        fields = ['model_name', 'course_id', 'model', 'prompt', 'max_tokens', 'top_p', 'presence_penalty', 'frequency_penalty']
+
+class GPTModelSelectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GPTModel
+        fields = ['course_id', 'model_id']
+>>>>>>> bceb4ca230aef144850712f7a878dbdeaa9e3fe5

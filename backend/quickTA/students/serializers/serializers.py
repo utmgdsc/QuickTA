@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import Chatlog, Conversation, Feedback, Report, User, Course, Model
+from ..models import Chatlog, Conversation, Feedback, Report, User, Course
 # from rest_framework_mongoengine.serializers import DocumentSerializer
 
 
@@ -8,17 +8,15 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['name', 'utorid', 'user_role']
 
+class GetUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['utorid']
 
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = ['course_code', 'semester']
-
-
-class ModelSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Model
-        fields = ['model_id', 'course_id']
 
 
 class ConversationSerializer(serializers.ModelSerializer):

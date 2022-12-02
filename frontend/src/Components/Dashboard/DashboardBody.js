@@ -1,6 +1,5 @@
 import { 
     Box,
-    Container,
     Tabs, 
     TabList, 
     TabPanels, 
@@ -9,15 +8,15 @@ import {
 } from "@chakra-ui/react";
 import DatedStats from "./DatedStats/DatedStats";
 import ReportTable from "./ReportTable/ReportTable";
+import React, { Component, useState, useEffect } from "react";
 
-const DashboardBody = ({ courseCode }) => {
+const DashboardBody = ({ courseID }) => {
     const tabStyle = {
         borderRadius: 'lg',
         color: 'white',
         bg: '#2C54A7',
         padding: "sm"
     };
-
     return (
         <Box>
             <Tabs variant='solid-rounded' mt={7}>
@@ -29,15 +28,16 @@ const DashboardBody = ({ courseCode }) => {
 
                 <TabPanels>
                     <TabPanel paddingLeft={'0'} paddingRight={'0'}>
-                        <DatedStats isWeekly={1} courseCode={courseCode}/>
+                        <DatedStats isWeekly={1} courseID={courseID}/>
+                        <ReportTable course_ID={courseID} isWeekly={1}/>
                     </TabPanel>
                     <TabPanel paddingLeft={'0'} paddingRight={'0'}>
-                        <DatedStats isWeekly={0} courseCode={courseCode}/>
+                        <DatedStats isWeekly={0} courseID={courseID}/>
+                        <ReportTable course_ID={courseID} isWeekly={0}/>
                     </TabPanel>
                 </TabPanels>
-
             </Tabs>
-            <ReportTable course_ID={courseCode}/>
+            
         </Box>
     );
 }

@@ -1,47 +1,40 @@
 import uuid
 
 from django.http import HttpResponse
-from ..serializers.admin_serializers import CreateUserSerializer
-from ..models import User
+from ..serializers.admin_serializers import CreateUserSerializer, AddUserCourseSerializer
+from ..models import *
+from ..constants import *
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-
+from ..functions import user_functions, course_functions
 from drf_yasg.utils import swagger_auto_schema
 
 @swagger_auto_schema(methods=['post'], request_body=CreateUserSerializer)
 @api_view(['POST'])
 def create_user(request):
-      if request.method == 'POST':
+    """
+    Adds a single user.
+
+    Parameters:
+    - user_id: str      User ID
+    - name: str         User name
+    - utorid: str       User's utorid
+    - user_role: str    User role ('ST' - Student, 'IS' - Instructor
+                        'RS' - researcher, 'AM' - admin)
+    """
+    if request.method == 'POST':
         try:
             # Response validation
             serializer = CreateUserSerializer(data=request.data)
             serializer.is_valid()
             
-            request.data['user_id'] = str(uuid.uuid4())
-            
-            utorid = User.objects.filter(utorid=request.data['utorid'])
-            if (len(utorid) != 0):
+            ret = user_functions.create_user(request.data)
+            if ret == OPERATION_FAILED:
                 raise UserAlreadyExistsError
 
-            # Save newly created user
-            data = request.data
-            user = User(
-                user_id=data['user_id'],
-                name=data['name'],
-                utorid=data['utorid'],
-                user_role=data['user_role']                
-            )
-            user.save()
-
-            response = {
-                "user_id": user.user_id,
-                "name": user.name,
-                "utorid": user.utorid,
-                "user_role": user.user_role
-            }
-            return Response(response, status=status.HTTP_201_CREATED)
+            return Response(ret, status=status.HTTP_201_CREATED)
         except UserAlreadyExistsError:
             return Response({"msg": "User already exists."}, status=status.HTTP_400_BAD_REQUEST)
         except:
@@ -56,4 +49,121 @@ def create_user(request):
 
             return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
+@swagger_auto_schema(methods=['post'], request_body=CreateUserSerializer)
+@api_view(['POST'])
+def create_multiple_users(request):
+    """
+    Adds multiple users.
+
+    Parameters:
+    - users: List  Users array containing the following information for each user:
+    
+        - user_id: str      User ID
+        - name: str         User name
+        - utorid: str       User's utorid
+        - user_role: str    User role ('ST' - Student, 'IS' - Instructor
+                            'RS' - researcher, 'AM' - admin)
+    """
+    if request.method == 'POST':
+        try:
+            response = { "users": [] }
+
+            for user in request.data['users']:
+                ret = user_functions.create_user(user)
+                if ret == OPERATION_FAILED:
+                    raise UserAlreadyExistsError
+                response['users'].append(ret)
+
+            return Response(ret, status=status.HTTP_201_CREATED)
+        except UserAlreadyExistsError:
+            return Response({"msg": "User already exists."}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            error = []
+            if 'name' not in request.data.keys():
+                error.append("Name")
+            if 'utorid' not in request.data.keys():
+                error.append("Utor ID")
+            if 'user_role' not in request.data.keys():
+                error.append("User Role")
+            err = {"msg": "User details missing fields:" + ','.join(error)}
+
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+
+@swagger_auto_schema(methods=['post'], request_body=AddUserCourseSerializer)
+@api_view(['POST'])
+def add_user_course(request):
+    """
+    Links a user to a course
+
+    Parameters:
+    - user_id
+    - course_id
+    """
+    if request.method == 'POST':
+        try:
+            add_user = user_functions.add_user_to_course(request.data['user_id'], request.data['course_id'])
+            if (add_user):
+                op = course_functions.update_course_students_list(request.data['course_id'], request.data['user_id'])
+                if not(op): raise AddUserToCourseFailedError
+            else:
+                raise AddUserToCourseFailedError
+
+            return Response(status=status.HTTP_200_OK)
+        except AddUserToCourseFailedError:
+            return Response({"msg": "Failed to add course to user."}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@swagger_auto_schema(methods=['post'], request_body=AddUserCourseSerializer)
+@api_view(['POST'])
+def add_multiple_user_course(request):
+    """
+    Links a user to a course
+
+    Parameters:
+    - users: List[str]  list of student user uuids
+    - course_id: str    course uuid
+    """
+    if request.method == 'POST':
+        try:
+            for user in request.data['users']:
+                add_user = user_functions.add_user_to_course(user, request.data['course_id'])
+                if (add_user):
+                    op = course_functions.update_course_students_list(request.data['course_id'], user)
+                    if not(op): raise AddUserToCourseFailedError
+                else:
+                    raise AddUserToCourseFailedError
+
+                return Response(status=status.HTTP_200_OK)
+        except AddUserToCourseFailedError:
+            return Response({"msg": "Failed to add course to users."}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@swagger_auto_schema(methods=['post'], request_body=AddUserCourseSerializer)
+@api_view(['POST'])
+def remove_user_course(request):
+    """
+    Removes a user from a course.
+    
+    Parameters:
+    - user_id
+    - course_id
+    """
+    if request.method == 'POST':
+        try:
+            data = request.data
+            remove_user = user_functions.remove_user_from_course(data['user_id'], data['course_id'])
+            if (remove_user):
+                op = course_functions.remove_student_from_course(data['course_id'], data['user_id'])
+                if not(op): raise RemoveUserFromCourseFailedError
+            else:
+                raise RemoveUserFromCourseFailedError
+        except RemoveUserFromCourseFailedError:
+            return Response({"msg": "Failed to remove user from course."}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
 class UserAlreadyExistsError(Exception): pass
+class AddUserToCourseFailedError(Exception): pass
+class RemoveUserFromCourseFailedError(Exception): pass

@@ -3,6 +3,7 @@ import uuid
 import re
 import zoneinfo
 import pytz 
+from ..openAI import quick_ta_model as model
 
 from datetime import datetime
 from http.client import responses
@@ -12,7 +13,7 @@ from django.http import JsonResponse
 from django.utils import timezone, dateparse
 from django.utils.timezone import now
 from ..models import Chatlog, Conversation, Course, Feedback, User, Report
-from ..serializers.serializers import ConversationSerializer, CourseSerializer, FeedbackSerializer, IncorrectChatlogSerializer, UserSerializer, ChatlogSerializer, ReportSerializer, ChatlogDetailSerializer, CourseComfortabilitySerializer
+from ..serializers.serializers import GetUserSerializer, ConversationSerializer, CourseSerializer, FeedbackSerializer, IncorrectChatlogSerializer, UserSerializer, ChatlogSerializer, ReportSerializer, ChatlogDetailSerializer, CourseComfortabilitySerializer
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -98,6 +99,24 @@ class FeedbackDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer = FeedbackSerializer(queryset, many=True)
     pass
 
+@swagger_auto_schema(methods=['post'], request_body=GetUserSerializer) 
+@api_view(['POST'])
+def get_user(request):
+    if request.method == 'POST':
+        try:
+            user = User.objects.get(utorid=request.data['utorid'])
+            res = { "user_id" : user.user_id}
+
+            return Response(res, status=status.HTTP_200_OK)
+        
+        except:
+            error = []
+            if 'utorid' not in request.data.keys():
+                error.append("Utor ID")
+                err = {"msg": "User details missing fields:" + ','.join(error)}
+            else:
+                err = {"msg": "User does not exist"}
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 @swagger_auto_schema(methods=['post'], request_body=UserSerializer)
 @api_view(['POST'])
@@ -169,7 +188,6 @@ def user_detail(request):
 
             return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
-
 @swagger_auto_schema(methods=['post'], request_body=CourseSerializer)
 @api_view(['POST'])
 def course_detail(request):
@@ -237,7 +255,7 @@ def course_detail(request):
 @swagger_auto_schema(methods=['post'], request_body=CourseSerializer)
 @api_view(['POST'])
 def course_get(request):
- if request.method == 'POST':
+    if request.method == 'POST':
         try:
             # Response Validation
             serializer = CourseSerializer(data=request.data)
@@ -245,15 +263,19 @@ def course_get(request):
 
             # Check for duplicated courses
             course_code = Course.objects.filter(
-                course_code=request.data['course_code'],
-                semester=request.data['semester']
+                course_code=request.data['course_code']
             )
 
-            if (len(course_code) != 0):
+            if (len(course_code) == 0):
                 raise CourseAlreadyExistsError
 
+            course_id = 0
+            for course in course_code:
+                if course.semester == request.data['semester']:
+                    course_id = course.course_id
+
             response = {
-                "course_id": course_code[0].course_id,
+                "course_id": course_id,
                 "course_code": request.data['course_code'],
                 "semester": request.data['semester']
             }
@@ -334,6 +356,19 @@ def conversation_detail(request):
             err = {"msg": "Conversation details missing fields: " + ','.join(error) + '.'}
 
             return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+
+@swagger_auto_schema(methods=['get'])
+@api_view(['GET'])
+def courses_get_all(request):
+    """
+    Retrieves all courses
+    """
+    if request.method == 'GET':
+        try:
+            courses = Course.objects.all().values()
+            return JsonResponse({"courses": list(courses)})
+        except:
+            return Response("Internal server error.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @swagger_auto_schema(methods=['post'], request_body=ChatlogSerializer)
 @api_view(['POST'])
@@ -431,10 +466,11 @@ def chatlog_detail(request):
 
 
             # Get response from Model
-            model_response = "hi"
+            model_chatlog_id = str(uuid.uuid4())
+            course_id = conversation[0].course_id            
+            model_response = model.enquire_model(cid, data['chatlog'], course_id)
             
             # Save message from the Model
-            model_chatlog_id = str(uuid.uuid4())
             model_time = timezone.now()
             model_chatlog = Chatlog(
                 conversation_id=cid,

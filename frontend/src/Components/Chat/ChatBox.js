@@ -9,6 +9,7 @@ const ChatBox = ({messages}) => {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    console.log(messages);
   }, [messages])
 
   return(
