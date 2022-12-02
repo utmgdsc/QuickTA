@@ -36,13 +36,11 @@ class CourseComfortabilityListSerializer(serializers.ModelSerializer):
         model = Course
         fields = ['course_id']
 
-<<<<<<< HEAD
 class ChatlogSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chatlog
         # fields = ['id', 'conversation_id', 'chatlog_id', 'time', 'is_user', 'chatlog', 'delta']
         fields = '__all__'
-=======
 class CourseUserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
@@ -62,4 +60,3 @@ class GPTModelSelectSerializer(serializers.ModelSerializer):
     class Meta:
         model = GPTModel
         fields = ['course_id', 'model_id']
->>>>>>> bceb4ca230aef144850712f7a878dbdeaa9e3fe5

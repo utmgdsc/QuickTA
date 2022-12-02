@@ -13,13 +13,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
-<<<<<<< HEAD
-from ..models import User, Chatlog, Conversation, Feedback, Report, Course
-from ..serializers.serializers import ConversationSerializer
-from ..serializers.researcher_serializers import ResearchersSerializer, ReportedListSerializer, AverageRatingSerializer, ChatlogListSerializer, ResponseRateSerializer, MostCommonWordsSerializer, ChatlogSerializer
-=======
 from ..models import *
->>>>>>> bceb4ca230aef144850712f7a878dbdeaa9e3fe5
 from ..serializers import researcher_serializers as rs
 from drf_yasg.utils import swagger_auto_schema
 
@@ -666,7 +660,6 @@ def get_course_comfortability_csv(request):
                 err = {"msg": "Course comfortability missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-<<<<<<< HEAD
 
 @api_view(['GET', 'POST'])
 def get_filtered_chatlogs(request):
@@ -682,7 +675,6 @@ def get_filtered_chatlogs(request):
 
     return Response(serializer.data)
 
-=======
 @swagger_auto_schema(methods=['post'], request_body=rs.InteractionFrequencySerializer)
 @api_view(['POST'])
 def get_interaction_frequency(request):
@@ -913,7 +905,6 @@ def gptmodel_delete(request):
             return Response(status=status.HTTP_200_OK)
         except:
             return Response("Internal server error.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
->>>>>>> bceb4ca230aef144850712f7a878dbdeaa9e3fe5
 
 
 # Helper functions
