@@ -357,6 +357,19 @@ def conversation_detail(request):
 
             return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
+@swagger_auto_schema(methods=['get'])
+@api_view(['GET'])
+def courses_get_all(request):
+    """
+    Retrieves all courses
+    """
+    if request.method == 'GET':
+        try:
+            courses = Course.objects.all().values()
+            return JsonResponse({"courses": list(courses)})
+        except:
+            return Response("Internal server error.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 @swagger_auto_schema(methods=['post'], request_body=ChatlogSerializer)
 @api_view(['POST'])
 def chatlog_detail(request):
@@ -393,7 +406,7 @@ def chatlog_detail(request):
     """
     if request.method == 'POST':
 
-        # try:
+        try:
             # Set current chatlog's time if not provided
             current_time = timezone.now()
             location = 'America/Toronto'
@@ -494,16 +507,16 @@ def chatlog_detail(request):
             }
             return Response(response, status=status.HTTP_201_CREATED)
         
-        # except:
-        #     # Error handling
-        #     error = []
-        #     if 'conversation_id' not in request.data.keys():
-        #         error.append("Conversation ID")
-        #     if 'chatlog' not in request.data.keys():
-        #         error.append("Chatlog message")
-        #     err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
+        except:
+            # Error handling
+            error = []
+            if 'conversation_id' not in request.data.keys():
+                error.append("Conversation ID")
+            if 'chatlog' not in request.data.keys():
+                error.append("Chatlog message")
+            err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
 
-        #     return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
 @swagger_auto_schema(methods=['post'], request_body=FeedbackSerializer)
 @api_view(['POST'])

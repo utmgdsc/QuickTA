@@ -108,6 +108,7 @@ def get_filtered_interactions(course_id, dates, timezone):
                     start_time__lt=offset_date
                 )
             count = len(convos)
+            
             # count = convos_cluster.aggregate([
             #     {
             #         "$match": {

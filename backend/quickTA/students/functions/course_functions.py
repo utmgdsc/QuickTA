@@ -30,6 +30,22 @@ def get_course_existence(course_id):
     except:
         return OBJECT_DOES_NOT_EXIST
 
+def get_all_courses():
+    """
+    Retrieves a list of all course
+    """
+    courses = Course.objects.all()
+    res = []
+    
+    for course in courses:
+        data = {}
+        data['course_id'] = course.course_id
+        data['semester'] = course.semester
+        data['course_code'] = course.course_code
+        res.append(data)
+    
+    return res
+
 def update_course_students_list(course_id, user_id):
     """
     Adds the user into the course's list of students.
