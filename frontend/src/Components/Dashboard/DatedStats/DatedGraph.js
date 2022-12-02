@@ -30,7 +30,7 @@ const DatedGraph = ({isWeekly, courseID}) => {
             timezone: "America/Toronto"
         })
         .then((res) => {
-            console.log(res.data.interactions);
+            // console.log(isWeekly, "Call");
             if (isWeekly == 1) {
                 
                 let x = {
@@ -45,8 +45,11 @@ const DatedGraph = ({isWeekly, courseID}) => {
                 }, x);
                 setCategory(day);
                 setData(dayData);
+                // console.log(day);
+                // console.log(dayData);
             
             } else {
+                console.log("rendering monthly data");
                 const currDate = Temporal.Now.plainDateISO().toString();
                 const currDay = currDate.substring(currDate.length-2);
                 let x = {
@@ -55,7 +58,7 @@ const DatedGraph = ({isWeekly, courseID}) => {
                 };
 
                 const { date, dateData } = res.data.interactions.reduce((obj, currData) => {
-                    console.log(currData);
+                    // console.log(currData);
                     obj.date.push(currData[0]);
                     if(currDay <= currData[0].substring(currData[0].length - 2)){
                         obj.dateData.push(null);
@@ -73,9 +76,12 @@ const DatedGraph = ({isWeekly, courseID}) => {
         .catch((err) => console.log(err))
     }
 
-    if(courseID){
-        fetchGraphData();
-    }
+    useEffect(()=>{
+        if(courseID && isWeekly){
+            fetchGraphData();
+        }
+    }, [courseID, isWeekly]);
+    
 
     return (
         <Box style={cardStyle}>

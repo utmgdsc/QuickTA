@@ -33,12 +33,7 @@ const ReportTable = ( { course_ID, isWeekly } ) => {
 
   const [reportList, changeReportList] = useState([{}]);
 
-    useEffect(() => {
-      if (course_ID.length != 0){
-        fetchReports();
-      }
-      console.log("report table", course_ID, isWeekly);
-    }, [course_ID, isWeekly]);
+
 
     const fetchReports = async () => {
       return await axios.post(process.env.REACT_APP_API_URL + "/researcher/reported-conversations", {course_id: course_ID, filter: (isWeekly === 1 ? "Weekly" : "Monthly")
@@ -51,11 +46,18 @@ const ReportTable = ( { course_ID, isWeekly } ) => {
               user_id: res.data.reported_conversations[obj]["user_id"], time: res.data.reported_conversations[obj]["time"], msg: res.data.reported_conversations[obj]["msg"]
             });
           }
+          console.log(entries);
           changeReportList(entries);
         })
         .catch((err) => console.log(err))
     };
 
+    useEffect(() => {
+      if (course_ID.length !== 0){
+        fetchReports();
+      }
+      console.log("report table", course_ID, isWeekly);
+    }, [course_ID, isWeekly]);
 
     return (
         
