@@ -27,7 +27,6 @@ urlpatterns = [
     path('incorrect-answer', views.report_conversation),
     path('comfortability-rating', views.course_comfortability),
 
-
     # Instructor/Researcher views
     # ================================================================================================
     path('researcher/average-ratings', researcher_views.average_ratings),

@@ -142,7 +142,7 @@ def get_courses_info(course_ids: List[str]):
     try:
         res = []
         for course_id in course_ids:
-            course = Course.objects.find(course_id=course_id).values()
+            course = Course.objects.filter(course_id=course_id).values()
             res.append(course[0])
         return res
     except:
