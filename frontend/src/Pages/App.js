@@ -17,7 +17,7 @@ function App() {
     <div>
       <BrowserRouter>
         <Routes>
-          <Route path="/Student" element={<StudentPage/>} />
+          <Route path="/Student" element={<StudentPage UTORid={"testuser1"}/>} />
           <Route path="/Professor" element={<ProfessorPage/>} />
           <Route path="/ResearcherAnalytics" element={<ResearcherAnalytics/>} />
           <Route path="/ResearcherModels" element={<ResearcherModels/>} />
