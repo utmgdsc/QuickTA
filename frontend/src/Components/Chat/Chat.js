@@ -9,7 +9,7 @@ import CourseSelect from "../CourseSelect";
 
 
 
-const Chat = ({currCourse , semester, courses, setCurrCourse }) => {
+const Chat = ({ currCourse , semester, courses, setCurrCourse}) => {
   
   const [messages, updateMessages] = useState([]);
   const [inConvo, updateInConvo] = useState(false);

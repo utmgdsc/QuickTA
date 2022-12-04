@@ -4,29 +4,18 @@ import {Box} from "@chakra-ui/react";
 import axios from "axios";
 import {useEffect, useState} from "react";
 
-const Dashboard = ({ courseCode, courseName, semester }) => {
-    const [course_id, setCourseID] = useState("");
-    useEffect(() => {
-        if (courseCode.length != 0){
-            fetchCourseID();
-        }
-        console.log(courseCode, semester);
-    }, [courseCode, semester]);
-
-    const fetchCourseID = async () => {
-        return axios.post(process.env.REACT_APP_API_URL + "/get-course", {course_code: courseCode, semester: semester})
-          .then((res) => {
-              setCourseID(res.data.course_id);
-              console.log(res.data.course_id);
-          })
-          .catch((err) => console.log(err))
-    }
+const Dashboard = ({ courseCode, courseName, semester, courses, setCurrCourse, currCourse, setIsLoading }) => {
 
     return (
         <>
         <Box overflow={'hidden'} ml={'12vw'} mr={'12vw'}>
-            <DashboardHeader courseCode={courseCode} courseName={courseName}/>
-            <DashboardBody courseID={course_id}/>
+            <DashboardHeader
+              courseCode={courseCode}
+              courseName={courseName}
+              courses={courses}
+              setCurrCourse={setCurrCourse}
+              currCourse={currCourse}/>
+            <DashboardBody courseID={currCourse.course_id} setIsLoading={setIsLoading}/>
         </Box>
         </>
     );

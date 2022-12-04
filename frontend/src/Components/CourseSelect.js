@@ -1,7 +1,6 @@
 import { Select, Box } from '@chakra-ui/react';
 
 const CourseSelect = ({currCourse, courses, setCurrCourse, inConvo}) => {
-    console.log("courses", courses, currCourse);
     return (
         <Box w='135px'>
             <Select 

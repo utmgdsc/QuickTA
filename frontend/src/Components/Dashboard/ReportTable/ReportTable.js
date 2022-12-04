@@ -16,7 +16,7 @@ import {
 import axios from "axios";
 import {useEffect, useState} from "react";
 
-const ReportTable = ( { course_ID, isWeekly } ) => {
+const ReportTable = ( { course_ID, isWeekly, setIsLoading } ) => {
 
   const cardStyle = {
     backgroundColor: 'white',
@@ -39,6 +39,7 @@ const ReportTable = ( { course_ID, isWeekly } ) => {
       return await axios.post(process.env.REACT_APP_API_URL + "/researcher/reported-conversations", {course_id: course_ID, filter: (isWeekly === 1 ? "Weekly" : "Monthly")
       , timezone: "America/Toronto"})
         .then((res) => {
+          setIsLoading(true);
           const entries = [];
           for (const obj in Object.keys(res.data.reported_conversations)) {
             entries.push({
@@ -48,6 +49,7 @@ const ReportTable = ( { course_ID, isWeekly } ) => {
           }
           console.log(entries);
           changeReportList(entries);
+          setIsLoading(false);
         })
         .catch((err) => console.log(err))
     };

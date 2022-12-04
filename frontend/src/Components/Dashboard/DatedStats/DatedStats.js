@@ -8,12 +8,14 @@ import DatedGraph from "./DatedGraph"
 import {useEffect} from "react";
 import axios from "axios";
 import {useState} from "react";
+import FrequencyCard from "./FrequencyCard";
 
-const DatedStats = ({isWeekly, courseID}) => {
+const DatedStats = ({isWeekly, courseID, setIsLoading}) => {
   const [avgRating, setAvgRating] = useState({avgRating : 0, avgRatingDelta: 0});
   const [avgRespTime, setAvgRespTime] = useState({avgRespTime: 0, avgRespTimeDelta: 0});
   const [avgComfort, setAvgComfort] = useState({avgComfort: 0, avgComfortDelta: 0});
   const [numReport, setNumReport] = useState({numReport: 0});
+  const [commonWords, setCommonWords] = useState([]);
 
   function computePrevAvg(data, currAvg){
     // we need to look at avg of indices 0, .. , data-2
@@ -70,14 +72,25 @@ const DatedStats = ({isWeekly, courseID}) => {
           })
           .catch((err) => {console.log(err)})
       }
+
+      if(endpoint.endsWith("most-common-words")){
+        return await axios.post(process.env.REACT_APP_API_URL + endpoint, {filter: (isWeekly === 1 ? "Weekly" : "Monthly"),
+        course_id: courseID, timezone: "America/Toronto"})
+          .then((res) => {
+            setCommonWords(res.data.most_common_words);
+          })
+      }
   }
 
   useEffect(() => {
     if(courseID){
+      setIsLoading(true);
       fetchData("/researcher/average-ratings");
       fetchData("/researcher/avg-comfortability-rating");
       fetchData("/researcher/avg-response-rate");
       fetchData("/researcher/reported-conversations");
+      fetchData("/researcher/most-common-words");
+      setIsLoading(false);
     }
   }, [courseID])
 
@@ -89,6 +102,7 @@ const DatedStats = ({isWeekly, courseID}) => {
                 <StatCard title={"Average Response Rate"} num={avgRespTime.avgRespTime} delta={avgRespTime.avgRespTimeDelta} unit={"s"}/>
                 <StatCard title={"Average Course Comfortability Rating"} num={avgComfort.avgComfort} delta={avgComfort.avgComfortDelta} unit={"☆"}/>
                 <StatCard title={"Reported Conversations"} num={numReport.numReport} delta={0} unit={""}/>
+                <FrequencyCard words={commonWords}/>
             </VStack>
             <Spacer/>
             <DatedGraph isWeekly={isWeekly} courseID={courseID}/>
