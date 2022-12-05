@@ -8,7 +8,7 @@ const FrequencyCard = ({ words }) => {
     boxShadow: '1px 2px 3px 1px rgba(0,0,0,0.12)',
     borderRadius: '15px',
     padding: '15px 15px 7px 20px',
-    width: '100%',
+    width: '99%',
   };
   const titleStyle = {
     display: 'block',

@@ -17,9 +17,12 @@ const DatedStats = ({isWeekly, courseID, setIsLoading}) => {
   const [numReport, setNumReport] = useState({numReport: 0});
   const [commonWords, setCommonWords] = useState([]);
 
+  // Fetch file loader for headers
+  const fileDownload = require('js-file-download');
+
   function computePrevAvg(data, currAvg){
     // we need to look at avg of indices 0, .. , data-2
-    if (data.length == 0){
+    if (data.length === 0){
       return 0;
     }
     let x = currAvg * data.length;
@@ -96,17 +99,63 @@ const DatedStats = ({isWeekly, courseID, setIsLoading}) => {
 
     
     return (
-        <Flex flexWrap='wrap'>
+      <>
+        <Flex flexWrap='wrap' mt={5} mb={5}>
             <VStack minWidth='320px' w='22vw' spacing='20px'>
-                <StatCard title={"Average Rating"} num={avgRating.avgRating} delta={avgRating.avgRatingDelta} unit={"☆"}/>
-                <StatCard title={"Average Response Rate"} num={avgRespTime.avgRespTime} delta={avgRespTime.avgRespTimeDelta} unit={"s"}/>
-                <StatCard title={"Average Course Comfortability Rating"} num={avgComfort.avgComfort} delta={avgComfort.avgComfortDelta} unit={"☆"}/>
-                <StatCard title={"Reported Conversations"} num={numReport.numReport} delta={0} unit={""}/>
-                <FrequencyCard words={commonWords}/>
+                <StatCard callBack={() => {
+                  if(courseID && isWeekly != null){
+                    axios.post(process.env.REACT_APP_API_URL + "/researcher/average-ratings-csv", {filter: (isWeekly === 1 ? "Weekly" : "Monthly"),
+                    course_id: courseID, timezone: "America/Toronto"})
+                    .then((response) => {
+                      if(response.headers['content-disposition']){
+                        fileDownload(response.data, response.headers['content-disposition'].split('"')[1]);
+                      }
+                    })
+                    .catch((err) => console.log(err))
+                  }
+                }} title={"Average Rating"} num={avgRating.avgRating} delta={avgRating.avgRatingDelta} unit={"☆"}/>
+                <StatCard callBack={() => {
+                  if(courseID && isWeekly != null){
+                    axios.post(process.env.REACT_APP_API_URL + "/researcher/avg-response-rate-csv", {filter: (isWeekly === 1 ? "Weekly" : "Monthly"),
+                    course_id: courseID, timezone: "America/Toronto"})
+                    .then((response) => {
+                      if(response.headers['content-disposition']){
+                        fileDownload(response.data, response.headers['content-disposition'].split('"')[1]);
+                      }
+                    })
+                    .catch((err) => console.log(err))
+                  }
+                }} title={"Average Response Rate"} num={avgRespTime.avgRespTime} delta={avgRespTime.avgRespTimeDelta} unit={"s"}/>
+                <StatCard callBack={() => {
+                  if(courseID && isWeekly != null){
+                    axios.post(process.env.REACT_APP_API_URL + "/researcher/avg-comfortability-rating-csv", {filter: (isWeekly === 1 ? "Weekly" : "Monthly"),
+                    course_id: courseID, timezone: "America/Toronto"})
+                    .then((response) => {
+                      if(response.headers['content-disposition']){
+                        fileDownload(response.data, response.headers['content-disposition'].split('"')[1]);
+                      }
+                    })
+                    .catch((err) => console.log(err))
+                  }
+                }} title={"Average Course Comfortability Rating"} num={avgComfort.avgComfort} delta={avgComfort.avgComfortDelta} unit={"☆"}/>
+                <StatCard callBack={() => {
+                  if(courseID && isWeekly != null){
+                    axios.post(process.env.REACT_APP_API_URL + "/researcher/reported-conversations-csv", {filter: (isWeekly === 1 ? "Weekly" : "Monthly"),
+                    course_id: courseID, timezone: "America/Toronto"})
+                    .then((response) => {
+                      if(response.headers['content-disposition']){
+                        fileDownload(response.data, response.headers['content-disposition'].split('"')[1]);
+                      }
+                    })
+                    .catch((err) => console.log(err))
+                  }
+                }} title={"Reported Conversations"} num={numReport.numReport} delta={0} unit={""}/>
             </VStack>
             <Spacer/>
             <DatedGraph isWeekly={isWeekly} courseID={courseID}/>
         </Flex>
+        <FrequencyCard words={commonWords} m={4}/>
+      </>
     );
 }
 

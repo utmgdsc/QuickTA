@@ -10,14 +10,16 @@ import {
     Td,
     TableCaption,
     TableContainer,
-    VStack
+    VStack,
+    useDisclosure
 } from "@chakra-ui/react";
 
 import axios from "axios";
 import {useEffect, useState} from "react";
+import ConversationView from "./ConversationView";
 
 const ReportTable = ( { course_ID, isWeekly, setIsLoading } ) => {
-
+  const {isOpen, onOpen, onClose} = useDisclosure();
   const cardStyle = {
     backgroundColor: 'white',
     boxShadow: '1px 2px 3px 1px rgba(0,0,0,0.12)',
@@ -32,7 +34,7 @@ const ReportTable = ( { course_ID, isWeekly, setIsLoading } ) => {
   };
 
   const [reportList, changeReportList] = useState([{}]);
-
+  const [rowIndex, setRowIndex] = useState(0);
 
 
     const fetchReports = async () => {
@@ -57,12 +59,13 @@ const ReportTable = ( { course_ID, isWeekly, setIsLoading } ) => {
     useEffect(() => {
       if (course_ID.length !== 0){
         fetchReports();
+        console.log(reportList);
       }
-      console.log("report table", course_ID, isWeekly);
     }, [course_ID, isWeekly]);
 
+    console.log(reportList, rowIndex);
     return (
-        
+
         <Box style={cardStyle} mt={6}>
             <Heading as='h2'><span style={titleStyle}>Reported Conversations (Detailed)</span></Heading>
             <TableContainer>
@@ -84,7 +87,12 @@ const ReportTable = ( { course_ID, isWeekly, setIsLoading } ) => {
                 <Tbody>
                 {reportList.map((obj, index) => (
                   // create a new entry in the table by unwrapping the corresponding fields
-                  <Tr key={index}>
+                  // If any table row is clicked on open a modal showing a detailed view of convo
+                  <Tr key={index} onClick={() => {
+                    setRowIndex(index);
+                    console.log(index, reportList);
+                    onOpen();
+                  }}>
                     <Td>{obj.conversation_id}</Td>
                     <Td>{obj.user_id}</Td>
                     <Td>{obj.time}</Td>
@@ -95,6 +103,7 @@ const ReportTable = ( { course_ID, isWeekly, setIsLoading } ) => {
             </Table>
             </VStack>
             </TableContainer>
+          {reportList.length !== 0 && <ConversationView isOpen={isOpen} onClose={onClose} convo_id={reportList[rowIndex].conversation_id}/>}
         </Box>
     );
 }
