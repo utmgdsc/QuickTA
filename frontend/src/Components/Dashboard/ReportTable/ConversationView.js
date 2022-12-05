@@ -29,7 +29,7 @@ const ConversationView = ({isOpen, onClose, convo_id}) => {
         }
     }, [convo_id]);
 
-    return( (convo.length === 0) ? <CustomSpinner/> :
+    return( 
         <Modal isOpen={isOpen} onClose={onClose} scrollBehavior={"inside"}>
             <ModalOverlay/>
             <ModalContent>

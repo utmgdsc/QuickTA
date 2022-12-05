@@ -1,5 +1,7 @@
 version: '3'
+
 services:
+  # Frontend sevice
   frontend:
     container_name: frontend
     build:
@@ -10,6 +12,7 @@ services:
     env_file:
       - ./frontend/.env
   
+  # Backend django and mongodb
   backend:
     container_name: backend
     build:
@@ -20,6 +23,7 @@ services:
     ports:
       - "8000:8000"
 
+  # Reverse proxy for frontend and backend port forwarding
   nginx-proxy:
     container_name: nginx
     image: nginx
