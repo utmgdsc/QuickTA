@@ -61,13 +61,12 @@ def get_user_courses(user_id: str):
     """
     Returns a list of the user's courses in course ids
     """
-    # try:  
-    users = acquire_user_cluster()
-    user = list(users.find({"user_id" : user_id}))[0]
-    print(user['courses'])
-    return user['courses']
-    # except:
-    #     return OPERATION_FAILED
+    try:  
+        users = acquire_user_cluster()
+        user = list(users.find({"user_id" : user_id}))[0]
+        return user['courses']
+    except:
+        return OPERATION_FAILED
 
 def add_user_to_course(user_id: str, course_id: str) -> bool:
     """

@@ -1,6 +1,7 @@
 from . import time_utils
 
 from ..models import *
+from ..constants import *
 
 def get_filtered_convos(course_id, view, timezone):
     """
@@ -22,3 +23,17 @@ def get_filtered_convos(course_id, view, timezone):
         reported_convos = Report.objects.filter(course_id=course_id).filter(status='O').order_by('-time')
     
     return reported_convos
+
+def resolve_conversation(convo_id):
+    """
+    Resolves an active reported conversation <convo_id>.
+    """
+
+    convo = Report.objects.filter(conversation_id=convo_id)
+    if len(convo) == 0:
+        return OPERATION_FAILED
+    
+    convo = Report.objects.filter(conversation_id=convo_id).update(
+        status='C'
+    )
+    return OPERATION_SUCCESSFUL

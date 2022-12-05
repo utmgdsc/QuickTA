@@ -67,8 +67,8 @@ const App = ( { UTORid } ) => {
               courses={courses}
               setCurrCourse={setCurrCourse}
               currCourse={currCourse}
-              courseCode={"CSC311H5"}
-              courseName={"Introduction to Machine Learning"}
+              courseCode={currCourse.course_code}
+              courseName={currCourse.course_name}
               semester={semester}
               setIsLoading={setIsLoading}
               isLoading={isLoading}

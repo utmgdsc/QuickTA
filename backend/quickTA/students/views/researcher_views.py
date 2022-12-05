@@ -140,6 +140,33 @@ def average_ratings_csv(request):
                 err = {"msg": "Average Ratings CSV missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
+@swagger_auto_schema(methods=['post'], request_body=rs.ResolveReportSerializer)
+@api_view(['POST'])
+def resolve_reported_conversation(request):
+    """
+    Resolves a reported conversation,
+    """
+    if request.method == 'POST':
+        try:
+            data = request.data
+            ret = report_functions.resolve_conversation(data['conversation_id'])
+            if not(ret): 
+                raise Exception
+
+            return HttpResponse(status=status.HTTP_200_OK)
+
+        except:
+            error = []
+            keys = request.data.keys()
+            if 'course_id' not in keys: error.append("Conversation ID")
+        
+            if (not(error)): 
+                err = {"msg": "Internal Server Error"}
+                return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                err = {"msg": "Reported Conversations missing fields: " + ','.join(error) + '.'}
+                return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
 @swagger_auto_schema(methods=['post'], request_body=rs.ReportedListSerializer)
 @api_view(['POST'])
 def list_reported_conversations(request):
@@ -157,7 +184,7 @@ def list_reported_conversations(request):
     - Report message
     """
     if request.method == 'POST':
-        # try:
+        try:
             data = request.data
             reported_convos = report_functions.get_filtered_convos(data['course_id'], data['filter'], data['timezone'])
             
@@ -179,19 +206,19 @@ def list_reported_conversations(request):
                     'msg': report.msg
                 }
             return Response(response, status=status.HTTP_200_OK)  
-        # except:
-        #     error = []
-        #     keys = request.data.keys()
-        #     if 'course_id' not in keys: error.append("Course ID")
-        #     if 'filter' not in keys: error.append("Filter view")
-        #     if 'timezone' not in keys: error.append("Timezone")
+        except:
+            error = []
+            keys = request.data.keys()
+            if 'course_id' not in keys: error.append("Course ID")
+            if 'filter' not in keys: error.append("Filter view")
+            if 'timezone' not in keys: error.append("Timezone")
             
-        #     if (not(error)): 
-        #         err = {"msg": "Internal Server Error"}
-        #         return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        #     else:
-        #         err = {"msg": "Reported Conversations missing fields: " + ','.join(error) + '.'}
-        #         return Response(err, status=status.HTTP_400_BAD_REQUEST)
+            if (not(error)): 
+                err = {"msg": "Internal Server Error"}
+                return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                err = {"msg": "Reported Conversations missing fields: " + ','.join(error) + '.'}
+                return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 @swagger_auto_schema(methods=['post'], request_body=rs.ReportedListSerializer)
 @api_view(['POST'])
@@ -660,7 +687,6 @@ def get_course_comfortability_csv(request):
                 err = {"msg": "Course comfortability missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-
 @api_view(['GET', 'POST'])
 def get_filtered_chatlogs(request):
     # id_contains = request.GET.get('id_contains')
@@ -671,7 +697,7 @@ def get_filtered_chatlogs(request):
     # qs = qs.filter()
     # qs = qs.object.filter(chatlog='hi')
     # qs = qs.object.filter(chatlog="test")
-    serializer = ChatlogSerializer(qs, context={'request': request}, many=True)
+    serializer = rs.ChatlogSerializer(qs, context={'request': request}, many=True)
 
     return Response(serializer.data)
 
@@ -869,9 +895,6 @@ def gptmodel_get(request):
         try:
             data = request.data
             gpt_models = gptmodel_functions.get_gptmodels(data['course_id'])
-
-            if not(gpt_models):
-                raise Exception
             
             return JsonResponse({"gpt_models": gpt_models})
         except:

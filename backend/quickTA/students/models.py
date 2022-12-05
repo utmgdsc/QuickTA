@@ -26,6 +26,7 @@ class Course(models.Model):
     course_id = models.CharField(max_length=50)
     semester = models.CharField(max_length=10)
     course_code = models.CharField(max_length=9)
+    course_name = models.TextField(max_length=1000)
 
     def __str__(self):
         return self.course_id 

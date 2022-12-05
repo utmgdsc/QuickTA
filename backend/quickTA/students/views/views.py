@@ -249,14 +249,16 @@ def course_detail(request):
             course = Course(
                 course_id=course_id,
                 course_code=request.data['course_code'],
-                semester=request.data['semester']
+                semester=request.data['semester'],
+                course_name=request.data['course_name']
             )
             course.save()
 
             response = {
                 "course_id": course_id,
                 "course_code": request.data['course_code'],
-                "semester": request.data['semester']
+                "semester": request.data['semester'],
+                "course_name": request.data['course_name']
             }
 
             return Response(response, status=status.HTTP_201_CREATED)
@@ -290,14 +292,20 @@ def course_get(request):
                 raise CourseAlreadyExistsError
 
             course_id = 0
+            course_name = ""
             for course in course_code:
                 if course.semester == request.data['semester']:
                     course_id = course.course_id
+                    course_name = course.course_name
+
+            if course_id == 0: 
+                raise CourseAlreadyExistsError
 
             response = {
                 "course_id": course_id,
                 "course_code": request.data['course_code'],
-                "semester": request.data['semester']
+                "semester": request.data['semester'],
+                "course_name": course_name
             }
 
             return Response(response, status=status.HTTP_201_CREATED)
