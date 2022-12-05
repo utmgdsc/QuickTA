@@ -5,6 +5,7 @@ import StudentPage from "./StudentPage";
 import ProfessorPage from "./ProfessorPage";
 import ResearcherAnalytics from "./ResearcherAnalytics";
 import ResearcherModels from "./ResearcherModels";
+import ResearcherFilterPage from "./ResearcherFilterPage";
 import {useEffect, useState} from "react";
 import axios from "axios";
 import CustomSpinner from "../Components/CustomSpinner";
@@ -76,6 +77,7 @@ const App = ( { UTORid } ) => {
           } />
 
           <Route path="/ResearcherModels" element={<ResearcherModels/>} />
+          <Route path="/ResearcherFilters" element={<ResearcherFilterPage/>} />
         </Routes>
     </div>);
 }
