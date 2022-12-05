@@ -4,6 +4,7 @@ import {
     StatNumber,
     StatHelpText,
     StatArrow,
+    Button
   } from '@chakra-ui/react'
 
 const StatCard = ({title, num, delta, unit, callBack}) => {
@@ -22,9 +23,10 @@ const StatCard = ({title, num, delta, unit, callBack}) => {
     };
 
     return (
+      
         <Stat style = {cardStyle} onClick={() => {
           callBack();
-          }}>
+          }} as={"button"}>
         <StatNumber><span style={titleStyle}>{title}</span></StatNumber>
         <StatLabel>{num}{unit}</StatLabel>
         {
@@ -41,6 +43,7 @@ const StatCard = ({title, num, delta, unit, callBack}) => {
           )
         }
       </Stat>
+      
     );
 }
 

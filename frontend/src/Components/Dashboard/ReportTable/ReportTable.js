@@ -11,7 +11,10 @@ import {
     TableCaption,
     TableContainer,
     VStack,
-    useDisclosure
+    useDisclosure,
+    Divider,
+    Center,
+    Spacer
 } from "@chakra-ui/react";
 
 import axios from "axios";
@@ -103,7 +106,7 @@ const ReportTable = ( { course_ID, isWeekly, setIsLoading } ) => {
             </Table>
             </VStack>
             </TableContainer>
-          {reportList.length !== 0 && <ConversationView isOpen={isOpen} onClose={onClose} convo_id={reportList[rowIndex].conversation_id}/>}
+          {reportList.length !== 0 ? <ConversationView isOpen={isOpen} onClose={onClose} convo_id={reportList[rowIndex].conversation_id}/> : <VStack><Center>No reported Conversations!</Center></VStack>}
         </Box>
     );
 }
