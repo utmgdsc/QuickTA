@@ -895,9 +895,6 @@ def gptmodel_get(request):
         try:
             data = request.data
             gpt_models = gptmodel_functions.get_gptmodels(data['course_id'])
-
-            if not(gpt_models):
-                raise Exception
             
             return JsonResponse({"gpt_models": gpt_models})
         except:

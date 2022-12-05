@@ -249,7 +249,7 @@ def course_detail(request):
             course = Course(
                 course_id=course_id,
                 course_code=request.data['course_code'],
-                semester=request.data['semester']
+                semester=request.data['semester'],
                 course_name=request.data['course_name']
             )
             course.save()
