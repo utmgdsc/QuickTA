@@ -13,6 +13,7 @@ from django.http import JsonResponse
 from django.utils import timezone, dateparse
 from django.utils.timezone import now
 
+from ..constants import *
 from ..functions import user_functions, course_functions
 from ..models import Chatlog, Conversation, Course, Feedback, User, Report
 from ..serializers.serializers import GetUserSerializer, ConversationSerializer, CourseSerializer, FeedbackSerializer, IncorrectChatlogSerializer, UserSerializer, ChatlogSerializer, ReportSerializer, ChatlogDetailSerializer, CourseComfortabilitySerializer, UserCoursesSerializer
@@ -497,6 +498,8 @@ def chatlog_detail(request):
             model_chatlog_id = str(uuid.uuid4())
             course_id = conversation[0].course_id            
             model_response = model.enquire_model(cid, data['chatlog'], course_id)
+            if model_response == OPERATION_FAILED:
+                raise ModelDoesNotExistsError
             
             # Save message from the Model
             model_time = timezone.now()
@@ -535,6 +538,10 @@ def chatlog_detail(request):
             }
             return Response(response, status=status.HTTP_201_CREATED)
         
+        except ConversationNotFoundError:
+            return Response({"msg": "Conversation does not exist."}, status=status.HTTP_401_UNAUTHORIZED)
+        except ModelDoesNotExistsError:
+            return Response({"msg": "Model does not exist."}, status=status.HTTP_401_UNAUTHORIZED)
         except:
             # Error handling
             error = []
@@ -838,3 +845,4 @@ class CourseDuplicationError(Exception): pass
 class OverRatingLimitError(Exception): pass
 class FeedbackExistsError(Exception): pass
 class MissingReportMessageError(Exception): pass
+class ModelDoesNotExistsError(Exception): pass

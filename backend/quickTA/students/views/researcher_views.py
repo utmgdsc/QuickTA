@@ -26,28 +26,19 @@ def average_ratings(request):
     """
     if request.method == 'POST':
         try:
-            start = time.time()
             course = Course.objects.filter(course_id=request.data['course_id'])
             if not(course.count()): 
                 raise CourseNotFoundError
-            end = time.time()
-            print("Time elapsed (Course filtering):", (end-start) * 1000)
 
-            start = time.time()
             data = request.data
             convos = conversation_functions.get_filtered_convos(data['course_id'], data['filter'], data['timezone'])
-            end = time.time()
-            print("Time elapsed (Conversations filtering):", (end-start) * 1000)
 
             # Retrieve all feedback from the conversations
             ratings = []
-            start = time.time()
             for convo in convos:
                 q2 = Feedback.objects.filter(conversation_id=convo.conversation_id)
                 if (len(q2) != 0):
                     ratings.append(q2[0].rating)
-            end = time.time()
-            print("Time elapsed (Feedback filtering):", (end-start) * 1000)
             
             if len(ratings) == 0:
                 avg_ratings = 0
@@ -714,12 +705,10 @@ def get_interaction_frequency(request):
         try:
             # Check for course existence
             course = Course.objects.filter(course_id=request.data['course_id'])
-            print(course)
-            start = time.time()
+
             if len(course) == 0:
                 raise CourseNotFoundError
-            end = time.time()
-            print("len:", (end-start) * 1000)
+
             # Get all dates in range for a particular filter view (Weekly or Monthly)
             data = request.data
             dates = time_utils.get_all_dates(data['filter'], data['timezone'])

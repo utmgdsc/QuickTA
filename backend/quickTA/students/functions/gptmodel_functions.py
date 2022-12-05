@@ -53,7 +53,12 @@ def get_active_model(course_id):
         "course_id": course_id,
         "status": True
     }
-    gpt_model = list(gptmodels.find(query))[0]
+    gpt_model = list(gptmodels.find(query))
+    
+    if len(gpt_model) == 0: 
+        return OPERATION_FAILED
+
+    gpt_model = gpt_model[0]
     res = {
         "model_id": gpt_model['model_id'],
         "model_name": gpt_model['model_name'],
