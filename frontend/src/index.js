@@ -5,17 +5,17 @@ import {
   ChakraProvider,
 } from "@chakra-ui/react";
 import theme from "./assets/theme";
-import { Router, Route, RouterProvider } from 'react-router';
-import { createBrowserRouter } from 'react-router-dom';
-import StudentPage from './Pages/StudentPage';
 import { createBrowserHistory } from "history";
+import {BrowserRouter} from "react-router-dom";
 
 const history = createBrowserHistory();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <ChakraProvider theme={theme}>
-      <App/>
+      <BrowserRouter>
+        <App UTORid={"testuser1"}/>
+      </BrowserRouter>
     </ChakraProvider>
 );
 

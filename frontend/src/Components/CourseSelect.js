@@ -1,12 +1,22 @@
 import { Select, Box } from '@chakra-ui/react';
 
-const CourseSelect = () => {
+const CourseSelect = ({currCourse, courses, setCurrCourse, inConvo}) => {
     return (
         <Box w='135px'>
-            <Select placeholder='CSC311H5' borderColor="white" bg="white" boxShadow="1px 2px 3px 1px rgba(0,0,0,0.12)">
-                <option value='option1'>CSC108H5</option>
-                <option value='option2'>CSC148H5</option>
-                <option value='option3'>CSC207H5</option>
+            <Select 
+            placeholder={currCourse.course_code}
+            borderColor="white" 
+            bg="white" 
+            boxShadow="1px 2px 3px 1px rgba(0,0,0,0.12)"
+            value={currCourse.course_code}
+            onChange={(e) => {
+                setCurrCourse(courses[parseInt(e.target.value)]);
+            }}
+            isDisabled={inConvo}
+            >
+                {
+                    courses.map(({id, course_id, semester, course_code}, index) => (<option key={index} value={index}>{course_code}</option>))
+                }
             </Select>
         </Box>
     );
