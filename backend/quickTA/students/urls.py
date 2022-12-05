@@ -32,6 +32,7 @@ urlpatterns = [
     path('researcher/average-ratings', researcher_views.average_ratings),
     path('researcher/average-ratings-csv', researcher_views.average_ratings_csv),
     
+    path('researcher/resolve-reported-conversation', researcher_views.resolve_reported_conversation),
     path('researcher/reported-conversations', researcher_views.list_reported_conversations),
     path('researcher/reported-conversations-csv', researcher_views.list_reported_conversations_csv),
     
