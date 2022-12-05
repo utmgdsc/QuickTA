@@ -35,6 +35,7 @@ const ChatBoxTopNav = ({courseCode, currConvoID}) => {
     <Spacer/>
 
       <Button variant={'ghost'} onClick={() => {
+        if(currConvoID){
         axios.post(process.env.REACT_APP_API_URL + "/report", {conversation_id: currConvoID})
           .then((response) => {
             if(response.headers['content-disposition']){
@@ -42,6 +43,9 @@ const ChatBoxTopNav = ({courseCode, currConvoID}) => {
             }
           })
           .catch((err) => console.log(err))
+        }else{
+          console.log("Must be in a conversation to download the chatlog!");
+        }
       }}>
         <VStack>
           <FontAwesomeIcon icon={faDownload} size={'2x'}/>
@@ -49,7 +53,13 @@ const ChatBoxTopNav = ({courseCode, currConvoID}) => {
         </VStack>
       </Button>
 
-      <Button variant={'ghost'} py={8} px={5} onClick={onOpen}>
+      <Button variant={'ghost'} py={8} px={5} onClick={() => {
+        if(currConvoID){
+          onOpen();
+        }else{
+          console.log("Must be in a chat to report a conversation!")
+        }
+        }}>
         <VStack>
           <FontAwesomeIcon icon={faBug} size={'2x'}/>
           <Text fontSize="2xs">Report</Text>

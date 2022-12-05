@@ -6,20 +6,20 @@ app_name = 'student_api'
 
 urlpatterns = [
     path('user/<str:user_id>/', UserDetail.as_view(), name='user-detail'),
-    path('course/<str:pk>/', CourseDetail.as_view(), name='course-detail'),
     path('conversation/<str:conversation_id>/', ConversationDetail.as_view(), name='conversation-detail'),
 
     path('user/all', UserList.as_view(), name='user-list'),
-    path('course/all', CourseList.as_view(), name='course-list'),
     path('conversation/all', ConversationList.as_view(), name='conversation-list'),
     path('chatlog/all', ChatlogList.as_view(), name='chatlog-detail'),
 
     # Student view
     # ================================================================================================
     path('user', views.user_detail),
+    path('user/courses', views.get_user_courses),
     path('get-user',views.get_user),
     path('course', views.course_detail),
     path('get-course', views.course_get),
+    path('course/all', views.courses_get_all),
     path('chatlog', views.chatlog_detail),
     path('conversation', views.conversation_detail),
     path('feedback', views.feedback_detail),
@@ -27,12 +27,12 @@ urlpatterns = [
     path('incorrect-answer', views.report_conversation),
     path('comfortability-rating', views.course_comfortability),
 
-
     # Instructor/Researcher views
     # ================================================================================================
     path('researcher/average-ratings', researcher_views.average_ratings),
     path('researcher/average-ratings-csv', researcher_views.average_ratings_csv),
     
+    path('researcher/resolve-reported-conversation', researcher_views.resolve_reported_conversation),
     path('researcher/reported-conversations', researcher_views.list_reported_conversations),
     path('researcher/reported-conversations-csv', researcher_views.list_reported_conversations_csv),
     
@@ -46,12 +46,13 @@ urlpatterns = [
     
     path('researcher/avg-comfortability-rating', researcher_views.get_course_comfortability),
     path('researcher/avg-comfortability-rating-csv', researcher_views.get_course_comfortability_csv),
+    path('researcher/get-filtered-chatlogs', researcher_views.get_filtered_chatlogs),
 
     path('researcher/interaction-frequency', researcher_views.get_interaction_frequency),
 
     path('researcher/course-student-list', researcher_views.get_course_users),
 
-    path('researcher/gptmodel-create', researcher_views.gptmodel_detail),
+    path('researcher/gptmodel-create', researcher_views.gptmodel_create),
     path('researcher/gptmodel-update', researcher_views.gptmodel_update),
     path('researcher/gptmodel-activate', researcher_views.gptmodel_select),
     path('researcher/gptmodel-get', researcher_views.gptmodel_get),

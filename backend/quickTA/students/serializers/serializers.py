@@ -58,3 +58,9 @@ class CourseComfortabilitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Conversation
         fields = ['conversation_id', 'comfortability_rating']
+
+class UserCoursesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ['user_id']

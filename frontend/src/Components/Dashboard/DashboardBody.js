@@ -10,7 +10,7 @@ import DatedStats from "./DatedStats/DatedStats";
 import ReportTable from "./ReportTable/ReportTable";
 import React, { Component, useState, useEffect } from "react";
 
-const DashboardBody = ({ courseID }) => {
+const DashboardBody = ({ courseID, setIsLoading }) => {
     const tabStyle = {
         borderRadius: 'lg',
         color: 'white',
@@ -28,12 +28,12 @@ const DashboardBody = ({ courseID }) => {
 
                 <TabPanels>
                     <TabPanel paddingLeft={'0'} paddingRight={'0'}>
-                        <DatedStats isWeekly={1} courseID={courseID}/>
-                        <ReportTable course_ID={courseID} isWeekly={1}/>
+                        <DatedStats isWeekly={1} courseID={courseID} setIsLoading={setIsLoading}/>
+                        <ReportTable course_ID={courseID} isWeekly={1} setIsLoading={setIsLoading}/>
                     </TabPanel>
                     <TabPanel paddingLeft={'0'} paddingRight={'0'}>
-                        <DatedStats isWeekly={0} courseID={courseID}/>
-                        <ReportTable course_ID={courseID} isWeekly={0}/>
+                        <DatedStats isWeekly={0} courseID={courseID} setIsLoading={setIsLoading}/>
+                        <ReportTable course_ID={courseID} isWeekly={0} setIsLoading/>
                     </TabPanel>
                 </TabPanels>
             </Tabs>

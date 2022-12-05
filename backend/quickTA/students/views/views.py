@@ -12,8 +12,10 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.utils import timezone, dateparse
 from django.utils.timezone import now
+
+from ..functions import user_functions, course_functions
 from ..models import Chatlog, Conversation, Course, Feedback, User, Report
-from ..serializers.serializers import GetUserSerializer, ConversationSerializer, CourseSerializer, FeedbackSerializer, IncorrectChatlogSerializer, UserSerializer, ChatlogSerializer, ReportSerializer, ChatlogDetailSerializer, CourseComfortabilitySerializer
+from ..serializers.serializers import GetUserSerializer, ConversationSerializer, CourseSerializer, FeedbackSerializer, IncorrectChatlogSerializer, UserSerializer, ChatlogSerializer, ReportSerializer, ChatlogDetailSerializer, CourseComfortabilitySerializer, UserCoursesSerializer
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -188,6 +190,24 @@ def user_detail(request):
 
             return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
+@swagger_auto_schema(methods=['post'], request_body=UserCoursesSerializer)
+@api_view(['POST'])
+def get_user_courses(request):
+    if request.method == 'POST':
+        try:
+            courses = user_functions.get_user_courses(request.data['user_id'])
+            res = course_functions.get_courses_info(courses)
+            response = {
+                "courses": res
+            }
+            return Response(response, status=status.HTTP_200_OK)
+        except:
+            error = []
+            if 'user_id' not in request.data.keys():
+                error.append("User ID")
+            err = {"msg": "Get user course missing fields:" + ','.join(error)}
+            return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 @swagger_auto_schema(methods=['post'], request_body=CourseSerializer)
 @api_view(['POST'])
 def course_detail(request):
@@ -229,14 +249,16 @@ def course_detail(request):
             course = Course(
                 course_id=course_id,
                 course_code=request.data['course_code'],
-                semester=request.data['semester']
+                semester=request.data['semester'],
+                course_name=request.data['course_name']
             )
             course.save()
 
             response = {
                 "course_id": course_id,
                 "course_code": request.data['course_code'],
-                "semester": request.data['semester']
+                "semester": request.data['semester'],
+                "course_name": request.data['course_name']
             }
 
             return Response(response, status=status.HTTP_201_CREATED)
@@ -270,14 +292,20 @@ def course_get(request):
                 raise CourseAlreadyExistsError
 
             course_id = 0
+            course_name = ""
             for course in course_code:
                 if course.semester == request.data['semester']:
                     course_id = course.course_id
+                    course_name = course.course_name
+
+            if course_id == 0: 
+                raise CourseAlreadyExistsError
 
             response = {
                 "course_id": course_id,
                 "course_code": request.data['course_code'],
-                "semester": request.data['semester']
+                "semester": request.data['semester'],
+                "course_name": course_name
             }
 
             return Response(response, status=status.HTTP_201_CREATED)
@@ -357,6 +385,19 @@ def conversation_detail(request):
 
             return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
+@swagger_auto_schema(methods=['get'])
+@api_view(['GET'])
+def courses_get_all(request):
+    """
+    Retrieves all courses
+    """
+    if request.method == 'GET':
+        try:
+            courses = Course.objects.all().values()
+            return JsonResponse({"courses": list(courses)})
+        except:
+            return Response("Internal server error.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 @swagger_auto_schema(methods=['post'], request_body=ChatlogSerializer)
 @api_view(['POST'])
 def chatlog_detail(request):
@@ -393,7 +434,7 @@ def chatlog_detail(request):
     """
     if request.method == 'POST':
 
-        # try:
+        try:
             # Set current chatlog's time if not provided
             current_time = timezone.now()
             location = 'America/Toronto'
@@ -494,16 +535,16 @@ def chatlog_detail(request):
             }
             return Response(response, status=status.HTTP_201_CREATED)
         
-        # except:
-        #     # Error handling
-        #     error = []
-        #     if 'conversation_id' not in request.data.keys():
-        #         error.append("Conversation ID")
-        #     if 'chatlog' not in request.data.keys():
-        #         error.append("Chatlog message")
-        #     err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
+        except:
+            # Error handling
+            error = []
+            if 'conversation_id' not in request.data.keys():
+                error.append("Conversation ID")
+            if 'chatlog' not in request.data.keys():
+                error.append("Chatlog message")
+            err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
 
-        #     return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
 @swagger_auto_schema(methods=['post'], request_body=FeedbackSerializer)
 @api_view(['POST'])

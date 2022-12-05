@@ -100,31 +100,32 @@ def get_filtered_interactions(course_id, dates, timezone):
                     offset_date = datetime(year_of_day + 1, 1, 1, tzinfo=tz)
             
            
-            # convos = Conversation.objects.filter(
-            #         course_id=course_id
-            #     ).filter(
-            #         start_time__gte=start_date
-            #     ).filter(
-            #         start_time__lt=offset_date
-            #     )
+            convos = Conversation.objects.filter(
+                    course_id=course_id
+                ).filter(
+                    start_time__gte=start_date
+                ).filter(
+                    start_time__lt=offset_date
+                )
+            count = len(convos)
             
-            count = convos_cluster.aggregate([
-                {
-                    "$match": {
-                        "$and": [
-                            { "course_id": course_id} ,
-                            { "start_time": {
-                                    "$gte": start_date,
-                                    "$lt": offset_date,
-                                }
-                            }
-                        ]
-                    }
-                },
-                {
-                    "$count": "course_id"
-                }
-            ])
+            # count = convos_cluster.aggregate([
+            #     {
+            #         "$match": {
+            #             "$and": [
+            #                 { "course_id": course_id} ,
+            #                 { "start_time": {
+            #                         "$gte": start_date,
+            #                         "$lt": offset_date,
+            #                     }
+            #                 }
+            #             ]
+            #         }
+            #     },
+            #     {
+            #         "$count": "course_id"
+            #     }
+            # ])
             
             day_f = day.strftime('%Y-%m-%d')
             

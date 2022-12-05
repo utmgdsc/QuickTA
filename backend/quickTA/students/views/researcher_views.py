@@ -140,6 +140,33 @@ def average_ratings_csv(request):
                 err = {"msg": "Average Ratings CSV missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
+@swagger_auto_schema(methods=['post'], request_body=rs.ResolveReportSerializer)
+@api_view(['POST'])
+def resolve_reported_conversation(request):
+    """
+    Resolves a reported conversation,
+    """
+    if request.method == 'POST':
+        try:
+            data = request.data
+            ret = report_functions.resolve_conversation(data['conversation_id'])
+            if not(ret): 
+                raise Exception
+
+            return HttpResponse(status=status.HTTP_200_OK)
+
+        except:
+            error = []
+            keys = request.data.keys()
+            if 'course_id' not in keys: error.append("Conversation ID")
+        
+            if (not(error)): 
+                err = {"msg": "Internal Server Error"}
+                return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                err = {"msg": "Reported Conversations missing fields: " + ','.join(error) + '.'}
+                return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
 @swagger_auto_schema(methods=['post'], request_body=rs.ReportedListSerializer)
 @api_view(['POST'])
 def list_reported_conversations(request):
@@ -660,6 +687,20 @@ def get_course_comfortability_csv(request):
                 err = {"msg": "Course comfortability missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['GET', 'POST'])
+def get_filtered_chatlogs(request):
+    # id_contains = request.GET.get('id_contains')
+    # chatlog_contains = request.GET.get('chatlog_contains')
+
+    # qs = Chatlog.objects.all()
+    qs = Chatlog.objects.filter()
+    # qs = qs.filter()
+    # qs = qs.object.filter(chatlog='hi')
+    # qs = qs.object.filter(chatlog="test")
+    serializer = rs.ChatlogSerializer(qs, context={'request': request}, many=True)
+
+    return Response(serializer.data)
+
 @swagger_auto_schema(methods=['post'], request_body=rs.InteractionFrequencySerializer)
 @api_view(['POST'])
 def get_interaction_frequency(request):
@@ -762,7 +803,7 @@ def get_course_users(request):
 
 @swagger_auto_schema(methods=['post'], request_body=rs.GPTModelSerializer)
 @api_view(['POST'])
-def gptmodel_detail(request):
+def gptmodel_create(request):
     """
     Creates a GPT Model given the parameter specifications.
     """
@@ -816,7 +857,7 @@ def gptmodel_update(request):
                 err = {"msg": "GPT Model update missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)                
 
-@swagger_auto_schema(methods=['post'], request_body=rs.GPTModelSerializer)
+@swagger_auto_schema(methods=['post'], request_body=rs.GPTModelSelectSerializer)
 @api_view(['POST'])
 def gptmodel_select(request):
     """
@@ -854,9 +895,6 @@ def gptmodel_get(request):
         try:
             data = request.data
             gpt_models = gptmodel_functions.get_gptmodels(data['course_id'])
-
-            if not(gpt_models):
-                raise Exception
             
             return JsonResponse({"gpt_models": gpt_models})
         except:
@@ -875,7 +913,7 @@ def gptmodel_get_all(request):
         except:
             return Response("Internal server error.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-@swagger_auto_schema(methods=['post'])
+@swagger_auto_schema(methods=['post'], request_body=rs.GPTModelSelectSerializer)
 @api_view(['POST'])
 def gptmodel_delete(request):
     """

@@ -47,7 +47,9 @@ def enquire_model(conversation_id: str, question: str, course_id: str) -> str:
     if chatlog == "":
         chatlog += BOT_START
 
-    prompt_text = f"{chatlog}{RESTART_SEQUENCE}{question}{START_SEQUENCE}"
+    # prompt_text = f"{chatlog}{RESTART_SEQUENCE}{question}{START_SEQUENCE}"
+    # prompt_text = f"{chatlog}"
+    prompt_text = f"{question}"
 
     response = openai.Completion.create(
         prompt=prompt_text,

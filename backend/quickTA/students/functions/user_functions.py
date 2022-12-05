@@ -34,6 +34,7 @@ def create_user(data: Dict[str, str]):
     - data:
     """
     user_id = str(uuid.uuid4())
+    data['user_id'] = user_id
             
     utorid = User.objects.filter(utorid=data['utorid'])
     if (len(utorid) != 0):
@@ -55,6 +56,17 @@ def create_user(data: Dict[str, str]):
         "user_role": user.user_role
     }
     return response
+
+def get_user_courses(user_id: str):
+    """
+    Returns a list of the user's courses in course ids
+    """
+    try:  
+        users = acquire_user_cluster()
+        user = list(users.find({"user_id" : user_id}))[0]
+        return user['courses']
+    except:
+        return OPERATION_FAILED
 
 def add_user_to_course(user_id: str, course_id: str) -> bool:
     """

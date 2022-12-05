@@ -6,7 +6,7 @@ import {
     StatArrow,
   } from '@chakra-ui/react'
 
-const StatCard = ({title, num, delta, unit}) => {
+const StatCard = ({title, num, delta, unit, callBack}) => {
     const cardStyle = {
       backgroundColor: 'white', 
       boxShadow: '1px 2px 3px 1px rgba(0,0,0,0.12)', 
@@ -22,7 +22,9 @@ const StatCard = ({title, num, delta, unit}) => {
     };
 
     return (
-        <Stat style = {cardStyle}>
+        <Stat style = {cardStyle} onClick={() => {
+          callBack();
+          }}>
         <StatNumber><span style={titleStyle}>{title}</span></StatNumber>
         <StatLabel>{num}{unit}</StatLabel>
         {

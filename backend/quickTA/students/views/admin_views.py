@@ -93,17 +93,19 @@ def create_multiple_users(request):
 @api_view(['POST'])
 def add_user_course(request):
     """
-    Links a user to a course
+    Links a student to a course
 
     Parameters:
     - user_id
     - course_id
+    - type: "student" or "instructor"
     """
     if request.method == 'POST':
         try:
             add_user = user_functions.add_user_to_course(request.data['user_id'], request.data['course_id'])
             if (add_user):
-                op = course_functions.update_course_students_list(request.data['course_id'], request.data['user_id'])
+                if request.data["type"] == "student": op = course_functions.update_course_students_list(request.data['course_id'], request.data['user_id'])
+                if request.data["type"] == "instructor":  op = course_functions.update_course_instructors_list(request.data['course_id'], request.data['user_id'])
                 if not(op): raise AddUserToCourseFailedError
             else:
                 raise AddUserToCourseFailedError
@@ -123,13 +125,15 @@ def add_multiple_user_course(request):
     Parameters:
     - users: List[str]  list of student user uuids
     - course_id: str    course uuid
+    - type: "student" or "instructor"
     """
     if request.method == 'POST':
         try:
             for user in request.data['users']:
                 add_user = user_functions.add_user_to_course(user, request.data['course_id'])
                 if (add_user):
-                    op = course_functions.update_course_students_list(request.data['course_id'], user)
+                    if request.data["type"] == "student": op = course_functions.update_course_students_list(request.data['course_id'], request.data['user_id'])
+                    if request.data["type"] == "instructor":  op = course_functions.update_course_instructors_list(request.data['course_id'], request.data['user_id'])
                     if not(op): raise AddUserToCourseFailedError
                 else:
                     raise AddUserToCourseFailedError
@@ -149,12 +153,15 @@ def remove_user_course(request):
     Parameters:
     - user_id
     - course_id
+    - type: "student" or "instructor"
     """
     if request.method == 'POST':
         try:
             data = request.data
             remove_user = user_functions.remove_user_from_course(data['user_id'], data['course_id'])
             if (remove_user):
+                if request.data["type"] == "student": op = course_functions.remove_student_from_course(request.data['course_id'], request.data['user_id'])
+                if request.data["type"] == "instructor":  op = course_functions.remove_instructors_from(request.data['course_id'], request.data['user_id'])
                 op = course_functions.remove_student_from_course(data['course_id'], data['user_id'])
                 if not(op): raise RemoveUserFromCourseFailedError
             else:
