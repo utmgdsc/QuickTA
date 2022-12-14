@@ -1,29 +1,33 @@
 version: '3'
-
 services:
-  # Frontend sevice
   frontend:
     container_name: frontend
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    networks:
+      backend:
+        aliases:
+          - frontend
     ports:
       - "3000:3000"
     env_file:
       - ./frontend/.env
-  
-  # Backend django and mongodb
-  backend:
-    container_name: backend
+
+  server:
+    container_name: server
     build:
       context: ./backend
       dockerfile: Dockerfile
     environment:
       - MAX_CHARACTER_LENGTH=1000
+    networks:
+      backend:
+        aliases:
+          - server
     ports:
       - "8000:8000"
 
-  # Reverse proxy for frontend and backend port forwarding
   nginx-proxy:
     container_name: nginx
     image: nginx
@@ -32,9 +36,12 @@ services:
       - frontend
     networks:
       backend:
-        - aliases:
-            - nginx
+        aliases:
+          - nginx
     ports:
       - "5000:80"
     volumes:
-      - ./nginx.conf
+      - ./nginx.conf:/etc/nginx/nginx.conf
+
+networks:
+  backend:

@@ -8,7 +8,6 @@ import theme from "./assets/theme";
 import { createBrowserHistory } from "history";
 import {BrowserRouter} from "react-router-dom";
 
-const history = createBrowserHistory();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

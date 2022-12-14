@@ -32,7 +32,7 @@ schema_view = swagger_get_schema_view(
 urlpatterns = [
     # path('app/', include('myapp.urls')),
     path('admin/', admin.site.urls),
-    path('api/', 
+    path('api/',
         include([
             path('', include('students.urls', namespace='user')),
             path('swagger/schema/', schema_view.with_ui('swagger', cache_timeout=0), name="swagger-schema"),

@@ -8,7 +8,7 @@ import {
     Input,
     HStack
 } from "@chakra-ui/react"
-
+import {Temporal} from "@js-temporal/polyfill";
 const CourseCreator = () => {
     const { isOpen, onOpen, onClose} = useDisclosure();
 
@@ -38,10 +38,10 @@ const CourseCreator = () => {
                         <FormLabel as='legend' mt={4}>Session</FormLabel>
                         <RadioGroup defaultValue='Fall'>
                             <HStack spacing='24px'>
-                            <Radio value='Fall'>Fall</Radio>
-                            <Radio value='Winter'>Winter</Radio>
-                            <Radio value='Full Year'>Full Year</Radio>
-                            <Radio value='Summer'>Summer</Radio>
+                            <Radio value={Temporal.Now.plainDateISO().toString().substring(2,4)+'F'}>Fall</Radio>
+                            <Radio value={Temporal.Now.plainDateISO().toString().substring(2,4)+'W'}>Winter</Radio>
+                            <Radio value={Temporal.Now.plainDateISO().toString().substring(2,4)+'Y'}>Full Year</Radio>
+                            <Radio value={Temporal.Now.plainDateISO().toString().substring(2,4)+'S'}>Summer</Radio>
                             </HStack>
                         </RadioGroup>
                     </FormControl>

@@ -10,3 +10,5 @@ sqlparse==0.2.4
 drf_yasg
 git+https://github.com/LIAAD/yake
 django-cors-headers
+django-environ
+openai

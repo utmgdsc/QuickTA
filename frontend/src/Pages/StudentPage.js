@@ -2,7 +2,7 @@ import {Box} from "@chakra-ui/react";
 import TopNav from "../Components/TopNav";
 import Chat from "../Components/Chat/Chat";
 
-const StudentPage = ({currCourse, setCurrCourse, semester, courses, isLoading}) => {
+const StudentPage = ({currCourse, setCurrCourse, semester, courses, isLoading, UTORid}) => {
 
     return (
     <div style={{
@@ -10,7 +10,7 @@ const StudentPage = ({currCourse, setCurrCourse, semester, courses, isLoading}) 
         width: "100vw",
         height: '110vh'
       }}>
-        <TopNav UTORid={"UTORid"}/>
+        <TopNav UTORid={UTORid}/>
         {
           currCourse ?
             <Chat

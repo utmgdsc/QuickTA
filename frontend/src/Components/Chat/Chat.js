@@ -18,7 +18,7 @@ const Chat = ({ currCourse , semester, courses, setCurrCourse}) => {
   return (
     <>
       <Box ml={'12vw'} mr={'12vw'}>
-        <CourseSelect courses={courses} currCourse={currCourse} setCurrCourse={setCurrCourse} inConvo={inConvo}/>
+        <CourseSelect courses={courses} currCourse={currCourse} setCurrCourse={setCurrCourse} wait={inConvo}/>
         <Box as={"div"} bgColor={'white'} overflow={'hidden'} mt={5} border={'1px solid #EAEAEA'} borderTopRadius={'lg'} borderBottomRadius={'lg'} boxShadow={'1px 2px 3px 1px rgba(0,0,0,0.12)'} mb={'30vh'}>
           <ChatOpenSurvey/>
           <ChatBoxTopNav courseCode={currCourse.course_code} currConvoID={currConvoID}/>
