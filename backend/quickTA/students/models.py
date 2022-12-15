@@ -7,11 +7,6 @@ from datetime import datetime
 
 class User(models.Model):
 
-    class UserCourses(models.Model):
-        course_id = models.CharField(max_length=50)
-        class Meta:
-            abstract = True    
-
     user_id = models.CharField(max_length=50)
     name = models.CharField(max_length=200)
     utorid = models.CharField(max_length=10)

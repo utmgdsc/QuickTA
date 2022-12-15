@@ -291,7 +291,9 @@ def course_get(request):
 
             # Check for duplicated courses
             course_code = Course.objects.filter(
-                course_code=request.data['course_code']
+                course_code=request.data['course_code'],
+                semester=request.data['semester'],
+                course_name=request.data['course_name']
             )
 
             if (len(course_code) == 0):
