@@ -101,7 +101,7 @@ const App = ( {UTORid = "testuser1"} ) => {
               courseName={currCourse.course_name}
               semester={semester}
               />
-              } />
+              }/>
               <Route path="/ResearcherFilters" element={<ResearcherFilterPage/>} />
               </React.Fragment>
               : null
