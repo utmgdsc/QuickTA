@@ -36,7 +36,7 @@ urlpatterns = [
         include([
             path('', include('students.urls', namespace='user')),
             path('swagger/schema/', schema_view.with_ui('swagger', cache_timeout=0), name="swagger-schema"),
-            path('redoc/schema/', schema_view.with_ui('redoc', cache_timeout=0), name="redoc-schema")
+            path('redoc', schema_view.with_ui('redoc', cache_timeout=0), name="redoc-schema")
         ])
     ),
     path('researchers/', include('researchers.urls'))
