@@ -1,16 +1,15 @@
 from django.urls import path
-from .views.views import ChatlogList, UserList, UserDetail, ConversationDetail, ConversationList
 from students.views import views, researcher_views, admin_views
 
 app_name = 'student_api'
 
 urlpatterns = [
-    path('user/<str:user_id>/', UserDetail.as_view(), name='user-detail'),
-    path('conversation/<str:conversation_id>/', ConversationDetail.as_view(), name='conversation-detail'),
+    # path('user/<str:user_id>/', UserDetail.as_view(), name='user-detail'),
+    # path('conversation/<str:conversation_id>/', ConversationDetail.as_view(), name='conversation-detail'),
 
-    path('user/all', UserList.as_view(), name='user-list'),
-    path('conversation/all', ConversationList.as_view(), name='conversation-list'),
-    path('chatlog/all', ChatlogList.as_view(), name='chatlog-detail'),
+    # path('user/all', UserList.as_view(), name='user-list'),
+    # path('conversation/all', ConversationList.as_view(), name='conversation-list'),
+    # path('chatlog/all', ChatlogList.as_view(), name='chatlog-detail'),
 
     # Student view
     # ================================================================================================
@@ -19,7 +18,7 @@ urlpatterns = [
     path('get-user',views.get_user),
     path('course', views.course_detail),
     path('get-course', views.course_get),
-    path('course/all', views.courses_get_all),
+    # path('course/all', views.courses_get_all),
     path('chatlog', views.chatlog_detail),
     path('conversation', views.conversation_detail),
     path('feedback', views.feedback_detail),

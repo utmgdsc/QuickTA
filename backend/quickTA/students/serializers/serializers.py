@@ -3,22 +3,22 @@ from ..models import *
 
 # Generic API Django API views
 # ======================================================
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['name', 'utorid', 'user_role']
-class CourseSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Course
-        fields = ['course_code', 'semester', 'course_name']
-class ConversationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Conversation
-        fields = ['user_id', 'course_id']
-class ChatlogSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Chatlog
-        fields = ['conversation_id', 'chatlog']
+# class UserSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = ['name', 'utorid', 'user_role']
+# class CourseSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Course
+#         fields = ['course_code', 'semester', 'course_name']
+# class ConversationSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Conversation
+#         fields = ['user_id', 'course_id']
+# class ChatlogSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Chatlog
+#         fields = ['conversation_id', 'chatlog']
 
 # Get User Request and Response
 # ======================================================

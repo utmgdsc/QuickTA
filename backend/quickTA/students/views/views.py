@@ -4,9 +4,13 @@ import re
 import pytz 
 from ..openAI import quick_ta_model as model
 
+from datetime import datetime
+from http.client import responses
+from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.utils import timezone, dateparse
+from django.utils.timezone import now
 
 from ..constants import *
 from ..functions import user_functions, course_functions
@@ -16,63 +20,12 @@ from ..serializers.serializers import *
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.parsers import JSONParser
 from rest_framework import generics
 
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
-# Generic APIView Django Endpoints
-# ======================================================
-class UserList(generics.ListAPIView):
-    serializer_class = UserSerializer
-    queryset = User.objects.all()
-    serializer = UserSerializer(queryset, many=True)
-    pass
-
-class UserDetail(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = UserSerializer
-    queryset = User.objects.all()
-    
-    serializer = UserSerializer(queryset)
-    pass
-
-class CourseList(generics.ListAPIView):
-    serializer_class = CourseSerializer
-    queryset = Course.objects.all()
-
-    serializer = CourseSerializer(queryset, many=True)
-    pass
-
-class CourseDetail(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = CourseSerializer
-    queryset = Course.objects.all()
-
-    serializer = CourseSerializer(queryset)
-    pass
-
-class ConversationList(generics.ListAPIView):
-    serializer_class = ConversationSerializer
-    queryset = Conversation.objects.all()
-
-    serializer = ConversationSerializer(queryset, many=True)
-    pass
-
-class ConversationDetail(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = ConversationSerializer
-    queryset = Conversation.objects.all()
-
-    serializer = ConversationSerializer(queryset)
-    pass
-
-class ChatlogList(generics.ListAPIView):
-    serializer_class = ChatlogSerializer
-    queryset = Chatlog.objects.all()
-
-    serializer = ChatlogSerializer(queryset)
-    pass
-
-# User View Endpoints
-# ======================================================
 @swagger_auto_schema(methods=['post'], request_body=GetUserRequest, 
     responses={
         200: openapi.Response('Success', GetUserResponse),
@@ -125,10 +78,6 @@ def user_detail(request):
     """
     if request.method == 'POST':
         try:
-            # Response validation
-            serializer = UserSerializer(data=request.data)
-            serializer.is_valid()
-            
             request.data['user_id'] = str(uuid.uuid4())
             
             utorid = User.objects.filter(utorid=request.data['utorid'])
@@ -168,7 +117,7 @@ def user_detail(request):
 
 @swagger_auto_schema(methods=['post'], request_body=GetUserCoursesRequest,
     responses={
-        200: openapi.Response('Success', schema=openapi.Schema(type=openapi.TYPE_ARRAY, items=GetUserCoursesResponse)),
+        200: openapi.Response('Success', GetUserCoursesResponse),
         400: openapi.Response('Bad Request', ErrorResponse)
     })
 @api_view(['POST'])
@@ -208,10 +157,6 @@ def course_detail(request):
     """
     if request.method == 'POST':
         try:
-            # Response Validation
-            serializer = CourseSerializer(data=request.data)
-            serializer.is_valid()
-
             # Check for duplicated courses
             course_code = Course.objects.filter(
                 course_code=request.data['course_code'],
@@ -370,7 +315,7 @@ def conversation_detail(request):
 
 @swagger_auto_schema(methods=['get'],
     responses={
-        200: openapi.Response('Success', schema=openapi.Schema(type=openapi.TYPE_ARRAY, items=GetAllCoursesResponse)),
+        200: openapi.Response('Success', GetAllCoursesResponse),
         500: openapi.Response('Internal Server Error', ErrorResponse)
     })
 @api_view(['GET'])
@@ -390,11 +335,7 @@ def courses_get_all(request):
 
 @swagger_auto_schema(methods=['post'], request_body=GetChatlogRequest,
     responses={
-        201: openapi.Response('Created', schema=openapi.Schema(type=openapi.TYPE_OBJECT, 
-            properties= {
-                "user": GetUserChatlogResponse,
-                "agent": GetAgentChatlogResponse
-        })),
+
         400: openapi.Response('Bad Request', ErrorResponse),
         404: openapi.Response('Not Found', ErrorResponse)
     })
@@ -555,8 +496,6 @@ def feedback_detail(request):
     """
     if request.method == 'POST':
         try:
-            serializer = FeedbackSerializer(data=request.data)
-            serializer.is_valid()
             if request.data['rating'] > 5:
                 raise OverRatingLimitError
             
@@ -785,9 +724,6 @@ def course_comfortability(request):
     """
     if request.method == 'POST':
         try: 
-            serializer = CourseComfortabilitySerializer(data=request.data)
-            serializer.is_valid()
-            
             convo = Conversation.objects.filter(conversation_id=request.data['conversation_id'])
             if (len(convo) == 0):
                 raise ConversationNotFoundError
