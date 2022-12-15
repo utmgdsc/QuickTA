@@ -14,22 +14,57 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from ..models import *
+from ..serializers.serializers import *
+from ..serializers.researcher_serializers import *
 from ..serializers import researcher_serializers as rs
 from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
-# Endpoints
-@swagger_auto_schema(methods=['post'], request_body=rs.AverageRatingSerializer)
+# Research Filter view endpoints 
+# ===============================================================================
+@api_view(['GET', 'POST'])
+def get_filtered_chatlogs(request):
+    """
+    TODO: Make swagger documentation for this endpoint
+    """
+    if request.method in ['GET', 'POST']:
+        # id_contains = request.GET.get('id_contains')
+        # chatlog_contains = request.GET.get('chatlog_contains')
+
+        # qs = Chatlog.objects.all()
+        qs = Chatlog.objects.filter()
+        # qs = qs.filter()
+        # qs = qs.object.filter(chatlog='hi')
+        # qs = qs.object.filter(chatlog="test")
+        serializer = rs.ChatlogSerializer(qs, context={'request': request}, many=True)
+
+        return Response(serializer.data)
+
+# Research Analytics view endpoints
+# ===============================================================================
+@swagger_auto_schema(methods=['post'], request_body=GetFilteredStatsRequest,
+    responses={
+        200: openapi.Response('Success', AverageRatingsResponse),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        404: openapi.Response('Not Found', ErrorResponse),
+        500: openapi.Response('Internal Server Error', ErrorResponse)
+    })
 @api_view(['POST'])
 def average_ratings(request):
     """
-    Finds the average rating of a particular course given the course id
+    Acquires the average ratings of a course.
+
+    Finds the average rating of a particular course given the course id.
+    The average rating can ether be within a weekly or monthly range.
     """
     if request.method == 'POST':
         try:
+            # Check if course exists
             course = Course.objects.filter(course_id=request.data['course_id'])
             if not(course.count()): 
                 raise CourseNotFoundError
 
+            # Acquire the conversation record
             data = request.data
             convos = conversation_functions.get_filtered_convos(data['course_id'], data['filter'], data['timezone'])
 
@@ -40,6 +75,7 @@ def average_ratings(request):
                 if (len(q2) != 0):
                     ratings.append(q2[0].rating)
             
+            # Compute average ratings
             if len(ratings) == 0:
                 avg_ratings = 0
             else:
@@ -50,10 +86,10 @@ def average_ratings(request):
                 'avg_ratings': avg_ratings,  
                 'all_ratings': ratings
             }
-
             return Response(response, status=status.HTTP_200_OK)
+
         except CourseNotFoundError:
-            return Response({"msg": "Error: Course not Found."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"msg": "Error: Course not Found."}, status=status.HTTP_404_NOT_FOUND)
         except:
             error = []
             keys = request.data.keys()
@@ -68,10 +104,18 @@ def average_ratings(request):
                 err = {"msg": "Average Ratings missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=rs.AverageRatingSerializer)
+@swagger_auto_schema(methods=['post'], request_body=GetFilteredStatsRequest,
+    responses={
+        200: openapi.Response('Success'),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        404: openapi.Response('Not Found', ErrorResponse),
+        500: openapi.Response('Internal Server Error', ErrorResponse)
+    })
 @api_view(['POST'])
 def average_ratings_csv(request):
     """
+    Acquires the average ratings of a course in a CSV file.
+
     Retrieves the average ratings given a course id and returns a copy of
     all the ratings of the chatbot from the course.
     """
@@ -116,7 +160,7 @@ def average_ratings_csv(request):
                     ])
             return response
         except CourseNotFoundError:
-            return Response({"msg": "Error: Course not Found."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"msg": "Error: Course not Found."}, status=status.HTTP_404_NOT_FOUND)
         except:
             error = []
             keys = request.data.keys()
@@ -131,7 +175,12 @@ def average_ratings_csv(request):
                 err = {"msg": "Average Ratings CSV missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=rs.ResolveReportSerializer)
+@swagger_auto_schema(methods=['post'], request_body=ResolveReportedConvoRequest,
+  responses={
+        200: openapi.Response('Success'),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        500: openapi.Response('Internal Server Error', ErrorResponse)
+    })
 @api_view(['POST'])
 def resolve_reported_conversation(request):
     """
@@ -158,7 +207,13 @@ def resolve_reported_conversation(request):
                 err = {"msg": "Reported Conversations missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=rs.ReportedListSerializer)
+@swagger_auto_schema(methods=['post'], request_body=GetFilteredStatsRequest,
+    responses={
+        200: openapi.Response('Success', GetReportedConvoListResponse),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        404: openapi.Response('Not Found', ErrorResponse),
+        500: openapi.Response('Internal Server Error', ErrorResponse)
+    })
 @api_view(['POST'])
 def list_reported_conversations(request):
     """
@@ -211,7 +266,12 @@ def list_reported_conversations(request):
                 err = {"msg": "Reported Conversations missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=rs.ReportedListSerializer)
+@swagger_auto_schema(methods=['post'], request_body=GetFilteredStatsRequest,
+    responses={
+        200: openapi.Response('Success'),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        500: openapi.Response('Internal Server Error', ErrorResponse)
+    })
 @api_view(['POST'])
 def list_reported_conversations_csv(request):
     """
@@ -276,58 +336,72 @@ def list_reported_conversations_csv(request):
                 err = {"msg": "Reported Conversations missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=rs.ChatlogListSerializer)
+@swagger_auto_schema(methods=['post'], request_body=GetReportedConvoChatlogsRequest,
+    responses={
+        200: openapi.Response('Success', GetReportedConvoChatlogsResponse),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        404: openapi.Response('Not Found', ErrorResponse),
+        500: openapi.Response('Internal Server Error', ErrorResponse)
+    })
 @api_view(['POST'])
 def get_reported_chatlogs(request):
     """
-    Returns all of the chatlogs of a reported conversation ID 
+    Returns all of the chatlogs of a reported conversation ID.
+
+    Acquires the conversation ID of the reported conversation and returns the corresponding chatlogs.
     """
-    try:
-        cid = request.data['conversation_id']
-        conversation = Conversation.objects.filter(conversation_id=cid)
+    if request.method == 'POST':
+        try:
+            cid = request.data['conversation_id']
+            conversation = Conversation.objects.filter(conversation_id=cid)
 
-        if not(conversation):
-            raise ConversationNotFoundError
+            if not(conversation):
+                raise ConversationNotFoundError
 
 
-        user = User.objects.get(user_id=conversation[0].user_id)
+            user = User.objects.get(user_id=conversation[0].user_id)
 
-        chatlogs = Chatlog.objects.filter(conversation_id=cid).order_by('time')
-        conversations = []
-        for chatlog in chatlogs:
-            if chatlog.is_user:
-                speaker = user.name
+            chatlogs = Chatlog.objects.filter(conversation_id=cid).order_by('time')
+            conversations = []
+            for chatlog in chatlogs:
+                if chatlog.is_user:
+                    speaker = user.name
+                else:
+                    speaker = 'Agent'
+                conversations.append({
+                    'chatlog_id': chatlog.chatlog_id,
+                    'speaker': speaker,
+                    'chatlog': chatlog.chatlog,
+                    'time': chatlog.time,
+                    'delta': chatlog.delta
+                })
+            
+            response = {
+                "total_reported_count": len(conversations),
+                "conversations": conversations
+            }
+            return Response(response, status=status.HTTP_200_OK)
+
+        except ConversationNotFoundError:
+            return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_404_NOT_FOUND) 
+        except:
+            error = []
+            if 'conversation_id' not in request.data.keys():
+                error.append("Conversation ID")
+            
+            if (not(error)): 
+                err = {"msg": "Internal Server Error"}
+                return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             else:
-                speaker = 'Agent'
-            conversations.append({
-                'chatlog_id': chatlog.chatlog_id,
-                'speaker': speaker,
-                'chatlog': chatlog.chatlog,
-                'time': chatlog.time,
-                'delta': chatlog.delta
-            })
-        
-        response = {
-            "total_reported_count": len(conversations),
-            "conversations": conversations
-        }
-        return Response(response, status=status.HTTP_200_OK)
-
-    except ConversationNotFoundError:
-        return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_401_UNAUTHORIZED) 
-    except:
-        error = []
-        if 'conversation_id' not in request.data.keys():
-            error.append("Conversation ID")
-        
-        if (not(error)): 
-            err = {"msg": "Internal Server Error"}
-            return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        else:
-            err = {"msg": "Reported Chatlogs missing fields: " + ','.join(error) + '.'}
-            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+                err = {"msg": "Reported Chatlogs missing fields: " + ','.join(error) + '.'}
+                return Response(err, status=status.HTTP_400_BAD_REQUEST)
        
-@swagger_auto_schema(methods=['post'], request_body=rs.ChatlogListSerializer)
+@swagger_auto_schema(methods=['post'], request_body=GetReportedConvoChatlogsRequest,
+    responses={
+        200: openapi.Response('Success'),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        404: openapi.Response('Not Found', ErrorResponse)
+    })
 @api_view(['POST'])
 def get_reported_chatlogs_csv(request):
     """
@@ -374,9 +448,9 @@ def get_reported_chatlogs_csv(request):
             return response
 
         except ConversationNotFoundError:
-            return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_401_UNAUTHORIZED) 
+            return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_404_NOT_FOUND) 
         except UserNotFoundError:
-            return Response({"msg": "Error: User not Found."}, status=status.HTTP_401_UNAUTHORIZED) 
+            return Response({"msg": "Error: User not Found."}, status=status.HTTP_404_NOT_FOUND) 
         except:
             # Error handling
             error = []
@@ -386,9 +460,21 @@ def get_reported_chatlogs_csv(request):
 
             return Response(err, status=status.HTTP_400_BAD_REQUEST) 
 
-@swagger_auto_schema(methods=['post'], request_body=rs.ResponseRateSerializer)
+@swagger_auto_schema(methods=['post'], request_body=GetFilteredStatsRequest,
+    responses={
+        200: openapi.Response('Success', GetAverageResponseRateResponse),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        500: openapi.Response('Internal Server Error', ErrorResponse)
+    })
 @api_view(['POST'])
 def get_average_response_rate(request):
+    """
+    Acquires the average response rate of a given course.
+
+    Given the course ID, filter and timezone, returns the average response rate of a course.
+    The response rate (delta) is calculated based on the second user response onwards for a particular conversation.
+    Each delta is the difference between the last model-generated response from the user input.
+    """
     if request.method == 'POST':
         try:
             course = Course.objects.filter(course_id=request.data['course_id'])
@@ -434,10 +520,17 @@ def get_average_response_rate(request):
                 err = {"msg": "Average Response Rate missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=rs.ResponseRateSerializer)
+@swagger_auto_schema(methods=['post'], request_body=GetFilteredStatsRequest,
+    responses={
+        200: openapi.Response('Success'),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        500: openapi.Response('Internal Server Error', ErrorResponse)
+    })
 @api_view(['POST'])
 def get_average_response_rate_csv(request):
     """
+    Acquires a CSV containing the average response rate of a given course.
+
     Retrieves the response rates given a course id and returns a copy of
     all the relevant chatlog response rates of a course.
     """
@@ -501,14 +594,23 @@ def get_average_response_rate_csv(request):
                 err = {"msg": "Average Response Rate CSV missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=rs.MostCommonWordsSerializer)
+@swagger_auto_schema(methods=['post'], request_body=GetFilteredStatsRequest,
+    responses={
+        200: openapi.Response('Success', GetMostCommonTopicsResponse),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        404: openapi.Response('Not Found', ErrorResponse),
+        500: openapi.Response('Internal Server Error', ErrorResponse)
+    })
 @api_view(['POST'])
 def get_most_common_words(request):
+    """
+    Acquires the most common topics within user responses for a given course.
+
+    Retrieves the most common topics through the use of YAKE (Yet Another Keyword Extractor).
+    Returns 3-gram topics keywords with their associated frequency. 
+    """
     if request.method == 'POST':
         try:
-            # serializer = MostCommonWordsSerializer(data=request.data)
-            # serializer.is_valid()
-
             # Gather all user chatlogs
             sentences = []
             convo_count = 0
@@ -551,7 +653,7 @@ def get_most_common_words(request):
             }
             return Response(response, status=status.HTTP_200_OK)
         except CourseNotFoundError:
-            return Response({"msg": "Error: Course not Found."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"msg": "Error: Course not Found."}, status=status.HTTP_404_NOT_FOUND)
         except:
             error = []
             keys = request.data.keys()
@@ -566,14 +668,23 @@ def get_most_common_words(request):
                 err = {"msg": "Most Common Topics missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=rs.CourseComfortabilityListSerializer)
+@swagger_auto_schema(methods=['post'], request_body=GetFilteredStatsRequest,
+    responses={
+        200: openapi.Response('Success', GetCourseComfortabilityResponse),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        404: openapi.Response('Not Found', ErrorResponse),
+        500: openapi.Response('Internal Server Error', ErrorResponse)
+    })
 @api_view(['POST'])
 def get_course_comfortability(request):
+    """
+    Acquires the average course comfortability rating for a given course.
+
+    Retrieves the average course comfortability rating of a course for a given period of time.
+    The filter can be either 'Weekly' or 'Monthly'.
+    """
     if request.method == 'POST':
         try:
-            serializer = rs.CourseComfortabilityListSerializer(data=request.data)
-            serializer.is_valid()
-
             course = Course.objects.filter(course_id=request.data['course_id'])
             if len(course) == 0:
                 raise CourseNotFoundError
@@ -582,7 +693,6 @@ def get_course_comfortability(request):
             convos = conversation_functions.get_filtered_convos(data['course_id'], data['filter'], data['timezone'])
 
             all_ratings = []
-
             for convo in convos:
                 if convo.comfortability_rating:
                     all_ratings.append(convo.comfortability_rating)
@@ -599,7 +709,7 @@ def get_course_comfortability(request):
 
             return Response(response, status=status.HTTP_200_OK)
         except CourseNotFoundError:
-            return Response({"msg": "Error: Course not Found."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"msg": "Error: Course not Found."}, status=status.HTTP_404_NOT_FOUND)
         except:
             error = []
             if 'course_id' not in request.data.keys():
@@ -612,17 +722,23 @@ def get_course_comfortability(request):
                 err = {"msg": "Course comfortability missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
         
-@swagger_auto_schema(methods=['post'], request_body=rs.CourseComfortabilityListSerializer)
+@swagger_auto_schema(methods=['post'], request_body=GetFilteredStatsRequest,
+    responses={
+        200: openapi.Response('Success'),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        404: openapi.Response('Not Found', ErrorResponse),
+        500: openapi.Response('Internal Server Error', ErrorResponse)
+    })
 @api_view(['POST'])
 def get_course_comfortability_csv(request):
     """
     Retrieves a CSV copy of all the course comfortability ratings of a given course id.
+
+    Retrieves the average course comfortability rating of a course for a given period of time.
+    The filter can be either 'Weekly' or 'Monthly'.
     """
     if request.method == 'POST':
         try:
-            serializer = rs.CourseComfortabilityListSerializer(data=request.data)
-            serializer.is_valid()
-
             course = Course.objects.filter(course_id=request.data['course_id'])
             if len(course) == 0:
                 raise CourseNotFoundError
@@ -663,7 +779,7 @@ def get_course_comfortability_csv(request):
             return response
 
         except CourseNotFoundError:
-            return Response({"msg": "Error: Course not Found."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"msg": "Error: Course not Found."}, status=status.HTTP_404_NOT_FOUND)
         except:
             error = []
             keys = request.data.keys()
@@ -678,21 +794,14 @@ def get_course_comfortability_csv(request):
                 err = {"msg": "Course comfortability missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET', 'POST'])
-def get_filtered_chatlogs(request):
-    # id_contains = request.GET.get('id_contains')
-    # chatlog_contains = request.GET.get('chatlog_contains')
 
-    # qs = Chatlog.objects.all()
-    qs = Chatlog.objects.filter()
-    # qs = qs.filter()
-    # qs = qs.object.filter(chatlog='hi')
-    # qs = qs.object.filter(chatlog="test")
-    serializer = rs.ChatlogSerializer(qs, context={'request': request}, many=True)
-
-    return Response(serializer.data)
-
-@swagger_auto_schema(methods=['post'], request_body=rs.InteractionFrequencySerializer)
+@swagger_auto_schema(methods=['post'], request_body=GetFilteredStatsRequest,
+    responses={
+        200: openapi.Response('Success', GetInteractionFrequencyResponse),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        404: openapi.Response('Not Found', ErrorResponse),
+        500: openapi.Response('Internal Server Error', ErrorResponse)
+    })
 @api_view(['POST'])
 def get_interaction_frequency(request):
     """
@@ -722,7 +831,7 @@ def get_interaction_frequency(request):
             return Response(response, status=status.HTTP_200_OK)
 
         except CourseNotFoundError:
-            return Response({"msg": "Error: Course not Found."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"msg": "Error: Course not Found."}, status=status.HTTP_404_NOT_FOUND)
         except:
             error = []
             keys = request.data.keys()
@@ -734,10 +843,16 @@ def get_interaction_frequency(request):
                 err = {"msg": "Internal Server Error"}
                 return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             else:
-                err = {"msg": "Average Ratings CSV missing fields: " + ','.join(error) + '.'}
+                err = {"msg": "Interaction Frequency missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=rs.CourseUserListSerializer)
+@swagger_auto_schema(methods=['post'], request_body=GetCourseUserListRequest,
+    responses={
+        200: openapi.Response('Success', GetCourseUserListResponse),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        404: openapi.Response('Not Found', ErrorResponse),
+        500: openapi.Response('Internal Server Error', ErrorResponse)
+    })
 @api_view(['POST'])
 def get_course_users(request):
     """
@@ -754,43 +869,47 @@ def get_course_users(request):
         - utorid
         - user_role
     """
-    try:
-        # Form validation
-        serializer = rs.CourseUserListSerializer(data=request.data)
-        serializer.is_valid()
+    if request.method == 'POST':
+        try:
+            course_id = request.data['course_id']
 
-        course_id = request.data['course_id']
+            # Acquire the course's list of students
+            users = course_functions.get_all_course_users(course_id)
+            if not(users):
+                raise CourseNotFoundError
 
-        # Acquire the course's list of students
-        users = course_functions.get_all_course_users(course_id)
-        if not(users):
-            raise CourseNotFoundError
+            # Acquire all user's information 
+            users_info = user_functions.get_users_info(users)
 
-        # Acquire all user's information 
-        users_info = user_functions.get_users_info(users)
+            response = {
+                "total_students": len(users),
+                "users": users_info
+            }
+            
+            return Response(response, status=status.HTTP_200_OK)
 
-        response = {
-            "total_students": len(users),
-            "users": users_info
-        }
-        
-        return Response(response, status=status.HTTP_200_OK)
+        except CourseNotFoundError:
+            return Response({"msg": "Error: Course not Found."}, status=status.HTTP_404_NOT_FOUND)
+        except:
+            error = []
+            if 'course_id' not in request.data.keys():
+                error.append("Course ID")
+            
+            if (not(error)): 
+                err = {"msg": "Internal Server Error"}
+                return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                err = {"msg": "Course User List missing fields: " + ','.join(error) + '.'}
+                return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-    except CourseNotFoundError:
-        return Response({"msg": "Error: Course not Found."}, status=status.HTTP_400_BAD_REQUEST)
-    except:
-        error = []
-        if 'course_id' not in request.data.keys():
-            error.append("Course ID")
-        
-        if (not(error)): 
-            err = {"msg": "Internal Server Error"}
-            return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        else:
-            err = {"msg": "Course User List missing fields: " + ','.join(error) + '.'}
-            return Response(err, status=status.HTTP_400_BAD_REQUEST)
-
-@swagger_auto_schema(methods=['post'], request_body=rs.GPTModelSelectSerializer)
+# GPT Model Related Endpoints
+# ====================================================================================
+@swagger_auto_schema(methods=['post'], request_body=GetOneGPTModelRequest,
+    responses={
+        200: openapi.Response('Success', GetOneGPTModelResponse),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        500: openapi.Response('Internal Server Error', ErrorResponse)
+    })
 @api_view(['POST'])
 def gptmodel_get_one(request):
     """
@@ -814,7 +933,12 @@ def gptmodel_get_one(request):
                 err = {"msg": "GPT get one model missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=rs.GPTModelSerializer)
+@swagger_auto_schema(methods=['post'], request_body=CreateGPTModelRequest,
+    responses={
+        200: openapi.Response('Success', CreateGPTModelResponse),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        500: openapi.Response('Internal Server Error', ErrorResponse)
+    })
 @api_view(['POST'])
 def gptmodel_create(request):
     """
@@ -841,7 +965,12 @@ def gptmodel_create(request):
                 err = {"msg": "GPT Model creation missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=rs.GPTModelSerializer)
+@swagger_auto_schema(methods=['post'], request_body=UpdateGPTModelRequest,
+    responses={
+        200: openapi.Response('Success', UpdateGPTModelResponse),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        500: openapi.Response('Internal Server Error', ErrorResponse)
+    })
 @api_view(['POST'])
 def gptmodel_update(request):
     """
@@ -869,7 +998,12 @@ def gptmodel_update(request):
                 err = {"msg": "GPT Model update missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)                
 
-@swagger_auto_schema(methods=['post'], request_body=rs.GPTModelSelectSerializer)
+@swagger_auto_schema(methods=['post'], request_body=SwitchGPTModelRequest,
+    responses={
+        200: openapi.Response('Success', SwitchGPTModelResponse),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        500: openapi.Response('Internal Server Error', ErrorResponse)
+    })
 @api_view(['POST'])
 def gptmodel_select(request):
     """
@@ -878,10 +1012,11 @@ def gptmodel_select(request):
     if request.method == 'POST':
         try:
             data = request.data
-            res = gptmodel_functions.switch_gptmodel(data['course_id'], data['model_id'])
+            ret = gptmodel_functions.switch_gptmodel(data['course_id'], data['model_id'])
             
             if OPERATION_FAILED:
                 raise Exception
+            res = { "success": ret } 
             return Response(res, status=status.HTTP_200_OK)
         
         except:
@@ -897,11 +1032,15 @@ def gptmodel_select(request):
                 err = {"msg": "GPT Model creation missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)                
 
-@swagger_auto_schema(methods=['post'], request_body=rs.CourseUserListSerializer)
+@swagger_auto_schema(methods=['post'], request_body=GetCourseGPTModelRequest,
+    responses={
+        200: openapi.Response('Success', GetCourseGPTModelResponse),
+        500: openapi.Response('Internal Server Error', ErrorResponse)
+    })
 @api_view(['POST'])
 def gptmodel_get(request):
     """
-    Returns all GPT models related to a course
+    Returns all GPT models related to a course.
     """
     if request.method == 'POST':
         try:
@@ -912,11 +1051,15 @@ def gptmodel_get(request):
         except:
             return Response("Internal server error", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@swagger_auto_schema(methods=['get'])
+@swagger_auto_schema(methods=['get'],
+    responses={
+        200: openapi.Response('Success', GetAllCourseGPTModelResponse),
+        500: openapi.Response('Internal Server Error', ErrorResponse)
+    })
 @api_view(['GET'])
 def gptmodel_get_all(request):
     """
-    Retrieves all GPT models from all courses
+    Retrieves all GPT models from all courses.
     """
     if request.method == 'GET':
         try:
@@ -925,11 +1068,15 @@ def gptmodel_get_all(request):
         except:
             return Response("Internal server error.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-@swagger_auto_schema(methods=['post'], request_body=rs.GPTModelSelectSerializer)
+@swagger_auto_schema(methods=['post'], request_body=DeleteGPTModelRequest,
+    responses={
+        200: openapi.Response('Success'),
+        500: openapi.Response('Internal Server Error', ErrorResponse)
+    })
 @api_view(['POST'])
 def gptmodel_delete(request):
     """
-    Deletes a GPT model configuration
+    Deletes a GPT model configuration.
     """
     if request.method == 'POST':
         try:

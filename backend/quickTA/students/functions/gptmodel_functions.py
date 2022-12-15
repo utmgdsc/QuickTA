@@ -246,6 +246,7 @@ def switch_gptmodel(course_id, model_id):
         if ret:
             ret = activate_gptmodel(model_id)
             if not(ret): return OPERATION_FAILED
+        return ret
     except:
         return OPERATION_FAILED
 

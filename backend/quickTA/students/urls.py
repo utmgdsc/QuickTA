@@ -18,7 +18,7 @@ urlpatterns = [
     path('get-user',views.get_user),
     path('course', views.course_detail),
     path('get-course', views.course_get),
-    # path('course/all', views.courses_get_all),
+    path('course/all', views.courses_get_all),
     path('chatlog', views.chatlog_detail),
     path('conversation', views.conversation_detail),
     path('feedback', views.feedback_detail),

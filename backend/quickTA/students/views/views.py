@@ -344,8 +344,7 @@ def chatlog_detail(request):
     """
     Retrieves and posts a chatlog from the user, then returns a response from the OpenAI model.
     
-    TODO: Fix the docstring of this function.
-    TODO: Also fix the prompt structure with the delimiters from openAI's functions.
+    Also fix the prompt structure with the delimiters from openAI's functions.
     Response:
     {
         'agent': {
