@@ -1,5 +1,5 @@
 from django.urls import path
-from .views.views import ChatlogList, ChatlogDetail, UserList, UserDetail, CourseDetail, CourseList, ConversationDetail, ConversationList
+from .views.views import ChatlogList, UserList, UserDetail, ConversationDetail, ConversationList
 from students.views import views, researcher_views, admin_views
 
 app_name = 'student_api'

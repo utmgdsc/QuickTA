@@ -1,66 +1,170 @@
 from rest_framework import serializers
-from ..models import Chatlog, Conversation, Feedback, Report, User, Course
-# from rest_framework_mongoengine.serializers import DocumentSerializer
+from ..models import *
 
-
+# Generic API Django API views
+# ======================================================
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['name', 'utorid', 'user_role']
-
-class GetUserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['utorid']
-
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = ['course_code', 'semester', 'course_name']
-
-
 class ConversationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conversation
         fields = ['user_id', 'course_id']
-
-
-class FeedbackSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Feedback
-        fields = ['conversation_id', 'rating', 'feedback_msg']
-
-
 class ChatlogSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chatlog
         fields = ['conversation_id', 'chatlog']
 
-class ChatlogDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Chatlog
-        fields = ['conversation_id', 'chatlog_id', 'time', 'is_user', 'chatlog', 'status']
+# Get User Request and Response
+# ======================================================
+class GetUserRequest(serializers.Serializer):
+    utorid = serializers.CharField()
 
+class GetUserResponse(serializers.Serializer):
+    user_id = serializers.CharField(required=False)
+    name = serializers.CharField(required=False)
+    utorid = serializers.CharField(required=False)
+    user_role = serializers.CharField(required=False)
 
-class ReportSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Report
-        fields = ['conversation_id']
+# Create User Request and Response
+# ======================================================
+class CreateUserRequest(serializers.Serializer):
+    name = serializers.CharField()
+    utorid = serializers.CharField()
+    user_role = serializers.CharField()
 
+class CreateUserResponse(serializers.Serializer):
+    user_id = serializers.CharField(required=False)
+    name = serializers.CharField(required=False)
+    utorid = serializers.CharField(required=False)
+    user_role = serializers.CharField(required=False)
 
-class IncorrectChatlogSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Report
-        fields = ['conversation_id', 'msg']
+# Get User's Courses Request and Response
+# ======================================================
+class GetUserCoursesRequest(serializers.Serializer):
+    user_id = serializers.CharField()
 
-class CourseComfortabilitySerializer(serializers.ModelSerializer):
+class GetUserCoursesResponse(serializers.Serializer):
+    course_id = serializers.ListField(required=False)
+    courses = serializers.ListField(child=serializers.CharField(label="course_id"), required=False)
 
-    class Meta:
-        model = Conversation
-        fields = ['conversation_id', 'comfortability_rating']
+# Create Course Request and Response
+# ======================================================
+class CreateCourseRequest(serializers.Serializer):
+    course_code = serializers.CharField()
+    semester = serializers.CharField()
 
-class UserCoursesSerializer(serializers.ModelSerializer):
+class CreateCourseResponse(serializers.Serializer):
+    course_id = serializers.CharField(required=False)
+    course_code = serializers.CharField(required=False)
+    semester = serializers.CharField(required=False)
+    course_name = serializers.CharField(required=False)
 
-    class Meta:
-        model = User
-        fields = ['user_id']
+# Get Course Request and Response
+# ======================================================
+class GetCourseRequest(serializers.Serializer):
+    course_code = serializers.CharField()
+    semester = serializers.CharField()
+    course_name = serializers.CharField(required=False)
+
+class GetCourseResponse(serializers.Serializer):
+    course_id = serializers.CharField(required=False)
+    course_code = serializers.CharField(required=False)
+    semester = serializers.CharField(required=False)
+    course_name = serializers.CharField(required=False)
+
+# Start Conversation Request and Response
+# ======================================================
+class StartConversationRequest(serializers.Serializer):
+    course_id = serializers.CharField()
+    user_id = serializers.CharField()
+
+class StartConversationResponse(serializers.Serializer):
+    conversation_id = serializers.CharField(required=False)
+    course_id = serializers.CharField(required=False)
+    user_id = serializers.CharField(required=False)
+    status = serializers.CharField(required=False)
+    report = serializers.CharField(required=False)
+
+# Get All Courses Response
+# ======================================================
+class GetAllCoursesResponse(serializers.Serializer):
+    course_id = serializers.CharField(max_length=50, required=False)
+    semester = serializers.CharField(max_length=10, required=False)
+    course_code = serializers.CharField(max_length=9, required=False)
+    course_name = serializers.CharField(max_length=1000, required=False)
+
+# Get Chatlog Request and Response
+# ======================================================
+class GetChatlogRequest(serializers.Serializer):
+    conversation_id = serializers.CharField()
+    chatlog = serializers.CharField()
+    time = serializers.CharField(required=False)
+
+class GetUserChatlogResponse(serializers.Serializer):
+    conversation_id = serializers.CharField(required=False)
+    chatlog_id = serializers.CharField(required=False)
+    time = serializers.CharField(required=False)
+    is_user = serializers.BooleanField(required=False)
+    chatlog = serializers.CharField(required=False)
+    delta = serializers.FloatField(required=False)
+
+class GetAgentChatlogResponse(serializers.Serializer):
+    conversation_id = serializers.CharField(required=False)
+    chatlog_id = serializers.CharField(required=False)
+    time = serializers.CharField(required=False)
+    is_user = serializers.BooleanField(required=False)
+    chatlog = serializers.CharField(required=False)
+
+# Create Feedback Request and Response
+# ======================================================
+class CreateFeedbackRequest(serializers.Serializer):
+    conversation_id = serializers.CharField()
+    rating = serializers.IntegerField()
+    feedback_msg = serializers.CharField(required=False)
+
+class CreateFeedbackResponse(serializers.Serializer):
+    conversation_id = serializers.CharField(required=False)
+    rating = serializers.IntegerField(required=False)
+    feedback_msg = serializers.CharField(required=False)
+    
+# Get Chatlog History Request and Response
+# ======================================================
+class GetChatlogHistoryRequest(serializers.Serializer):
+    conversation_id = serializers.CharField()
+
+# Incorrect Chatlog Request and Response
+# ======================================================
+class IncorrectChatlogRequest(serializers.Serializer):
+    conversation_id = serializers.CharField()
+    msg = serializers.CharField()
+
+class IncorrectChatlogResponse(serializers.Serializer):
+    conversation_id = serializers.CharField(required=False)
+    course_id = serializers.CharField(required=False)
+    user_id = serializers.CharField(required=False)
+    name = serializers.CharField(required=False)
+    utorid = serializers.CharField(required=False)
+    time = serializers.CharField(required=False)
+    status = serializers.CharField(required=False)
+    msg = serializers.CharField(required=False)
+
+# Course Comfortability Request and Response
+# ======================================================
+class CourseComfortabilityRequest(serializers.Serializer):
+    conversation_id = serializers.CharField()
+    comfortability_rating = serializers.CharField()
+
+class CourseComfortabilityResponse(serializers.Serializer):
+    conversation_id = serializers.CharField(required=False)
+    comfortability_rating = serializers.CharField(required=False)
+
+# Error Resposne (Status Codes 400, 401, 404, 500)
+# ======================================================
+class ErrorResponse(serializers.Serializer):
+    msg = serializers.CharField(label="Error Message", required=False)

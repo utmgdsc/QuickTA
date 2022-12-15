@@ -15,8 +15,6 @@ class User(models.Model):
     def __str__(self):
         return self.name + '(' + self.user_id + ')' + '[' + ','.join(self.courses) + ']'
 
-
-
 class Course(models.Model):
     course_id = models.CharField(max_length=50)
     semester = models.CharField(max_length=10)
