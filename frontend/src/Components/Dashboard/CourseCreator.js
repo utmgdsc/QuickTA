@@ -79,8 +79,11 @@ const CourseCreator = () => {
                               })
                                 .then(async (res) => {
                                     await axios.post(process.env.REACT_APP_API_URL + "/researcher/gptmodel-create", {
+                                        course_id: res.data.course_id,
                                         model_name: newCourse.course_code,
-                                        engine: "text-davinci-002",
+                                        model: "text-davinci-002",
+                                        prompt: "Hello. I am an AI chatbot designed to assist you in solving your problems " +
+                                          "by giving hints but never providing direct answers. How can I help you?",
                                         temperature: 0.9,
                                         max_tokens: 300,
                                         top_p: 1,
@@ -92,7 +95,7 @@ const CourseCreator = () => {
                                 })
                                 .catch((err) => console.log(err))
                           }setNewCourse({course_code: "", course_name: ""});
-                          setNewSemester(Temporal.Now.plainDateISO().toString().substring(2,4)+'F');
+                          setNewSemester(Temporal.Now.plainDateISO().year.toString()+'F');
                           onClose();
                       }}
                     >
@@ -100,7 +103,7 @@ const CourseCreator = () => {
                     </Button>
                     <Button onClick={() => {
                         setNewCourse({course_code: "", course_name: ""});
-                        setNewSemester(Temporal.Now.plainDateISO().toString().substring(2, 4) + 'F');
+                        setNewSemester(Temporal.Now.plainDateISO().year.toString()+'F');
                         onClose();
                     }} backgroundColor="#EFEFEF" color="#2D2D2D" >
                     Cancel
