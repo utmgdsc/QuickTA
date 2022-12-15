@@ -50,9 +50,11 @@ def enquire_model(conversation_id: str, question: str, course_id: str) -> str:
     if chatlog == "":
         chatlog += BOT_START
 
-    # prompt_text = f"{chatlog}{RESTART_SEQUENCE}{question}{START_SEQUENCE}"
+    prompt_text = f"{chatlog}{RESTART_SEQUENCE}{question}{START_SEQUENCE}"
     # prompt_text = f"{chatlog}"
     prompt_text = f"{question}"
+    # print("Hello. I am an AI chatbot designed to assist you in solving your problems by giving hints but never providing direct answers. How can I help you?"
+    print(prompt_text)
 
     response = openai.Completion.create(
         prompt=prompt_text,
@@ -62,6 +64,8 @@ def enquire_model(conversation_id: str, question: str, course_id: str) -> str:
 
     res_text = response['choices'][0]['text']
     answer = str(res_text).strip().split(RESTART_SEQUENCE.rstrip())[0]
+    print(START_SEQUENCE, RESTART_SEQUENCE)
+    print(res_text)
     print(answer)
     
     # Save the entire chatlog (with the AI response back to the conversation)

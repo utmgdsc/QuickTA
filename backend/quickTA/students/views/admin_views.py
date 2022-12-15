@@ -104,8 +104,10 @@ def add_user_course(request):
         try:
             add_user = user_functions.add_user_to_course(request.data['user_id'], request.data['course_id'])
             if (add_user):
-                if request.data["type"] == "student": op = course_functions.update_course_students_list(request.data['course_id'], request.data['user_id'])
-                if request.data["type"] == "instructor":  op = course_functions.update_course_instructors_list(request.data['course_id'], request.data['user_id'])
+                if request.data["type"] == "student": 
+                    op = course_functions.update_course_students_list(request.data['course_id'], request.data['user_id'])
+                if request.data["type"] == "instructor":  
+                    op = course_functions.update_course_instructors_list(request.data['course_id'], request.data['user_id'])
                 if not(op): raise AddUserToCourseFailedError
             else:
                 raise AddUserToCourseFailedError

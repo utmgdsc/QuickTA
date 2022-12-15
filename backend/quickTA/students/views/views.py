@@ -108,7 +108,12 @@ def get_user(request):
     if request.method == 'POST':
         try:
             user = User.objects.get(utorid=request.data['utorid'])
-            res = { "user_id" : user.user_id}
+            res = { 
+                    "user_id" : user.user_id,
+                    "name": user.name,
+                    "utorid": user.utorid,
+                    "user_role": user.user_role
+                }
 
             return Response(res, status=status.HTTP_200_OK)
         

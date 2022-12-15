@@ -16,7 +16,7 @@ class GetUserSerializer(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
-        fields = ['course_code', 'semester']
+        fields = ['course_code', 'semester', 'course_name']
 
 
 class ConversationSerializer(serializers.ModelSerializer):

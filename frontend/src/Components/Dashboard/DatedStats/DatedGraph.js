@@ -104,7 +104,7 @@ const DatedGraph = ({isWeekly, courseID}) => {
                         style: {
                           color: "pink",
                           fontSize: '69px',
-                          fontFamily: "Comic Sans MS"
+                          fontFamily: "Arial"
                         }
                       }
                 }} 
