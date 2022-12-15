@@ -56,6 +56,7 @@ urlpatterns = [
     path('researcher/gptmodel-update', researcher_views.gptmodel_update),
     path('researcher/gptmodel-activate', researcher_views.gptmodel_select),
     path('researcher/gptmodel-get', researcher_views.gptmodel_get),
+    path('researcher/gptmodel-get-one', researcher_views.gptmodel_get_one),
     path('researcher/gptmodel-get-all', researcher_views.gptmodel_get_all),
     path('researcher/gptmodel-delete', researcher_views.gptmodel_delete),
     # Admin view

@@ -790,6 +790,30 @@ def get_course_users(request):
             err = {"msg": "Course User List missing fields: " + ','.join(error) + '.'}
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
+@swagger_auto_schema(methods=['post'], request_body=rs.GPTModelSelectSerializer)
+@api_view(['POST'])
+def gptmodel_get_one(request):
+    """
+    Acquires one GPT Model when given the course_id and model_id
+    """
+    if request.method == 'POST':
+        try:
+            data = request.data
+            res = gptmodel_functions.get_one_gptmodel(data['model_id'], data['course_id'])
+            return Response(res, status=status.HTTP_200_OK)
+        except:
+            error = []
+            keys = request.data.keys()
+            if 'model_id' not in keys: error.append("Model ID")
+            if 'course_id' not in keys: error.append("Course ID")
+
+            if (not(error)):
+                err = {"msg": "Internal Server Error"}
+                return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                err = {"msg": "GPT get one model missing fields: " + ','.join(error) + '.'}
+                return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
 @swagger_auto_schema(methods=['post'], request_body=rs.GPTModelSerializer)
 @api_view(['POST'])
 def gptmodel_create(request):
@@ -809,7 +833,6 @@ def gptmodel_create(request):
             if 'course_id' not in keys: error.append("Course ID")
             if 'model' not in keys: error.append("Model")
             if 'prompt' not in keys: error.append("Prompt")
-            if 'suffix' not in keys: error.append("Suffix")
             
             if (not(error)): 
                 err = {"msg": "Internal Server Error"}
