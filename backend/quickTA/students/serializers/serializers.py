@@ -104,7 +104,7 @@ class GetAllCoursesResponse(serializers.Serializer):
 class GetChatlogRequest(serializers.Serializer):
     conversation_id = serializers.CharField()
     chatlog = serializers.CharField()
-    time = serializers.CharField(required=False)
+    time = serializers.CharField(required=False, min_length=0)
 
 class GetUserChatlogResponse(serializers.Serializer):
     conversation_id = serializers.CharField(required=False)

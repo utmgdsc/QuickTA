@@ -60,7 +60,6 @@ def get_filtered_convos(course_id, view, timezone):
             ).filter(
                 start_time__lt=end_date
             )
-
     else:
         convos = Conversation.objects.filter(course_id=course_id)
     return convos
@@ -72,7 +71,6 @@ def get_filtered_interactions(course_id, dates, timezone):
     interactions = []
     tz = ZoneInfo(timezone)
     # Retrieve all convesrations from the course given the particular datetime
-
     convos_cluster = get_conversation_cluster()
 
     if dates:

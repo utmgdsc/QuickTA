@@ -365,11 +365,11 @@ def chatlog_detail(request):
     """
     if request.method == 'POST':
 
-        try:
+        # try:
             # Set current chatlog's time if not provided
             current_time = timezone.now()
             location = 'America/Toronto'
-            if 'time' not in request.data.keys():
+            if 'time' not in request.data.keys() or request.data['time'] == '.':
                 request.data['time'] = current_time
             # Parse given chatlog time
             else: 
@@ -464,20 +464,20 @@ def chatlog_detail(request):
             }
             return Response(response, status=status.HTTP_201_CREATED)
         
-        except ConversationNotFoundError:
-            return Response({"msg": "Conversation does not exist."}, status=status.HTTP_404_NOT_FOUND)
-        except ModelDoesNotExistsError:
-            return Response({"msg": "Model does not exist."}, status=status.HTTP_404_NOT_FOUND)
-        except:
-            # Error handling
-            error = []
-            if 'conversation_id' not in request.data.keys():
-                error.append("Conversation ID")
-            if 'chatlog' not in request.data.keys():
-                error.append("Chatlog message")
-            err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
+        # except ConversationNotFoundError:
+        #     return Response({"msg": "Conversation does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        # except ModelDoesNotExistsError:
+        #     return Response({"msg": "Model does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        # except:
+        #     # Error handling
+        #     error = []
+        #     if 'conversation_id' not in request.data.keys():
+        #         error.append("Conversation ID")
+        #     if 'chatlog' not in request.data.keys():
+        #         error.append("Chatlog message")
+        #     err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
 
-            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+        #     return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 @swagger_auto_schema(methods=['post'], request_body=CreateFeedbackRequest,
     responses={

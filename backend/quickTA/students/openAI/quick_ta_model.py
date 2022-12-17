@@ -20,7 +20,7 @@ NOTI = "Notification"
 
 # CONFIGURATIONS TO BE BASED ON THE MODEL OF THE PARTICULAR COURSE
 CONFIGS = {
-    "engine": "text-davinci-002",
+    "engine": "text-davinci-002", # <model> field for GPT <Model> object
     "temperature": 0.9,
     "max_tokens": 1000,
     "top_p": 1,
@@ -48,13 +48,12 @@ def enquire_model(conversation_id: str, question: str, course_id: str) -> str:
         return OPERATION_FAILED
 
     if chatlog == "":
-        chatlog += BOT_START
+        chatlog += f"{AGENT}: {BOT_START}"
 
     prompt_text = f"{chatlog}{RESTART_SEQUENCE}{question}{START_SEQUENCE}"
-    # prompt_text = f"{chatlog}"
-    prompt_text = f"{question}"
+
     # print("Hello. I am an AI chatbot designed to assist you in solving your problems by giving hints but never providing direct answers. How can I help you?"
-    print(prompt_text)
+    # print("Prompt Text:", prompt_text)
 
     response = openai.Completion.create(
         prompt=prompt_text,
@@ -64,14 +63,15 @@ def enquire_model(conversation_id: str, question: str, course_id: str) -> str:
 
     res_text = response['choices'][0]['text']
     answer = str(res_text).strip().split(RESTART_SEQUENCE.rstrip())[0]
-    print(START_SEQUENCE, RESTART_SEQUENCE)
-    print(res_text)
-    print(answer)
+    # print("SEQUENCES:", START_SEQUENCE, RESTART_SEQUENCE)
+    # print("RESPONSE TEXT:", res_text)
+    # print("ANSWER:", answer)
     
     # Save the entire chatlog (with the AI response back to the conversation)
     entire_convo = prompt_text + answer
+    # print("ENTIRE CONVO", entire_convo)
     ret = convo_f.post_conversation_chatlog(conversation_id, entire_convo)
-    print(ret)
+    # print("RETURN:",ret)
 
     if not(ret): 
         return ""

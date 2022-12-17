@@ -13,7 +13,17 @@ import {
   ModalBody,
   FormLabel,
   Switch,
-  FormControl, Heading, Stack, Input, ModalFooter, ModalCloseButton, HStack, Divider, NumberInput, NumberInputField,
+  FormControl,
+  Heading,
+  Stack,
+  Input,
+  ModalFooter,
+  ModalCloseButton,
+  HStack,
+  Divider,
+  NumberInput,
+  NumberInputField,
+  Textarea,
 } from "@chakra-ui/react"
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {useEffect, useState} from "react";
@@ -45,11 +55,11 @@ const ModelCard = ({modelName, colorScheme, modelId, courseid, modelStatus, setC
             return false;
           }
         }else if(key === "maxTokens") {
-          if (isNaN(value) || value < 0) {
+          if (isNaN(parseInt(value)) || value < 0) {
             return false
           }
         }else {
-          if (isNaN(value)) {
+          if (isNaN(parseFloat(value)) || value < 0) {
             return false
           }
         }
@@ -84,42 +94,29 @@ const ModelCard = ({modelName, colorScheme, modelId, courseid, modelStatus, setC
     }
 
     const fetchModelDetails = async () => {
-        return await axios.post(process.env.REACT_APP_API_URL + "/researcher/gptmodel-get")
-          .then((res) => {})
+        return await axios.post(process.env.REACT_APP_API_URL + "/researcher/gptmodel-get-one", {model_id: modelId, course_id: courseid})
+          .then((res) => {
+              const model_settings = res.data
+              setModelSettings({
+                name: model_settings.model_name,
+                model: model_settings.model,
+                prompt: model_settings.prompt,
+                maxTokens: model_settings.max_tokens,
+                topP: model_settings.top_p,
+                presence_pen: model_settings.presence_penalty,
+                freq_pen: model_settings.frequency_penalty
+              });
+              console.log(res.data.max_tokens);
+          })
           .catch((err) => console.log(err))
     }
 
-    function updateInt(e){
-      setModelSettings({
-        ...newModelSettings,
-        [e.target.name]: isNaN(parseInt(e.target.value)) ? 0 : parseInt(e.target.value)
-      });
-    }
-
-    function updateFloat(e){
-      setModelSettings({
-        ...newModelSettings,
-        [e.target.name]: isNaN(parseFloat(e.target.value)) ? 0 : parseFloat(e.target.value)
-      })
-    }
-
-    useState(() => {
-      setModelSettings({
-        name: "",
-        model: "",
-        prompt: "",
-        maxTokens: 0,
-        topP: 0.0,
-        presence_pen: 0.0,
-        freq_pen: 0.0
-      });
-    }, [courseid])
 
     return (
       <>
         <Button colorScheme={colorScheme} boxSizing='border-box' p='10px' onClick={() => {
           onOpen();
-          console.log(newModelSettings);
+          fetchModelDetails();
         }} isDisabled={enabling}>
             <Box borderBottom='2px' pb='5px'>
                 <Flex>
@@ -160,28 +157,24 @@ const ModelCard = ({modelName, colorScheme, modelId, courseid, modelStatus, setC
                   value={newModelSettings.model} name={"model"}/>
 
                   <FormLabel>Prompt</FormLabel>
-                  <Input onChange={updateField}
+                  <Textarea onChange={updateField}
                   value={newModelSettings.prompt} name={"prompt"}/>
                 </FormControl>
 
                 <FormControl id={"Optional Parameters"}>
                   <FormLabel>Max Tokens</FormLabel>
-                  <NumberInput>
-                    <NumberInputField onChange={updateInt} name={"maxTokens"} value={newModelSettings.maxTokens}/>
-                  </NumberInput>
-
-
+                  <Input onChange={updateField} name={"maxTokens"} value={newModelSettings.maxTokens}/>
 
                   <FormLabel>Top P</FormLabel>
-                  <Input onChange={updateFloat}
+                  <Input onChange={updateField}
                   value={newModelSettings.topP} name={"topP"}/>
 
                   <FormLabel>Presence Penalty</FormLabel>
-                  <Input onChange={updateFloat}
+                  <Input onChange={updateField}
                   value={newModelSettings.presence_pen} name={"presence_pen"}/>
 
                   <FormLabel>Frequency Penalty</FormLabel>
-                  <Input onChange={updateFloat}
+                  <Input onChange={updateField}
                   value={newModelSettings.freq_pen} name={"freq_pen"} />
                 </FormControl>
               </Stack>

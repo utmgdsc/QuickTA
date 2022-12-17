@@ -23,7 +23,7 @@ const DatedStats = ({isWeekly, courseID, setIsLoading}) => {
 
   function computePrevAvg(data, currAvg){
     // we need to look at avg of indices 0, .. , data-2
-    if (data.length === 0){
+    if (data.length <= 1){
       return 0;
     }
     let x = currAvg * data.length;
@@ -81,7 +81,19 @@ const DatedStats = ({isWeekly, courseID, setIsLoading}) => {
         return await axios.post(process.env.REACT_APP_API_URL + endpoint, {filter: (isWeekly === 1 ? "Weekly" : "Monthly"),
         course_id: courseID, timezone: "America/Toronto"})
           .then((res) => {
-            setCommonWords(res.data.most_common_words);
+            let max = 0.0
+            let min = 0.0
+            res.data.most_common_words.forEach((word) => {
+              if(word[1] > max){
+                max = word[1]
+              }
+              if (word[1] < min){
+                min = word[1]
+              }
+            })
+
+
+            setCommonWords(res.data.most_common_words.map((word) => ([word[0], 1-(((word[1] - min)) / (max - min))])));
           })
       }
   }

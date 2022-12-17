@@ -9,7 +9,7 @@ import {
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faArrowRightFromBracket} from "@fortawesome/free-solid-svg-icons";
 
-const TopNav = (props) => {
+const TopNav = ({UTORid}) => {
   const { isOpen, onOpen, onClose} = useDisclosure();
 
   return (
@@ -29,7 +29,7 @@ const TopNav = (props) => {
 
       <Text textAlign="right">
         <Text fontSize="2xs" marginRight="0.2vw">Logged in as</Text>
-        <Text color="#012E8A" fontSize="lg" lineHeight="0.9" marginRight="0.2vw">{props.UTORid}</Text>
+        <Text color="#012E8A" fontSize="lg" lineHeight="0.9" marginRight="0.2vw">{UTORid}</Text>
       </Text>
       <Button onClick={onOpen}>
         <FontAwesomeIcon icon={faArrowRightFromBracket} size={"lg"}/>

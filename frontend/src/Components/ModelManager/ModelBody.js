@@ -55,7 +55,7 @@ const ModelBody = ({ courseid, setLoadingModel, loadingModel }) => {
       if (courseid){
         getAllModels();
       }
-    },[courseid, processing]);
+    },[courseid, processing, currentModel]);
 
     return (
         <Box style={cardStyle} mt={5}>
@@ -64,7 +64,7 @@ const ModelBody = ({ courseid, setLoadingModel, loadingModel }) => {
                 <Text><span style={{fontWeight: '500'}}>Current model:</span> {currentModel}</Text>
             </Flex>
             <Flex flexWrap="wrap" mt={3} marginLeft='-5px'>
-                <ModelRemover deleting={processing} setDeleting={setProcessing} courseid={courseid}/>
+                <ModelRemover deleting={processing} setCurrentModel={setCurrentModel} setDeleting={setProcessing} courseid={courseid} allModels={allModels}/>
                 <ModelCreator creating={processing} setCreating={setProcessing} courseid={courseid}/>
             </Flex>
             <Flex flexDirection={"row"} flexWrap={"wrap"} py={5} gap={2}>

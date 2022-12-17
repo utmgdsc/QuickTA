@@ -61,7 +61,7 @@ const DatedGraph = ({isWeekly, courseID}) => {
                 const { date, dateData } = res.data.interactions.reduce((obj, currData) => {
                     // console.log(currData);
                     obj.date.push(currData[0]);
-                    if(currDay <= currData[0].substring(currData[0].length - 2)){
+                    if(currDay < currData[0].substring(currData[0].length - 2)){
                         obj.dateData.push(null);
                     }else{
                         obj.dateData.push(currData[2]);
@@ -102,8 +102,8 @@ const DatedGraph = ({isWeekly, courseID}) => {
                         offsetX: 0,
                         offsetY: 0,
                         style: {
-                          color: "pink",
-                          fontSize: '69px',
+                          color: "black",
+                          fontSize: '50px',
                           fontFamily: "Arial"
                         }
                       }
