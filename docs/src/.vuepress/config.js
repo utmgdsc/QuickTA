@@ -55,6 +55,18 @@ module.exports = {
             'backend/Models',
             'backend/Endpoints',
           ]
+        }, 
+        {
+          title: 'Frontend',
+          collapsable: false,
+          children: [
+            'frontend/Synposis',
+            'frontend/SharedComponents',
+            'frontend/StudentPage',
+            'frontend/ResearcherAnalytics',
+            'frontend/ResearcherFilters',
+            'frontend/ResearcherModels'
+          ]
         }
       ],
     }
