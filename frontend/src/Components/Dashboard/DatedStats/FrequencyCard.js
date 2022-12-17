@@ -26,7 +26,12 @@ const FrequencyCard = ({ words }) => {
           flexWrap: "wrap"
         }}
       >
-        {
+        { words.length === 0 ? 
+          <div style={{ 
+            width: "100%",
+            textAlign: "center"
+          }}>No words</div>
+        :
           words.map((word, index) => (
             <Tag
               key={index}
