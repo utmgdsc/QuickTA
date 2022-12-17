@@ -30,14 +30,14 @@ def get_weekly_time(timezone):
     """
     tz = ZoneInfo(timezone)
     
-    t1 = datetime.now() + timedelta(days=-7)
+    t1 = datetime.now() + timedelta(days=-6)
     t1 = t1.replace(hour=0, minute=0, second=0, microsecond=0)
     t1 = t1.astimezone(tz)
     
     t2 = datetime.now() + timedelta(days=+1)
     t2 = t2.replace(hour=0, minute=0, second=0, microsecond=0)
     t2 = t2.astimezone(tz)
-    
+    # print("\033[32m", t1,t2, '\033[0m')
     return t1, t2
 
 def get_monthly_time(timezone):
@@ -56,11 +56,13 @@ def get_monthly_time(timezone):
     next_month = t1.month + 1
     if (t1.month + 1 > 12):
         next_month = 1
+        next_year = t1.year + 1
 
-    t2 = t1.replace(month=next_month)
+    t2 = t1.replace(year=next_year, month=next_month)
     
     t1 = t1.astimezone(tz)
     t2 = t2.astimezone(tz)
+    
     
     return t1, t2
 
@@ -78,8 +80,9 @@ def get_weekly_times(timezone):
     tz = ZoneInfo(timezone)
     week = []
     for day in range(7):
-        t1 = datetime.now() + timedelta(days=-7+day)
+        t1 = datetime.now() + timedelta(days=-6+day)
         t2 = t1.astimezone(tz)
+        # print("\033[32m", t2, '\033[0m')
         weekday = get_weekday_name(t2.weekday())
         week.append((t2, weekday))
     return week

@@ -483,7 +483,7 @@ def get_average_response_rate(request):
 
             data = request.data
             convos = conversation_functions.get_filtered_convos(data['course_id'], data['filter'], data['timezone'])
-            
+
             deltas = []
             total_delta = 0
             total_chatlogs = 0
