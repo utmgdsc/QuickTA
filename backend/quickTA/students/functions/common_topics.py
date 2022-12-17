@@ -14,9 +14,6 @@ def generate_wordcloud(data):
 
     kw_extractor = yake.KeywordExtractor(top=numOfKeywords, n=max_ngram_size)
     keywords = kw_extractor.extract_keywords(text)
-    r_keywords = reversed(keywords)
-    for word in r_keywords:
-        print(word)
     
     return keywords
 
