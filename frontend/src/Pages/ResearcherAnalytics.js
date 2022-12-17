@@ -2,9 +2,8 @@ import TopNav from "../Components/TopNav";
 import Dashboard from "../Components/Dashboard/Dashboard";
 import {Button, Spinner} from "@chakra-ui/react";
 import React from "react";
-import {Link} from 'react-router-dom'
 
-const ResearcherAnalytics = ({UTORid, courseCode, courseName, semester, currCourse, setCurrCourse, courses, isLoading, setIsLoading, userid}) => {
+const ResearcherAnalytics = ({UTORid, courseCode, courseName, semester, currCourse, setCurrCourse, courses, isLoading, setIsLoading, userid, setCourses}) => {
         return (
           isLoading ? <Spinner/> :
           <div style={{
@@ -23,6 +22,7 @@ const ResearcherAnalytics = ({UTORid, courseCode, courseName, semester, currCour
                 setCurrCourse={setCurrCourse}
                 courses={courses}
                 setIsLoading={setIsLoading}
+                setCourses={setCourses}
               />
           </div>
         );

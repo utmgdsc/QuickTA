@@ -4,7 +4,7 @@ import {Box} from "@chakra-ui/react";
 import axios from "axios";
 import {useEffect, useState} from "react";
 
-const Dashboard = ({ courseCode, courseName, courses, setCurrCourse, currCourse, setIsLoading, userid}) => {
+const Dashboard = ({ courseCode, courseName, courses, setCurrCourse, currCourse, setIsLoading, userid, setCourses}) => {
 
     return (
         <>
@@ -14,7 +14,11 @@ const Dashboard = ({ courseCode, courseName, courses, setCurrCourse, currCourse,
               courseName={courseName}
               courses={courses}
               setCurrCourse={setCurrCourse}
-              currCourse={currCourse}/>
+              currCourse={currCourse}
+              userid={userid}
+              setIsLoading={setIsLoading}
+              setCourses={setCourses}
+            />
             <DashboardBody courseID={currCourse.course_id} setIsLoading={setIsLoading}/>
         </Box>
         </>

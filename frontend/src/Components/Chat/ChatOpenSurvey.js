@@ -8,11 +8,21 @@ import {
     useDisclosure
   } from '@chakra-ui/react'
   import {useState} from "react";
+import axios from "axios";
 
-const ChatOpenSurvey = () => {
-  const { isOpen, onOpen, onClose} = useDisclosure({defaultIsOpen: true});
+const ChatOpenSurvey = ({conversation_id, isOpen, onClose}) => {
+
   const [sliderVal, setSliderVal] = useState(0);
   const [showTooltip, setSliderTooltip] = useState(false);
+
+  const sendComfort = async () => {
+    await axios.post(process.env.REACT_APP_API_URL + "/comfortability-rating", {conversation_id: conversation_id, comfortability_rating: sliderVal})
+      .then((res) => {
+        onClose();
+        setSliderVal(0);
+      })
+      .catch((err) => console.log(err))
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -56,7 +66,10 @@ const ChatOpenSurvey = () => {
         </ModalBody>
 
         <ModalFooter>
-          <Button colorScheme={'green'} onClick={onClose}>
+          <Button colorScheme={'green'} onClick={()=>{
+            sendComfort();
+            onClose();
+          }}>
             Submit
           </Button>
         </ModalFooter>
