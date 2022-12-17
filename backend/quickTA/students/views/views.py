@@ -730,8 +730,8 @@ def course_comfortability(request):
             convo = Conversation.objects.filter(conversation_id=request.data['conversation_id']).update(comfortability_rating=request.data['comfortability_rating'])
             data = request.data
             response = {
-                "conversation": data.conversation_id,
-                "comfortability_rating": data.comfortability_rating
+                "conversation_id": data['conversation_id'],
+                "comfortability_rating": data['comfortability_rating']
             }
             return Response(response, status=status.HTTP_201_CREATED)
         except ConversationNotFoundError: 
