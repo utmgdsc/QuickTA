@@ -17,14 +17,12 @@ const App = ( {UTORid = "testuser1"} ) => {
   const [courses, setCourses] = useState([]);
   const [currCourse, setCurrCourse] = useState({});
   const [isLoading, setIsLoading] = useState(true);
-  const [semester, setSemester] = useState("");
   const [userId, setuserId] = useState("");
-  const [courseName, setCourseName] = useState("");
-  const [auth, setAuth] = useState("professor");
+  const [auth, setAuth] = useState("student");
   
 
   const getUserId = async () => {
-    return await axios.post(process.env.REACT_APP_API_URL + "/get-user", {utorid: UTORid})
+    await axios.post(process.env.REACT_APP_API_URL + "/get-user", {utorid: UTORid})
       .then((res) => {
         return setuserId(res.data.user_id);
       })
@@ -42,8 +40,7 @@ const App = ( {UTORid = "testuser1"} ) => {
           
           setCurrCourse({course_id: res.data.courses[0].course_id,
             course_code: res.data.courses[0].course_code, semester: res.data.courses[0].semester});
-          
-          setSemester(res.data.courses[0].semester);
+
         }
         setIsLoading(false);
       })
@@ -71,7 +68,7 @@ const App = ( {UTORid = "testuser1"} ) => {
               currCourse={currCourse}
               setCurrCourse={setCurrCourse}
               courses={courses} 
-              semester={semester}
+              semester={currCourse.semester}
             />
             } /> : null}
             { auth === "professor" ? <React.Fragment>
@@ -79,13 +76,14 @@ const App = ( {UTORid = "testuser1"} ) => {
 
               <Route path="/ResearcherAnalytics" element={
                 <ResearcherAnalytics
+                  userid={userId}
                   UTORid={UTORid}
                   courses={courses}
                   setCurrCourse={setCurrCourse}
                   currCourse={currCourse}
                   courseCode={currCourse.course_code}
                   courseName={currCourse.course_name}
-                  semester={semester}
+                  semester={currCourse.semester}
                   setIsLoading={setIsLoading}
                   isLoading={isLoading}
                 />
@@ -99,10 +97,10 @@ const App = ( {UTORid = "testuser1"} ) => {
               currCourse={currCourse}
               courseCode={currCourse.course_code}
               courseName={currCourse.course_name}
-              semester={semester}
+              semester={currCourse.semester}
               />
               }/>
-              <Route path="/ResearcherFilters" element={<ResearcherFilterPage/>} />
+              <Route path="/ResearcherFilters" element={<ResearcherFilterPage UTORid={UTORid}/>} />
               </React.Fragment>
               : null
             }

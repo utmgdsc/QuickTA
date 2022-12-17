@@ -1,10 +1,10 @@
 import { Select, Box } from '@chakra-ui/react';
 
-const CourseSelect = ({currCourse, courses, setCurrCourse, wait}) => {
+const CourseSelect = ({courses, setCurrCourse, wait}) => {
     
 
     return (
-        <Box w='135px' mb={3}>
+        <Box w='135px'>
             <Select 
             borderColor="white" 
             bg="white"
@@ -13,6 +13,7 @@ const CourseSelect = ({currCourse, courses, setCurrCourse, wait}) => {
                 setCurrCourse(courses[parseInt(e.target.value)]);
             }}
             isDisabled={wait}
+            mb={5}
             >
                 {courses.map(({id, course_id, semester, course_code}, index) => (<option key={index} value={index}>{course_code}</option>))}
             </Select>

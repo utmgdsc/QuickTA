@@ -4,7 +4,7 @@ import {Box} from "@chakra-ui/react";
 import axios from "axios";
 import {useEffect, useState} from "react";
 
-const Dashboard = ({ courseCode, courseName, semester, courses, setCurrCourse, currCourse, setIsLoading }) => {
+const Dashboard = ({ courseCode, courseName, courses, setCurrCourse, currCourse, setIsLoading, userid}) => {
 
     return (
         <>

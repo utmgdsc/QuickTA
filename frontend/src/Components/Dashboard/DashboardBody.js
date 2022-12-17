@@ -1,14 +1,13 @@
-import { 
+import {
     Box,
-    Tabs, 
-    TabList, 
-    TabPanels, 
-    Tab, 
+    Tabs,
+    TabList,
+    TabPanels,
+    Tab,
     TabPanel
 } from "@chakra-ui/react";
 import DatedStats from "./DatedStats/DatedStats";
 import ReportTable from "./ReportTable/ReportTable";
-import React, { Component, useState, useEffect } from "react";
 
 const DashboardBody = ({ courseID, setIsLoading }) => {
     const tabStyle = {
@@ -37,7 +36,7 @@ const DashboardBody = ({ courseID, setIsLoading }) => {
                     </TabPanel>
                 </TabPanels>
             </Tabs>
-            
+
         </Box>
     );
 }

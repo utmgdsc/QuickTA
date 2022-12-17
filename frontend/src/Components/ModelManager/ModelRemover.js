@@ -10,7 +10,7 @@ import {
 import {useState} from "react";
 import axios from "axios";
 
-const ModelRemover = ({courseid, deleting, setDeleting}) => {
+const ModelRemover = ({courseid, deleting, setDeleting, allModels}) => {
   const {isOpen, onOpen, onClose} = useDisclosure();
   const [removeModel, setRemoveModel] = useState({
     id: "",
@@ -33,17 +33,47 @@ const ModelRemover = ({courseid, deleting, setDeleting}) => {
 
   const deleteModel = async () => {
     setDeleting(true);
-    await axios.post(process.env.REACT_APP_API_URL + "/researcher/gptmodel-delete", {
+    if (await isActive(removeModel.id)){
+      await axios.post(process.env.REACT_APP_API_URL + "/researcher/gptmodel-delete", {
+        course_id: courseid,
+        model_id: removeModel.id,
+      })
+        .then(async (res) => {
+          await axios.post(process.env.REACT_APP_API_URL + "/researcher/gptmodel-activate", {
+            course_id: courseid,
+            model_id: allModels[0].model_id
+          })
+            .then((res) => {})
+            .catch((err) => console.log(err))
+          setDeleting(false);
+        })
+        .catch((err) => console.log(err))
+    }else{
+      await axios.post(process.env.REACT_APP_API_URL + "/researcher/gptmodel-delete", {
+        course_id: courseid,
+        model_id: removeModel.id,
+      })
+        .then((res) => setDeleting(false))
+        .catch((err) => console.log(err))
+    }
+
+  }
+
+  const isActive = async (modelid) => {
+    return await axios.post(process.env.REACT_APP_API_URL + "/researcher/gptmodel-get-one", {
       course_id: courseid,
-      model_id: removeModel.id,
+      model_id: modelid
     })
-      .then((res) => {setDeleting(false);})
-      .catch((err) => console.log(err))
+      .then((res) => res.data.status)
+      .catch((err) => {
+        console.log(err);
+        setDeleting(false);
+      })
   }
 
   return (
     <>
-      <Box p='5px'><Button colorScheme='red' isDisabled={deleting} onClick={onOpen}>Delete</Button></Box>
+      <Box p='5px'><Button colorScheme='red' isDisabled={deleting || allModels.length <= 1} onClick={onOpen}>Delete</Button></Box>
 
       <Modal isOpen={isOpen} onClose={onClose} closeOnOverlayClick={false}>
         <ModalOverlay/>
