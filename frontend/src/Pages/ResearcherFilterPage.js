@@ -1,6 +1,8 @@
 import React,{Component} from 'react';
-import { Button, Table, Thead, Tbody, Tr, Th, Td, Input } from "@chakra-ui/react";
+import {Button, Table, Thead, Tbody, Tr, Th, Td, Input, HStack, TableContainer} from "@chakra-ui/react";
 import { ChevronUpIcon, ChevronDownIcon } from "@chakra-ui/icons"
+import TopNav from "../Components/TopNav";
+import {Link} from 'react-router-dom';
 
 export const variables={
     API_URL:"http://127.0.0.1:8000/api/",
@@ -138,132 +140,146 @@ export class ResearcherFilterPage extends Component{
 
         return(
 <div>
-    <Table>
-    <Thead>
-    <Tr>
-        <Th>
-            <div> 
-            <Input name="id_contains" onChange={this.changeidFilter} placeholder="Filter"/>
-            <Button onClick={()=>this.sortResult('id',true)} colorScheme='blue' size='sm'>
-                <ChevronUpIcon/>
-            </Button>
+    <TopNav UTORid={this.props.UTORid}/>
+    <div style={{marginInline: "8vw"}}>
+        <HStack spacing={3}>
+            <Link to={"/"}>
+                <Button colorScheme={"blue"} style={{backgroundColor: '#2C54A7', color: 'white'}}>To Models Page</Button>
+            </Link>
+            <Link to={"/ResearcherAnalytics"}>
+                <Button colorScheme={"blue"} style={{backgroundColor: '#2C54A7', color: 'white'}}>To Analytics Page</Button>
+            </Link>
+        </HStack>
+        <Table style={{
+            width: "90vw",
+            height: "90vh",
+        }}>
+            <Thead>
+                <Tr>
+                    <Th>
+                        <div>
+                            <Input name="id_contains" onChange={this.changeidFilter} placeholder="Filter"/>
+                            <Button onClick={()=>this.sortResult('id',true)} colorScheme='blue' size='sm'>
+                                <ChevronUpIcon/>
+                            </Button>
 
-            <Button onClick={()=>this.sortResult('id',false)} colorScheme='blue' size='sm'>
-                <ChevronDownIcon/>
-            </Button>
+                            <Button onClick={()=>this.sortResult('id',false)} colorScheme='blue' size='sm'>
+                                <ChevronDownIcon/>
+                            </Button>
 
-            </div>
-            id
-        </Th>
+                        </div>
+                        id
+                    </Th>
 
-        <Th>
-            <div>
-            <Input onChange={this.changeConversationIdFilter} placeholder="Filter"/>
-            <Button onClick={()=>this.sortResult('conversation_id',true)} colorScheme='blue' size='sm'> 
-                <ChevronUpIcon/>
-            </Button>
+                    <Th>
+                        <div>
+                            <Input onChange={this.changeConversationIdFilter} placeholder="Filter"/>
+                            <Button onClick={()=>this.sortResult('conversation_id',true)} colorScheme='blue' size='sm'>
+                                <ChevronUpIcon/>
+                            </Button>
 
-            <Button onClick={()=>this.sortResult('conversation_id',false)} colorScheme='blue' size='sm'>
-                <ChevronDownIcon/>
-            </Button>
-            </div>
-            conversation_id
-        </Th>
+                            <Button onClick={()=>this.sortResult('conversation_id',false)} colorScheme='blue' size='sm'>
+                                <ChevronDownIcon/>
+                            </Button>
+                        </div>
+                        conversation_id
+                    </Th>
 
-        <Th>
-            <div>
-            <Input onChange={this.changeChatlogIdFilter} placeholder="Filter"/>
-            <Button onClick={()=>this.sortResult('chatlog_id',true)} colorScheme='blue' size='sm'>
-                <ChevronUpIcon/>
-            </Button>
+                    <Th>
+                        <div>
+                            <Input onChange={this.changeChatlogIdFilter} placeholder="Filter"/>
+                            <Button onClick={()=>this.sortResult('chatlog_id',true)} colorScheme='blue' size='sm'>
+                                <ChevronUpIcon/>
+                            </Button>
 
-            <Button onClick={()=>this.sortResult('chatlog_id',false)} colorScheme='blue' size='sm'>
-                <ChevronDownIcon/>
-            </Button>
-            </div>
-            chatlog_id
-        </Th>
+                            <Button onClick={()=>this.sortResult('chatlog_id',false)} colorScheme='blue' size='sm'>
+                                <ChevronDownIcon/>
+                            </Button>
+                        </div>
+                        chatlog_id
+                    </Th>
 
-        <Th>
-            <div>
-            <Input onChange={this.changeTimeFilter} placeholder="Filter"/>
-            <Button onClick={()=>this.sortResult('time',true)} colorScheme='blue' size='sm'>
-                <ChevronUpIcon/>
-            </Button>
+                    <Th>
+                        <div>
+                            <Input onChange={this.changeTimeFilter} placeholder="Filter"/>
+                            <Button onClick={()=>this.sortResult('time',true)} colorScheme='blue' size='sm'>
+                                <ChevronUpIcon/>
+                            </Button>
 
-            <Button onClick={()=>this.sortResult('time',false)} colorScheme='blue' size='sm'>
-                <ChevronDownIcon/>
-            </Button>
-            </div>
-            time
-      
-        </Th>
+                            <Button onClick={()=>this.sortResult('time',false)} colorScheme='blue' size='sm'>
+                                <ChevronDownIcon/>
+                            </Button>
+                        </div>
+                        time
+
+                    </Th>
 
 
-        <Th>
-            <div>
-            <Input onChange={this.changeChatlogFilter} placeholder="Filter"/>
+                    <Th>
+                        <div>
+                            <Input onChange={this.changeChatlogFilter} placeholder="Filter"/>
 
-            <Button onClick={()=>this.sortResult('chatlog',true)} colorScheme='blue' size='sm'>
-                <ChevronUpIcon/>
-            </Button>
+                            <Button onClick={()=>this.sortResult('chatlog',true)} colorScheme='blue' size='sm'>
+                                <ChevronUpIcon/>
+                            </Button>
 
-            <Button onClick={()=>this.sortResult('chatlog',false)} colorScheme='blue' size='sm'>
-                <ChevronDownIcon/>
-            </Button>
-            </div>
-            chatlog
-      
-        </Th>
-        <Th>
-            <div>
-            <Input onChange={this.changeIsUserFilter} placeholder="Filter"/>
-            <Button onClick={()=>this.sortResult('is_user',true)} colorScheme='blue' size='sm'>
-                <ChevronUpIcon/>
-            </Button>
+                            <Button onClick={()=>this.sortResult('chatlog',false)} colorScheme='blue' size='sm'>
+                                <ChevronDownIcon/>
+                            </Button>
+                        </div>
+                        chatlog
 
-            <Button onClick={()=>this.sortResult('is_user',false)} colorScheme='blue' size='sm'>
-                <ChevronDownIcon/>
-            </Button>
-            </div>
-            is_user
-      
-        </Th>
+                    </Th>
+                    <Th>
+                        <div>
+                            <Input onChange={this.changeIsUserFilter} placeholder="Filter"/>
+                            <Button onClick={()=>this.sortResult('is_user',true)} colorScheme='blue' size='sm'>
+                                <ChevronUpIcon/>
+                            </Button>
 
-        <Th>
-            <div>
-            <Input onChange={this.changeDeltaFilter} placeholder="Filter"/>
-            <Button onClick={()=>this.sortResult('delta',true)} colorScheme='blue' size='sm'>
-                <ChevronUpIcon/>
-            </Button>
-            <Button onClick={()=>this.sortResult('delta',false)} colorScheme='blue' size='sm'>
-                <ChevronDownIcon/>
-            </Button>
-            </div>
-            delta
-      
-        </Th>
-        
-    </Tr>
-    </Thead>
-    <Tbody>
-        {chat.map(ch=>
-            <Tr key={ch.id}>
-                <Td>{ch.id}</Td>
-                <Td>{ch.conversation_id}</Td>
-                <Td>{ch.chatlog_id}</Td>
-                <Td>{ch.time}</Td>
-                <Td maxWidth={"150px"}>{ch.chatlog}</Td>
-                <Td>{ch.is_user}</Td>
-                <Td>{ch.delta}</Td>
-            </Tr>
-            )}
-        
-    </Tbody>
-    </Table>
-    <div>
-     
-     </div>
+                            <Button onClick={()=>this.sortResult('is_user',false)} colorScheme='blue' size='sm'>
+                                <ChevronDownIcon/>
+                            </Button>
+                        </div>
+                        is_user
+
+                    </Th>
+
+                    <Th>
+                        <div>
+                            <Input onChange={this.changeDeltaFilter} placeholder="Filter"/>
+                            <Button onClick={()=>this.sortResult('delta',true)} colorScheme='blue' size='sm'>
+                                <ChevronUpIcon/>
+                            </Button>
+                            <Button onClick={()=>this.sortResult('delta',false)} colorScheme='blue' size='sm'>
+                                <ChevronDownIcon/>
+                            </Button>
+                        </div>
+                        delta
+
+                    </Th>
+
+                </Tr>
+            </Thead>
+            <Tbody>
+                {chat.map(ch=>
+                  <Tr key={ch.id}>
+                      <Td>{ch.id}</Td>
+                      <Td>{ch.conversation_id}</Td>
+                      <Td>{ch.chatlog_id}</Td>
+                      <Td>{ch.time}</Td>
+                      <Td maxWidth={"150px"}>{ch.chatlog}</Td>
+                      <Td>{ch.is_user}</Td>
+                      <Td>{ch.delta}</Td>
+                  </Tr>
+                )}
+
+            </Tbody>
+        </Table>
+        <div>
+
+        </div>
+    </div>
 
 </div>
 

@@ -1,4 +1,4 @@
-import {HStack, Stat, StatLabel, Tag, TagLabel} from "@chakra-ui/react";
+import {Box, Center, Divider, Flex, HStack, Spacer, Stat, StatLabel, Tag, TagLabel, Text} from "@chakra-ui/react";
 import StatCard from "./StatCard";
 
 
@@ -20,18 +20,35 @@ const FrequencyCard = ({ words }) => {
   return(
     <Stat style={cardStyle}>
       <StatLabel><span style={titleStyle}>Most Common Words</span></StatLabel>
+      <Divider my={3}/>
+      <HStack>
+        <Text>Less Frequent</Text>
+        <Box
+          bgGradient={"linear(to-r, #FFFFFF, #2C54A7)"}
+          w={'100%'}
+          h={'10px'}
+          borderRadius={'lg'}
+        />
+        <Text>More Frequent</Text>
+      </HStack>
+      <Divider my={3}/>
       <HStack
         style={{
           display: "flex",
-          flexWrap: "wrap"
+          flexWrap: "wrap",
+          gap: '12px'
         }}
+        spacing={3}
       >
-        { words.length === 0 ? 
-          <div style={{ 
+        {words.length ===0 ?
+
+          <div style={{
             width: "100%",
             textAlign: "center"
-          }}>No words</div>
-        :
+          }}>
+            No Common Words
+          </div>
+          :
           words.map((word, index) => (
             <Tag
               key={index}
