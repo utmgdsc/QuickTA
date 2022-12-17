@@ -21,6 +21,7 @@ const App = ( {UTORid = "testuser1"} ) => {
   const [userId, setuserId] = useState("");
   const [courseName, setCourseName] = useState("");
   const [auth, setAuth] = useState("professor");
+  // const [auth, setAuth] = useState("student");
   
 
   const getUserId = async () => {
