@@ -12,21 +12,21 @@ import CustomSpinner from "../Components/CustomSpinner";
 import NotFoundPage from '../Components/NotFoundPage'
 
 
-const App = ( {UTORid = "testuser1"} ) => {
-  const navigate = useNavigate();
+const App = ( {UTORid = ""} ) => {
   const [courses, setCourses] = useState([]);
   const [currCourse, setCurrCourse] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setuserId] = useState("");
   const [courseName, setCourseName] = useState("");
-  // const [auth, setAuth] = useState("professor");
-  const [auth, setAuth] = useState("student");
+  const [auth, setAuth] = useState("");
+  // const [auth, setAuth] = useState("student");
   
 
   const getUserId = async () => {
     await axios.post(process.env.REACT_APP_API_URL + "/get-user", {utorid: UTORid})
       .then((res) => {
-        return setuserId(res.data.user_id);
+        setuserId(res.data.user_id);
+        setAuth(res.data.user_role);
       })
       .catch((e) => {console.log(e)})
   }
@@ -34,7 +34,7 @@ const App = ( {UTORid = "testuser1"} ) => {
   const getAllCourses = async () => {
     // Gets all the courses a student is enrolled in
     // Pass getUserId return
-    return axios.post(process.env.REACT_APP_API_URL + "/user/courses", {user_id: "76d1c94d-48c2-4b7a-9ec9-1390732d84a0"})
+    await axios.post(process.env.REACT_APP_API_URL + "/user/courses", {user_id: "76d1c94d-48c2-4b7a-9ec9-1390732d84a0"})
       .then((res) => {
         if(res.data.courses) {
           setCourses(res.data.courses.map((course) => ({course_id: course.course_id,
@@ -56,10 +56,6 @@ const App = ( {UTORid = "testuser1"} ) => {
     if(UTORid){
       getAllCourses();
       getUserId();
-
-      // TODO: Set up auth here 
-      // if (auth === "student") navigate("/Student")
-      // if (auth === "professor") navigate("/ResearcherModels")
       
     }
   }, [UTORid]);
@@ -67,8 +63,8 @@ const App = ( {UTORid = "testuser1"} ) => {
   return isLoading ? <CustomSpinner /> :
     (<div>
         <Routes>
-          { auth === "student" ? <Route path="/" element={
-            <StudentPage 
+          { auth === "ST" ? <Route path="/" element={
+            <StudentPage
               UTORid={UTORid} 
               currCourse={currCourse}
               setCurrCourse={setCurrCourse}
@@ -76,7 +72,7 @@ const App = ( {UTORid = "testuser1"} ) => {
               semester={currCourse.semester}
             />
             } /> : null}
-            { auth === "professor" ? <React.Fragment>
+            { auth === "IS" ? <React.Fragment>
               <Route path="/Professor" element={<ProfessorPage/>} />
 
               <Route path="/ResearcherAnalytics" element={
@@ -97,7 +93,7 @@ const App = ( {UTORid = "testuser1"} ) => {
     
               <Route path="/" element={
               <ResearcherModels 
-              UTORid={"testuser1"}
+              UTORid={UTORid}
               courses={courses}
               setCurrCourse={setCurrCourse}
               currCourse={currCourse}
