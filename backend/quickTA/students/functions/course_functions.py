@@ -73,11 +73,11 @@ def update_course_instructors_list(course_id: str, instructor_id: str):
         else:
             instructor_ls = [instructor_id]
 
-            #  Update course's instructors list
-            courses.update_one(
-                {"course_id": course_id},
-                {"$set": { "instructors": instructor_ls }}
-            )
+        #  Update course's instructors list
+        courses.update_one(
+            {"course_id": course_id},
+            {"$set": { "instructors": instructor_ls }}
+        )
         return OPERATION_SUCCESSFUL
     
     except:
