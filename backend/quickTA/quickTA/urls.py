@@ -23,7 +23,7 @@ from drf_yasg.views import get_schema_view as swagger_get_schema_view
 schema_view = swagger_get_schema_view(
     openapi.Info(
         title="QuickTA API",
-        default_version="1.0.0",
+        default_version="v1",
         descrpition="API documentation of QuickTA"
     ),
     public=True,
@@ -32,10 +32,11 @@ schema_view = swagger_get_schema_view(
 urlpatterns = [
     # path('app/', include('myapp.urls')),
     path('admin/', admin.site.urls),
-    path('api/', 
+    path('api/',
         include([
             path('', include('students.urls', namespace='user')),
             path('swagger/schema/', schema_view.with_ui('swagger', cache_timeout=0), name="swagger-schema"),
+            path('redoc', schema_view.with_ui('redoc', cache_timeout=0), name="redoc-schema")
         ])
     ),
     path('researchers/', include('researchers.urls'))

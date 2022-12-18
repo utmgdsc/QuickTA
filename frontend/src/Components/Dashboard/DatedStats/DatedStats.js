@@ -1,7 +1,8 @@
 import {
     VStack, 
     Flex, 
-    Spacer 
+    Spacer,
+    Button 
 } from "@chakra-ui/react";
 import StatCard from "./StatCard";
 import DatedGraph from "./DatedGraph"
@@ -22,7 +23,7 @@ const DatedStats = ({isWeekly, courseID, setIsLoading}) => {
 
   function computePrevAvg(data, currAvg){
     // we need to look at avg of indices 0, .. , data-2
-    if (data.length === 0){
+    if (data.length <= 1){
       return 0;
     }
     let x = currAvg * data.length;
@@ -80,7 +81,19 @@ const DatedStats = ({isWeekly, courseID, setIsLoading}) => {
         return await axios.post(process.env.REACT_APP_API_URL + endpoint, {filter: (isWeekly === 1 ? "Weekly" : "Monthly"),
         course_id: courseID, timezone: "America/Toronto"})
           .then((res) => {
-            setCommonWords(res.data.most_common_words);
+            let max = 0.0
+            let min = 0.0
+            res.data.most_common_words.forEach((word) => {
+              if(word[1] > max){
+                max = word[1]
+              }
+              if (word[1] < min){
+                min = word[1]
+              }
+            })
+
+
+            setCommonWords(res.data.most_common_words.map((word) => ([word[0], 1-(((word[1] - min)) / (max - min))])));
           })
       }
   }
@@ -102,6 +115,7 @@ const DatedStats = ({isWeekly, courseID, setIsLoading}) => {
       <>
         <Flex flexWrap='wrap' mt={5} mb={5}>
             <VStack minWidth='320px' w='22vw' spacing='20px'>
+                
                 <StatCard callBack={() => {
                   if(courseID && isWeekly != null){
                     axios.post(process.env.REACT_APP_API_URL + "/researcher/average-ratings-csv", {filter: (isWeekly === 1 ? "Weekly" : "Monthly"),
@@ -114,6 +128,8 @@ const DatedStats = ({isWeekly, courseID, setIsLoading}) => {
                     .catch((err) => console.log(err))
                   }
                 }} title={"Average Rating"} num={avgRating.avgRating} delta={avgRating.avgRatingDelta} unit={"☆"}/>
+                
+                
                 <StatCard callBack={() => {
                   if(courseID && isWeekly != null){
                     axios.post(process.env.REACT_APP_API_URL + "/researcher/avg-response-rate-csv", {filter: (isWeekly === 1 ? "Weekly" : "Monthly"),
@@ -126,6 +142,7 @@ const DatedStats = ({isWeekly, courseID, setIsLoading}) => {
                     .catch((err) => console.log(err))
                   }
                 }} title={"Average Response Rate"} num={avgRespTime.avgRespTime} delta={avgRespTime.avgRespTimeDelta} unit={"s"}/>
+                
                 <StatCard callBack={() => {
                   if(courseID && isWeekly != null){
                     axios.post(process.env.REACT_APP_API_URL + "/researcher/avg-comfortability-rating-csv", {filter: (isWeekly === 1 ? "Weekly" : "Monthly"),
@@ -138,6 +155,7 @@ const DatedStats = ({isWeekly, courseID, setIsLoading}) => {
                     .catch((err) => console.log(err))
                   }
                 }} title={"Average Course Comfortability Rating"} num={avgComfort.avgComfort} delta={avgComfort.avgComfortDelta} unit={"☆"}/>
+                
                 <StatCard callBack={() => {
                   if(courseID && isWeekly != null){
                     axios.post(process.env.REACT_APP_API_URL + "/researcher/reported-conversations-csv", {filter: (isWeekly === 1 ? "Weekly" : "Monthly"),
@@ -150,6 +168,7 @@ const DatedStats = ({isWeekly, courseID, setIsLoading}) => {
                     .catch((err) => console.log(err))
                   }
                 }} title={"Reported Conversations"} num={numReport.numReport} delta={0} unit={""}/>
+                
             </VStack>
             <Spacer/>
             <DatedGraph isWeekly={isWeekly} courseID={courseID}/>

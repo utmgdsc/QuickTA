@@ -53,7 +53,12 @@ def get_active_model(course_id):
         "course_id": course_id,
         "status": True
     }
-    gpt_model = list(gptmodels.find(query))[0]
+    gpt_model = list(gptmodels.find(query))
+    
+    if len(gpt_model) == 0: 
+        return OPERATION_FAILED
+
+    gpt_model = gpt_model[0]
     res = {
         "model_id": gpt_model['model_id'],
         "model_name": gpt_model['model_name'],
@@ -82,7 +87,7 @@ def create_gptmodel(data):
     keys = data.keys()
     
     if "suffix" not in keys: data['suffix'] = ''
-    if "max_tokens" not in keys: data['max_tokens'] = 16
+    if "max_tokens" not in keys: data['max_tokens'] = 300
     if "temperature" not in keys: data['temperature'] = 1
     if "top_p" not in keys: data['top_p'] = 1
     if "n" not in keys: data['n'] = 1
@@ -241,6 +246,19 @@ def switch_gptmodel(course_id, model_id):
         if ret:
             ret = activate_gptmodel(model_id)
             if not(ret): return OPERATION_FAILED
+        return ret
+    except:
+        return OPERATION_FAILED
+
+def get_one_gptmodel(model_id, course_id):
+    """
+    Gets a GPT Model for a particular course
+    """
+    try:
+        gpt_model = GPTModel.objects.filter(
+                        model_id=model_id,
+                        course_id=course_id).values()
+        return list(gpt_model)[0]
     except:
         return OPERATION_FAILED
 

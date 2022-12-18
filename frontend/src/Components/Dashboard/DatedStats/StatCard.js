@@ -4,6 +4,7 @@ import {
     StatNumber,
     StatHelpText,
     StatArrow,
+    Button
   } from '@chakra-ui/react'
 
 const StatCard = ({title, num, delta, unit, callBack}) => {
@@ -11,8 +12,9 @@ const StatCard = ({title, num, delta, unit, callBack}) => {
       backgroundColor: 'white', 
       boxShadow: '1px 2px 3px 1px rgba(0,0,0,0.12)', 
       borderRadius: '15px', 
-      padding: '15px 15px 7px 20px',
+      padding: '10px 15px 2px 20px',
       width: '100%',
+      textAlign: "left"
     };
     const titleStyle = {
       display: 'block',
@@ -22,9 +24,10 @@ const StatCard = ({title, num, delta, unit, callBack}) => {
     };
 
     return (
+      
         <Stat style = {cardStyle} onClick={() => {
           callBack();
-          }}>
+          }} as={"button"}>
         <StatNumber><span style={titleStyle}>{title}</span></StatNumber>
         <StatLabel>{num}{unit}</StatLabel>
         {
@@ -41,6 +44,7 @@ const StatCard = ({title, num, delta, unit, callBack}) => {
           )
         }
       </Stat>
+      
     );
 }
 

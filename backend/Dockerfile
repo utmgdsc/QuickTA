@@ -12,4 +12,5 @@ WORKDIR /backend/quickTA
 
 EXPOSE 8000
 
-CMD [ "python", "manage.py", "runserver" ]
+ENTRYPOINT [ "python", "manage.py" ]
+CMD ["runserver", "0.0.0.0:8000"]

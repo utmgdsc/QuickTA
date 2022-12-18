@@ -6,6 +6,7 @@ import {useState, useEffect} from "react";
 import axios from "axios";
 import { Temporal } from '@js-temporal/polyfill';
 import FeedbackSurvey from "./FeedbackSurvey";
+import ChatOpenSurvey from "./ChatOpenSurvey";
 
 const ChatBoxFooter = ({
     updateMessages, 
@@ -19,6 +20,7 @@ const ChatBoxFooter = ({
 
     const { isOpen: isOpenFeedback, onOpen: onOpenFeedback, onClose: onCloseFeedback } = useDisclosure();
     // after conversations ends disclosure
+    const { isOpen: isOpenComfortability, onOpen: onOpenComfortability, onClose: onCloseComfortability} = useDisclosure();
     
     const [sliderVal, setSliderVal] = useState(0);
     const [text, setText] = useState("");
@@ -45,6 +47,7 @@ const ChatBoxFooter = ({
             (response) => {
               updateConvoID(response.data.conversation_id);
               updateInConvo(true);
+              onOpenComfortability();
             }
           )
           .catch((err) => {console.log(err)})        
@@ -54,7 +57,7 @@ const ChatBoxFooter = ({
       >
         Start Conversation
       </Button>
-
+      <ChatOpenSurvey isOpen={isOpenComfortability} onClose={onCloseComfortability} conversation_id={currConvoID}/>
       <Button
         colorScheme={'red'}
         fontSize={'sm'}

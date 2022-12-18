@@ -60,7 +60,7 @@ def update_course_instructors_list(course_id: str, instructor_id: str):
         courses = get_course_cluster()
         course = list(courses.find({"course_id" : course_id}))
 
-        if len(course == 0):
+        if len(course) == 0:
             return OPERATION_FAILED
 
         #  Adding instructor to course's instructor list
@@ -70,14 +70,14 @@ def update_course_instructors_list(course_id: str, instructor_id: str):
             instructor_ls = course['instructors'][:]
             if instructor_id not in instructor_ls:
                 instructor_ls.append(instructor_id)
-            else:
-                instructor_ls = [instructor_id]
+        else:
+            instructor_ls = [instructor_id]
 
-            #  Update course's instructors list
-            courses.update_one(
-                {"course_id": course_id},
-                {"$set": { "instructors": instructor_ls }}
-            )
+        #  Update course's instructors list
+        courses.update_one(
+            {"course_id": course_id},
+            {"$set": { "instructors": instructor_ls }}
+        )
         return OPERATION_SUCCESSFUL
     
     except:

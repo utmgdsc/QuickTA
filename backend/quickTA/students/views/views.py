@@ -1,7 +1,6 @@
 import csv
 import uuid
 import re
-import zoneinfo
 import pytz 
 from ..openAI import quick_ta_model as model
 
@@ -13,9 +12,10 @@ from django.http import JsonResponse
 from django.utils import timezone, dateparse
 from django.utils.timezone import now
 
+from ..constants import *
 from ..functions import user_functions, course_functions
 from ..models import Chatlog, Conversation, Course, Feedback, User, Report
-from ..serializers.serializers import GetUserSerializer, ConversationSerializer, CourseSerializer, FeedbackSerializer, IncorrectChatlogSerializer, UserSerializer, ChatlogSerializer, ReportSerializer, ChatlogDetailSerializer, CourseComfortabilitySerializer, UserCoursesSerializer
+from ..serializers.serializers import * 
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -23,91 +23,30 @@ from rest_framework import status
 from rest_framework.parsers import JSONParser
 from rest_framework import generics
 
+from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-"""
-Serializers 
-======================================================================================================
-- ensuring data returned is in the right format (JSON)
-- allows data from querysets and models to be converted into python datatypes to be rendered into JSON
-"""
 
-
-class UserList(generics.ListAPIView):
-    serializer_class = UserSerializer
-    queryset = User.objects.all()
-    serializer = UserSerializer(queryset, many=True)
-    pass
-
-class UserDetail(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = UserSerializer
-    queryset = User.objects.all()
-    
-    serializer = UserSerializer(queryset)
-    pass
-
-class CourseList(generics.ListAPIView):
-    serializer_class = CourseSerializer
-    queryset = Course.objects.all()
-
-    serializer = CourseSerializer(queryset, many=True)
-    pass
-
-class CourseDetail(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = CourseSerializer
-    queryset = Course.objects.all()
-
-    serializer = CourseSerializer(queryset)
-    pass
-
-class ConversationList(generics.ListAPIView):
-    serializer_class = ConversationSerializer
-    queryset = Conversation.objects.all()
-
-    serializer = ConversationSerializer(queryset, many=True)
-    pass
-
-class ConversationDetail(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = ConversationSerializer
-    queryset = Conversation.objects.all()
-
-    serializer = ConversationSerializer(queryset)
-    pass
-
-class ChatlogList(generics.ListAPIView):
-    serializer_class = ChatlogSerializer
-    queryset = Chatlog.objects.all()
-
-    serializer = ChatlogSerializer(queryset)
-    pass
-
-class ChatlogDetail(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = ChatlogDetailSerializer
-    queryset = Chatlog.objects.all()
-
-    serializer = ChatlogDetailSerializer(queryset)
-    pass
-
-class FeedbackList(generics.ListAPIView):
-    serializer_class = FeedbackSerializer
-    queryset = Feedback.objects.all()
-
-    serializer = FeedbackSerializer(queryset)
-    pass
-
-class FeedbackDetail(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = FeedbackSerializer
-    queryset = Feedback.objects.all()
-
-    serializer = FeedbackSerializer(queryset, many=True)
-    pass
-
-@swagger_auto_schema(methods=['post'], request_body=GetUserSerializer) 
+@swagger_auto_schema(methods=['post'], request_body=GetUserRequest, 
+    responses={
+        200: openapi.Response('Success', GetUserResponse),
+        400: openapi.Response('Bad Request', ErrorResponse)
+    }) 
 @api_view(['POST'])
 def get_user(request):
+    """
+    Acquires a user's information given their utorid.
+
+    Returns the user's user ID, name, utorid and role given their utorid.
+    """
     if request.method == 'POST':
         try:
             user = User.objects.get(utorid=request.data['utorid'])
-            res = { "user_id" : user.user_id}
+            res = { 
+                    "user_id" : user.user_id,
+                    "name": user.name,
+                    "utorid": user.utorid,
+                    "user_role": user.user_role
+                }
 
             return Response(res, status=status.HTTP_200_OK)
         
@@ -120,7 +59,11 @@ def get_user(request):
                 err = {"msg": "User does not exist"}
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=UserSerializer)
+@swagger_auto_schema(methods=['post'], request_body=CreateUserRequest,
+    responses={
+        201: openapi.Response('Created', CreateUserResponse),
+        400: openapi.Response('Bad Request', ErrorResponse)
+    })
 @api_view(['POST'])
 def user_detail(request):
     """
@@ -132,27 +75,9 @@ def user_detail(request):
         - IS: instructor
         - RS: researcher
         - AM: admin
-
-    API endpoint: /api/user
-    Supported operations: /POST
-
-    Request:
-    {
-        name: str,
-        utorid: str,
-        user_role: str
-    }
-    Response: {
-        user_id: str
-    }
     """
-
     if request.method == 'POST':
         try:
-            # Response validation
-            serializer = UserSerializer(data=request.data)
-            serializer.is_valid()
-            
             request.data['user_id'] = str(uuid.uuid4())
             
             utorid = User.objects.filter(utorid=request.data['utorid'])
@@ -190,9 +115,18 @@ def user_detail(request):
 
             return Response(err, status=status.HTTP_401_UNAUTHORIZED)
 
-@swagger_auto_schema(methods=['post'], request_body=UserCoursesSerializer)
+@swagger_auto_schema(methods=['post'], request_body=GetUserCoursesRequest,
+    responses={
+        200: openapi.Response('Success', GetUserCoursesResponse),
+        400: openapi.Response('Bad Request', ErrorResponse)
+    })
 @api_view(['POST'])
 def get_user_courses(request):
+    """
+    Acquires the user's list of enrolled courses.
+
+    Returns the list of courses of a particular user given their user ID.
+    """
     if request.method == 'POST':
         try:
             courses = user_functions.get_user_courses(request.data['user_id'])
@@ -206,34 +140,23 @@ def get_user_courses(request):
             if 'user_id' not in request.data.keys():
                 error.append("User ID")
             err = {"msg": "Get user course missing fields:" + ','.join(error)}
-            return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=CourseSerializer)
+@swagger_auto_schema(methods=['post'], request_body=CreateCourseRequest,
+    responses={
+        200: openapi.Response('Success', CreateCourseResponse),
+        400: openapi.Response('Bad Request', ErrorResponse)
+    })
 @api_view(['POST'])
 def course_detail(request):
     """
     Creates a new course.
 
-    API endpoint: /api/course
-    Supported operations: /POST
-
-    Request:
-    {
-        course_code: str,
-        semester: str
-    }
-    Response: {
-        course_id: str,
-        course_code: str,
-        semester: str
-    }
+    Acquires the course_code and semester.
+    Returns the initialized course created with its course id, course name, course code and semester.
     """
     if request.method == 'POST':
         try:
-            # Response Validation
-            serializer = CourseSerializer(data=request.data)
-            serializer.is_valid()
-
             # Check for duplicated courses
             course_code = Course.objects.filter(
                 course_code=request.data['course_code'],
@@ -272,20 +195,29 @@ def course_detail(request):
             if 'semester' not in request.data.keys():
                 error.append("Semester")
             err = {"msg": "Course missing fields:" + ','.join(error)}
-            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=CourseSerializer)
+@swagger_auto_schema(methods=['post'], request_body=GetCourseRequest,
+    responses={
+        200: openapi.Response('Success', GetCourseResponse),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        404: openapi.Response('Not Found', ErrorResponse)
+    })
 @api_view(['POST'])
 def course_get(request):
+    """
+    Retrieves a current course's information.
+
+    Acquires the course_code, semester and course_name.
+    Returns the initialized course created with its course id, course name, course code and semester.
+    """
     if request.method == 'POST':
         try:
-            # Response Validation
-            serializer = CourseSerializer(data=request.data)
-            serializer.is_valid()
-
             # Check for duplicated courses
             course_code = Course.objects.filter(
-                course_code=request.data['course_code']
+                course_code=request.data['course_code'],
+                semester=request.data['semester'],
+                course_name=request.data['course_name']
             )
 
             if (len(course_code) == 0):
@@ -311,7 +243,7 @@ def course_get(request):
             return Response(response, status=status.HTTP_201_CREATED)
         
         except CourseAlreadyExistsError:
-            return Response({"msg": "Course does not exists."}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"msg": "Course does not exists."}, status=status.HTTP_404_NOT_FOUND)
         except:
             error = []
             if 'course_code' not in request.data.keys():
@@ -319,41 +251,35 @@ def course_get(request):
             if 'semester' not in request.data.keys():
                 error.append("Semester")
             err = {"msg": "Course missing fields:" + ','.join(error)}
-            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=ConversationSerializer)
+@swagger_auto_schema(methods=['post'], request_body=StartConversationRequest,
+    responses={
+        201: openapi.Response('Created', StartConversationResponse),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        404: openapi.Response('Not Found', ErrorResponse)
+    })
 @api_view(['POST'])
 def conversation_detail(request):
     """
     Retrieves a request to start a session.
 
-    API endpoint: /api/conversation
-    Supported operations: /POST
-
-    Request: 
-    {
-        user_id: str,
-        course_id: str,
-        semester: str
-    }
-
-    Response: {
-        conversation_id
-    }
+    Acquires the course id and starts a new course session.
+    TODO: Checks if a course id by the same user has an active conversation. 
+    If the user does, then flag the old conversation as inactive.
     """
-
     if request.method == 'POST':
         try:
-            serializer = ConversationSerializer(data=request.data)
-            serializer.is_valid()
-
+            # Acquire course
             course = Course.objects.filter(course_id=request.data['course_id'])
             if len(course) == 0:
                 raise CourseNotFoundError
             course = course[0]
 
+            # Initialize conversation ID
             convo_id = str(uuid.uuid4())
 
+            # Save conversation record
             data = request.data
             convo = Conversation(
                 conversation_id=convo_id,
@@ -364,6 +290,7 @@ def conversation_detail(request):
             )
             convo.save()
 
+            # Response formatting
             response = {
                 "conversation_id": convo_id,
                 "course_id": data['course_id'],
@@ -372,9 +299,10 @@ def conversation_detail(request):
                 "report": "False",
             }
             return Response(response, status=status.HTTP_201_CREATED)
+
         except CourseNotFoundError:
             err = {'msg': 'Course not found.'}
-            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
         except:
             error = []
             if 'user_id' not in request.data.keys():
@@ -383,13 +311,20 @@ def conversation_detail(request):
                 error.append("Semester")
             err = {"msg": "Conversation details missing fields: " + ','.join(error) + '.'}
 
-            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['get'])
+@swagger_auto_schema(methods=['get'],
+    responses={
+        200: openapi.Response('Success', GetAllCoursesResponse),
+        500: openapi.Response('Internal Server Error', ErrorResponse)
+    })
 @api_view(['GET'])
 def courses_get_all(request):
     """
-    Retrieves all courses
+    Retrieves all courses.
+
+    Returns all relevant information of all courses.
+    Each course's information includes the course ID, semester, code and name.
     """
     if request.method == 'GET':
         try:
@@ -398,22 +333,18 @@ def courses_get_all(request):
         except:
             return Response("Internal server error.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@swagger_auto_schema(methods=['post'], request_body=ChatlogSerializer)
+@swagger_auto_schema(methods=['post'], request_body=GetChatlogRequest,
+    responses={
+
+        400: openapi.Response('Bad Request', ErrorResponse),
+        404: openapi.Response('Not Found', ErrorResponse)
+    })
 @api_view(['POST'])
 def chatlog_detail(request):
     """
-    Retrieves a chatlog from the user, posts it and also
-    returns a response from the OpenAI model.
-
-    API endpoint: /api/chatlog
-    Supported operations: /POST
-
-    Request: 
-    {
-        conversation_id: str
-        chatlog: str
-    }
-
+    Retrieves and posts a chatlog from the user, then returns a response from the OpenAI model.
+    
+    Also fix the prompt structure with the delimiters from openAI's functions.
     Response:
     {
         'agent': {
@@ -434,11 +365,11 @@ def chatlog_detail(request):
     """
     if request.method == 'POST':
 
-        try:
+        # try:
             # Set current chatlog's time if not provided
             current_time = timezone.now()
             location = 'America/Toronto'
-            if 'time' not in request.data.keys():
+            if 'time' not in request.data.keys() or request.data['time'] == '.':
                 request.data['time'] = current_time
             # Parse given chatlog time
             else: 
@@ -448,10 +379,6 @@ def chatlog_detail(request):
                 tz = dateparse.parse_datetime(time[:index])
                 request.data['time'] = tz
                 current_time = tz
-
-                    
-            serializer = ChatlogSerializer(data=request.data)
-            serializer.is_valid()
 
             # Check if conversation exists
             cid = request.data['conversation_id']
@@ -497,6 +424,8 @@ def chatlog_detail(request):
             model_chatlog_id = str(uuid.uuid4())
             course_id = conversation[0].course_id            
             model_response = model.enquire_model(cid, data['chatlog'], course_id)
+            if model_response == OPERATION_FAILED:
+                raise ModelDoesNotExistsError
             
             # Save message from the Model
             model_time = timezone.now()
@@ -535,18 +464,27 @@ def chatlog_detail(request):
             }
             return Response(response, status=status.HTTP_201_CREATED)
         
-        except:
-            # Error handling
-            error = []
-            if 'conversation_id' not in request.data.keys():
-                error.append("Conversation ID")
-            if 'chatlog' not in request.data.keys():
-                error.append("Chatlog message")
-            err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
+        # except ConversationNotFoundError:
+        #     return Response({"msg": "Conversation does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        # except ModelDoesNotExistsError:
+        #     return Response({"msg": "Model does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        # except:
+        #     # Error handling
+        #     error = []
+        #     if 'conversation_id' not in request.data.keys():
+        #         error.append("Conversation ID")
+        #     if 'chatlog' not in request.data.keys():
+        #         error.append("Chatlog message")
+        #     err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
 
-            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+        #     return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=FeedbackSerializer)
+@swagger_auto_schema(methods=['post'], request_body=CreateFeedbackRequest,
+    responses={
+        201: openapi.Response('Created', CreateFeedbackResponse),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        404: openapi.Response('Not Found', ErrorResponse)
+    })
 @api_view(['POST'])
 def feedback_detail(request):
     """
@@ -554,24 +492,9 @@ def feedback_detail(request):
     Logs the conversation as inactive (I) afterwards.
 
     Rating is an integer from 1 to 5.
-
-    API Endpoint: /api/feedback
-    Supported operations: /POST
-
-    Request:
-    {
-        conversation_id: str,
-        rating: int,
-        feedback_msg: str
-    }
-
-    Response: 
-        HTTP status code 201: CREATED
     """
     if request.method == 'POST':
         try:
-            serializer = FeedbackSerializer(data=request.data)
-            serializer.is_valid()
             if request.data['rating'] > 5:
                 raise OverRatingLimitError
             
@@ -609,15 +532,15 @@ def feedback_detail(request):
         
         except OverRatingLimitError:
             err = {"msg": "Rating exceeded limit of 5."}
-            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
         
         except ConversationNotFoundError:
             err = {"msg": "Conversation does not exist."}
-            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
         
         except FeedbackExistsError:
             err = {"msg": "Feedback already exists."}
-            return Response(err, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
         
         except:
             # Error handling
@@ -629,23 +552,23 @@ def feedback_detail(request):
             if 'feedback_msg' not in request.data.keys():
                 error.append("Feedback Message")
             err = {"msg": "Feedback details missing fields: " + ','.join(error) + '.'}
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=ReportSerializer)
+@swagger_auto_schema(methods=['post'], request_body=GetChatlogHistoryRequest,
+    responses={
+        200: openapi.Response('Success'),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        404: openapi.Response('Not Found', ErrorResponse)
+    })
 @api_view(['POST'])
 def chatlog_history_detail(request):
     """
     Retrieves the conversation id and returns a copy of the chatlog.
 
-    API Endpoint: /api/report
-    Supported operations: /POST
+    Returns a CSV file including the contents of a particular conversation.
+    The CSV file contains all of the chatlogs pertaining to the specific conversation, formatted as follows:
 
-    Request:
-    {
-        conversation_id: str
-    }
-
-    Response: 
-        CSV file containing all the chatlogs
+        [Time], Speaker, Chatlog
     """
     if request.method == 'POST':
         try:
@@ -669,11 +592,8 @@ def chatlog_history_detail(request):
         
             response = HttpResponse(
                 content_type='text/csv',
-                headers={
-                    'Content-Disposition': 'attachement; filename="convo-report.csv"'
-                }
+                headers={'Content-Disposition': 'attachement; filename="convo-report.csv"'}
             )
-
             response["Access-Control-Expose-Headers"] = "Content-Type, Content-Disposition"
 
             writer = csv.writer(response)
@@ -688,19 +608,23 @@ def chatlog_history_detail(request):
             return response
 
         except ConversationNotFoundError:
-            return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_401_UNAUTHORIZED) 
+            return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_404_NOT_FOUND) 
         except UserNotFoundError:
-            return Response({"msg": "Error: User not Found."}, status=status.HTTP_401_UNAUTHORIZED) 
+            return Response({"msg": "Error: User not Found."}, status=status.HTTP_404_NOT_FOUND) 
         except:
             # Error handling
             error = []
             if 'conversation_id' not in request.data.keys():
                 error.append("Conversation ID")
             err = {"msg": "Feedback details missing fields: " + ','.join(error) + '.'}
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
 
-            return Response(err, status=status.HTTP_401_UNAUTHORIZED) 
-
-@swagger_auto_schema(methods=['post'], request_body=IncorrectChatlogSerializer)
+@swagger_auto_schema(methods=['post'], request_body=IncorrectChatlogRequest,
+    responses={
+        201: openapi.Response('Created', IncorrectChatlogResponse),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        404: openapi.Response('Not Found', ErrorResponse)
+    })
 @api_view(['POST'])
 def report_conversation(request):
     """
@@ -709,21 +633,8 @@ def report_conversation(request):
     The corresponding field, chatlog.status:
         'I' - stands for incorrect
         'C' - stands for correct
-
-    API Endpoint: /api/incorrect-answer
-    Supported operations: /POST
-
-    Request:
-    {
-        conversation_id: str
-        chatlog_id: str
-    }
-
-    Response: 
-        HTTP status code 200: OK
     """
     if request.method == 'POST':
-        
         try:
             if not(request.data['msg']):
                 raise MissingReportMessageError
@@ -779,7 +690,7 @@ def report_conversation(request):
                 'status': 'O',
                 'msg': request.data['msg']
             }
-            return Response(response, status=status.HTTP_200_OK)
+            return Response(response, status=status.HTTP_201_CREATED)
         
         except MissingReportMessageError:
             err = {"msg": "Please enter a report message."}
@@ -795,16 +706,23 @@ def report_conversation(request):
             if 'conversation_id' not in request.data.keys():
                 error.append("Conversation ID")
             err = {"msg": "Report incorrect answers: " + ','.join(error) +  '.'}
-            return Response(err, status=status.HTTP_404_NOT_FOUND)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=CourseComfortabilitySerializer)
+@swagger_auto_schema(methods=['post'], request_body=CourseComfortabilityRequest,
+    responses={
+        201: openapi.Response('Created', CourseComfortabilityResponse),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        404: openapi.Response('Not Found', ErrorResponse)
+    })
 @api_view(['POST'])
 def course_comfortability(request):
+    """
+    Adds a course comfortability rating to the corresponding conversation.
+
+    Finds the conversation given the conversation id and updates its comfortability rating.
+    """
     if request.method == 'POST':
         try: 
-            serializer = CourseComfortabilitySerializer(data=request.data)
-            serializer.is_valid()
-            
             convo = Conversation.objects.filter(conversation_id=request.data['conversation_id'])
             if (len(convo) == 0):
                 raise ConversationNotFoundError
@@ -812,10 +730,10 @@ def course_comfortability(request):
             convo = Conversation.objects.filter(conversation_id=request.data['conversation_id']).update(comfortability_rating=request.data['comfortability_rating'])
             data = request.data
             response = {
-                "conversation": data.conversation_id,
-                "comfortability_rating": data.comfortability_rating
+                "conversation_id": data['conversation_id'],
+                "comfortability_rating": data['comfortability_rating']
             }
-            return Response(response, status=status.HTTP_200_OK)
+            return Response(response, status=status.HTTP_201_CREATED)
         except ConversationNotFoundError: 
             err = {"msg": "Conversation not found."}
             return Response(err, status=status.HTTP_404_NOT_FOUND)
@@ -824,12 +742,11 @@ def course_comfortability(request):
             if 'conversation_id' not in request.data.keys():
                 error.append("Conversation ID")
             err = {"msg": "Report incorrect answers: " + ','.join(error) +  '.'}
-            return Response(err, status=status.HTTP_404_NOT_FOUND)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 # Exceptions
 class UserAlreadyExistsError(Exception): pass
 class CourseAlreadyExistsError(Exception): pass
-
 class UserNotFoundError(Exception): pass
 class ConversationNotFoundError(Exception): pass
 class ChatlogNotFoundError(Exception): pass
@@ -838,3 +755,4 @@ class CourseDuplicationError(Exception): pass
 class OverRatingLimitError(Exception): pass
 class FeedbackExistsError(Exception): pass
 class MissingReportMessageError(Exception): pass
+class ModelDoesNotExistsError(Exception): pass

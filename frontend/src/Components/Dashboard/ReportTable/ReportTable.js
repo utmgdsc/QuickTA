@@ -1,17 +1,20 @@
 import {
-    Box, 
-    Heading,
-    Table,
-    Thead,
-    Tbody,
-    Tfoot,
-    Tr,
-    Th,
-    Td,
-    TableCaption,
-    TableContainer,
-    VStack,
-    useDisclosure
+  Box,
+  Heading,
+  Table,
+  Thead,
+  Tbody,
+  Tfoot,
+  Tr,
+  Th,
+  Td,
+  TableCaption,
+  TableContainer,
+  VStack,
+  useDisclosure,
+  Divider,
+  Center,
+  Spacer, Tooltip
 } from "@chakra-ui/react";
 
 import axios from "axios";
@@ -20,6 +23,7 @@ import ConversationView from "./ConversationView";
 
 const ReportTable = ( { course_ID, isWeekly, setIsLoading } ) => {
   const {isOpen, onOpen, onClose} = useDisclosure();
+  const [hover, setHover] = useState(false);
   const cardStyle = {
     backgroundColor: 'white',
     boxShadow: '1px 2px 3px 1px rgba(0,0,0,0.12)',
@@ -69,13 +73,7 @@ const ReportTable = ( { course_ID, isWeekly, setIsLoading } ) => {
         <Box style={cardStyle} mt={6}>
             <Heading as='h2'><span style={titleStyle}>Reported Conversations (Detailed)</span></Heading>
             <TableContainer>
-            <VStack style= {{
-                    height: "40vh",
-                    overflowY: "scroll",
-                    overflowX: "hidden",
-                    maxWidth: 'fit-content',
-                }}>
-            <Table variant='unstyled'>
+            <Table variant='unstyled' overflowX={"scroll"}>
                 <Thead>
                 <Tr>
                     <Th>Conversation ID</Th>
@@ -88,6 +86,7 @@ const ReportTable = ( { course_ID, isWeekly, setIsLoading } ) => {
                 {reportList.map((obj, index) => (
                   // create a new entry in the table by unwrapping the corresponding fields
                   // If any table row is clicked on open a modal showing a detailed view of convo
+                  <Tooltip label={"Click an entry for more info"}>
                   <Tr key={index} onClick={() => {
                     setRowIndex(index);
                     console.log(index, reportList);
@@ -98,12 +97,12 @@ const ReportTable = ( { course_ID, isWeekly, setIsLoading } ) => {
                     <Td>{obj.time}</Td>
                     <Td>{obj.msg}</Td>
                   </Tr>
+                  </Tooltip>
                 ))}
                 </Tbody>
             </Table>
-            </VStack>
             </TableContainer>
-          {reportList.length !== 0 && <ConversationView isOpen={isOpen} onClose={onClose} convo_id={reportList[rowIndex].conversation_id}/>}
+          {reportList.length !== 0 ? <ConversationView isOpen={isOpen} onClose={onClose} convo_id={reportList[rowIndex].conversation_id}/> : <VStack><Center>No reported Conversations!</Center></VStack>}
         </Box>
     );
 }

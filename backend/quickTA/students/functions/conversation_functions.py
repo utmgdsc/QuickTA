@@ -33,7 +33,7 @@ def post_conversation_chatlog(conversation_id: str, chatlog_history: str) -> str
     """
     try:
         convos = get_conversation_cluster()
-        print(chatlog_history)
+
         convos.update_one(
             {"conversation_id": conversation_id},
             {"$set": { "gpt_chatlog" : chatlog_history}}
@@ -53,7 +53,6 @@ def get_filtered_convos(course_id, view, timezone):
     # Retrieve all convesrations from the course given the particular datetime
     if start_date and end_date:
         
-        start = time.time()
         convos = Conversation.objects.filter(
                 course_id=course_id
             ).filter(
@@ -61,9 +60,6 @@ def get_filtered_convos(course_id, view, timezone):
             ).filter(
                 start_time__lt=end_date
             )
-        end = time.time()
-        print("Time elapsed (Conversation filtering):", (end-start) * 1000)
-
     else:
         convos = Conversation.objects.filter(course_id=course_id)
     return convos
@@ -75,7 +71,6 @@ def get_filtered_interactions(course_id, dates, timezone):
     interactions = []
     tz = ZoneInfo(timezone)
     # Retrieve all convesrations from the course given the particular datetime
-
     convos_cluster = get_conversation_cluster()
 
     if dates:
@@ -107,35 +102,10 @@ def get_filtered_interactions(course_id, dates, timezone):
                 ).filter(
                     start_time__lt=offset_date
                 )
-            count = len(convos)
-            
-            # count = convos_cluster.aggregate([
-            #     {
-            #         "$match": {
-            #             "$and": [
-            #                 { "course_id": course_id} ,
-            #                 { "start_time": {
-            #                         "$gte": start_date,
-            #                         "$lt": offset_date,
-            #                     }
-            #                 }
-            #             ]
-            #         }
-            #     },
-            #     {
-            #         "$count": "course_id"
-            #     }
-            # ])
+            count = convos.count()
             
             day_f = day.strftime('%Y-%m-%d')
             
-            # start = time.time()
             interactions.append((day_f, weekday, count))
-            # end = time.time()
-        #     print("Time elapsed (Date [" + str(day_of_day) + "])", (end-start) * 1000)
-        #     total += end-start
-        # print("Time elapsed (Date)", total * 1000)
 
     return interactions
-
-print(get_conversation_chatlog("69033ecd-ee6f-4991-9812-a930dff97a47"))

@@ -1,16 +1,15 @@
 from django.urls import path
-from .views.views import ChatlogList, ChatlogDetail, UserList, UserDetail, CourseDetail, CourseList, ConversationDetail, ConversationList
 from students.views import views, researcher_views, admin_views
 
 app_name = 'student_api'
 
 urlpatterns = [
-    path('user/<str:user_id>/', UserDetail.as_view(), name='user-detail'),
-    path('conversation/<str:conversation_id>/', ConversationDetail.as_view(), name='conversation-detail'),
+    # path('user/<str:user_id>/', UserDetail.as_view(), name='user-detail'),
+    # path('conversation/<str:conversation_id>/', ConversationDetail.as_view(), name='conversation-detail'),
 
-    path('user/all', UserList.as_view(), name='user-list'),
-    path('conversation/all', ConversationList.as_view(), name='conversation-list'),
-    path('chatlog/all', ChatlogList.as_view(), name='chatlog-detail'),
+    # path('user/all', UserList.as_view(), name='user-list'),
+    # path('conversation/all', ConversationList.as_view(), name='conversation-list'),
+    # path('chatlog/all', ChatlogList.as_view(), name='chatlog-detail'),
 
     # Student view
     # ================================================================================================
@@ -56,6 +55,7 @@ urlpatterns = [
     path('researcher/gptmodel-update', researcher_views.gptmodel_update),
     path('researcher/gptmodel-activate', researcher_views.gptmodel_select),
     path('researcher/gptmodel-get', researcher_views.gptmodel_get),
+    path('researcher/gptmodel-get-one', researcher_views.gptmodel_get_one),
     path('researcher/gptmodel-get-all', researcher_views.gptmodel_get_all),
     path('researcher/gptmodel-delete', researcher_views.gptmodel_delete),
     # Admin view
