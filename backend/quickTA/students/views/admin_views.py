@@ -197,6 +197,53 @@ def remove_user_course(request):
         except:
             return Response({"msg": "Bad Request."}, status=status.HTTP_400_BAD_REQUEST)
 
+@swagger_auto_schema(methods=['post'], request_body=ImportAllStudentsFromCsvRequest)
+@api_view(['POST'])
+def import_all_students_from_csv(request):
+    
+    if request.method == 'POST':
+        try:
+            csv_file = request.FILES["students.csv"]
+
+            if not csv_file.name.endswith(".csv"):
+                return Response({"msg": "Wrong File Type"})
+
+            file_data = csv_file.read().decode("utf-8")
+            data = file_data.split("\n")
+
+            for row in data():
+                fields = row.split(",")
+                student_id = fields[8]
+                name = fields[9] + " " + fields[10]
+                utorid = fields[14]
+                course_code = fields[0]
+
+                user = User.objects.filter(utorid=utorid)
+
+                if not user:
+                    data_dict = {
+                    "user_id": "",
+                    "name": name,
+                    "utorid": utorid,
+                    "user_role": "ST"
+                    }
+                    user_functions.create_user(data_dict)
+
+                user_id = User.objects.get(utorid=utorid)
+                course_id = Course.objects.filter(course_code=course_code) 
+                user_functions.add_user_to_course(user_id=user_id, course_id=course_id)
+
+            return Response({"success"}, status=status.HTTP_200_OK)
+
+        
+
+                
+        except:
+            return Response({"msg": "Bad Request."},status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
 class UserAlreadyExistsError(Exception): pass
 class AddUserToCourseFailedError(Exception): pass
 class RemoveUserFromCourseFailedError(Exception): pass

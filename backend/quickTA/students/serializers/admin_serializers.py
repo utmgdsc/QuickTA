@@ -46,3 +46,10 @@ class RemoveUserFromCourseRequest(serializers.Serializer):
     user_id = serializers.CharField()
     course_id = serializers.CharField()
     type = serializers.CharField()
+
+# Import All Students from csv Request
+# ===========================================================
+class ImportAllStudentsFromCsvRequest(serializers.Serializer):
+    user_id = serializers.CharField()
+    course_id = serializers.CharField()
+    type = serializers.CharField()
