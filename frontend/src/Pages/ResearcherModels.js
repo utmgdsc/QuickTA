@@ -21,8 +21,8 @@ const ResearcherModels = ( {UTORid, currCourse, setCurrCourse, courses} ) => {
     useEffect(() => {
         if(currCourse){
 
-        }
-    },[currCourse]);
+        }console.log(courses);
+    },[currCourse, courses]);
 
     return (UTORid ?
         <div style={{

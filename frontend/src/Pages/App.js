@@ -19,8 +19,8 @@ const App = ( {UTORid = "testuser1"} ) => {
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setuserId] = useState("");
   const [courseName, setCourseName] = useState("");
-  const [auth, setAuth] = useState("professor");
-  // const [auth, setAuth] = useState("student");
+  // const [auth, setAuth] = useState("professor");
+  const [auth, setAuth] = useState("student");
   
 
   const getUserId = async () => {
@@ -46,7 +46,10 @@ const App = ( {UTORid = "testuser1"} ) => {
         }
         setIsLoading(false);
       })
-      .catch((err) => console.log(err))
+      .catch((err) => {
+        console.log(err);
+        setIsLoading(false);
+      })
   }
 
   useEffect(() => {
@@ -88,6 +91,7 @@ const App = ( {UTORid = "testuser1"} ) => {
                   semester={currCourse.semester}
                   setIsLoading={setIsLoading}
                   isLoading={isLoading}
+                  setCourses={setCourses}
                 />
               } />
     
