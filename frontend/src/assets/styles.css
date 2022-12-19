@@ -9,3 +9,7 @@ a:hover {
 color: #fff;
 box-shadow: inset 200px 0 0 0 #54b3d6;;
 }
+
+.dragover {
+  background-color: #2D54A6;
+}
