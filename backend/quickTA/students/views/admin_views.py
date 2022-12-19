@@ -197,53 +197,78 @@ def remove_user_course(request):
         except:
             return Response({"msg": "Bad Request."}, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=ImportAllStudentsFromCsvRequest)
+@swagger_auto_schema(methods=['post'], request_body=ImportAllStudentsFromCsvRequest,
+    responses={
+        200: openapi.Response('Success'),
+        201: openapi.Response('Created'),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        404: openapi.Response('Not Found', ErrorResponse)
+    })
 @api_view(['POST'])
 def import_all_students_from_csv(request):
-    
+    """
+    Adds the list of students in the CSV file passed it into a specific course.
+
+    List of Parameters:
+
+        - file: CSV file        CSV file
+        - course_id: str        Course UUID
+
+    The CSV format is given by the following corresponding fields (in exact order):
+    Acad_act, Section_cd, Prime TM,Prime SNR,0th TM1,0th SNR1,0th TM2,0th SNR2,Person ID,Surname,Given Name,Preferred Name,Email,Current_sts,UTORid
+
+    The fields extracted are the Surname, Given Name, Preferred Name and UTORid
+    """
     if request.method == 'POST':
-        try:
-            csv_file = request.FILES["students.csv"]
-
+        # try:
+            # Acquires csv file from HTTP body
+            csv_file = request.FILES['file']
             if not csv_file.name.endswith(".csv"):
-                return Response({"msg": "Wrong File Type"})
+                return Response({"msg": "Wrong File Type"}, status=status.HTTP_404_NOT_FOUND)
 
+            # Clean csv file formatting
             file_data = csv_file.read().decode("utf-8")
             data = file_data.split("\n")
+            
+            # Ensure data is populated
+            if len(data) == 1: 
+                raise Response({"msg": ""}, status=status.HTTP_400_BAD_REQUEST)
+            data = data[1:]
 
-            for row in data():
+            # Parse through fields for e ach user
+            for row in data:
                 fields = row.split(",")
-                student_id = fields[8]
+                # student_id = fields[8] - Unused field
                 name = fields[9] + " " + fields[10]
+                if fields[11] != "":
+                    name += " " + fields[11]
                 utorid = fields[14]
-                course_code = fields[0]
 
+                # Acquires matching utorids
                 user = User.objects.filter(utorid=utorid)
 
+                # Creates user if user does not exist
                 if not user:
                     data_dict = {
-                    "user_id": "",
-                    "name": name,
-                    "utorid": utorid,
-                    "user_role": "ST"
+                        "name": name,
+                        "utorid": utorid,
+                        "user_role": "ST"
                     }
                     user_functions.create_user(data_dict)
 
-                user_id = User.objects.get(utorid=utorid)
-                course_id = Course.objects.filter(course_code=course_code) 
-                user_functions.add_user_to_course(user_id=user_id, course_id=course_id)
-
-            return Response({"success"}, status=status.HTTP_200_OK)
-
+                user_id = User.objects.get(utorid=utorid).user_id
+                ret = user_functions.add_user_to_course(user_id=user_id, course_id=request.data['course_id'])
+                if not(ret):
+                    print("failed to add user")
+                    # raise FailedToAddUserToCourseError
+            return Response(status=status.HTTP_201_CREATED)
         
+        # except FailedToAddUserToCourseError:
+        #     return Response({"msg": "Cannot add user to course."}, status=status.HTTP_404_NOT_FOUND)
+        # except:
+        #     return Response({"msg": "Bad Request."},status=status.HTTP_400_BAD_REQUEST)
 
-                
-        except:
-            return Response({"msg": "Bad Request."},status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
+class FailedToAddUserToCourseError(Exception): pass
 class UserAlreadyExistsError(Exception): pass
 class AddUserToCourseFailedError(Exception): pass
 class RemoveUserFromCourseFailedError(Exception): pass
