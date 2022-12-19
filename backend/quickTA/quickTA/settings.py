@@ -69,7 +69,7 @@ CORS_ORIGIN_WHITELIST = (
 )
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = ['GET', 'POST', 'DELETE', 'PATCH']
-ALLOWED_HOSTS=["quickta.utm.utoronto.ca"]
+# ALLOWED_HOSTS=["quickta.utm.utoronto.ca"]
 
 ROOT_URLCONF = 'quickTA.urls'
 
