@@ -23,18 +23,21 @@ const App = ( {UTORid = ""} ) => {
   
 
   const getUserId = async () => {
-    await axios.post(process.env.REACT_APP_API_URL + "/get-user", {utorid: UTORid})
+    const user_id = await axios.post(process.env.REACT_APP_API_URL + "/get-user", {utorid: UTORid})
       .then((res) => {
         setuserId(res.data.user_id);
         setAuth(res.data.user_role);
+        // console.log(res.data.user_id);
+        return res.data.user_id
       })
       .catch((e) => {console.log(e)})
+      return user_id
   }
 
-  const getAllCourses = async () => {
+  const getAllCourses = async (user_id) => {
     // Gets all the courses a student is enrolled in
     // Pass getUserId return
-    await axios.post(process.env.REACT_APP_API_URL + "/user/courses", {user_id: "76d1c94d-48c2-4b7a-9ec9-1390732d84a0"})
+    await axios.post(process.env.REACT_APP_API_URL + "/user/courses", {user_id: user_id})
       .then((res) => {
         if(res.data.courses) {
           setCourses(res.data.courses.map((course) => ({course_id: course.course_id,
@@ -54,9 +57,7 @@ const App = ( {UTORid = ""} ) => {
 
   useEffect(() => {
     if(UTORid){
-      getAllCourses();
-      getUserId();
-      
+      getUserId().then((userid) => {getAllCourses(userid)});
     }
   }, [UTORid]);
 

@@ -13,7 +13,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <ChakraProvider theme={theme}>
       <BrowserRouter>
-        <App UTORid={"testinstructor1"}/>
+        <App UTORid={"testinstructor3"}/>
       </BrowserRouter>
     </ChakraProvider>
 );
