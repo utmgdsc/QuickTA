@@ -60,8 +60,8 @@ module.exports = {
           title: 'Backend',
           collapsable: false,
           children: [
-            'backend/Endpoints',
-            'backend/Models'
+            'backend/Models',
+            'backend/Endpoints'
           ]
         }
       ],
