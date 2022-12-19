@@ -39,15 +39,17 @@ def get_user(request):
     Returns the user's user ID, name, utorid and role given their utorid.
     """
     if request.method == 'POST':
+        
         try:
             user = User.objects.get(utorid=request.data['utorid'])
             res = { 
                     "user_id" : user.user_id,
                     "name": user.name,
                     "utorid": user.utorid,
-                    "user_role": user.user_role
+                    "user_role": user.user_role,
+                    # "res": str(request.headers)
                 }
-
+            
             return Response(res, status=status.HTTP_200_OK)
         
         except:
