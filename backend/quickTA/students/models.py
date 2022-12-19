@@ -13,7 +13,7 @@ class User(models.Model):
     user_role = models.CharField(max_length=2)
 
     def __str__(self):
-        return self.name + '(' + self.user_id + ')' + '[' + ','.join(self.courses) + ']'
+        return self.name + '(' + self.user_id + ')' 
 
 class Course(models.Model):
     course_id = models.CharField(max_length=50)
