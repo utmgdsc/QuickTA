@@ -41,21 +41,9 @@ module.exports = {
         text: 'Config',
         link: '/config/'
       },
-      {
-        text: 'VuePress',
-        link: 'https://v1.vuepress.vuejs.org'
-      }
     ],
     sidebar: {
       '/guide/': [
-        {
-          title: 'Backend',
-          collapsable: false,
-          children: [
-            'backend/Models',
-            'backend/Endpoints',
-          ]
-        }, 
         {
           title: 'Frontend',
           collapsable: false,
@@ -66,6 +54,14 @@ module.exports = {
             'frontend/ResearcherAnalytics',
             'frontend/ResearcherFilters',
             'frontend/ResearcherModels'
+          ]
+        },
+        {
+          title: 'Backend',
+          collapsable: false,
+          children: [
+            'backend/Endpoints',
+            'backend/Models'
           ]
         }
       ],

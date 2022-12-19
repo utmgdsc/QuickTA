@@ -12,7 +12,7 @@ const UploadCourseList = ({courseID}) => {
   
     const file = event.dataTransfer.files[0];
     const formData = new FormData();
-    console.log(courseID);
+
     formData.append('file', file);
     formData.append('course_id', courseID);
   

@@ -184,7 +184,7 @@ def average_ratings_csv(request):
 @api_view(['POST'])
 def resolve_reported_conversation(request):
     """
-    Resolves a reported conversation,
+    Resolves a reported conversation.
     """
     if request.method == 'POST':
         try:
@@ -275,7 +275,7 @@ def list_reported_conversations(request):
 @api_view(['POST'])
 def list_reported_conversations_csv(request):
     """
-    Returns all reported conversations of a given course.
+    Returns all reported conversations of a given course in a CSV file.
     
     Information returned includes:
     - Conversation ID

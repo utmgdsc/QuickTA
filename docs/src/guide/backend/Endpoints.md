@@ -1,102 +1,72 @@
-# Chatlog Endpoints
+# Endpoints
 ---
-## getAgentResponse
+There are three main different categories of endpoints that are separated by their user functions. The following is the base URL for the three categories of endpoints:
 
-Retrieves a chatlog from the user, posts it and also returns a response from the corresponding model assigned to the course.
+- Students (ST):  <code>http://localhost:8000/api</code>
+- Instructors/Researchers (IS/RS): <code>http://localhost:8000/api/resarcher</code>
+- Admin (AM): <code>http://localhost:8000/api/admin</code>
 
-#### <p style="color:green;">Request URL</p>
-```
-POST: /api/chatlog
-```
+To see the comprehensive documentation of the endpoints, after running the backend server on your local computer, visit either link:
 
-**Curl**
-```bash
-curl -X 'POST' \
-  'http://127.0.0.1:8000/api/chatlog' \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -H 'X-CSRFToken: TldzPe8AZ3LClcLapFo2FmLsBCgZxfCTCvzFW1zbkDPAXYpMcMmokgzkHz4JMrAt' \
-  -d '{
-  "conversation_id": "1",
-  "chatlog": "string"
-}'
-```
+- Swagger Documentation: <a href="http://localhost:8000/api/swagger/schema/">http://localhost:8000/api/swagger/schema/</a>
+- Redoc Documentation: <a href="http://localhost:8000/api/redoc">http://localhost:8000/api/redoc</a>
 
-#### <p style="color:green;">Request Body</p>
+## Student Endpoints
+### **User related endpoints**
+- **Create user**: <code>/user</code> Creates a new user.
+- **Get user**: <code>/get-user</code> Acquires a user's information given their utorid. 
+- **Get user courses**: <code>/user/courses</code> Acquires the user's list of enrolled courses.
 
-- conversation_id: string
-- chatlog: string
+### **Course related endpoints**
+- **Create course**: <code>/course</code> Creates a new course.
+- **Get course**: <code>/get-course</code> Retrieves a current course's information.
+- **Get all courses**: <code>/course/all</code> Retrieves all courses.
 
-#### <p style="color:green;">Response Body</p>
+### **Conversation related endpoints**
+- **Start conversation**: <code>/conversation</code> Retrieves a request to start a session.
+- **Comfortability Rating**: <code>/comfortability-rating</code> Adds a course comfortability rating to the corresponding conversation.
+- **Post chatlog**: <code>/chatlog</code>: Retrieves and posts a chatlog from the user, then returns a response from the OpenAI model.
+- **Post feedback**: <code>/feedback</code> Retrieves and saves a feedback from the user to the database.
+    Logs the conversation as inactive afterwards.
+- **Acquire all conversation chatlogs**: <code>/report</code> Retrieves the conversation id and returns a copy of the chatlog.
+- **Report incorrect answers**: <code>/incorrect-answer</code> Flags the given answer of a particular conversation as wrong.
 
-#### <p style="color:green;">Code 201: CREATED</p>
-```json
-{
-  "agent": {
-    "conversation_id": "1",
-    "chatlog_id": "2f05c8ea-be1a-4ae9-992f-296e98659654",
-    "is_user": false,
-    "chatlog": "hi",
-    "status": "C"
-  },
-  "user": {
-    "conversation_id": "1",
-    "chatlog_id": "5561950d-a5d1-4845-86f1-103a8e278f21",
-    "is_user": true,
-    "chatlog": "string",
-    "status": "C"
-  }
-}
-```
-#### <p style="color:red;">Code 401: UNAUTHORIZED</p>
-```json
-{
-  "msg": "Chatlog details missing fields: Chatlog message."
-}
-```
+## Instructor / Researcher Endpoints
+### Analytics Endpoints:
+- **Get Average Ratings**: <code>researcher/average-ratings</code> Acquires the average ratings of a course.
+- **Get Average Ratings (CSV)**:<code>researcher/average-ratings-csv</code> Acquires the average ratings of a course in a CSV file.
+- **Get reported conversations:** <code>researcher/reported-conversations</code> Returns all reported conversations of a given course.
+- **Get reported conversations (CSV):**<code>researcher/reported-conversations-csv</code> Returns all reported conversations of a given course in a CSV file. 
+- **Resolve reported conversations**: <code>researcher/resolve-reported-conversation</code>  Resolves a reported conversation.
+- **Get reported conversation chatlogs**:<code>researcher/report-chatlogs</code> Returns all of the chatlogs of a reported conversation ID.
+- **Get reported chat**:<code>researcher/reported-chatlogs-csv</code> Retrieves the reported conversation id and returns a CSV copy of the chatlog.
+- **Get average response rate**:<code>researcher/avg-response-rate</code> Acquires the average response rate of a given course.
+- **Get average response rate (CSV)**:<code>researcher/avg-response-rate-csv</code> Acquires a CSV containing the average response rate of a given course.
+- **Get most common words**:<code>researcher/most-common-words</code> Acquires the most common topics within user responses for a given course.
+- **Get average comfortability rating**:<code>researcher/avg-comfortability-rating</code> Acquires the average course comfortability rating for a given course.
+- **Get average comfortability rating (CSV)**:<code>researcher/avg-comfortability-rating-csv</code> Retrieves a CSV copy of all the course comfortability ratings of a given course id.
+- **Get interaction frequency**:<code>researcher/interaction-frequency</code> Retrieves the interaction frequency of QuickTA of a given
 
-## getAllResponses
+### Filters Endpoints:
+- **Get filtered chatlogs**:<code>researcher/get-filtered-chatlogs</code>
 
-Retrieves all chatlog from all users.
+### Course Information Endpoints
+- **Get course's student list**: <code>researcher/course-student-list</code> Acquires the information of all students of a course given the course_id.
 
-#### <p style="color:green;">Request URL</p>
-```
-GET: /api/chatlog/all
-```
+### GPT Model Configuration Endpoints
+- **GPT model create**:<code>researcher/gptmodel-create</code>  Creates a GPT Model given the parameter specifications.
+- **GPT model update**: <code>researcher/gptmodel-update</code> Updates a particular GPT model.
+- **GPT model activate**: <code>researcher/gptmodel-activate</code> Activates a selected GPTModel.
+- **GPT model get one**: <code>researcher/gptmodel-get-one</code> Acquires one GPT Model when given the course ID and model ID.
+- **GPT model get course**: <code>researcher/gptmodel-get</code> Returns all GPT models related to a course.
+- **GPT model get all course**: <code>researcher/gptmodel-get-all </code> Retrieves all GPT models from all courses.
+- **GPT model delete**: <code>researcher/gptmodel-delete </code> Deletes a GPT model configuration.
 
-**Curl**
-```bash
-curl -X 'GET' \
-  'http://127.0.0.1:8000/api/chatlog/all' \
-  -H 'accept: application/json' \
-  -H 'X-CSRFToken: ILsNt3iUxP2sGOSPM1HcmtE8pu2SWv7VrVOTAQJvSp6qiAwrz8Fy1ns0vrQCbH5v'
-```
+## Admin Endpoints
+- **Add a user**:<code>admin/add-user</code> Add a single user
+- **Add multiple users**:<code>admin/add-multiple-user</code> Adds multiple users.
+- **Add user to a course**:<code>admin/add-user-course</code> Links a user to a course.
+- **Add multiple users to a course**:<code>admin/add-multiple-user-course</code> Links multiple user to a course.
+- **Remove a user from a course**:<code>admin/remove-user-course</code> Removes a user from a course.
+- **Import all students from CSV List**:<code>admin/import-all-students-from-csv</code> Adds the list of students in the CSV file passed it into a specific course.
 
-#### <p style="color:green;">Response Body</p>
-#### <p style="color:green;">Code 200: OK</p>
-``` json
-  {
-    "conversation_id": "4a832a81-576c-43aa-842f-304a94f274b3",
-    "chatlog": "Hello! Testing out this functionality."
-  },
-  {
-    "conversation_id": "4a832a81-576c-43aa-842f-304a94f274b3",
-    "chatlog": "hi"
-  },
-  {
-    "conversation_id": "4a832a81-576c-43aa-842f-304a94f274b3",
-    "chatlog": "How is your day?"
-  },
-  {
-    "conversation_id": "4a832a81-576c-43aa-842f-304a94f274b3",
-    "chatlog": "hi"
-  },
-  {
-    "conversation_id": "4a832a81-576c-43aa-842f-304a94f274b3",
-    "chatlog": "Nice seeing you too!"
-  },
-  {
-    "conversation_id": "4a832a81-576c-43aa-842f-304a94f274b3",
-    "chatlog": "hi"
-  },
-```

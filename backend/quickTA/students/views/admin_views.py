@@ -220,7 +220,7 @@ def import_all_students_from_csv(request):
     The fields extracted are the Surname, Given Name, Preferred Name and UTORid
     """
     if request.method == 'POST':
-        # try:
+        try:
             # Acquires csv file from HTTP body
             csv_file = request.FILES['file']
             if not csv_file.name.endswith(".csv"):
@@ -259,14 +259,13 @@ def import_all_students_from_csv(request):
                 user_id = User.objects.get(utorid=utorid).user_id
                 ret = user_functions.add_user_to_course(user_id=user_id, course_id=request.data['course_id'])
                 if not(ret):
-                    print("failed to add user")
-                    # raise FailedToAddUserToCourseError
+                    raise FailedToAddUserToCourseError
             return Response(status=status.HTTP_201_CREATED)
         
-        # except FailedToAddUserToCourseError:
-        #     return Response({"msg": "Cannot add user to course."}, status=status.HTTP_404_NOT_FOUND)
-        # except:
-        #     return Response({"msg": "Bad Request."},status=status.HTTP_400_BAD_REQUEST)
+        except FailedToAddUserToCourseError:
+            return Response({"msg": "Cannot add user to course."}, status=status.HTTP_404_NOT_FOUND)
+        except:
+            return Response({"msg": "Bad Request."},status=status.HTTP_400_BAD_REQUEST)
 
 class FailedToAddUserToCourseError(Exception): pass
 class UserAlreadyExistsError(Exception): pass
