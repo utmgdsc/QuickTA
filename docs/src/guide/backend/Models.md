@@ -24,6 +24,26 @@
 | model_name | textfield     | Name of the model            |
 | course_id  | charfield(20) | Unique course ID (UUID)      | 
 
+## GPTModel
+| Fields            | Type            | Description 
+| ----------------- | --------------- | -
+| model_id          | charfield(100)  | Unique model ID (UUID)
+| model_name        | charfield(100)  | Name of the model
+| course_id         | charfield(100)  | Unique course ID (UUID)
+| status            | booleanfield    | 
+| model             | textfield(40)   | The prediction-generating AI model is specified 
+| prompt            | textfield(2000) | Prompt for the model 
+| suffix            | textfield(100)  | The suffix that is inserted after the inserted text.
+| max_tokens        | integerfield    | The maximum amount of tokens that can be created by the model 
+| temperature       | floatfield      | The temperature controls how much randomness is in the output. 
+| top_p             | floatfield      | An inference time sampling threshold is specified by the top_p parameter. 
+| n                 | integerfield    | The number of text generated for each prompt
+| stream            | booleanfield    | 
+| logprobs          | integerfield    | 
+| presence_penalty  | floatfield      | The model is encouraged to create new predictions by the presence penalty parameter 
+| frequency_penalty | floatfield      | The model’s propensity to repeat predictions is controlled by the frequency penalty parameter. 
+| best_of           | integerfield    | 
+
 ## Conversation
 | Fields               | Type           | Description                                             |
 | -------------------- | -------------- | ------------------------------------------------------- |
