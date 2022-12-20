@@ -31,7 +31,7 @@ const CourseCreator = ({ userid, setCourses, setCurrCourse, setIsLoading }) => {
         // Gets all the courses a student is enrolled in
         // Pass getUserId return
         setIsLoading(true);
-        return axios.post(process.env.REACT_APP_API_URL + "/user/courses", {user_id: "76d1c94d-48c2-4b7a-9ec9-1390732d84a0"})
+        return axios.post(process.env.REACT_APP_API_URL + "/user/courses", {user_id: userid})
           .then((res) => {
               if(res.data.courses) {
                   setCourses(res.data.courses.map((course) => ({course_id: course.course_id,
