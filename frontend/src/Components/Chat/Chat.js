@@ -14,6 +14,7 @@ const Chat = ({ currCourse, courses, setCurrCourse}) => {
   const [messages, updateMessages] = useState([]);
   const [inConvo, updateInConvo] = useState(false);
   const [currConvoID, updateConvoID] = useState("");
+  const [waitingForResp, setWaitForResp] = useState(false);
 
   return (
     <>
@@ -21,15 +22,17 @@ const Chat = ({ currCourse, courses, setCurrCourse}) => {
         <CourseSelect courses={courses} currCourse={currCourse} setCurrCourse={setCurrCourse} wait={inConvo}/>
         <Box as={"div"} bgColor={'white'} overflow={'hidden'} mt={5} border={'1px solid #EAEAEA'} borderTopRadius={'lg'} borderBottomRadius={'lg'} boxShadow={'1px 2px 3px 1px rgba(0,0,0,0.12)'} mb={'30vh'}>
           <ChatBoxTopNav courseCode={currCourse.course_code} currConvoID={currConvoID}/>
-          <ChatBox messages={messages}/>
+          <ChatBox messages={messages} waitingForResp={waitingForResp}/>
           <ChatBoxFooter
           updateMessages={updateMessages}
-          inConvo={inConvo} 
+          inConvo={inConvo}
           updateInConvo={updateInConvo}
           currConvoID={currConvoID}
           updateConvoID={updateConvoID}
           course_ID={currCourse.course_id}
           messages={messages}
+          waitingForResp={waitingForResp}
+          setWaitForResp={setWaitForResp}
           />
         </Box>
       </Box>
