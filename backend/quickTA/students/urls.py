@@ -42,6 +42,7 @@ urlpatterns = [
     path('researcher/avg-response-rate-csv', researcher_views.get_average_response_rate_csv),
     
     path('researcher/most-common-words', researcher_views.get_most_common_words),
+    path('researcher/most-common-words-wordcloud', researcher_views.get_most_common_words_wordcloud),
     
     path('researcher/avg-comfortability-rating', researcher_views.get_course_comfortability),
     path('researcher/avg-comfortability-rating-csv', researcher_views.get_course_comfortability_csv),

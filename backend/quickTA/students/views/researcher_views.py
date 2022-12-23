@@ -1,10 +1,11 @@
 import time
 import csv
+from io import BytesIO
 from datetime import datetime, date
 from ..constants import * 
 
 from ..functions import user_functions, course_functions, report_functions, conversation_functions,  time_utils, gptmodel_functions
-from ..functions.common_topics import generate_wordcloud
+from ..functions.common_topics import generate_wordcloud, get_wordcloud_image
 
 from django.http import HttpResponse
 from django.http import JsonResponse
@@ -688,7 +689,7 @@ def get_most_common_words_wordcloud(request):
     Returns 3-gram topic keywords with their associated frequency. 
     The resulting response will be a PNG image file containing a worldcloud image.
     """
-    if request.methpd == 'POST':
+    if request.method == 'POST':
         try:
             sentences = []
             data = request.data
@@ -702,11 +703,16 @@ def get_most_common_words_wordcloud(request):
                         sentences.append(chatlog.chatlog)
             
             # Generate the wordcloud image
+            img = get_wordcloud_image(sentences)
+
+            image_data = BytesIO()
+            img.save(image_data, format='png')
+            image_data.seek(0)
 
             # Return the wordcloud image as a file to the frontend
-            # Content-disposition: file/png
             today = timezone.now()
             response = HttpResponse(
+                image_data,
                 content_type='image/png',
                 headers={'Content-Disposition': 'attachement; filename="wordcloud-{}-{}"'.format(today, data['filter'])}
             )

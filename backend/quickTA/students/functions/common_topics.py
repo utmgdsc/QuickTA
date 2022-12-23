@@ -1,6 +1,6 @@
 from wordcloud import WordCloud, STOPWORDS
 import yake
-from datetime import datetime
+import matplotlib
 
 def generate_wordcloud(data):
     
@@ -14,9 +14,20 @@ def generate_wordcloud(data):
 
     kw_extractor = yake.KeywordExtractor(top=numOfKeywords, n=max_ngram_size)
     keywords = kw_extractor.extract_keywords(text)
-    print(keywords)
-    
     return keywords
 
 def get_wordcloud_image(data):
+    _keywords = generate_wordcloud(data)
+    keywords = {}
+    for keyword in _keywords:
+        keywords[keyword[0]] = 1 - keyword[1]
+    
+    print(keywords)
+
+    wordcloud = WordCloud(background_color='white')
+    wordcloud.generate_from_frequencies(keywords)
+
+    img = wordcloud.to_image()
+    return img
+
 
