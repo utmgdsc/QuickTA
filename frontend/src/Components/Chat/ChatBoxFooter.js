@@ -15,7 +15,9 @@ const ChatBoxFooter = ({
     currConvoID, 
     updateConvoID,
     course_ID,
-    messages
+    messages,
+    waitingForResp,
+    setWaitForResp
   }) => {
 
     const { isOpen: isOpenFeedback, onOpen: onOpenFeedback, onClose: onCloseFeedback } = useDisclosure();
@@ -24,7 +26,6 @@ const ChatBoxFooter = ({
     
     const [sliderVal, setSliderVal] = useState(0);
     const [text, setText] = useState("");
-    const [waitingForResp, setWaitForResp] = useState(false);
 
 
     console.log(currConvoID);
