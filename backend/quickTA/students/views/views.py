@@ -171,19 +171,39 @@ def course_detail(request):
             # Save new course
             course_id = str(uuid.uuid4())
 
+            # Acuqiring start date
+            start_date = timezone.now()
+
+            # Date parsing (Getting of the timezone portion)
+            time = request.data['end_date']
+            index = time.find('[')
+            location = re.search(r"\[(.*?)\]", time).group()[1:-1]
+            tz = dateparse.parse_datetime(time[:index])
+            
+            # Set start date and end date to the correct timezone 
+            # TODO: Round to the nearest date for both start date and end date
+            # Start date - 00:00 UTC-05
+            # End date-  23:59  UTC-05
+            start_date = start_date.astimezone(pytz.timezone(location))
+            end_date = tz.astimezone(pytz.timezone(location))
+
+            
             course = Course(
                 course_id=course_id,
                 course_code=request.data['course_code'],
                 semester=request.data['semester'],
-                course_name=request.data['course_name']
+                course_name=request.data['course_name'],
+                start_date=start_date,
+                end_date=end_date
             )
             course.save()
-
+            end_date = request.data['end_date'].isoformat() + '[' + location + ']'
             response = {
                 "course_id": course_id,
                 "course_code": request.data['course_code'],
                 "semester": request.data['semester'],
-                "course_name": request.data['course_name']
+                "course_name": request.data['course_name'],
+                "end_date": end_date
             }
 
             return Response(response, status=status.HTTP_201_CREATED)

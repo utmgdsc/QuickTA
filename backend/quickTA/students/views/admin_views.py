@@ -221,6 +221,16 @@ def import_all_students_from_csv(request):
     """
     if request.method == 'POST':
         try:
+            # Deletes all current students from the course
+            course_id = request.data['course_id']
+            students = course_functions.get_all_course_users(course_id)
+
+            # Remove course from student's course list
+            if students:
+                for sid in students:
+                    user_functions.remove_user_from_course(sid, course_id)
+                    course_functions.remove_course_students_list(course_id, sid)
+
             # Acquires csv file from HTTP body
             csv_file = request.FILES['file']
             if not csv_file.name.endswith(".csv"):
@@ -234,7 +244,7 @@ def import_all_students_from_csv(request):
             if len(data) == 1: 
                 raise Response({"msg": ""}, status=status.HTTP_400_BAD_REQUEST)
             data = data[1:]
-
+            
             # Parse through fields for e ach user
             for row in data:
                 fields = row.split(",")
@@ -246,7 +256,7 @@ def import_all_students_from_csv(request):
 
                 # Acquires matching utorids
                 user = User.objects.filter(utorid=utorid)
-
+                
                 # Creates user if user does not exist
                 if not user:
                     data_dict = {
@@ -255,11 +265,12 @@ def import_all_students_from_csv(request):
                         "user_role": "ST"
                     }
                     user_functions.create_user(data_dict)
-
+                
                 user_id = User.objects.get(utorid=utorid).user_id
                 ret = user_functions.add_user_to_course(user_id=user_id, course_id=request.data['course_id'])
                 if not(ret):
                     raise FailedToAddUserToCourseError
+                ret = course_functions.update_course_students_list(course_id=course_id, user_id=user_id)
             return Response(status=status.HTTP_201_CREATED)
         
         except FailedToAddUserToCourseError:

@@ -48,7 +48,7 @@ def get_filtered_convos(course_id, view, timezone):
     filter <view> in the given time format <timezone>.
     """
 
-    start_date, end_date = time_utils.get_dates(view, timezone)
+    start_date, end_date = time_utils.get_dates(course_id, view, timezone)
 
     # Retrieve all convesrations from the course given the particular datetime
     if start_date and end_date:

@@ -98,7 +98,7 @@ def add_user_to_course(user_id: str, course_id: str) -> bool:
     # Create course list if course does not exist
     else:
         course_ls = [course_id]
-    
+    print(course_ls)
     # Update user's course list
     users.update_one(
         {"user_id" : user_id},

@@ -4,7 +4,7 @@ import {useRef, useEffect} from "react";
 
 
 
-const ChatBox = ({messages}) => {
+const ChatBox = ({messages, waitingForResp}) => {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -26,8 +26,15 @@ const ChatBox = ({messages}) => {
           isUser={isUser}
         />
         
-      ))}
-
+      ))
+      }
+      {waitingForResp ?
+        <div className="typing">
+          <span className="circle scaling"></span>
+          <span className="circle scaling"></span>
+          <span className="circle scaling"></span>
+        </div>
+       : null}
       <div ref={messagesEndRef}/>
     </VStack>
   );

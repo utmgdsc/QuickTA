@@ -8,6 +8,8 @@ from ..functions.common_topics import generate_wordcloud
 
 from django.http import HttpResponse
 from django.http import JsonResponse
+from django.utils import timezone
+from django.utils.timezone import now
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -634,6 +636,8 @@ def get_most_common_words(request):
             
             words = generate_wordcloud(sentences)
 
+            #  Extract these words and create word clouds with them
+
             if convo_count != 0:
                 avg_chatlog_count =  sum(chatlog_count) / convo_count
             else: 
@@ -667,6 +671,59 @@ def get_most_common_words(request):
             else:
                 err = {"msg": "Most Common Topics missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+@swagger_auto_schema(methods=['post'], request_body=GetFilteredStatsRequest,
+    responses={
+        200: openapi.Response('Success', GetMostCommonTopicsWordCloudResponse),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        404: openapi.Response('Not Found', ErrorResponse),
+        500: openapi.Response('Internal Server Error', ErrorResponse),
+    })
+@api_view(['POST'])
+def get_most_common_words_wordcloud(request):
+    """
+    Acquires the most common topics within user response for a given course.
+
+    Retrieves the most common topics through the use of YAKE (Yet Another Keyword Extractor).
+    Returns 3-gram topic keywords with their associated frequency. 
+    The resulting response will be a PNG image file containing a worldcloud image.
+    """
+    if request.methpd == 'POST':
+        try:
+            sentences = []
+            data = request.data
+            convos = conversation_functions.get_filtered_convos(data['course_id'], data['filter'], data['timezone'])
+
+            #  Acquire all the conversations of a selected time period given the course
+            for convo in convos:
+                chatlogs = get_convo_chatlogs(convo.conversation_id)
+                for chatlog in chatlogs:
+                    if chatlog.is_user:
+                        sentences.append(chatlog.chatlog)
+            
+            # Generate the wordcloud image
+
+            # Return the wordcloud image as a file to the frontend
+            # Content-disposition: file/png
+            today = timezone.now()
+            response = HttpResponse(
+                content_type='image/png',
+                headers={'Content-Disposition': 'attachement; filename="wordcloud-{}-{}"'.format(today, data['filter'])}
+            )
+            response["Access-Control-Expose-Headers"] = "Content-Type, Content-Disposition"
+
+            return response
+        except:
+            error = []
+            if 'course_code' not in request.data.keys(): error.append("Course Code")
+            if 'filter' not in request.data.keys(): error.append("Filter")
+            if 'timezone' not in request.data.keys(): error.append("Timezone")
+            
+            if error:
+                err = {"msg": "Most Common Words Wordcloud Missing FIelds:" + ','.join(error)}
+                return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 @swagger_auto_schema(methods=['post'], request_body=GetFilteredStatsRequest,
     responses={
