@@ -714,7 +714,6 @@ def get_course_comfortability(request):
             error = []
             if 'course_id' not in request.data.keys():
                 error.append("Course ID")
-            
             if (not(error)): 
                 err = {"msg": "Internal Server Error"}
                 return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

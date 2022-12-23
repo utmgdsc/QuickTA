@@ -1,4 +1,4 @@
-# from wordcloud import WordCloud, STOPWORDS
+from wordcloud import WordCloud, STOPWORDS
 import yake
 from datetime import datetime
 
@@ -14,6 +14,9 @@ def generate_wordcloud(data):
 
     kw_extractor = yake.KeywordExtractor(top=numOfKeywords, n=max_ngram_size)
     keywords = kw_extractor.extract_keywords(text)
+    print(keywords)
     
     return keywords
+
+def get_wordcloud_image(data):
 
