@@ -90,6 +90,16 @@ class GetMostCommonTopicsResponse(serializers.Serializer):
     sentences = Sentences(many=True)
     most_common_words = CommonWords(many=True)
 
+# Get Most Common Topics Word Cloud Reseponse
+# ======================================================
+class GetMostCommonTopicsWordCloudResponse(serializers.Serializer):
+
+    class MostCommonTopics(serializers.Serializer):
+        word = serializers.CharField(required=True)
+        frequency = serializers.CharField(required=True)
+
+    words = MostCommonTopics(many=True)
+
 # Get Course Comfortability Response
 # ======================================================
 class GetCourseComfortabilityResponse(serializers.Serializer):
@@ -249,4 +259,6 @@ class GetAllCourseGPTModelResponse(serializers.Serializer):
 # ======================================================
 class DeleteGPTModelRequest(serializers.Serializer):
     model_id = serializers.CharField(max_length=100)
+
+
 
