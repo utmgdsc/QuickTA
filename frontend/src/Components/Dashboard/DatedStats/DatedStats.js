@@ -33,7 +33,7 @@ const DatedStats = ({isWeekly, courseID, setIsLoading}) => {
 
   const fetchData = async (endpoint) => {
       if (endpoint.endsWith("average-ratings")){
-        return await axios.post(process.env.REACT_APP_API_URL + endpoint, {filter: (isWeekly === 1 ? "Weekly" : "Monthly"),
+        return await axios.post(process.env.REACT_APP_API_URL + endpoint, {filter: (isWeekly === 1 ? "Weekly" : (isWeekly === 0 ? "Monthly" : "All")),
           course_id: courseID, timezone: "America/Toronto"})
           .then((res) => {
             setAvgRating({
@@ -45,7 +45,7 @@ const DatedStats = ({isWeekly, courseID, setIsLoading}) => {
       }
       
       if (endpoint.endsWith("avg-comfortability-rating")){
-        return await axios.post(process.env.REACT_APP_API_URL + endpoint, {filter: (isWeekly === 1 ? "Weekly" : "Monthly"),
+        return await axios.post(process.env.REACT_APP_API_URL + endpoint, {filter: (isWeekly === 1 ? "Weekly" : (isWeekly === 0 ? "Monthly" : "All")),
           course_id: courseID, timezone: "America/Toronto"})
           .then((res) => {
             setAvgComfort({
@@ -57,7 +57,7 @@ const DatedStats = ({isWeekly, courseID, setIsLoading}) => {
       }
       
       if (endpoint.endsWith("avg-response-rate")){
-        return await axios.post(process.env.REACT_APP_API_URL + endpoint, {filter: (isWeekly === 1 ? "Weekly" : "Monthly"),
+        return await axios.post(process.env.REACT_APP_API_URL + endpoint, {filter: (isWeekly === 1 ? "Weekly" : (isWeekly === 0 ? "Monthly" : "All")),
           course_id: courseID, timezone: "America/Toronto"})
           .then((res) => {
             setAvgRespTime({
@@ -69,7 +69,7 @@ const DatedStats = ({isWeekly, courseID, setIsLoading}) => {
       }
       
       if (endpoint.endsWith("reported-conversations")){
-        return await axios.post(process.env.REACT_APP_API_URL + endpoint, {filter: (isWeekly === 1 ? "Weekly" : "Monthly"),
+        return await axios.post(process.env.REACT_APP_API_URL + endpoint, {filter: (isWeekly === 1 ? "Weekly" : (isWeekly === 0 ? "Monthly" : "All")),
           course_id: courseID, timezone: "America/Toronto"})
           .then((res) => {
             setNumReport({numReport: res.data.total_reported});
@@ -78,7 +78,7 @@ const DatedStats = ({isWeekly, courseID, setIsLoading}) => {
       }
 
       if(endpoint.endsWith("most-common-words")){
-        return await axios.post(process.env.REACT_APP_API_URL + endpoint, {filter: (isWeekly === 1 ? "Weekly" : "Monthly"),
+        return await axios.post(process.env.REACT_APP_API_URL + endpoint, {filter: (isWeekly === 1 ? "Weekly" : (isWeekly === 0 ? "Monthly" : "All")),
         course_id: courseID, timezone: "America/Toronto"})
           .then((res) => {
             let max = 0.0
@@ -118,7 +118,7 @@ const DatedStats = ({isWeekly, courseID, setIsLoading}) => {
                 
                 <StatCard callBack={() => {
                   if(courseID && isWeekly != null){
-                    axios.post(process.env.REACT_APP_API_URL + "/researcher/average-ratings-csv", {filter: (isWeekly === 1 ? "Weekly" : "Monthly"),
+                    axios.post(process.env.REACT_APP_API_URL + "/researcher/average-ratings-csv", {filter: (isWeekly === 1 ? "Weekly" : (isWeekly === 0 ? "Monthly" : "All")),
                     course_id: courseID, timezone: "America/Toronto"})
                     .then((response) => {
                       if(response.headers['content-disposition']){
@@ -132,7 +132,7 @@ const DatedStats = ({isWeekly, courseID, setIsLoading}) => {
                 
                 <StatCard callBack={() => {
                   if(courseID && isWeekly != null){
-                    axios.post(process.env.REACT_APP_API_URL + "/researcher/avg-response-rate-csv", {filter: (isWeekly === 1 ? "Weekly" : "Monthly"),
+                    axios.post(process.env.REACT_APP_API_URL + "/researcher/avg-response-rate-csv", {filter: (isWeekly === 1 ? "Weekly" : (isWeekly === 0 ? "Monthly" : "All")),
                     course_id: courseID, timezone: "America/Toronto"})
                     .then((response) => {
                       if(response.headers['content-disposition']){
@@ -145,7 +145,7 @@ const DatedStats = ({isWeekly, courseID, setIsLoading}) => {
                 
                 <StatCard callBack={() => {
                   if(courseID && isWeekly != null){
-                    axios.post(process.env.REACT_APP_API_URL + "/researcher/avg-comfortability-rating-csv", {filter: (isWeekly === 1 ? "Weekly" : "Monthly"),
+                    axios.post(process.env.REACT_APP_API_URL + "/researcher/avg-comfortability-rating-csv", {filter: (isWeekly === 1 ? "Weekly" : (isWeekly === 0 ? "Monthly" : "All")),
                     course_id: courseID, timezone: "America/Toronto"})
                     .then((response) => {
                       if(response.headers['content-disposition']){
@@ -158,7 +158,7 @@ const DatedStats = ({isWeekly, courseID, setIsLoading}) => {
                 
                 <StatCard callBack={() => {
                   if(courseID && isWeekly != null){
-                    axios.post(process.env.REACT_APP_API_URL + "/researcher/reported-conversations-csv", {filter: (isWeekly === 1 ? "Weekly" : "Monthly"),
+                    axios.post(process.env.REACT_APP_API_URL + "/researcher/reported-conversations-csv", {filter: (isWeekly === 1 ? "Weekly" : (isWeekly === 0 ? "Monthly" : "All")),
                     course_id: courseID, timezone: "America/Toronto"})
                     .then((response) => {
                       if(response.headers['content-disposition']){
