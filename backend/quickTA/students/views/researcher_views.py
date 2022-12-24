@@ -882,7 +882,7 @@ def get_interaction_frequency(request):
 
             # Get all dates in range for a particular filter view (Weekly or Monthly)
             data = request.data
-            dates = time_utils.get_all_dates(data['filter'], data['timezone'])
+            dates = time_utils.get_all_dates(data['course_id'], data['filter'], data['timezone'])
 
             interactions = conversation_functions.get_filtered_interactions(data['course_id'], dates, data['timezone'])
 

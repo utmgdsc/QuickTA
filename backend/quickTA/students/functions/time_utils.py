@@ -2,6 +2,7 @@ import calendar
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from ..models import Course
+from django.utils.timezone import now
 
 def get_dates(course_id, view, timezone):
     """
@@ -38,12 +39,12 @@ def get_all_time(course_id, timezone):
     tz = ZoneInfo(timezone)
 
     # Acquire the start date and end date of the particular course
-    course = Course.objects.get(course_id=course_id).start_date
+    course = Course.objects.get(course_id=course_id)
     start_date = course.start_date
     end_date = course.end_date
 
     # Check for lower bound date
-    curr_date = timezone.now()
+    curr_date = now()
     if curr_date < end_date:
         end_date = curr_date
 
@@ -117,15 +118,14 @@ def get_all_times(course_id, timezone):
     end_date = course.end_date
 
     # Set current date as the lower bound of the aggregated view
-    curr_date = timezone.now()
+    curr_date = now()
     if curr_date < end_date:
         end_date = curr_date
 
     # Count how many days are in between start date and end date
-    # TODO: Check if subtraction works correctly and outputs the total difference in dates
     total_num_dates = end_date - start_date
 
-    for day in range(total_num_dates):
+    for day in range(total_num_dates.days):
         t1 = start_date + timedelta(days=day+1)
         t2 = t1.astimezone(tz)
 
