@@ -32,8 +32,6 @@ def get_filtered_chatlogs(request):
     TODO: Make swagger documentation for this endpoint
     """
     if request.method in ['GET', 'POST']:
-        # id_contains = request.GET.get('id_contains')
-        # chatlog_contains = request.GET.get('chatlog_contains')
 
         # qs = Chatlog.objects.all()
         convos = []
@@ -69,7 +67,7 @@ def get_filtered_chatlogs(request):
             convos.append(data)
 
             # Sorting based on rating
-            convos = sorted(convos, key=lambda item: item["rating"], reverse=False)
+            # convos = sorted(convos, key=lambda item: item["rating"], reverse=False)
         
         # serializer = rs.ConversationSerializer(qs, context={'request': request}, many=True)
 
