@@ -42,10 +42,14 @@ const App = ( {UTORid = ""} ) => {
         if(res.data.courses) {
           setCourses(res.data.courses.map((course) => ({course_id: course.course_id,
             course_code: course.course_code, semester: course.semester, course_name: course.course_name})));
-          
-          setCurrCourse({course_id: res.data.courses[0].course_id,
-            course_code: res.data.courses[0].course_code, semester: res.data.courses[0].semester,
-            course_name: res.data.courses[0].course_name});
+
+          if (sessionStorage.getItem("selected") === null) {
+            sessionStorage.setItem("selected", "0")
+          }
+          setCurrCourse({course_id: res.data.courses[parseInt(sessionStorage.getItem("selected"))].course_id,
+            course_code: res.data.courses[parseInt(sessionStorage.getItem("selected"))].course_code,
+            semester: res.data.courses[parseInt(sessionStorage.getItem("selected"))].semester,
+            course_name: res.data.courses[parseInt(sessionStorage.getItem("selected"))].course_name});
 
         }
         setIsLoading(false);

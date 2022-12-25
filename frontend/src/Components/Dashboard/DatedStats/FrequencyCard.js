@@ -1,4 +1,17 @@
-import {Box, Center, Divider, Flex, HStack, Spacer, Stat, StatLabel, Tag, TagLabel, Text} from "@chakra-ui/react";
+import {
+  Box,
+  Center,
+  Divider,
+  Flex,
+  HStack,
+  Spacer,
+  Stat,
+  StatLabel,
+  Tag,
+  TagLabel,
+  Text,
+  Tooltip
+} from "@chakra-ui/react";
 import StatCard from "./StatCard";
 
 
@@ -19,6 +32,7 @@ const FrequencyCard = ({ words, callBack }) => {
   };
 
   return(
+    <Tooltip label={"Click to download a wordcloud"}>
     <Stat style={cardStyle} onClick={() => {
       callBack();
     }} as={"button"}>
@@ -66,6 +80,7 @@ const FrequencyCard = ({ words, callBack }) => {
         }
       </HStack>
     </Stat>
+    </Tooltip>
   )
 }
 

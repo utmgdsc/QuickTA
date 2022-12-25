@@ -12,7 +12,9 @@ const StudentPage = ({currCourse, setCurrCourse, semester, courses, isLoading, U
       }}>
         <TopNav UTORid={UTORid}/>
         {
-          currCourse ?
+          courses.length === 0
+          ?  <Box ml={'12vw'} mr={'12vw'}>Sorry, you are not enrolled in any courses!</Box>
+            :
             <Chat
               currCourse={currCourse}
               setCurrCourse={setCurrCourse}
@@ -20,7 +22,6 @@ const StudentPage = ({currCourse, setCurrCourse, semester, courses, isLoading, U
               courses={courses}
               style={{position: 'relative'}}
             />
-          : <Box ml={'12vw'} mr={'12vw'}>Sorry, you are not enrolled in any courses!</Box>
         }
     </div>
     );

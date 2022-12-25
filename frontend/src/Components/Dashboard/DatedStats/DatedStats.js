@@ -1,8 +1,8 @@
 import {
-    VStack, 
-    Flex, 
-    Spacer,
-    Button 
+  VStack,
+  Flex,
+  Spacer,
+  Button, Tooltip
 } from "@chakra-ui/react";
 import StatCard from "./StatCard";
 import DatedGraph from "./DatedGraph"
@@ -129,7 +129,7 @@ const DatedStats = ({isWeekly, courseID, setIsLoading}) => {
                     .catch((err) => console.log(err))
                   }
                 }} title={"Average Rating"} num={avgRating.avgRating} delta={avgRating.avgRatingDelta} unit={"☆"}/>
-                
+
                 
                 <StatCard callBack={() => {
                   if(courseID && isWeekly != null){

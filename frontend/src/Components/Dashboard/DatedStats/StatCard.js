@@ -1,11 +1,11 @@
 import {
-    Stat,
-    StatLabel,
-    StatNumber,
-    StatHelpText,
-    StatArrow,
-    Button
-  } from '@chakra-ui/react'
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatHelpText,
+  StatArrow,
+  Button, Tooltip
+} from '@chakra-ui/react'
 
 const StatCard = ({title, num, delta, unit, callBack}) => {
     const cardStyle = {
@@ -24,10 +24,10 @@ const StatCard = ({title, num, delta, unit, callBack}) => {
     };
 
     return (
-      
+      <Tooltip label={`Click on me for ${title} csv report`}>
         <Stat style = {cardStyle} onClick={() => {
           callBack();
-          }} as={"button"}>
+          }} as={"Button"}>
         <StatNumber><span style={titleStyle}>{title}</span></StatNumber>
         <StatLabel>{num}{unit}</StatLabel>
         {
@@ -44,7 +44,7 @@ const StatCard = ({title, num, delta, unit, callBack}) => {
           )
         }
       </Stat>
-      
+      </Tooltip>
     );
 }
 

@@ -1,8 +1,6 @@
 import DashboardHeader from "./DashboardHeader";
 import DashboardBody from "./DashboardBody";
 import {Box} from "@chakra-ui/react";
-import axios from "axios";
-import {useEffect, useState} from "react";
 
 const Dashboard = ({ courseCode, courseName, courses, setCurrCourse, currCourse, setIsLoading, userid, setCourses}) => {
 

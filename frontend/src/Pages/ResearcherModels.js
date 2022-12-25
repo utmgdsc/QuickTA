@@ -16,14 +16,7 @@ import { Link } from "react-router-dom";
 
 
 const ResearcherModels = ( {UTORid, currCourse, setCurrCourse, courses} ) => {
-  console.log(currCourse);
     const [loadingModel, setLoadingModel] = useState(false);
-    
-    useEffect(() => {
-        if(currCourse){
-
-        }
-    },[currCourse, courses]);
 
     return (Object.keys(currCourse).length === 0 && currCourse.constructor === Object ?
         <CustomSpinner/> :
