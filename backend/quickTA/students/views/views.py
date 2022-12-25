@@ -158,7 +158,7 @@ def course_detail(request):
     Returns the initialized course created with its course id, course name, course code and semester.
     """
     if request.method == 'POST':
-        try:
+        # try:
             # Check for duplicated courses
             course_code = Course.objects.filter(
                 course_code=request.data['course_code'],
@@ -172,23 +172,8 @@ def course_detail(request):
             course_id = str(uuid.uuid4())
 
             # Date Parsing Start Date
-            time = request.data['end_date']
-            index = time.find('[')
-            start_date = dateparse.parse_datetime(time[:index])
-
-            # Date parsing (Getting of the timezone portion)
-            time = request.data['end_date']
-            index = time.find('[')
-            location = re.search(r"\[(.*?)\]", time).group()[1:-1]
-            end_date = dateparse.parse_datetime(time[:index])
-            
-            # Set start date and end date to the correct timezone 
-            # TODO: Round to the nearest date for both start date and end date
-            # Start date - 00:00 UTC-05
-            # End date-  23:59  UTC-05
-            start_date = start_date.astimezone(pytz.timezone(location))
-            end_date = end_date.astimezone(pytz.timezone(location))
-
+            start_date = request.data['start_date']
+            end_date = request.data['end_date']
             
             course = Course(
                 course_id=course_id,
@@ -199,27 +184,28 @@ def course_detail(request):
                 end_date=end_date
             )
             course.save()
-            end_date = request.data['end_date'].isoformat() + '[' + location + ']'
+        
             response = {
                 "course_id": course_id,
                 "course_code": request.data['course_code'],
                 "semester": request.data['semester'],
                 "course_name": request.data['course_name'],
+                "start_date": start_date,
                 "end_date": end_date
             }
 
             return Response(response, status=status.HTTP_201_CREATED)
 
-        except CourseAlreadyExistsError:
-            return Response({"msg": "Course already exists."}, status=status.HTTP_403_FORBIDDEN)
-        except:
-            error = []
-            if 'course_code' not in request.data.keys():
-                error.append("Course Code")
-            if 'semester' not in request.data.keys():
-                error.append("Semester")
-            err = {"msg": "Course missing fields:" + ','.join(error)}
-            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+        # except CourseAlreadyExistsError:
+        #     return Response({"msg": "Course already exists."}, status=status.HTTP_403_FORBIDDEN)
+        # except:
+        #     error = []
+        #     if 'course_code' not in request.data.keys():
+        #         error.append("Course Code")
+        #     if 'semester' not in request.data.keys():
+        #         error.append("Semester")
+        #     err = {"msg": "Course missing fields:" + ','.join(error)}
+        #     return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 @swagger_auto_schema(methods=['post'], request_body=GetCourseRequest,
     responses={

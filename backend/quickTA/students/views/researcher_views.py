@@ -45,7 +45,6 @@ def get_filtered_chatlogs(request):
             try:
                 # Get Feedback information
                 feedback = Feedback.objects.get(conversation_id=convo_id)
-                print("Conversation", convo_id, "Feedback", feedback)
             except:
                 pass
             
@@ -64,7 +63,13 @@ def get_filtered_chatlogs(request):
             if (feedback):
                 data['rating'] = feedback.rating
                 data['feedback_msg'] = feedback.feedback_msg
+            else:
+                data['rating'] = None
+                data['feedback_msg'] = None
             convos.append(data)
+
+            # Sorting based on rating
+            convos = sorted(convos, key=lambda item: item["rating"], reverse=False)
         
         # serializer = rs.ConversationSerializer(qs, context={'request': request}, many=True)
 
