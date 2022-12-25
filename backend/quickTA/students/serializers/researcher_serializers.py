@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import Chatlog, Course, GPTModel, Report
+from ..models import Conversation
 from drf_yasg import openapi
 
 # Get <Weekly/Monthly Statistics> Response
@@ -11,9 +11,9 @@ class GetFilteredStatsRequest(serializers.Serializer):
 
 # Research Filter View Serializer
 # ======================================================
-class ChatlogSerializer(serializers.ModelSerializer):
+class ConversationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Chatlog
+        model = Conversation
         # fields = ['id', 'conversation_id', 'chatlog_id', 'time', 'is_user', 'chatlog', 'delta']
         fields = '__all__'
 

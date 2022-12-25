@@ -22,6 +22,7 @@ from ..serializers.researcher_serializers import *
 from ..serializers import researcher_serializers as rs
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from django.db.models import Q
 
 # Research Filter view endpoints 
 # ===============================================================================
@@ -35,13 +36,39 @@ def get_filtered_chatlogs(request):
         # chatlog_contains = request.GET.get('chatlog_contains')
 
         # qs = Chatlog.objects.all()
-        qs = Chatlog.objects.filter()
-        # qs = qs.filter()
-        # qs = qs.object.filter(chatlog='hi')
-        # qs = qs.object.filter(chatlog="test")
-        serializer = rs.ChatlogSerializer(qs, context={'request': request}, many=True)
+        convos = []
+        qs = Conversation.objects.filter()
+        
+        for convo in qs:
+            convo_id = convo.conversation_id
+            feedback = ''
+            try:
+                # Get Feedback information
+                feedback = Feedback.objects.get(conversation_id=convo_id)
+                print("Conversation", convo_id, "Feedback", feedback)
+            except:
+                pass
+            
+            if convo.report: report = "True"
+            else: report = "False"
 
-        return Response(serializer.data)
+            data = {
+                "conversation_id": convo.conversation_id,
+                "course_id": convo.course_id,
+                "user_id": convo.user_id,
+                "start_time": convo.start_time,
+                "end_time": convo.end_time,
+                "status": convo.status,
+                "report": report
+            }
+            if (feedback):
+                data['rating'] = feedback.rating
+                data['feedback_msg'] = feedback.feedback_msg
+            convos.append(data)
+        
+        # serializer = rs.ConversationSerializer(qs, context={'request': request}, many=True)
+
+        return Response(convos)
 
 # Research Analytics view endpoints
 # ===============================================================================
