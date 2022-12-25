@@ -44,7 +44,8 @@ const App = ( {UTORid = ""} ) => {
             course_code: course.course_code, semester: course.semester, course_name: course.course_name})));
           
           setCurrCourse({course_id: res.data.courses[0].course_id,
-            course_code: res.data.courses[0].course_code, semester: res.data.courses[0].semester});
+            course_code: res.data.courses[0].course_code, semester: res.data.courses[0].semester,
+            course_name: res.data.courses[0].course_name});
 
         }
         setIsLoading(false);

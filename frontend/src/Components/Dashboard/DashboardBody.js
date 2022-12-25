@@ -35,8 +35,10 @@ const DashboardBody = ({ courseID, setIsLoading }) => {
                         <DatedStats isWeekly={0} courseID={courseID} setIsLoading={setIsLoading}/>
                         <ReportTable course_ID={courseID} isWeekly={0} setIsLoading={setIsLoading}/>
                     </TabPanel>
+                    <TabPanel>
                         <DatedStats isWeekly={2} courseID={courseID} setIsLoading={setIsLoading}/>
                         <ReportTable course_ID={courseID} setIsLoading={setIsLoading} isWeekly={2}/>
+                    </TabPanel>
                 </TabPanels>
             </Tabs>
 

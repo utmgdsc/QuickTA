@@ -15,7 +15,9 @@ const CourseCreator = ({ userid, setCourses, setCurrCourse, setIsLoading }) => {
     const { isOpen, onOpen, onClose} = useDisclosure();
     const [newCourse, setNewCourse] = useState({
         course_code: "",
-        course_name: ""
+        course_name: "",
+        start_date: "",
+        end_date: ""
     });
     const [semester, setNewSemester] = useState(Temporal.Now.plainDateISO().toString().substring(2,4)+'F');
 
@@ -81,6 +83,20 @@ const CourseCreator = ({ userid, setCourses, setCurrCourse, setIsLoading }) => {
                             <Radio value={Temporal.Now.plainDateISO().toString().substring(2,4)+'S'}>Summer</Radio>
                             </HStack>
                         </RadioGroup>
+
+                        <FormLabel>Start Date</FormLabel>
+                        <Input
+                          type={"date"}
+                          onChange={updateField}
+                          name={"start_date"}
+                        />
+
+                        <FormLabel>End Date</FormLabel>
+                        <Input
+                          type={"date"}
+                          onChange={updateField}
+                          name={"end_date"}
+                        />
                     </FormControl>
                 </ModalBody>
                 <Divider mt={4}/>
