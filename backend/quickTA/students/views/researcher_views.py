@@ -710,8 +710,8 @@ def get_most_common_words(request):
         404: openapi.Response('Not Found', ErrorResponse),
         500: openapi.Response('Internal Server Error', ErrorResponse),
     })
-# @api_view(['POST'])
-@api_view(['GET'])
+@api_view(['POST'])
+# @api_view(['GET'])
 def get_most_common_words_wordcloud(request):
     """
     Acquires the most common topics within user response for a given course.
@@ -720,13 +720,13 @@ def get_most_common_words_wordcloud(request):
     Returns 3-gram topic keywords with their associated frequency. 
     The resulting response will be a PNG image file containing a worldcloud image.
     """
-#     if request.method == 'POST':
-    if request.method == 'GET':
+    if request.method == 'POST':
+#     if request.method == 'GET':
         try:
             sentences = []
-#             data = request.data
-#             convos = conversation_functions.get_filtered_convos(data['course_id'], data['filter'], data['timezone'])
-            convos = conversation_functions.get_filtered_convos(request.GET.get('course_id'), request.GET.get('filter'), request.GET.get('timezone'))
+            data = request.data
+            convos = conversation_functions.get_filtered_convos(data['course_id'], data['filter'], data['timezone'])
+#             convos = conversation_functions.get_filtered_convos(request.GET.get('course_id'), request.GET.get('filter'), request.GET.get('timezone'))
 
             #  Acquire all the conversations of a selected time period given the course
             for convo in convos:
