@@ -32,8 +32,6 @@ def get_filtered_chatlogs(request):
     TODO: Make swagger documentation for this endpoint
     """
     if request.method in ['GET', 'POST']:
-        # id_contains = request.GET.get('id_contains')
-        # chatlog_contains = request.GET.get('chatlog_contains')
 
         # qs = Chatlog.objects.all()
         convos = []
@@ -45,7 +43,6 @@ def get_filtered_chatlogs(request):
             try:
                 # Get Feedback information
                 feedback = Feedback.objects.get(conversation_id=convo_id)
-                print("Conversation", convo_id, "Feedback", feedback)
             except:
                 pass
             
@@ -64,7 +61,13 @@ def get_filtered_chatlogs(request):
             if (feedback):
                 data['rating'] = feedback.rating
                 data['feedback_msg'] = feedback.feedback_msg
+            else:
+                data['rating'] = None
+                data['feedback_msg'] = None
             convos.append(data)
+
+            # Sorting based on rating
+            # convos = sorted(convos, key=lambda item: item["rating"], reverse=False)
         
         # serializer = rs.ConversationSerializer(qs, context={'request': request}, many=True)
 
@@ -381,14 +384,14 @@ def get_reported_chatlogs(request):
     Acquires the conversation ID of the reported conversation and returns the corresponding chatlogs.
     """
     if request.method == 'POST':
-        try:
+        # try:
             cid = request.data['conversation_id']
             conversation = Conversation.objects.filter(conversation_id=cid)
 
             if not(conversation):
                 raise ConversationNotFoundError
 
-
+            print(conversation[0].user_id)
             user = User.objects.get(user_id=conversation[0].user_id)
 
             chatlogs = Chatlog.objects.filter(conversation_id=cid).order_by('time')
@@ -412,19 +415,19 @@ def get_reported_chatlogs(request):
             }
             return Response(response, status=status.HTTP_200_OK)
 
-        except ConversationNotFoundError:
-            return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_404_NOT_FOUND) 
-        except:
-            error = []
-            if 'conversation_id' not in request.data.keys():
-                error.append("Conversation ID")
+        # except ConversationNotFoundError:
+        #     return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_404_NOT_FOUND) 
+        # except:
+        #     error = []
+        #     if 'conversation_id' not in request.data.keys():
+        #         error.append("Conversation ID")
             
-            if (not(error)): 
-                err = {"msg": "Internal Server Error"}
-                return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            else:
-                err = {"msg": "Reported Chatlogs missing fields: " + ','.join(error) + '.'}
-                return Response(err, status=status.HTTP_400_BAD_REQUEST)
+        #     if (not(error)): 
+        #         err = {"msg": "Internal Server Error"}
+        #         return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        #     else:
+        #         err = {"msg": "Reported Chatlogs missing fields: " + ','.join(error) + '.'}
+        #         return Response(err, status=status.HTTP_400_BAD_REQUEST)
        
 @swagger_auto_schema(methods=['post'], request_body=GetReportedConvoChatlogsRequest,
     responses={
