@@ -15,7 +15,9 @@ const CourseCreator = ({ userid, setCourses, setCurrCourse, setIsLoading }) => {
     const { isOpen, onOpen, onClose} = useDisclosure();
     const [newCourse, setNewCourse] = useState({
         course_code: "",
-        course_name: ""
+        course_name: "",
+        start_date: "",
+        end_date: ""
     });
     const [semester, setNewSemester] = useState(Temporal.Now.plainDateISO().toString().substring(2,4)+'F');
 
@@ -31,14 +33,18 @@ const CourseCreator = ({ userid, setCourses, setCurrCourse, setIsLoading }) => {
         // Gets all the courses a student is enrolled in
         // Pass getUserId return
         setIsLoading(true);
-        return axios.post(process.env.REACT_APP_API_URL + "/user/courses", {user_id: "76d1c94d-48c2-4b7a-9ec9-1390732d84a0"})
+        return axios.post(process.env.REACT_APP_API_URL + "/user/courses", {user_id: userid})
           .then((res) => {
               if(res.data.courses) {
                   setCourses(res.data.courses.map((course) => ({course_id: course.course_id,
                       course_code: course.course_code, semester: course.semester, course_name: course.course_name})));
 
-                  setCurrCourse({course_id: res.data.courses[0].course_id,
-                      course_code: res.data.courses[0].course_code, semester: res.data.courses[0].semester});
+                  sessionStorage.setItem('selected', '0');
+                  setCurrCourse({course_id: res.data.courses[parseInt(sessionStorage.getItem('selected'))].course_id,
+                      course_code: res.data.courses[parseInt(sessionStorage.getItem('selected'))].course_code,
+                      semester: res.data.courses[parseInt(sessionStorage.getItem('selected'))].semester,
+                      course_name: res.data.courses[parseInt(sessionStorage.getItem('selected'))].course_name});
+
 
               }
               setIsLoading(false);
@@ -81,6 +87,20 @@ const CourseCreator = ({ userid, setCourses, setCurrCourse, setIsLoading }) => {
                             <Radio value={Temporal.Now.plainDateISO().toString().substring(2,4)+'S'}>Summer</Radio>
                             </HStack>
                         </RadioGroup>
+
+                        <FormLabel>Start Date</FormLabel>
+                        <Input
+                          type={"date"}
+                          onChange={updateField}
+                          name={"start_date"}
+                        />
+
+                        <FormLabel>End Date</FormLabel>
+                        <Input
+                          type={"date"}
+                          onChange={updateField}
+                          name={"end_date"}
+                        />
                     </FormControl>
                 </ModalBody>
                 <Divider mt={4}/>

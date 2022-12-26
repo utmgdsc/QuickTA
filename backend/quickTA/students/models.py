@@ -13,13 +13,15 @@ class User(models.Model):
     user_role = models.CharField(max_length=2)
 
     def __str__(self):
-        return self.name + '(' + self.user_id + ')' + '[' + ','.join(self.courses) + ']'
+        return self.name + '(' + self.user_id + ')' 
 
 class Course(models.Model):
     course_id = models.CharField(max_length=50)
     semester = models.CharField(max_length=10)
     course_code = models.CharField(max_length=9)
     course_name = models.TextField(max_length=1000)
+    start_date = models.DateTimeField(blank=True, null=True)
+    end_date = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return self.course_id 

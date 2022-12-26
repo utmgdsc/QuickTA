@@ -27,7 +27,13 @@ const ChatBox = ({messages}) => {
         />
         
       ))}
-
+      {waitingForResp ?
+        <div className="typing">
+          <span className="circle scaling"></span>
+          <span className="circle scaling"></span>
+          <span className="circle scaling"></span>
+        </div>
+       : null}
       <div ref={messagesEndRef}/>
     </VStack>
   );

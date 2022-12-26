@@ -8,7 +8,7 @@ def get_filtered_convos(course_id, view, timezone):
     Returns a list of convo_ids of course <course_id> with a specific
     filter <view> in the given time format <timezone>.
     """
-    start_date, end_date = time_utils.get_dates(view, timezone)
+    start_date, end_date = time_utils.get_dates(course_id, view, timezone)
     if start_date and end_date:
         reported_convos = Report.objects.filter(
                 course_id=course_id

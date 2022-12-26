@@ -56,14 +56,19 @@ class GetUserCoursesResponse(serializers.Serializer):
 # Create Course Request and Response
 # ======================================================
 class CreateCourseRequest(serializers.Serializer):
+    course_name = serializers.CharField()
     course_code = serializers.CharField()
     semester = serializers.CharField()
+    start_date = serializers.DateField()
+    end_date = serializers.DateField()
 
 class CreateCourseResponse(serializers.Serializer):
     course_id = serializers.CharField(required=False)
     course_code = serializers.CharField(required=False)
     semester = serializers.CharField(required=False)
     course_name = serializers.CharField(required=False)
+    start_date = serializers.DateField()
+    end_date = serializers.DateField()
 
 # Get Course Request and Response
 # ======================================================

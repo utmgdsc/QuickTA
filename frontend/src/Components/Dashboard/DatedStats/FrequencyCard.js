@@ -1,14 +1,28 @@
-import {Box, Center, Divider, Flex, HStack, Spacer, Stat, StatLabel, Tag, TagLabel, Text} from "@chakra-ui/react";
+import {
+  Box,
+  Center,
+  Divider,
+  Flex,
+  HStack,
+  Spacer,
+  Stat,
+  StatLabel,
+  Tag,
+  TagLabel,
+  Text,
+  Tooltip
+} from "@chakra-ui/react";
 import StatCard from "./StatCard";
 
 
-const FrequencyCard = ({ words }) => {
+const FrequencyCard = ({ words, callBack }) => {
   const cardStyle = {
     backgroundColor: 'white',
     boxShadow: '1px 2px 3px 1px rgba(0,0,0,0.12)',
     borderRadius: '15px',
     padding: '15px 15px 7px 20px',
     width: '99%',
+    textAlign: "left"
   };
   const titleStyle = {
     display: 'block',
@@ -18,7 +32,10 @@ const FrequencyCard = ({ words }) => {
   };
 
   return(
-    <Stat style={cardStyle}>
+    <Tooltip label={"Click to download a wordcloud"}>
+    <Stat style={cardStyle} onClick={() => {
+      callBack();
+    }} as={"button"}>
       <StatLabel><span style={titleStyle}>Most Common Words</span></StatLabel>
       <Divider my={3}/>
       <HStack>
@@ -63,6 +80,7 @@ const FrequencyCard = ({ words }) => {
         }
       </HStack>
     </Stat>
+    </Tooltip>
   )
 }
 

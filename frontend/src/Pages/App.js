@@ -12,37 +12,51 @@ import CustomSpinner from "../Components/CustomSpinner";
 import NotFoundPage from '../Components/NotFoundPage'
 
 
-const App = ( {UTORid = ""} ) => {
+const App = () => {
   const [courses, setCourses] = useState([]);
   const [currCourse, setCurrCourse] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setuserId] = useState("");
-  const [courseName, setCourseName] = useState("");
   const [auth, setAuth] = useState("");
+  const [UTORid, setUtorID] = useState("");
   // const [auth, setAuth] = useState("student");
   
 
   const getUserId = async () => {
-    await axios.post(process.env.REACT_APP_API_URL + "/get-user", {utorid: UTORid})
+    setIsLoading(true);
+    const user_id = await axios.post(process.env.REACT_APP_API_URL + "/get-user", {})
       .then((res) => {
         setuserId(res.data.user_id);
         setAuth(res.data.user_role);
+        setUtorID(res.data.utorid);
+        // console.log(res.data.user_id);
+        setIsLoading(false);
+        return res.data.user_id
       })
-      .catch((e) => {console.log(e)})
+      .catch((e) => {
+        console.log(e)
+        setIsLoading(false);
+      })
+      return user_id
   }
 
-  const getAllCourses = async () => {
+  const getAllCourses = async (user_id) => {
     // Gets all the courses a student is enrolled in
     // Pass getUserId return
-    await axios.post(process.env.REACT_APP_API_URL + "/user/courses", {user_id: "76d1c94d-48c2-4b7a-9ec9-1390732d84a0"})
+    await axios.post(process.env.REACT_APP_API_URL + "/user/courses", {user_id: user_id})
       .then((res) => {
         if(res.data.courses) {
           setCourses(res.data.courses.map((course) => ({course_id: course.course_id,
             course_code: course.course_code, semester: course.semester, course_name: course.course_name})));
           
-          setCurrCourse({course_id: res.data.courses[0].course_id,
-            course_code: res.data.courses[0].course_code, semester: res.data.courses[0].semester});
-
+            if (sessionStorage.getItem("selected") === null) {
+              sessionStorage.setItem("selected", "0")
+            }
+            setCurrCourse({course_id: res.data.courses[parseInt(sessionStorage.getItem("selected"))].course_id,
+              course_code: res.data.courses[parseInt(sessionStorage.getItem("selected"))].course_code,
+              semester: res.data.courses[parseInt(sessionStorage.getItem("selected"))].semester,
+              course_name: res.data.courses[parseInt(sessionStorage.getItem("selected"))].course_name});
+  
         }
         setIsLoading(false);
       })
@@ -53,12 +67,9 @@ const App = ( {UTORid = ""} ) => {
   }
 
   useEffect(() => {
-    if(UTORid){
-      getAllCourses();
-      getUserId();
-      
-    }
-  }, [UTORid]);
+      getUserId().then((userid) => {getAllCourses(userid)});
+    
+  }, []);
 
   return isLoading ? <CustomSpinner /> :
     (<div>
