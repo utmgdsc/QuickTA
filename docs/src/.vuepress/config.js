@@ -44,11 +44,11 @@ module.exports = {
     ],
     sidebar: {
       '/guide/': [
+        'frontend/Synposis',
         {
           title: 'Frontend',
           collapsable: false,
           children: [
-            'frontend/Synposis',
             'frontend/SharedComponents',
             'frontend/StudentPage',
             'frontend/ResearcherAnalytics',
@@ -60,8 +60,8 @@ module.exports = {
           title: 'Backend',
           collapsable: false,
           children: [
-            'backend/Endpoints',
-            'backend/Models'
+            'backend/Models',
+            'backend/Endpoints'
           ]
         }
       ],

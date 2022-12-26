@@ -17,30 +17,25 @@ import { Link } from "react-router-dom";
 
 const ResearcherModels = ( {UTORid, currCourse, setCurrCourse, courses} ) => {
     const [loadingModel, setLoadingModel] = useState(false);
-    
-    useEffect(() => {
-        if(currCourse){
 
-        }console.log(courses);
-    },[currCourse, courses]);
-
-    return (UTORid ?
+    return (Object.keys(currCourse).length === 0 && currCourse.constructor === Object ?
+        <CustomSpinner/> :
         <div style={{
-            backgroundColor: "#F1F1F1",
-            width: "100vw",
+          backgroundColor: "#F1F1F1",
+          width: "100vw",
           height: "100vh",
           overflowY: "scroll"
-          }}>
-            <TopNav UTORid={UTORid}/>
-            <Box ml={'12vw'} mr={'12vw'} >
-              <CourseSelect currCourse={currCourse} courses={courses} setCurrCourse={setCurrCourse} wait={loadingModel}/>
-                <ModelHeader courseCode={currCourse.course_code} courseName={currCourse.course_name}/>
-              <ModelBody courseid={currCourse.course_id} setLoadingModel={setLoadingModel}
-                         loadingModel={loadingModel}/>
-              <Link to={"/ResearcherFilters"}><Button my={5} mx={2} colorScheme={"blue"}>Redirect to Filters</Button></Link>
-              <Link to={"/ResearcherAnalytics"}><Button my={5} mx={2} colorScheme={"blue"}>Redirect to Analytics</Button></Link>
-            </Box>
-        </div> : <CustomSpinner/>
+        }}>
+          <TopNav UTORid={UTORid}/>
+          <Box ml={'12vw'} mr={'12vw'} >
+            <CourseSelect currCourse={currCourse} courses={courses} setCurrCourse={setCurrCourse} wait={loadingModel}/>
+            <ModelHeader courseCode={currCourse.course_code} courseName={currCourse.course_name}/>
+            <ModelBody courseid={currCourse.course_id} setLoadingModel={setLoadingModel}
+                       loadingModel={loadingModel}/>
+            <Link to={"/ResearcherFilters"}><Button my={5} mx={2} colorScheme={"blue"}>Redirect to Filters</Button></Link>
+            <Link to={"/ResearcherAnalytics"}><Button my={5} mx={2} colorScheme={"blue"}>Redirect to Analytics</Button></Link>
+          </Box>
+        </div>
     );
 };
 

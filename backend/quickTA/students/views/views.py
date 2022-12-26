@@ -158,7 +158,7 @@ def course_detail(request):
     Returns the initialized course created with its course id, course name, course code and semester.
     """
     if request.method == 'POST':
-        try:
+        # try:
             # Check for duplicated courses
             course_code = Course.objects.filter(
                 course_code=request.data['course_code'],
@@ -171,33 +171,41 @@ def course_detail(request):
             # Save new course
             course_id = str(uuid.uuid4())
 
+            # Date Parsing Start Date
+            start_date = request.data['start_date']
+            end_date = request.data['end_date']
+            
             course = Course(
                 course_id=course_id,
                 course_code=request.data['course_code'],
                 semester=request.data['semester'],
-                course_name=request.data['course_name']
+                course_name=request.data['course_name'],
+                start_date=start_date,
+                end_date=end_date
             )
             course.save()
-
+        
             response = {
                 "course_id": course_id,
                 "course_code": request.data['course_code'],
                 "semester": request.data['semester'],
-                "course_name": request.data['course_name']
+                "course_name": request.data['course_name'],
+                "start_date": start_date,
+                "end_date": end_date
             }
 
             return Response(response, status=status.HTTP_201_CREATED)
 
-        except CourseAlreadyExistsError:
-            return Response({"msg": "Course already exists."}, status=status.HTTP_403_FORBIDDEN)
-        except:
-            error = []
-            if 'course_code' not in request.data.keys():
-                error.append("Course Code")
-            if 'semester' not in request.data.keys():
-                error.append("Semester")
-            err = {"msg": "Course missing fields:" + ','.join(error)}
-            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+        # except CourseAlreadyExistsError:
+        #     return Response({"msg": "Course already exists."}, status=status.HTTP_403_FORBIDDEN)
+        # except:
+        #     error = []
+        #     if 'course_code' not in request.data.keys():
+        #         error.append("Course Code")
+        #     if 'semester' not in request.data.keys():
+        #         error.append("Semester")
+        #     err = {"msg": "Course missing fields:" + ','.join(error)}
+        #     return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 @swagger_auto_schema(methods=['post'], request_body=GetCourseRequest,
     responses={

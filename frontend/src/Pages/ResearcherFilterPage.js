@@ -18,49 +18,59 @@ export class ResearcherFilterPage extends Component{
             conversation_id:"",
             id:0,
 
-            idFilter:"",
             conversation_idFilter:"",
-            chatlog_idFilter: "",
-            timeFilter: "",
-            chatlogFilter: "",
-            is_userFilter: "",
-            deltaFilter: "",
+            course_idFilter: "",
+            user_idFilter: "",
+            starttimeFilter: "",
+            endtimeFilter: "",
+            statusFilter: "",
+            reportFilter: "",
+            ratingFilter: "",
+            feedback_msgFilter: "",
             chatWithoutFilter:[]
         }
     }
 
     FilterFn(){
-        var idFilter=this.state.idFilter;
         var conversation_idFilter = this.state.conversation_idFilter;
-        var chatlog_idFilter=this.state.chatlog_idFilter;
-        var timeFilter=this.state.timeFilter;
-        var chatlogFilter=this.state.chatlogFilter;
-        var is_userFilter=this.state.is_userFilter;
-        var deltaFilter=this.state.deltaFilter;
+        var course_idFilter=this.state.course_idFilter;
+        var user_idFilter = this.state.user_idFilter;
+        var starttimeFilter=this.state.starttimeFilter;
+        var endtimeFilter=this.state.endtimeFilter;
+        var statusFilter=this.state.statusFilter;
+        var reportFilter=this.state.reportFilter;
+        var ratingFilter=this.state.ratingFilter;
+        var feedback_msgFilter=this.state.feedback_msgFilter;
 
 
         var filteredData=this.state.chatWithoutFilter.filter(
             function(el){
-                return el.id.toString().toLowerCase().includes(
-                    idFilter.toString().trim().toLowerCase()
-                )&&
-                el.conversation_id.toString().toLowerCase().includes(
+                return el.conversation_id.toString().toLowerCase().includes(
                     conversation_idFilter.toString().trim().toLowerCase()
                 )&&
-                el.chatlog_id.toString().toLowerCase().includes(
-                    chatlog_idFilter.toString().trim().toLowerCase()
+                el.course_id.toString().toLowerCase().includes(
+                    course_idFilter.toString().trim().toLowerCase()
                 )&&
-                el.time.toString().toLowerCase().includes(
-                    timeFilter.toString().trim().toLowerCase()
+                el.user_id.toString().toLowerCase().includes(
+                    user_idFilter.toString().trim().toLowerCase()
                 )&&
-                el.is_user.toString().toLowerCase().includes(
-                    is_userFilter.toString().trim().toLowerCase()
+                el.starttime.toString().toLowerCase().includes(
+                    starttimeFilter.toString().trim().toLowerCase()
                 )&&
-                el.chatlog.toString().toLowerCase().includes(
-                    chatlogFilter.toString().trim().toLowerCase()
+                el.endtime.toString().toLowerCase().includes(
+                    endtimeFilter.toString().trim().toLowerCase()
                 )&&
-                el.delta.toString().toLowerCase().includes(
-                    deltaFilter.toString().trim().toLowerCase()
+                el.status.toString().toLowerCase().includes(
+                    statusFilter.toString().trim().toLowerCase()
+                )&&
+                el.report.toString().toLowerCase().includes(
+                    reportFilter.toString().trim().toLowerCase()
+                )&&
+                el.rating.toString().toLowerCase().includes(
+                    ratingFilter.toString().trim().toLowerCase()
+                )&&
+                el.feedback_msg.toString().toLowerCase().includes(
+                    feedback_msgFilter.toString().trim().toLowerCase()
                 )
             }
         );
@@ -82,33 +92,40 @@ export class ResearcherFilterPage extends Component{
         this.setState({chat:sortedData});
     }
 
-    changeidFilter = (e)=>{
-        this.state.idFilter=e.target.value;
-        this.FilterFn();
-    }
     changeConversationIdFilter = (e)=>{
         this.state.conversation_idFilter=e.target.value;
         this.FilterFn();
     }
-    changeChatlogIdFilter = (e)=>{
-        this.state.chatlog_idFilter=e.target.value;
+    changeCourseIdFilter = (e)=>{
+        this.state.course_idFilter=e.target.value;
         this.FilterFn();
     }
-    changeTimeFilter = (e)=>{
-        this.state.timeFilter=e.target.value;
+    changeUserIdFilter = (e)=>{
+        this.state.user_idFilter=e.target.value;
         this.FilterFn();
     }
-    changeIsUserFilter = (e)=>{
-        this.state.is_userFilter=e.target.value;
+    changeStartTimeFilter = (e)=>{
+        this.state.starttimeFilter=e.target.value;
         this.FilterFn();
     }
-    changeChatlogFilter = (e)=>{
-        this.state.chatlogFilter=e.target.value;
-        console.log(this.state.chatlogFilter)
+    changeEndTimeFilter = (e)=>{
+        this.state.endtimeFilter=e.target.value;
         this.FilterFn();
     }
-    changeDeltaFilter = (e)=>{
-        this.state.deltaFilter=e.target.value;
+    changeStatusFilter = (e)=>{
+        this.state.statusFilter=e.target.value;
+        this.FilterFn();
+    }
+    changeReportFilter = (e)=>{
+        this.state.reportFilter=e.target.value;
+        this.FilterFn();
+    }
+    changeRatingFilter = (e)=>{
+        this.state.ratingFilter=e.target.value;
+        this.FilterFn();
+    }
+    changeFeedbackMsgFilter = (e)=>{
+        this.state.feedback_msgFilter=e.target.value;
         this.FilterFn();
     }
 
@@ -129,13 +146,15 @@ export class ResearcherFilterPage extends Component{
         const {
             chat,
             modalTitle,
-            id,
             conversation_id,
-            chatlog_id,
-            time,
-            is_user,
-            chatlog,
-            delta
+            course_id,
+            user_id,
+            start_time,
+            end_time,
+            status,
+            report,
+            rating,
+            feedback_msg
         }=this.state;
 
         return(
@@ -158,22 +177,7 @@ export class ResearcherFilterPage extends Component{
                 <Tr>
                     <Th>
                         <div>
-                            <Input name="id_contains" onChange={this.changeidFilter} placeholder="Filter"/>
-                            <Button onClick={()=>this.sortResult('id',true)} colorScheme='blue' size='sm'>
-                                <ChevronUpIcon/>
-                            </Button>
-
-                            <Button onClick={()=>this.sortResult('id',false)} colorScheme='blue' size='sm'>
-                                <ChevronDownIcon/>
-                            </Button>
-
-                        </div>
-                        id
-                    </Th>
-
-                    <Th>
-                        <div>
-                            <Input onChange={this.changeConversationIdFilter} placeholder="Filter"/>
+                            <Input name="id_contains" onChange={this.changeConversationIdFilter} placeholder="Filter"/>
                             <Button onClick={()=>this.sortResult('conversation_id',true)} colorScheme='blue' size='sm'>
                                 <ChevronUpIcon/>
                             </Button>
@@ -181,81 +185,124 @@ export class ResearcherFilterPage extends Component{
                             <Button onClick={()=>this.sortResult('conversation_id',false)} colorScheme='blue' size='sm'>
                                 <ChevronDownIcon/>
                             </Button>
+
                         </div>
                         conversation_id
                     </Th>
 
                     <Th>
                         <div>
-                            <Input onChange={this.changeChatlogIdFilter} placeholder="Filter"/>
-                            <Button onClick={()=>this.sortResult('chatlog_id',true)} colorScheme='blue' size='sm'>
+                            <Input onChange={this.changeCourseIdFilter} placeholder="Filter"/>
+                            <Button onClick={()=>this.sortResult('course_id',true)} colorScheme='blue' size='sm'>
                                 <ChevronUpIcon/>
                             </Button>
 
-                            <Button onClick={()=>this.sortResult('chatlog_id',false)} colorScheme='blue' size='sm'>
+                            <Button onClick={()=>this.sortResult('course_id',false)} colorScheme='blue' size='sm'>
                                 <ChevronDownIcon/>
                             </Button>
                         </div>
-                        chatlog_id
+                        course_id
                     </Th>
 
                     <Th>
                         <div>
-                            <Input onChange={this.changeTimeFilter} placeholder="Filter"/>
-                            <Button onClick={()=>this.sortResult('time',true)} colorScheme='blue' size='sm'>
+                            <Input onChange={this.changeUserIdFilter} placeholder="Filter"/>
+                            <Button onClick={()=>this.sortResult('user_id',true)} colorScheme='blue' size='sm'>
                                 <ChevronUpIcon/>
                             </Button>
 
-                            <Button onClick={()=>this.sortResult('time',false)} colorScheme='blue' size='sm'>
+                            <Button onClick={()=>this.sortResult('user_id',false)} colorScheme='blue' size='sm'>
                                 <ChevronDownIcon/>
                             </Button>
                         </div>
-                        time
+                        user_id
+                    </Th>
+
+                    <Th>
+                        <div>
+                            <Input onChange={this.changeStartTimeFilter} placeholder="Filter"/>
+                            <Button onClick={()=>this.sortResult('start_time',true)} colorScheme='blue' size='sm'>
+                                <ChevronUpIcon/>
+                            </Button>
+
+                            <Button onClick={()=>this.sortResult('start_time',false)} colorScheme='blue' size='sm'>
+                                <ChevronDownIcon/>
+                            </Button>
+                        </div>
+                        start_time
 
                     </Th>
 
 
                     <Th>
                         <div>
-                            <Input onChange={this.changeChatlogFilter} placeholder="Filter"/>
+                            <Input onChange={this.changeEndTimeFilter} placeholder="Filter"/>
 
-                            <Button onClick={()=>this.sortResult('chatlog',true)} colorScheme='blue' size='sm'>
+                            <Button onClick={()=>this.sortResult('end_time',true)} colorScheme='blue' size='sm'>
                                 <ChevronUpIcon/>
                             </Button>
 
-                            <Button onClick={()=>this.sortResult('chatlog',false)} colorScheme='blue' size='sm'>
+                            <Button onClick={()=>this.sortResult('end_time',false)} colorScheme='blue' size='sm'>
                                 <ChevronDownIcon/>
                             </Button>
                         </div>
-                        chatlog
+                        end_time
 
                     </Th>
                     <Th>
                         <div>
-                            <Input onChange={this.changeIsUserFilter} placeholder="Filter"/>
-                            <Button onClick={()=>this.sortResult('is_user',true)} colorScheme='blue' size='sm'>
+                            <Input onChange={this.changeStatusFilter} placeholder="Filter"/>
+                            <Button onClick={()=>this.sortResult('status',true)} colorScheme='blue' size='sm'>
                                 <ChevronUpIcon/>
                             </Button>
 
-                            <Button onClick={()=>this.sortResult('is_user',false)} colorScheme='blue' size='sm'>
+                            <Button onClick={()=>this.sortResult('status',false)} colorScheme='blue' size='sm'>
                                 <ChevronDownIcon/>
                             </Button>
                         </div>
-                        is_user
+                        status
 
                     </Th>
 
                     <Th>
                         <div>
-                            <Input onChange={this.changeDeltaFilter} placeholder="Filter"/>
-                            <Button onClick={()=>this.sortResult('delta',true)} colorScheme='blue' size='sm'>
+                            <Input onChange={this.changeReportFilter} placeholder="Filter"/>
+                            <Button onClick={()=>this.sortResult('report',true)} colorScheme='blue' size='sm'>
                                 <ChevronUpIcon/>
                             </Button>
-                            <Button onClick={()=>this.sortResult('delta',false)} colorScheme='blue' size='sm'>
+                            <Button onClick={()=>this.sortResult('report',false)} colorScheme='blue' size='sm'>
                                 <ChevronDownIcon/>
                             </Button>
                         </div>
-                        delta
+                        report
+
+                    </Th>
+
+                    <Th>
+                        <div>
+                            <Input onChange={this.changeRatingFilter} placeholder="Filter"/>
+                            <Button onClick={()=>this.sortResult('rating',true)} colorScheme='blue' size='sm'>
+                                <ChevronUpIcon/>
+                            </Button>
+                            <Button onClick={()=>this.sortResult('rating',false)} colorScheme='blue' size='sm'>
+                                <ChevronDownIcon/>
+                            </Button>
+                        </div>
+                        rating
+
+                    </Th>
+
+                    <Th>
+                        <div>
+                            <Input onChange={this.changeFeedbackMsgFilter} placeholder="Filter"/>
+                            <Button onClick={()=>this.sortResult('feedback_msg',true)} colorScheme='blue' size='sm'>
+                                <ChevronUpIcon/>
+                            </Button>
+                            <Button onClick={()=>this.sortResult('feedback_msg',false)} colorScheme='blue' size='sm'>
+                                <ChevronDownIcon/>
+                            </Button>
+                        </div>
+                        feedback_msg
 
                     </Th>
 
@@ -263,14 +310,16 @@ export class ResearcherFilterPage extends Component{
             </Thead>
             <Tbody>
                 {chat.map(ch=>
-                  <Tr key={ch.id}>
-                      <Td>{ch.id}</Td>
+                  <Tr key={ch.conversation_id}>
                       <Td>{ch.conversation_id}</Td>
-                      <Td>{ch.chatlog_id}</Td>
-                      <Td>{ch.time}</Td>
-                      <Td maxWidth={"150px"}>{ch.chatlog}</Td>
-                      <Td>{ch.is_user}</Td>
-                      <Td>{ch.delta}</Td>
+                      <Td>{ch.course_id}</Td>
+                      <Td>{ch.user_id}</Td>
+                      <Td>{ch.start_time}</Td>
+                      <Td>{ch.end_time}</Td>
+                      <Td>{ch.status}</Td>
+                      <Td>{ch.report}</Td>
+                      <Td>{ch.rating}</Td>
+                      <Td>{ch.feedback_msg}</Td>
                   </Tr>
                 )}
 

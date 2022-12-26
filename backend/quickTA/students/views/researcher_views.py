@@ -1,13 +1,16 @@
 import time
 import csv
+from io import BytesIO
 from datetime import datetime, date
 from ..constants import * 
 
 from ..functions import user_functions, course_functions, report_functions, conversation_functions,  time_utils, gptmodel_functions
-from ..functions.common_topics import generate_wordcloud
+from ..functions.common_topics import generate_wordcloud, get_wordcloud_image
 
 from django.http import HttpResponse
 from django.http import JsonResponse
+from django.utils import timezone
+from django.utils.timezone import now
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -19,6 +22,7 @@ from ..serializers.researcher_serializers import *
 from ..serializers import researcher_serializers as rs
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from django.db.models import Q
 
 # Research Filter view endpoints 
 # ===============================================================================
@@ -28,17 +32,46 @@ def get_filtered_chatlogs(request):
     TODO: Make swagger documentation for this endpoint
     """
     if request.method in ['GET', 'POST']:
-        # id_contains = request.GET.get('id_contains')
-        # chatlog_contains = request.GET.get('chatlog_contains')
 
         # qs = Chatlog.objects.all()
-        qs = Chatlog.objects.filter()
-        # qs = qs.filter()
-        # qs = qs.object.filter(chatlog='hi')
-        # qs = qs.object.filter(chatlog="test")
-        serializer = rs.ChatlogSerializer(qs, context={'request': request}, many=True)
+        convos = []
+        qs = Conversation.objects.filter()
+        
+        for convo in qs:
+            convo_id = convo.conversation_id
+            feedback = ''
+            try:
+                # Get Feedback information
+                feedback = Feedback.objects.get(conversation_id=convo_id)
+            except:
+                pass
+            
+            if convo.report: report = "True"
+            else: report = "False"
 
-        return Response(serializer.data)
+            data = {
+                "conversation_id": convo.conversation_id,
+                "course_id": convo.course_id,
+                "user_id": convo.user_id,
+                "start_time": convo.start_time,
+                "end_time": convo.end_time,
+                "status": convo.status,
+                "report": report
+            }
+            if (feedback):
+                data['rating'] = feedback.rating
+                data['feedback_msg'] = feedback.feedback_msg
+            else:
+                data['rating'] = None
+                data['feedback_msg'] = None
+            convos.append(data)
+
+            # Sorting based on rating
+            # convos = sorted(convos, key=lambda item: item["rating"], reverse=False)
+        
+        # serializer = rs.ConversationSerializer(qs, context={'request': request}, many=True)
+
+        return Response(convos)
 
 # Research Analytics view endpoints
 # ===============================================================================
@@ -351,14 +384,14 @@ def get_reported_chatlogs(request):
     Acquires the conversation ID of the reported conversation and returns the corresponding chatlogs.
     """
     if request.method == 'POST':
-        try:
+        # try:
             cid = request.data['conversation_id']
             conversation = Conversation.objects.filter(conversation_id=cid)
 
             if not(conversation):
                 raise ConversationNotFoundError
 
-
+            print(conversation[0].user_id)
             user = User.objects.get(user_id=conversation[0].user_id)
 
             chatlogs = Chatlog.objects.filter(conversation_id=cid).order_by('time')
@@ -382,19 +415,19 @@ def get_reported_chatlogs(request):
             }
             return Response(response, status=status.HTTP_200_OK)
 
-        except ConversationNotFoundError:
-            return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_404_NOT_FOUND) 
-        except:
-            error = []
-            if 'conversation_id' not in request.data.keys():
-                error.append("Conversation ID")
+        # except ConversationNotFoundError:
+        #     return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_404_NOT_FOUND) 
+        # except:
+        #     error = []
+        #     if 'conversation_id' not in request.data.keys():
+        #         error.append("Conversation ID")
             
-            if (not(error)): 
-                err = {"msg": "Internal Server Error"}
-                return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            else:
-                err = {"msg": "Reported Chatlogs missing fields: " + ','.join(error) + '.'}
-                return Response(err, status=status.HTTP_400_BAD_REQUEST)
+        #     if (not(error)): 
+        #         err = {"msg": "Internal Server Error"}
+        #         return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        #     else:
+        #         err = {"msg": "Reported Chatlogs missing fields: " + ','.join(error) + '.'}
+        #         return Response(err, status=status.HTTP_400_BAD_REQUEST)
        
 @swagger_auto_schema(methods=['post'], request_body=GetReportedConvoChatlogsRequest,
     responses={
@@ -634,6 +667,8 @@ def get_most_common_words(request):
             
             words = generate_wordcloud(sentences)
 
+            #  Extract these words and create word clouds with them
+
             if convo_count != 0:
                 avg_chatlog_count =  sum(chatlog_count) / convo_count
             else: 
@@ -667,6 +702,65 @@ def get_most_common_words(request):
             else:
                 err = {"msg": "Most Common Topics missing fields: " + ','.join(error) + '.'}
                 return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+@swagger_auto_schema(methods=['get'],
+    responses={
+        200: openapi.Response('Success', GetMostCommonTopicsWordCloudResponse),
+        400: openapi.Response('Bad Request', ErrorResponse),
+        404: openapi.Response('Not Found', ErrorResponse),
+        500: openapi.Response('Internal Server Error', ErrorResponse),
+    })
+# @api_view(['POST'])
+@api_view(['GET'])
+def get_most_common_words_wordcloud(request):
+    """
+    Acquires the most common topics within user response for a given course.
+
+    Retrieves the most common topics through the use of YAKE (Yet Another Keyword Extractor).
+    Returns 3-gram topic keywords with their associated frequency. 
+    The resulting response will be a PNG image file containing a worldcloud image.
+    """
+    if request.method == 'GET':
+        try:
+            sentences = []
+            data = request.GET
+            # convos = conversation_functions.get_filtered_convos(data['course_id'], data['filter'], data['timezone'])
+            convos = conversation_functions.get_filtered_convos(data['course_id'], data['filter'], data['timezone'])
+            #  Acquire all the conversations of a selected time period given the course
+            for convo in convos:
+                chatlogs = get_convo_chatlogs(convo.conversation_id)
+                for chatlog in chatlogs:
+                    if chatlog.is_user:
+                        sentences.append(chatlog.chatlog)
+            
+            # Generate the wordcloud image
+            img = get_wordcloud_image(sentences)
+
+            image_data = BytesIO()
+            img.save(image_data, format='png')
+            image_data.seek(0)
+
+            # Return the wordcloud image as a file to the frontend
+            today = timezone.now()
+            response = HttpResponse(
+                image_data,
+                content_type='image/png',
+                headers={'Content-Disposition': 'attachement; filename="image.png"'}
+            )
+            response["Access-Control-Expose-Headers"] = "Content-Type, Content-Disposition"
+
+            return response
+        except:
+            error = []
+            if 'course_code' not in request.data.keys(): error.append("Course Code")
+            if 'filter' not in request.data.keys(): error.append("Filter")
+            if 'timezone' not in request.data.keys(): error.append("Timezone")
+            
+            if error:
+                err = {"msg": "Most Common Words Wordcloud Missing FIelds:" + ','.join(error)}
+                return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 @swagger_auto_schema(methods=['post'], request_body=GetFilteredStatsRequest,
     responses={
@@ -714,7 +808,6 @@ def get_course_comfortability(request):
             error = []
             if 'course_id' not in request.data.keys():
                 error.append("Course ID")
-            
             if (not(error)): 
                 err = {"msg": "Internal Server Error"}
                 return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -820,7 +913,7 @@ def get_interaction_frequency(request):
 
             # Get all dates in range for a particular filter view (Weekly or Monthly)
             data = request.data
-            dates = time_utils.get_all_dates(data['filter'], data['timezone'])
+            dates = time_utils.get_all_dates(data['course_id'], data['filter'], data['timezone'])
 
             interactions = conversation_functions.get_filtered_interactions(data['course_id'], dates, data['timezone'])
 

@@ -21,8 +21,9 @@ const DashboardBody = ({ courseID, setIsLoading }) => {
             <Tabs variant='solid-rounded' mt={7}>
 
                 <TabList>
-                <Tab _selected={tabStyle}><span style={{fontSize: '13px'}}>Weekly</span></Tab>
-                <Tab _selected={tabStyle}><span style={{fontSize: '13px'}}>Monthly</span></Tab>
+                    <Tab _selected={tabStyle}><span style={{fontSize: '13px'}}>Weekly</span></Tab>
+                    <Tab _selected={tabStyle}><span style={{fontSize: '13px'}}>Monthly</span></Tab>
+                    <Tab _selected={tabStyle}><span style={{fontSize: '13px'}}>All</span></Tab>
                 </TabList>
 
                 <TabPanels>
@@ -33,6 +34,10 @@ const DashboardBody = ({ courseID, setIsLoading }) => {
                     <TabPanel paddingLeft={'0'} paddingRight={'0'}>
                         <DatedStats isWeekly={0} courseID={courseID} setIsLoading={setIsLoading}/>
                         <ReportTable course_ID={courseID} isWeekly={0} setIsLoading={setIsLoading}/>
+                    </TabPanel>
+                    <TabPanel>
+                        <DatedStats isWeekly={2} courseID={courseID} setIsLoading={setIsLoading}/>
+                        <ReportTable course_ID={courseID} setIsLoading={setIsLoading} isWeekly={2}/>
                     </TabPanel>
                 </TabPanels>
             </Tabs>

@@ -9,4 +9,4 @@ Only admin users have access to ```ResearcherFilters```. When running, ```Resear
 Takes the following properties:
 | Properties    | Type   | Description                  |
 | ----------    | -------| ---------------------------- |
-| utorid        | str    | utorid of user   |
+| utorid        | str    | utorid of user               |
