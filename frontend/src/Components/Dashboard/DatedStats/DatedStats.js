@@ -177,18 +177,17 @@ const DatedStats = ({isWeekly, courseID, setIsLoading}) => {
         <FrequencyCard words={commonWords} callBack={() => {
           if(courseID && isWeekly != null){
             axios.get(process.env.REACT_APP_API_URL + "/researcher/most-common-words-wordcloud", {
-            params : {
-              filter: (isWeekly === 1 ? "Weekly" : (isWeekly === 0 ? "Monthly" : "All")),
-              course_id: courseID,
-              timezone: "America/Toronto",
-            },
-              responseType:'arraybuffer'
-            })
+                params: {
+                  filter: (isWeekly === 1 ? "Weekly" : (isWeekly === 0 ? "Monthly" : "All")),
+                  course_id: courseID,
+                  timezone: "America/Toronto",
+                },
+                responseType: "arraybuffer"
+              })
               .then((response) => {
                 const imageData = new Uint8Array(response.data);
                 const imageBlob = new Blob([imageData], {type: 'image/png'});
                 const imageUrl = URL.createObjectURL(imageBlob);
-
                 const link = document.createElement('a');
                 link.href = imageUrl;
                 link.download = 'image.png';

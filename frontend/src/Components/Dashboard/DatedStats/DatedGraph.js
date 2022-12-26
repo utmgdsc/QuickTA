@@ -8,7 +8,7 @@ import React, { useState, useEffect } from "react";
 import Chart from "react-apexcharts";
 
 const DatedGraph = ({isWeekly, courseID}) => {
-    console.log(isWeekly);
+    // console.log(isWeekly);
     const [category, setCategory] = useState([]);
     const [data, setData] = useState ([]);
     const cardStyle = {
