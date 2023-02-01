@@ -91,8 +91,7 @@ def get_monthly_time(timezone):
     if (t1.month + 1 > 12):
         next_month = 1
         next_year = t1.year + 1
-
-    t2 = t1.replace(year=next_year, month=next_month)
+        t2 = t1.replace(year=next_year, month=next_month)
     
     t1 = t1.astimezone(tz)
     t2 = t2.astimezone(tz)

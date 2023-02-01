@@ -54,7 +54,7 @@ def enquire_model(conversation_id: str, question: str, course_id: str) -> str:
 
     # print("Hello. I am an AI chatbot designed to assist you in solving your problems by giving hints but never providing direct answers. How can I help you?"
     # print("Prompt Text:", prompt_text)
-
+    print(configs)
     response = openai.Completion.create(
         prompt=prompt_text,
         stop=[" {}:".format(USER), " {}:".format(AGENT)],

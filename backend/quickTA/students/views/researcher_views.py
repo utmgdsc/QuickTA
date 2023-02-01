@@ -384,7 +384,7 @@ def get_reported_chatlogs(request):
     Acquires the conversation ID of the reported conversation and returns the corresponding chatlogs.
     """
     if request.method == 'POST':
-        # try:
+        try:
             cid = request.data['conversation_id']
             conversation = Conversation.objects.filter(conversation_id=cid)
 
@@ -415,19 +415,19 @@ def get_reported_chatlogs(request):
             }
             return Response(response, status=status.HTTP_200_OK)
 
-        # except ConversationNotFoundError:
-        #     return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_404_NOT_FOUND) 
-        # except:
-        #     error = []
-        #     if 'conversation_id' not in request.data.keys():
-        #         error.append("Conversation ID")
+        except ConversationNotFoundError:
+            return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_404_NOT_FOUND) 
+        except:
+            error = []
+            if 'conversation_id' not in request.data.keys():
+                error.append("Conversation ID")
             
-        #     if (not(error)): 
-        #         err = {"msg": "Internal Server Error"}
-        #         return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        #     else:
-        #         err = {"msg": "Reported Chatlogs missing fields: " + ','.join(error) + '.'}
-        #         return Response(err, status=status.HTTP_400_BAD_REQUEST)
+            if (not(error)): 
+                err = {"msg": "Internal Server Error"}
+                return Response(err, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                err = {"msg": "Reported Chatlogs missing fields: " + ','.join(error) + '.'}
+                return Response(err, status=status.HTTP_400_BAD_REQUEST)
        
 @swagger_auto_schema(methods=['post'], request_body=GetReportedConvoChatlogsRequest,
     responses={
