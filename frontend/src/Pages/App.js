@@ -10,6 +10,7 @@ import React, {useEffect, useState} from "react";
 import axios from "axios";
 import CustomSpinner from "../Components/CustomSpinner";
 import NotFoundPage from '../Components/NotFoundPage'
+import AdminPage from "./AdminPage";
 
 
 const App = ( {UTORid = ""} ) => {
@@ -112,6 +113,11 @@ const App = ( {UTORid = ""} ) => {
               </React.Fragment>
               : null
             }
+          { auth === "AD" ? <React.Fragment>
+              <Route path="/Admin" element={<AdminPage UTORID={UTORid}/>} />
+            </React.Fragment>
+            : null
+          }
           
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
