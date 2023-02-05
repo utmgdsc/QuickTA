@@ -83,4 +83,11 @@ class GetCourseUsersResponse(serializers.Serializer):
 # Get Course Unadded users
 # ==============================================================
 class GetCourseUnaddedUsersResponse(serializers.Serializer):
-    users = User(many=True)
+    
+    class _Users(serializers.Serializer):
+        user_id = serializers.CharField()
+        name = serializers.CharField()
+        utorid = serializers.CharField()
+        user_role = serializers.CharField()
+    
+    users = _Users(many=True)
