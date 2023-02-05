@@ -278,6 +278,121 @@ def import_all_students_from_csv(request):
         except:
             return Response({"msg": "Bad Request."},status=status.HTTP_400_BAD_REQUEST)
 
+# @swagger_auto_schema(method=['get'], responses={
+#     200: openapi.Response('Success', GetAllCoursesResponse),
+#     500: openapi.Response('Internal Server Error')})
+@api_view(['GET'])
+def get_all_courses(request):
+    """
+    Acquires all courses that exists in the database.
+
+    The courses contain their unique course ids, course code, semesters
+    and the list of instructors.
+    """
+    if request.method == 'GET':
+        try:
+            courses = Course.objects.all()
+
+            res = { "courses": [] }
+            for course in list(courses):
+                
+                instructors = course_functions.get_all_course_instructors(course.course_id)
+                ins = []
+
+                for instructor in instructors:
+                    user = User.objects.get(user_id=instructor)
+                    ins.append(user.utorid)
+
+                c = {
+                    "course_id": course.course_id,  
+                    "course_name": course.course_name,  
+                    "course_code": course.course_code,
+                    "semester": course.semester,
+                    "instructors": ins
+                }
+                res['courses'].append(c)
+            return Response(res, status=status.HTTP_200_OK)
+        except:
+            return Response({"msg": "Bad Request."},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# @swagger_auto_schema(method=['delete'], responses={
+#     200: openapi.Response('Success'),
+#     405: openapi.Response('Method Not Allowed')
+# })
+@api_view(['DELETE'])
+def delete_course(request, course_id):
+    """
+    Deletes a course given the course id.
+    
+    Returns an OK response upon successful deletion. Otherwise,
+    returns a 405 Method Not Allowed response.
+    """
+    if request.method == 'DELETE':
+        
+        # Check if course is empty
+        if not(course_functions.get_all_course_instructors()
+            or course_functions.get_all_course_users()):
+            course = Course.objects.get(course_id=course_id)
+            course.delete()
+            return Response({'msg': 'OK'}, status=status.HTTP_200_OK)
+        return Response({'msg': 'Course is not empty'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)  
+
+# @swagger_auto_schema(method=['get'], responses={
+#     200: openapi.Response('Success', GetCourseUsersResponse),
+#     500: openapi.Response('Internal Server Error')
+# })
+@api_view(['GET'])
+def get_course_users(request, course_id):
+    if request.method == 'GET':
+        try:
+            uuids = course_functions.get_all_course_users(course_id)
+            if not(uuids):
+                raise Exception
+            
+            res = { 'students': [] }
+            for uuid in uuids:
+                user = User.objects.get(user_id=uuid)
+                u = {
+                    'user_id': uuid,
+                    'name': user.name,
+                    'utorid': user.utorid
+                }
+                res['students'].append(u)
+            return Response(res, status=status.HTTP_200_OK)
+
+        except:
+            return Response({"msg": "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# @swagger_auto_schema(method=['get'], response={
+#     200: openapi.Response('Success', GetCourseUnaddedUsersResponse),
+#     500: openapi.Response('Internal Server Error')
+# })
+@api_view(['GET'])
+def get_courses_unadded_users(request):
+    if request.method == 'GET':
+        try:
+            _cid = request.GET.get('course_id')
+            _type = request.GET.get('type')
+            role = "ST" if _type == 'student' else "IS"
+
+            if _type == 'student': _uuids = course_functions.get_all_course_users(course_id=_cid)
+            elif _type == 'instructor': _uuids = course_functions.get_all_course_instructors(course_id=_cid)
+            
+            res = { "users": [] }
+            users = User.objects.all().filter(user_role=role)
+            for user in list(users):
+                if user.user_id not in _uuids:
+                    _user = {
+                        "user_id": user.uuid,
+                        "name": user.name,
+                        "utorid": user.utorid,
+                        "user_role": user.user_role                        
+                    }   
+                    res['users'].append(_user) 
+            return Response(res, status=status.HTTP_200_OK)
+        except:
+            return Response({"msg": "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 class FailedToAddUserToCourseError(Exception): pass
 class UserAlreadyExistsError(Exception): pass
 class AddUserToCourseFailedError(Exception): pass

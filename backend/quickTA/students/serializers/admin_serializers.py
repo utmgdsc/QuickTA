@@ -52,3 +52,42 @@ class RemoveUserFromCourseRequest(serializers.Serializer):
 class ImportAllStudentsFromCsvRequest(serializers.Serializer):
     file = serializers.CharField()
     course_id = serializers.CharField()
+
+# Get All Courses Information Response
+# ===========================================================
+class GetAllCoursesResponse(serializers.Serializer):
+    
+    class _Course(serializers.Serializer):
+        class Instructors(serializers.Serializer):
+            utorid = serializers.CharField()
+
+        course_id = serializers.CharField()
+        course_code = serializers.CharField()
+        semester = serializers.CharField()
+        instructors = Instructors(many=True)
+    
+    courses = _Course(many=True)
+
+# Get Course Users Response
+# ==============================================================
+
+class GetCourseUsersResponse(serializers.Serializer):
+
+    class _CourseUsers(serializers.Serializer):
+        user_id = serializers.CharField()
+        name = serializers.CharField()
+        utorid = serializers.CharField()
+    
+    students = _CourseUsers(many=True)
+
+# Get Course Unadded users
+# ==============================================================
+class GetCourseUnaddedUsersResponse(serializers.Serializer):
+    
+    class _Users(serializers.Serializer):
+        user_id = serializers.CharField()
+        name = serializers.CharField()
+        utorid = serializers.CharField()
+        user_role = serializers.CharField()
+    
+    users = _Users(many=True)

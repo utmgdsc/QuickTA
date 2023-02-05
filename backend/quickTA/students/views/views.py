@@ -40,7 +40,7 @@ def get_user(request):
     """
     if request.method == 'POST':
         
-        try:
+        # try:
             user = User.objects.get(utorid=request.data['utorid'])
             res = { 
                     "user_id" : user.user_id,
@@ -52,14 +52,14 @@ def get_user(request):
             
             return Response(res, status=status.HTTP_200_OK)
         
-        except:
-            error = []
-            if 'utorid' not in request.data.keys():
-                error.append("Utor ID")
-                err = {"msg": "User details missing fields:" + ','.join(error)}
-            else:
-                err = {"msg": "User does not exist"}
-            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+        # except:
+        #     error = []
+        #     if 'utorid' not in request.data.keys():
+        #         error.append("Utor ID")
+        #         err = {"msg": "User details missing fields:" + ','.join(error)}
+        #     else:
+        #         err = {"msg": "User does not exist"}
+        #     return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 @swagger_auto_schema(methods=['post'], request_body=CreateUserRequest,
     responses={
@@ -374,7 +374,7 @@ def chatlog_detail(request):
     }
     """
     if request.method == 'POST':
-        try:
+        # try:
             # Set current chatlog's time if not provided
             current_time = timezone.now()
             location = 'America/Toronto'
@@ -473,20 +473,20 @@ def chatlog_detail(request):
             }
             return Response(response, status=status.HTTP_201_CREATED)
         
-        except ConversationNotFoundError:
-            return Response({"msg": "Conversation does not exist."}, status=status.HTTP_404_NOT_FOUND)
-        except ModelDoesNotExistsError:
-            return Response({"msg": "Model does not exist."}, status=status.HTTP_404_NOT_FOUND)
-        except:
-            # Error handling
-            error = []
-            if 'conversation_id' not in request.data.keys():
-                error.append("Conversation ID")
-            if 'chatlog' not in request.data.keys():
-                error.append("Chatlog message")
-            err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
+        # except ConversationNotFoundError:
+        #     return Response({"msg": "Conversation does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        # except ModelDoesNotExistsError:
+        #     return Response({"msg": "Model does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        # except:
+        #     # Error handling
+        #     error = []
+        #     if 'conversation_id' not in request.data.keys():
+        #         error.append("Conversation ID")
+        #     if 'chatlog' not in request.data.keys():
+        #         error.append("Chatlog message")
+        #     err = {"msg": "Chatlog details missing fields: " + ','.join(error) + '.'}
 
-            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+        #     return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 @swagger_auto_schema(methods=['post'], request_body=CreateFeedbackRequest,
     responses={
