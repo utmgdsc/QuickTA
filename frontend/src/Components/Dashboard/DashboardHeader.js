@@ -12,7 +12,7 @@ import {Link} from 'react-router-dom';
 import UploadCourseList from "./UploadCourseList";
 
 const DashboardHeader = ({courseCode, courseName, currCourse, courses, setCurrCourse, userid, setCourses, setIsLoading}) => {
-  console.log(currCourse)  
+  console.log(currCourse)
   // course_code: "CSC311H5"
   // course_id: "b8aaff99-8649-4620-97c0-05272fea47b8"
   // semester: "2022F"

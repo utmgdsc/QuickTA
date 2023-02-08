@@ -64,6 +64,7 @@ const App = ( {UTORid = ""} ) => {
   useEffect(() => {
     if(UTORid){
       getUserId().then((userid) => {getAllCourses(userid)});
+      console.log(auth);
     }
   }, [UTORid]);
 
@@ -114,7 +115,7 @@ const App = ( {UTORid = ""} ) => {
               : null
             }
           { auth === "AD" ? <React.Fragment>
-              <Route path="/Admin" element={<AdminPage UTORID={UTORid}/>} />
+              <Route path="/" element={<AdminPage UTORID={UTORid}/>} />
             </React.Fragment>
             : null
           }
