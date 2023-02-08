@@ -5,7 +5,6 @@ import {
   ChakraProvider,
 } from "@chakra-ui/react";
 import theme from "./assets/theme";
-import { createBrowserHistory } from "history";
 import {BrowserRouter} from "react-router-dom";
 
 

@@ -69,7 +69,7 @@ const App = ( {UTORid = ""} ) => {
   }, [UTORid]);
 
   return isLoading ? <CustomSpinner /> :
-    (<div>
+    (<>
         <Routes>
           { auth === "ST" ? <Route path="/" element={
             <StudentPage
@@ -122,7 +122,7 @@ const App = ( {UTORid = ""} ) => {
           
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
-    </div>);
+    </>);
 }
 
 export default App;

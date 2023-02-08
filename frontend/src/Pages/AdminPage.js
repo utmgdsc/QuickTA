@@ -19,10 +19,9 @@ import CourseDrawer from "../Components/AdminView/CourseDrawer"
 
 
 const AdminPage = ({ UTORID }) => {
-  const [courseIndex, setRowIndex] = useState(0);
+  const [courseIndex, setCourseIndex] = useState(0);
   const [courseList, setCourseList] = useState([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const openDrawer = useRef(0);
 
 
   const fetchAllCourses = () => {
@@ -35,21 +34,29 @@ const AdminPage = ({ UTORID }) => {
       .catch((err) => {})
   }
 
+  const hashing = (str, seed = 0) => {
+    let h1 = 0xdeadbeef ^ seed,
+      h2 = 0x41c6ce57 ^ seed;
+    for (let i = 0, ch; i < str.length; i++) {
+      ch = str.charCodeAt(i);
+      h1 = Math.imul(h1 ^ ch, 2654435761);
+      h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+
+    return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+  };
+
+
   useEffect(() => {
     if(UTORID.length !== 0){
       fetchAllCourses()
     }
   }, [UTORID])
 
-  useEffect(() => {
-    if(courseIndex){
-      console.log(openDrawer)
-    }
-  }, [courseIndex])
-
   return(
-
-
     UTORID.length !== 0 ?
     <div style={{
       backgroundColor: "#F1F1F1",
@@ -78,16 +85,17 @@ const AdminPage = ({ UTORID }) => {
           <Tbody>
             {courseList.map((obj, index) => {
               return(
-                <Tooltip label={"Click on me to edit course list"}>
-                  <Tr key={index} onClick={() => {
+                <Tooltip key={obj.toString()} label={"Click on me to edit course list"}>
+                  <Tr key={hashing(obj.course_id)} onClick={() => {
                   //   Open the chakra drawer to display
-                    setRowIndex(index);
-                    console.log(index, courseList);
+                    setCourseIndex(index);
+                    console.log(courseList[courseIndex])
+                    onOpen();
                   }
                   }>
-                    <Td key={}>{obj.course_name}</Td>
-                    <Td key={}>{obj.semester}</Td>
-                    <Td key={}>{obj.instructors.toString()}</Td>
+                    <Td key={hashing(obj.course_name)}>{obj.course_name}</Td>
+                    <Td key={hashing(obj.semester)}>{obj.semester}</Td>
+                    <Td key={hashing(obj.instructors.toString())}>{obj.instructors.toString()}</Td>
                   </Tr>
                 </Tooltip>
               )
