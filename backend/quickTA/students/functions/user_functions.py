@@ -118,30 +118,30 @@ def remove_user_from_course(user_id: str, course_id: str) -> bool:
     - user_id: user UUID
     - course_id: course UUID
     """
-    try:
-        # Acquiring user collection
-        users = acquire_user_cluster()
-        user = list(users.find({"user_id" : user_id}))[0]
+    # try:
+    # Acquiring user collection
+    users = acquire_user_cluster()
+    user = list(users.find({"user_id" : user_id}))[0]
 
-        # Ensure course exists
-        course = course_functions.get_course_existence(course_id)
-        if not(course):
-            return OPERATION_FAILED
-
-        # Remove student 
-        course_ls = []
-        if 'courses' in user.keys():
-            course_ls = user['courses'][:]
-            course_ls.remove(course_id)
-        
-        # Update users's course list
-        users.update_one(
-            {"user_id" : user_id},
-            {"$set": { "courses" : course_ls }}
-        )
-        return OPERATION_SUCCESSFUL
-    except:
+    # Ensure course exists
+    course = course_functions.get_course_existence(course_id)
+    if not(course):
         return OPERATION_FAILED
+
+    # Remove student 
+    course_ls = []
+    if 'courses' in user.keys():
+        course_ls = user['courses'][:]
+        course_ls.remove(course_id)
+    
+    # Update users's course list
+    users.update_one(
+        {"user_id" : user_id},
+        {"$set": { "courses" : course_ls }}
+    )
+    return OPERATION_SUCCESSFUL
+    # except:
+    #     return OPERATION_FAILED
 
 def get_user_info(user_id):
     """

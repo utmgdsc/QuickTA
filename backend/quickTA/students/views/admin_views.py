@@ -184,9 +184,11 @@ def remove_user_course(request):
             data = request.data
             remove_user = user_functions.remove_user_from_course(data['user_id'], data['course_id'])
             if (remove_user):
-                if request.data["type"] == "student": op = course_functions.remove_student_from_course(request.data['course_id'], request.data['user_id'])
-                if request.data["type"] == "instructor":  op = course_functions.remove_instructors_from(request.data['course_id'], request.data['user_id'])
-                op = course_functions.remove_student_from_course(data['course_id'], data['user_id'])
+                if request.data["type"] == "student": 
+                    op = course_functions.remove_course_students_list(request.data['course_id'], request.data['user_id'])
+                    print('test')
+                if request.data["type"] == "instructor":  op = course_functions.remove_course_instructors_list(request.data['course_id'], request.data['user_id'])
+                # op = course_functions.remove_student_from_course(data['course_id'], data['user_id'])
                 if not(op): raise RemoveUserFromCourseFailedError
             else:
                 raise RemoveUserFromCourseFailedError
