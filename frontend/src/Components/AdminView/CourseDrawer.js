@@ -9,6 +9,8 @@ import {
 } from "@chakra-ui/react";
 import {useEffect, useState} from "react";
 import axios from "axios";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faTrashCan} from "@fortawesome/free-solid-svg-icons";
 
 const CourseDrawer = ({isOpen, onClose, course_id}) => {
   const [studentList, setStudentList] = useState([])
@@ -35,6 +37,18 @@ const CourseDrawer = ({isOpen, onClose, course_id}) => {
     return 4294967296 * (2097151 & h2) + (h1 >>> 0);
   };
 
+  const deleteUser = (course_id, user_id, role="student") => {
+    axios.post(process.env.REACT_APP_API_URL + "/admin/remove-user-course", {course_id: course_id, user_id: user_id, type: role})
+      .then((res) => {})
+      .catch((err) => console.log(err))
+  }
+
+  const deleteElement = (user_id) => {
+    console.log("delete " + user_id)
+    let filtered = studentList.filter((student) => student.user_id!==user_id);
+    setStudentList(filtered);
+  }
+
   useEffect(() => {
     if(course_id){
       fetchCourseList(course_id)
@@ -59,7 +73,7 @@ const CourseDrawer = ({isOpen, onClose, course_id}) => {
               <Button>Add Instructor</Button>
             </HStack>
             <TableContainer>
-              <Table variant={'striped'}>
+              <Table variant={'striped'} colorScheme={'blue'}>
                 <Thead>
                   <Tr>
                     <Th>utorid</Th>
@@ -71,6 +85,13 @@ const CourseDrawer = ({isOpen, onClose, course_id}) => {
                    return( <Tr key={hashing(student.user_id)}>
                       <Td key={hashing(student.utorid)}>{student.utorid}</Td>
                       <Td key={hashing(student.name)}>{student.name}</Td>
+                     <Td>
+                       <Button variant={'ghost'}><FontAwesomeIcon icon={faTrashCan} size={'2x'} onClick={() => {
+                       //  Remove student from classroom and get new list of students
+                         deleteUser(course_id, student.user_id);
+                         deleteElement(student.user_id);
+                       }}/></Button>
+                     </Td>
                     </Tr>)
                   })}
                 </Tbody>
