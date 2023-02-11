@@ -385,7 +385,7 @@ def get_courses_unadded_users(request):
             for user in list(users):
                 if user.user_id not in _uuids:
                     _user = {
-                        "user_id": user.uuid,
+                        "user_id": user.user_id,
                         "name": user.name,
                         "utorid": user.utorid,
                         "user_role": user.user_role                        
