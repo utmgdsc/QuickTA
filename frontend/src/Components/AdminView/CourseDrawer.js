@@ -5,15 +5,18 @@ import {
   DrawerCloseButton,
   DrawerContent,
   DrawerHeader,
-  DrawerOverlay, HStack, Table, TableContainer, Tbody, Td, Th, Thead, Tr
+  DrawerOverlay, HStack, Table, TableContainer, Tbody, Td, Th, Thead, Tr, useDisclosure
 } from "@chakra-ui/react";
 import {useEffect, useState} from "react";
 import axios from "axios";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faTrashCan} from "@fortawesome/free-solid-svg-icons";
+import AddUser from "./AddUser";
 
 const CourseDrawer = ({isOpen, onClose, course_id}) => {
-  const [studentList, setStudentList] = useState([])
+  const [studentList, setStudentList] = useState([]);
+  const {isOpen: isOpenInstructors, onOpen: onOpenInstructors, onClose: onCloseInstructors} = useDisclosure();
+  const {isOpen: isOpenStudent, onOpen: onOpenStudent, onClose: onCloseStudent} = useDisclosure();
   const fetchCourseList = async (course_id) => {
     await axios.get(process.env.REACT_APP_API_URL + `/admin/get-course-users/${course_id}/`)
       .then((res) => {
@@ -69,8 +72,10 @@ const CourseDrawer = ({isOpen, onClose, course_id}) => {
           <DrawerHeader>Edit Course List</DrawerHeader>
           <DrawerBody>
             <HStack>
-              <Button>Add Student</Button>
-              <Button>Add Instructor</Button>
+              <Button onClick={onOpenStudent}>Add Student</Button>
+              <AddUser type={"student"} course_id={course_id} onClose={onCloseStudent} isOpen={isOpenStudent}/>
+              <Button onClick={onOpenInstructors}>Add Instructor</Button>
+              <AddUser type={"instructor"} course_id={course_id} onClose={onCloseInstructors} isOpen={isOpenInstructors}/>
             </HStack>
             <TableContainer>
               <Table variant={'striped'} colorScheme={'blue'}>
@@ -82,7 +87,7 @@ const CourseDrawer = ({isOpen, onClose, course_id}) => {
                 </Thead>
                 <Tbody>
                   {studentList.map((student, index) => {
-                   return( <Tr key={hashing(student.user_id)}>
+                   return(<Tr key={hashing(student.user_id)}>
                       <Td key={hashing(student.utorid)}>{student.utorid}</Td>
                       <Td key={hashing(student.name)}>{student.name}</Td>
                      <Td>

@@ -83,7 +83,7 @@ const ChatBoxFooter = ({
         placeholder={"Enter your message here"}
         value={text}
         onChange={(e) => {
-        setText(e.target.value.slice(0, 250));
+        setText(e.target.value.slice(0, process.env.MAX_MESSAGE_LENGTH));
         }}
         isDisabled={waitingForResp || !inConvo}
       />
