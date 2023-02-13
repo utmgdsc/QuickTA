@@ -22,7 +22,8 @@ const AddUser = ({course_id, isOpen, onClose, type}) => {
     axios.get(process.env.REACT_APP_API_URL + `/admin/get-course-unadded-users/?course_id=${course_id}&type=${type}`)
       .then((res) => {
         if(res.data.users){
-          setUserList(res.data.users)
+          setUserList(res.data.users);
+          setToAdd(Array(res.data.users.length).fill(false));
         }
       })
       .catch((err) => console.log(err))
@@ -68,7 +69,9 @@ const AddUser = ({course_id, isOpen, onClose, type}) => {
                       <Td key={hashing(user.name)}>{user.name}</Td>
                       <Td key={user.user_role}>{<Checkbox onChange={(e) => {
                         // let filtered = userList.filter((e) => e.user_id !== user.user_id);
-
+                        let filter = toAdd;
+                        filter[index] = !filter[index]
+                        setToAdd(filter);
                         // setUserList(filtered);
 
                       }}/>}</Td>
@@ -80,7 +83,16 @@ const AddUser = ({course_id, isOpen, onClose, type}) => {
 
             <HStack>
               <Spacer/>
-              <Button variant={'solid'}>Add</Button>
+              <Button variant={'solid'} onClick={() => {
+                let users = toAdd.reduce((add, index) => {
+                  if(add){
+                      return userList[index].user_id
+                  }
+                })
+                axios.post(process.env.REACT_APP_API_URL + "/admin/add-multiple-user-course", {users: users, course_id: course_id, type: (type==="student" ? "student" : "instructor")})
+                  .then((res) => {})
+                  .catch((err) => console.log(err))
+              }}>Add</Button>
             </HStack>
 
           </Stack>
