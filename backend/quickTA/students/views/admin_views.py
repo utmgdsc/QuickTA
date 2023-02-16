@@ -150,8 +150,8 @@ def add_multiple_user_course(request):
             for user in request.data['users']:
                 add_user = user_functions.add_user_to_course(user, request.data['course_id'])
                 if (add_user):
-                    if request.data["type"] == "student": op = course_functions.update_course_students_list(request.data['course_id'], request.data['user_id'])
-                    if request.data["type"] == "instructor":  op = course_functions.update_course_instructors_list(request.data['course_id'], request.data['user_id'])
+                    if request.data["type"] == "student": op = course_functions.update_course_students_list(request.data['course_id'], user)
+                    if request.data["type"] == "instructor":  op = course_functions.update_course_instructors_list(request.data['course_id'], user)
                     if not(op): raise AddUserToCourseFailedError
                 else:
                     raise AddUserToCourseFailedError
