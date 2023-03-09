@@ -71,7 +71,7 @@ def create_multiple_users(request):
     """
     if request.method == 'POST':
         try:
-            response = { "added": [] }
+            response = { "users": [] }
 
             for user in request.data['users']:
                 ret = user_functions.create_user(user)
@@ -156,7 +156,7 @@ def add_multiple_user_course(request):
                 else:
                     raise AddUserToCourseFailedError
 
-                return Response(status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_200_OK)
         except AddUserToCourseFailedError:
             return Response({"msg": "Failed to add course to users."}, status=status.HTTP_404_BAD_REQUEST)
         except:

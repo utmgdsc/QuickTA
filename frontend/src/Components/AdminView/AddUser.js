@@ -109,6 +109,7 @@ const AddUser = ({course_id, isOpen, onClose, type, handleClose, parentDisable})
                 usersToAdd = usersToAdd.filter((e, index) => toAdd[index]===true).map((userObj, i) => userObj.user_id);
                 console.log(usersToAdd)
                 setDisableAdd(true);
+                console.log({users: usersToAdd, course_id: course_id, type: (type==="student" ? "student" : "instructor")});
                 axios.post(process.env.REACT_APP_API_URL + "/admin/add-multiple-user-course", {users: usersToAdd, course_id: course_id, type: (type==="student" ? "student" : "instructor")})
                   .then((res) => {
                     removeUsers(usersToAdd);
