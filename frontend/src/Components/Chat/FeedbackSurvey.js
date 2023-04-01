@@ -11,14 +11,14 @@ import axios from "axios";
 
 const FeedbackSurvey = ({ isOpen, onClose, conversation_id, updateConvoID, updateInConvo, updateMessages }) => {
 
-  const [sliderVal, setSliderVal] = useState(0);
+  const [sliderVal, setSliderVal] = useState(1);
 
   const [askFeedBack, setFeedBackPopup] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [isSurveyDisabled, setIsSurveyDisabled] = useState(false);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose}>
       <ModalOverlay/>
       <ModalContent>
         <ModalHeader>

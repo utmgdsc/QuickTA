@@ -8,7 +8,7 @@ import {
   VStack,
   Heading,
   Modal,
-  useDisclosure, ModalOverlay, ModalContent, ModalCloseButton, Textarea, ModalHeader, ModalBody, ModalFooter
+  useDisclosure, ModalOverlay, ModalContent, ModalCloseButton, Textarea, ModalHeader, ModalBody, ModalFooter, Tooltip
 } from "@chakra-ui/react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faBug, faDownload} from "@fortawesome/free-solid-svg-icons";
@@ -47,10 +47,12 @@ const ChatBoxTopNav = ({courseCode, currConvoID}) => {
           console.log("Must be in a conversation to download the chatlog!");
         }
       }}>
+        <Tooltip label={"This may take a couple of minutes"}>
         <VStack>
           <FontAwesomeIcon icon={faDownload} size={'2x'}/>
-          <Text fontSize="2xs">Download</Text>
+            <Text fontSize="2xs">Download Conversation</Text>
         </VStack>
+      </Tooltip>
       </Button>
 
       <Button variant={'ghost'} py={8} px={5} onClick={() => {
@@ -60,10 +62,12 @@ const ChatBoxTopNav = ({courseCode, currConvoID}) => {
           console.log("Must be in a chat to report a conversation!")
         }
         }}>
+        <Tooltip label={"See a bug?"}>
         <VStack>
           <FontAwesomeIcon icon={faBug} size={'2x'}/>
           <Text fontSize="2xs">Report</Text>
         </VStack>
+        </Tooltip>
       </Button>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay/>
