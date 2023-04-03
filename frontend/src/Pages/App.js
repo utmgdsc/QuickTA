@@ -74,6 +74,7 @@ const App = ( {UTORid = ""} ) => {
           { auth === "ST" ? <Route path="/" element={
             <StudentPage
               UTORid={UTORid} 
+              userId={userId}
               currCourse={currCourse}
               setCurrCourse={setCurrCourse}
               courses={courses} 

@@ -2,7 +2,7 @@ import {Box} from "@chakra-ui/react";
 import TopNav from "../Components/TopNav";
 import Chat from "../Components/Chat/Chat";
 
-const StudentPage = ({currCourse, setCurrCourse, semester, courses, isLoading, UTORid}) => {
+const StudentPage = ({currCourse, setCurrCourse, semester, courses, isLoading, UTORid, userId}) => {
 
     return (
     <div style={{
@@ -16,6 +16,7 @@ const StudentPage = ({currCourse, setCurrCourse, semester, courses, isLoading, U
           ?  <Box ml={'12vw'} mr={'12vw'}>Sorry, you are not enrolled in any courses!</Box>
             :
             <Chat
+              userId={userId}
               currCourse={currCourse}
               setCurrCourse={setCurrCourse}
               semester={semester}

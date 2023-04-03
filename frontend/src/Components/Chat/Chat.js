@@ -7,7 +7,7 @@ import CourseSelect from "../CourseSelect";
 
 
 
-const Chat = ({ currCourse, courses, setCurrCourse}) => {
+const Chat = ({ currCourse, courses, setCurrCourse, userId}) => {
   const [messages, updateMessages] = useState([]);
   const [inConvo, updateInConvo] = useState(false);
   const [currConvoID, updateConvoID] = useState("");
@@ -21,6 +21,7 @@ const Chat = ({ currCourse, courses, setCurrCourse}) => {
           <ChatBoxTopNav courseCode={currCourse.course_code} currConvoID={currConvoID}/>
           <ChatBox messages={messages} waitingForResp={waitingForResp}/>
           <ChatBoxFooter
+          userId={userId}
           updateMessages={updateMessages}
           inConvo={inConvo}
           updateInConvo={updateInConvo}

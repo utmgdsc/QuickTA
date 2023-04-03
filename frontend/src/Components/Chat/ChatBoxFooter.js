@@ -17,7 +17,8 @@ const ChatBoxFooter = ({
     course_ID,
     messages,
     waitingForResp,
-    setWaitForResp
+    setWaitForResp,
+    userId
   }) => {
 
     const { isOpen: isOpenFeedback, onOpen: onOpenFeedback, onClose: onCloseFeedback } = useDisclosure();
@@ -42,7 +43,7 @@ const ChatBoxFooter = ({
           console.log("You're already in a conversation!");
         }else{
           console.log("Started a conversation!")
-          axios.post(process.env.REACT_APP_API_URL + "/conversation", {user_id: "76d1c94d-48c2-4b7a-9ec9-1390732d84a0", 
+          axios.post(process.env.REACT_APP_API_URL + "/conversation", {user_id: userId, 
           course_id: course_ID})
           .then(
             (response) => {

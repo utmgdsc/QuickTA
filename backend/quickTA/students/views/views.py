@@ -580,7 +580,7 @@ def chatlog_history_detail(request):
         [Time], Speaker, Chatlog
     """
     if request.method == 'POST':
-        try:
+        # try:
             cid = request.data['conversation_id']
             conversation = Conversation.objects.filter(conversation_id=cid)
 
@@ -591,6 +591,7 @@ def chatlog_history_detail(request):
                 raise ConversationNotFoundError
 
             # Checks if user is found
+            print(uid)
             user = User.objects.filter(user_id=uid)
             if (len(user) > 0):
                 user = user[0]
@@ -616,17 +617,17 @@ def chatlog_history_detail(request):
 
             return response
 
-        except ConversationNotFoundError:
-            return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_404_NOT_FOUND) 
-        except UserNotFoundError:
-            return Response({"msg": "Error: User not Found."}, status=status.HTTP_404_NOT_FOUND) 
-        except:
-            # Error handling
-            error = []
-            if 'conversation_id' not in request.data.keys():
-                error.append("Conversation ID")
-            err = {"msg": "Feedback details missing fields: " + ','.join(error) + '.'}
-            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+        # except ConversationNotFoundError:
+        #     return Response({"msg": "Error: Conversation not Found."}, status=status.HTTP_404_NOT_FOUND) 
+        # except UserNotFoundError:
+        #     return Response({"msg": "Error: User not Found."}, status=status.HTTP_404_NOT_FOUND) 
+        # except:
+        #     # Error handling
+        #     error = []
+        #     if 'conversation_id' not in request.data.keys():
+        #         error.append("Conversation ID")
+        #     err = {"msg": "Feedback details missing fields: " + ','.join(error) + '.'}
+        #     return Response(err, status=status.HTTP_400_BAD_REQUEST) 
 
 @swagger_auto_schema(methods=['post'], request_body=IncorrectChatlogRequest,
     responses={
