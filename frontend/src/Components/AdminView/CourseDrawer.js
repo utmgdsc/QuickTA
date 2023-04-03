@@ -15,14 +15,15 @@ import AddUser from "./AddUser";
 
 const CourseDrawer = ({isOpen, onClose, course_id}) => {
   const [studentList, setStudentList] = useState([]);
+  const [disableFlag, setDisableFlag] = useState(false);
   const {isOpen: isOpenInstructors, onOpen: onOpenInstructors, onClose: onCloseInstructors} = useDisclosure();
   const {isOpen: isOpenStudent, onOpen: onOpenStudent, onClose: onCloseStudent} = useDisclosure();
   const fetchCourseList = async (course_id) => {
     await axios.get(process.env.REACT_APP_API_URL + `/admin/get-course-users/${course_id}/`)
       .then((res) => {
-        setStudentList(res.data.students)
+        setStudentList(res.data.students);
       })
-      .catch((err) => {})
+      .catch((err) => console.log(err))
   }
 
   const hashing = (str, seed = 0) => {
@@ -54,7 +55,8 @@ const CourseDrawer = ({isOpen, onClose, course_id}) => {
 
   useEffect(() => {
     if(course_id){
-      fetchCourseList(course_id)
+      setDisableFlag(true);
+      fetchCourseList(course_id).then(()=> {setDisableFlag(false);})
       console.log(studentList)
     }
   }, [course_id])
@@ -72,10 +74,10 @@ const CourseDrawer = ({isOpen, onClose, course_id}) => {
           <DrawerHeader>Edit Course List</DrawerHeader>
           <DrawerBody>
             <HStack>
-              <Button onClick={onOpenStudent}>Add Student</Button>
-              <AddUser type={"student"} course_id={course_id} onClose={onCloseStudent} isOpen={isOpenStudent}/>
-              <Button onClick={onOpenInstructors}>Add Instructor</Button>
-              <AddUser type={"instructor"} course_id={course_id} onClose={onCloseInstructors} isOpen={isOpenInstructors}/>
+              <Button onClick={onOpenStudent} isDisabled={disableFlag}>Add Student</Button>
+              <AddUser type={"student"} course_id={course_id} onClose={onCloseStudent} isOpen={isOpenStudent} handleClose={fetchCourseList} parentDisable={setDisableFlag}/>
+              <Button onClick={onOpenInstructors} isDisabled={disableFlag}>Add Instructor</Button>
+              <AddUser type={"instructor"} course_id={course_id} onClose={onCloseInstructors} isOpen={isOpenInstructors} handleClose={fetchCourseList} parentDisable={setDisableFlag}/>
             </HStack>
             <TableContainer>
               <Table variant={'striped'} colorScheme={'blue'}>
@@ -91,10 +93,12 @@ const CourseDrawer = ({isOpen, onClose, course_id}) => {
                       <Td key={hashing(student.utorid)}>{student.utorid}</Td>
                       <Td key={hashing(student.name)}>{student.name}</Td>
                      <Td>
-                       <Button variant={'ghost'}><FontAwesomeIcon icon={faTrashCan} size={'2x'} onClick={() => {
+                       <Button variant={'ghost'} isDisabled={disableFlag}><FontAwesomeIcon icon={faTrashCan} size={'2x'} onClick={() => {
                        //  Remove student from classroom and get new list of students
+                         setDisableFlag(true);
                          deleteUser(course_id, student.user_id);
                          deleteElement(student.user_id);
+                         setDisableFlag(false);
                        }}/></Button>
                      </Td>
                     </Tr>)

@@ -1,16 +1,13 @@
 import {Box, useRadio} from "@chakra-ui/react";
-import ChatOpenSurvey from "./ChatOpenSurvey";
 import ChatBoxTopNav from "./ChatBoxTopNav";
 import ChatBox from "./ChatBox";
 import ChatBoxFooter from "./ChatBoxFooter";
 import {useState, useEffect} from "react";
-import axios from "axios";
 import CourseSelect from "../CourseSelect";
 
 
 
 const Chat = ({ currCourse, courses, setCurrCourse}) => {
-  
   const [messages, updateMessages] = useState([]);
   const [inConvo, updateInConvo] = useState(false);
   const [currConvoID, updateConvoID] = useState("");

@@ -12,20 +12,20 @@ import axios from "axios";
 
 const ChatOpenSurvey = ({conversation_id, isOpen, onClose}) => {
 
-  const [sliderVal, setSliderVal] = useState(0);
+  const [sliderVal, setSliderVal] = useState(1);
   const [showTooltip, setSliderTooltip] = useState(false);
 
   const sendComfort = async () => {
     await axios.post(process.env.REACT_APP_API_URL + "/comfortability-rating", {conversation_id: conversation_id, comfortability_rating: sliderVal})
       .then((res) => {
         onClose();
-        setSliderVal(0);
+        setSliderVal(1);
       })
       .catch((err) => console.log(err))
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose}>
     <ModalOverlay/>
       <ModalContent>
         <ModalHeader>

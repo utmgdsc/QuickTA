@@ -16,7 +16,8 @@ const ChatBox = ({messages, waitingForResp}) => {
     <VStack background={'#F9F9F9'} style={{
       height: "50vh",
       overflowY: "scroll",
-      padding: "0vw 1.5vw 0vw 1.5vw"
+      padding: "0vw 1.5vw 0vw 1.5vw",
+      overflowWrap: "break-word"
     }}>
       {messages.map(({message, dateSent, isUser}, index) => (
         <ChatBubble
