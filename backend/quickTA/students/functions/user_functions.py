@@ -81,7 +81,10 @@ def add_user_to_course(user_id: str, course_id: str) -> bool:
     # try:
     # Acquiring user collection
     users = acquire_user_cluster()
-    user = list(users.find({"user_id" : user_id}))[0]
+    user = list(users.find({"user_id" : user_id}))
+    if len(user) == 0:
+        return OPERATION_FAILED
+    user = user[0]
 
     # Ensure course exists
     course = course_functions.get_course_existence(course_id)

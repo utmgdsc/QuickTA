@@ -146,7 +146,7 @@ def add_multiple_user_course(request):
         - type: str         "student" or "instructor"
     """
     if request.method == 'POST':
-        try:
+        # try:
             for user in request.data['users']:
                 add_user = user_functions.add_user_to_course(user, request.data['course_id'])
                 if (add_user):
@@ -157,10 +157,10 @@ def add_multiple_user_course(request):
                     raise AddUserToCourseFailedError
 
             return Response(status=status.HTTP_200_OK)
-        except AddUserToCourseFailedError:
-            return Response({"msg": "Failed to add course to users."}, status=status.HTTP_404_BAD_REQUEST)
-        except:
-            return Response({"msg": "Bad Request."},status=status.HTTP_400_BAD_REQUEST)
+        # except AddUserToCourseFailedError:
+        #     return Response({"msg": "Failed to add course to users."}, status=status.HTTP_404_BAD_REQUEST)
+        # except:
+        #     return Response({"msg": "Bad Request."},status=status.HTTP_400_BAD_REQUEST)
 
 @swagger_auto_schema(methods=['post'], request_body=RemoveUserFromCourseRequest,
     responses={
