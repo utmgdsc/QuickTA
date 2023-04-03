@@ -34,7 +34,9 @@ const ChatBoxTopNav = ({courseCode, currConvoID}) => {
     </Text>
     <Spacer/>
 
-      <Button variant={'ghost'} onClick={() => {
+      <Button variant={'ghost'} 
+        py={8} px={5}
+        onClick={() => {
         if(currConvoID){
         axios.post(process.env.REACT_APP_API_URL + "/report", {conversation_id: currConvoID})
           .then((response) => {

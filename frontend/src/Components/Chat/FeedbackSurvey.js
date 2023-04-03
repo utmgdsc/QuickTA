@@ -48,12 +48,22 @@ const FeedbackSurvey = ({ isOpen, onClose, conversation_id, updateConvoID, updat
           </Slider>
         </ModalBody>
 
-        <ModalFooter>
+        <ModalFooter
+          style={{
+            display: "flex",
+          }}>
           { askFeedBack ?
-            (<VStack>
+            (<VStack 
+              style={{
+                width: "100%",
+              }}>
               <Textarea
+              style={{
+                width: "100%",
+                height: "200px"
+              }}
               size={'lg'}
-              placeholder={'Any feedback would appreciated!'}
+              placeholder={'Any feedback would be appreciated!'}
               onChange={(e) => {setFeedback(e.target.value)}}/>
               <Button colorScheme={'green'} onClick={async () => {
                 console.log(conversation_id, sliderVal, feedback);

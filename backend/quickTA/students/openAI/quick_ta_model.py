@@ -12,8 +12,8 @@ openai.api_key = env('OPENAI_KEY')
 
 # CONVO_START = "\n\nHuman: Hello, who are you?\nAI: I am an AI created by OpenAI."
 BOT_START = "Hello. I am an AI chatbot designed to assist you in solving your problems by giving hints but never providing direct answers. How can I help you?"
-USER = "Human"
-AGENT = "AI"
+USER = "Student"
+AGENT = "Instructor"
 WARNING = "Warning"
 END = "End"
 NOTI = "Notification"

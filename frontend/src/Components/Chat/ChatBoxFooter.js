@@ -57,7 +57,7 @@ const ChatBoxFooter = ({
             .then((response) => {
               const temp2 = {
                 message: response.data.agent.chatlog,
-                // dateSent: response.data.agent.time,
+                dateSent: response.data.agent.time,
                 isUser: "false"
               }
               updateMessages((oldMessage) => [...oldMessage, temp2]);
