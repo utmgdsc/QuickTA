@@ -61,6 +61,36 @@ const App = ( {UTORid = ""} ) => {
       })
   }
 
+  // Function used for CSC343 auth in PCRS and Reflections
+  // Only be called in student redirects with `model-{x}`
+  const setModel = async (model_num) => {
+    //   Reflection
+    if(model_num === 1){
+      for (let i = 0; i < courses.length; i++) {
+        if(courses[i].course_id ==="33399325-f39e-4130-aabc-8c67469d2717"){
+        //   Set 343 reflection course as our current course
+          sessionStorage.setItem("selected", `${i}`);
+        }
+      }
+    }
+    //  PCRS
+    if (model_num === 2){
+      for(let i = 0; i < courses.length; i++){
+        if(courses[i].course_id === "2f801ccd-3fc2-41b9-821b-75898d856f03"){
+          //  Set 343 PCRS course as our current course
+          sessionStorage.setItem("selected", `${i}`);
+        }
+      }
+    }
+
+    //  After verification set the current course to this new model
+    setCurrCourse({course_id: res.data.courses[parseInt(sessionStorage.getItem("selected"))].course_id,
+      course_code: res.data.courses[parseInt(sessionStorage.getItem("selected"))].course_code,
+      semester: res.data.courses[parseInt(sessionStorage.getItem("selected"))].semester,
+      course_name: res.data.courses[parseInt(sessionStorage.getItem("selected"))].course_name});
+
+  }
+
   useEffect(() => {
     if(UTORid){
       getUserId().then((userid) => {getAllCourses(userid)});
@@ -71,15 +101,39 @@ const App = ( {UTORid = ""} ) => {
   return isLoading ? <CustomSpinner /> :
     (<>
         <Routes>
-          { auth === "ST" ? <Route path="/" element={
-            <StudentPage
-              UTORid={UTORid} 
-              currCourse={currCourse}
-              setCurrCourse={setCurrCourse}
-              courses={courses} 
-              semester={currCourse.semester}
-            />
-            } /> : null}
+          {auth === "ST" ? <React.Fragment>
+            <Route path="/" element={
+              <StudentPage
+                UTORid={UTORid}
+                currCourse={currCourse}
+                setCurrCourse={setCurrCourse}
+                courses={courses}
+                semester={currCourse.semester}
+              />
+            } />
+            <Route path={"/model-1"}>
+              <StudentPage
+                UTORid={UTORid}
+                currCourse={currCourse}
+                setCurrCourse={setCurrCourse}
+                courses={courses}
+                semester={currCourse.semester}
+                setModelFunc={setModel}
+                modelNum={1}
+              />
+            </Route>
+            <Route path={"/model-2"}>
+              <StudentPage
+                UTORid={UTORid}
+                currCourse={currCourse}
+                setCurrCourse={setCurrCourse}
+                courses={courses}
+                semester={currCourse.semester}
+                setModelFunc={setModel}
+                modelNum={2}
+              />
+            </Route>
+          </React.Fragment> : null}
             { auth === "IS" ? <React.Fragment>
               <Route path="/Professor" element={<ProfessorPage/>} />
 
