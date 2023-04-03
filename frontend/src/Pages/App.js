@@ -1,6 +1,6 @@
 import "../assets/globals.css";
-import { Route, useNavigate } from 'react-router-dom';
-import { Routes } from "react-router";
+import {Route} from 'react-router-dom';
+import {Routes} from "react-router";
 import StudentPage from "./StudentPage";
 import ProfessorPage from "./ProfessorPage";
 import ResearcherAnalytics from "./ResearcherAnalytics";
@@ -24,15 +24,20 @@ const App = ( {UTORid = ""} ) => {
   
 
   const getUserId = async () => {
+    setIsLoading(true);
     const user_id = await axios.post(process.env.REACT_APP_API_URL + "/get-user", {utorid: UTORid})
       .then((res) => {
         setuserId(res.data.user_id);
         setAuth(res.data.user_role);
         // console.log(res.data.user_id);
-        return res.data.user_id
+        setIsLoading(false);
+        return res.data.user_id;
       })
-      .catch((e) => {console.log(e)})
-      return user_id
+      .catch((e) => {
+        console.log(e)
+        setIsLoading(false);
+      });
+    return user_id;
   }
 
   const getAllCourses = async (user_id) => {
@@ -61,36 +66,6 @@ const App = ( {UTORid = ""} ) => {
       })
   }
 
-  // Function used for CSC343 auth in PCRS and Reflections
-  // Only be called in student redirects with `model-{x}`
-  const setModel = async (model_num) => {
-    //   Reflection
-    if(model_num === 1){
-      for (let i = 0; i < courses.length; i++) {
-        if(courses[i].course_id ==="33399325-f39e-4130-aabc-8c67469d2717"){
-        //   Set 343 reflection course as our current course
-          sessionStorage.setItem("selected", `${i}`);
-        }
-      }
-    }
-    //  PCRS
-    if (model_num === 2){
-      for(let i = 0; i < courses.length; i++){
-        if(courses[i].course_id === "2f801ccd-3fc2-41b9-821b-75898d856f03"){
-          //  Set 343 PCRS course as our current course
-          sessionStorage.setItem("selected", `${i}`);
-        }
-      }
-    }
-
-    //  After verification set the current course to this new model
-    setCurrCourse({course_id: res.data.courses[parseInt(sessionStorage.getItem("selected"))].course_id,
-      course_code: res.data.courses[parseInt(sessionStorage.getItem("selected"))].course_code,
-      semester: res.data.courses[parseInt(sessionStorage.getItem("selected"))].semester,
-      course_name: res.data.courses[parseInt(sessionStorage.getItem("selected"))].course_name});
-
-  }
-
   useEffect(() => {
     if(UTORid){
       getUserId().then((userid) => {getAllCourses(userid)});
@@ -109,30 +84,31 @@ const App = ( {UTORid = ""} ) => {
                 setCurrCourse={setCurrCourse}
                 courses={courses}
                 semester={currCourse.semester}
+                userId={userId}
               />
             } />
-            <Route path={"/model-1"}>
+            <Route path={"/model-1"} element={
               <StudentPage
                 UTORid={UTORid}
                 currCourse={currCourse}
                 setCurrCourse={setCurrCourse}
                 courses={courses}
                 semester={currCourse.semester}
-                setModelFunc={setModel}
                 modelNum={1}
+                userId={userId}
               />
-            </Route>
-            <Route path={"/model-2"}>
+            }/>
+            <Route path={"/model-2"} element={
               <StudentPage
                 UTORid={UTORid}
                 currCourse={currCourse}
                 setCurrCourse={setCurrCourse}
                 courses={courses}
                 semester={currCourse.semester}
-                setModelFunc={setModel}
                 modelNum={2}
+                userId={userId}
               />
-            </Route>
+            }/>
           </React.Fragment> : null}
             { auth === "IS" ? <React.Fragment>
               <Route path="/Professor" element={<ProfessorPage/>} />
