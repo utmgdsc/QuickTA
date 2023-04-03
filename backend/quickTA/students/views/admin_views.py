@@ -70,29 +70,29 @@ def create_multiple_users(request):
             - user_role: str    User role ('ST' - Student, 'IS' - Instructor, 'RS' - researcher, 'AM' - admin)
     """
     if request.method == 'POST':
-        try:
-            response = { "added": [] }
+        # try:
+        response = { "users": [] }
 
-            for user in request.data['users']:
-                ret = user_functions.create_user(user)
-                if ret == OPERATION_FAILED:
-                    raise UserAlreadyExistsError
-                response['users'].append(ret)
+        for user in request.data['users']:
+            ret = user_functions.create_user(user)
+            if ret == OPERATION_FAILED:
+                raise UserAlreadyExistsError
+            response['users'].append(ret)
 
-            return Response(ret, status=status.HTTP_201_CREATED)
-        except UserAlreadyExistsError:
-            return Response({"msg": "User already exists."}, status=status.HTTP_409_CONFLICT)
-        except:
-            error = []
-            if 'name' not in request.data.keys():
-                error.append("Name")
-            if 'utorid' not in request.data.keys():
-                error.append("Utor ID")
-            if 'user_role' not in request.data.keys():
-                error.append("User Role")
-            err = {"msg": "User details missing fields:" + ','.join(error)}
+        return Response(ret, status=status.HTTP_201_CREATED)
+        # except UserAlreadyExistsError:
+        #     return Response({"msg": "User already exists."}, status=status.HTTP_409_CONFLICT)
+        # except:
+        #     error = []
+        #     if 'name' not in request.data.keys():
+        #         error.append("Name")
+        #     if 'utorid' not in request.data.keys():
+        #         error.append("Utor ID")
+        #     if 'user_role' not in request.data.keys():
+        #         error.append("User Role")
+        #     err = {"msg": "User details missing fields:" + ','.join(error)}
 
-            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+        #     return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 @swagger_auto_schema(methods=['post'], request_body=AddUserToCourseRequest,
     responses={
@@ -146,7 +146,7 @@ def add_multiple_user_course(request):
         - type: str         "student" or "instructor"
     """
     if request.method == 'POST':
-        try:
+        # try:
             for user in request.data['users']:
                 add_user = user_functions.add_user_to_course(user, request.data['course_id'])
                 if (add_user):
@@ -156,11 +156,11 @@ def add_multiple_user_course(request):
                 else:
                     raise AddUserToCourseFailedError
 
-                return Response(status=status.HTTP_200_OK)
-        except AddUserToCourseFailedError:
-            return Response({"msg": "Failed to add course to users."}, status=status.HTTP_404_BAD_REQUEST)
-        except:
-            return Response({"msg": "Bad Request."},status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_200_OK)
+        # except AddUserToCourseFailedError:
+        #     return Response({"msg": "Failed to add course to users."}, status=status.HTTP_404_BAD_REQUEST)
+        # except:
+        #     return Response({"msg": "Bad Request."},status=status.HTTP_400_BAD_REQUEST)
 
 @swagger_auto_schema(methods=['post'], request_body=RemoveUserFromCourseRequest,
     responses={
