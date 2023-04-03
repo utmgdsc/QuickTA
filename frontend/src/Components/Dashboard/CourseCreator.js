@@ -117,7 +117,9 @@ const CourseCreator = ({ userid, setCourses, setCurrCourse, setIsLoading }) => {
                               await axios.post(process.env.REACT_APP_API_URL + "/course", {
                                   course_code: newCourse.course_code,
                                   semester: semester,
-                                  course_name: newCourse.course_name
+                                  course_name: newCourse.course_name,
+                                  start_date: newCourse.start_date,
+                                  end_date: newCourse.end_date
                               })
                                 .then(async (res) => {
                                     const new_course_id = res.data.course_id

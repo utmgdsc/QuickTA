@@ -7,7 +7,8 @@ import {
     SliderMark, SliderThumb, SliderTrack, Spacer, Tooltip,
     useDisclosure
   } from '@chakra-ui/react'
-  import {useState} from "react";
+import { InfoOutlineIcon } from '@chakra-ui/icons';
+import {useState} from "react";
 import axios from "axios";
 
 const ChatOpenSurvey = ({conversation_id, isOpen, onClose}) => {
@@ -33,6 +34,17 @@ const ChatOpenSurvey = ({conversation_id, isOpen, onClose}) => {
             fontFamily: "Poppins"
           }}>Please rate your current comfortability with the course material
         </span>
+        <Tooltip 
+          label="Comfortability is a measure of how well you feel like you understand the course material."
+          placement='right'>
+            <InfoOutlineIcon fontSize={10} 
+            fill="blue.500"
+            color="blue.500"
+            style={{
+              verticalAlign: "top"
+            }}/>
+        </Tooltip>
+
         </ModalHeader>
         <ModalBody>
           <Slider

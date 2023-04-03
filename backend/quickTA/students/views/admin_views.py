@@ -78,8 +78,8 @@ def create_multiple_users(request):
                 if ret == OPERATION_FAILED:
                     raise UserAlreadyExistsError
                 response['users'].append(ret)
-
             return Response(ret, status=status.HTTP_201_CREATED)
+        
         except UserAlreadyExistsError:
             return Response({"msg": "User already exists."}, status=status.HTTP_409_CONFLICT)
         except:
@@ -186,7 +186,6 @@ def remove_user_course(request):
             if (remove_user):
                 if request.data["type"] == "student": 
                     op = course_functions.remove_course_students_list(request.data['course_id'], request.data['user_id'])
-                    print('test')
                 if request.data["type"] == "instructor":  op = course_functions.remove_course_instructors_list(request.data['course_id'], request.data['user_id'])
                 # op = course_functions.remove_student_from_course(data['course_id'], data['user_id'])
                 if not(op): raise RemoveUserFromCourseFailedError
@@ -292,7 +291,7 @@ def get_all_courses(request):
     and the list of instructors.
     """
     if request.method == 'GET':
-        try:
+        # try:
             courses = Course.objects.all()
 
             res = { "courses": [] }
@@ -301,9 +300,10 @@ def get_all_courses(request):
                 instructors = course_functions.get_all_course_instructors(course.course_id)
                 ins = []
 
-                for instructor in instructors:
-                    user = User.objects.get(user_id=instructor)
-                    ins.append(user.utorid)
+                if instructors != False:
+                    for instructor in instructors:
+                        user = User.objects.get(user_id=instructor)
+                        ins.append(user.utorid)
 
                 c = {
                     "course_id": course.course_id,  
@@ -314,8 +314,8 @@ def get_all_courses(request):
                 }
                 res['courses'].append(c)
             return Response(res, status=status.HTTP_200_OK)
-        except:
-            return Response({"msg": "Bad Request."},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # except:
+        #     return Response({"msg": "Bad Request."},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # @swagger_auto_schema(method=['delete'], responses={
 #     200: openapi.Response('Success'),

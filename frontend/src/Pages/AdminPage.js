@@ -11,17 +11,40 @@ import {
   Tooltip,
   Tr,
   useDisclosure, VStack,
+   Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, FormControl, FormLabel, Input, Select 
 } from "@chakra-ui/react";
 import TopNav from "../Components/TopNav";
 import axios from "axios";
 import {useEffect, useRef, useState} from "react";
 import CourseDrawer from "../Components/AdminView/CourseDrawer"
+import CourseCreator from "../Components/Dashboard/CourseCreator";
 
 
 const AdminPage = ({ UTORID }) => {
   const [courseIndex, setCourseIndex] = useState(0);
   const [courseList, setCourseList] = useState([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const [isOpenCreateUser, setIsOpenCreateUser] = useState(false);
+  const [name, setName] = useState('');
+  const [utorid, setUtorid] = useState('');
+  const [userRole, setUserRole] = useState('ST');
+  const userid = sessionStorage.getItem('userid');
+  const [courses, setCourses] = useState([]) ;
+  const [currCourse, setCurrCourse] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = () => {
+    const payload = { name, utorid, user_role: userRole };
+    axios.post(process.env.REACT_APP_API_URL + "/admin/add-user", 
+      payload)
+    .then(response => {
+      return response.json();
+    }).catch(error => {
+      console.log(error);
+    });
+    setIsOpenCreateUser(false);
+  }
 
 
   const fetchAllCourses = () => {
@@ -66,15 +89,52 @@ const AdminPage = ({ UTORID }) => {
       <TopNav UTORid={ UTORID }/>
       <Box overflow={'hidden'} ml={'12vw'} mr={'12vw'}>
         <HStack>
-          <Button style={{backgroundColor: '#2C54A7', color: 'white'}} fontSize={'sm'} >
+          <CourseCreator userid={userid} setCourses={setCourses} setCurrCourse={setCurrCourse} setIsLoading={setIsLoading}/>
+          {/* <Button style={{backgroundColor: '#2C54A7', color: 'white'}} fontSize={'sm'} >
             Create New Course
-          </Button>
-          <Button style={{backgroundColor: '#2C54A7', color: 'white'}} fontSize={'sm'}>
+          </Button> */}
+          <Button style={{backgroundColor: '#2C54A7', color: 'white'}} fontSize={'sm'}
+            onClick={() => setIsOpenCreateUser(true)}>
             Create User (manually)
           </Button>
         </HStack>
+      {/* Modal for Creating User */}
+        <Modal isOpen={isOpenCreateUser} onClose={() => setIsOpenCreateUser(false)}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Create User</ModalHeader>
+          <ModalBody>
+            <FormControl>
+              <FormLabel>Name</FormLabel>
+              <Input placeholder="Enter name" value={name} onChange={(e) => setName(e.target.value)} />
+            </FormControl>
+            <FormControl mt={4}>
+              <FormLabel>UTORid</FormLabel>
+              <Input placeholder="Enter UTORid" value={utorid} onChange={(e) => setUtorid(e.target.value)} />
+            </FormControl>
+            <FormControl mt={4}>
+              <FormLabel>User Role</FormLabel>
+              <Select placeholder="Select user role" value={userRole} onChange={(e) => setUserRole(e.target.value)}>
+                <option value="ST">Student</option>
+                <option value="IS">Instructor</option>
+                <option value="AM">Admin</option>
+              </Select>
+            </FormControl>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="ghost" onClick={() => setIsOpenCreateUser(false)}>Cancel</Button>
+            <Button colorScheme="blue" ml={3} onClick={handleSubmit}>Submit</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
         <TableContainer>
-        <Table>
+        <Table
+          style={{
+            marginTop: '1rem',
+            backgroundColor: 'white',
+            borderRadius: '0.5rem',
+          }}>
           <Thead>
             <Tr>
               <Th>Course ID</Th>
@@ -103,7 +163,9 @@ const AdminPage = ({ UTORID }) => {
           </Tbody>
         </Table>
         </TableContainer>
-        {courseList.length !== 0 ? <CourseDrawer isOpen={isOpen} onClose={onClose} course_id={courseList[courseIndex].course_id}/> : <VStack><Center>No reported Conversations!</Center></VStack>}
+        {courseList.length !== 0 
+          ?  <CourseDrawer isOpen={isOpen} onClose={onClose} course_id={courseList[courseIndex].course_id}/> 
+          : <VStack><Center>No Courses Found</Center></VStack>}
       </Box>
 
     </div> : null
