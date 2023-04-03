@@ -31,9 +31,7 @@ const ChatBox = ({messages, waitingForResp}) => {
       }
       {waitingForResp ?
         <div className="typing">
-          <span className="circle scaling"></span>
-          <span className="circle scaling"></span>
-          <span className="circle scaling"></span>
+          <div className="dot-flashing"></div>
         </div>
        : null}
       <div ref={messagesEndRef}/>

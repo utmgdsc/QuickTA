@@ -32,3 +32,51 @@
     animation: typing 1000ms ease-in-out infinite;
     animation-delay: 3600ms;
 }
+
+
+.dot-flashing {
+    margin-bottom: 1rem;
+    position: relative;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: #474748;
+    color: #474748;
+    animation: dot-flashing 0.8s infinite linear alternate;
+    animation-delay: 0.5s;
+  }
+  .dot-flashing::before, .dot-flashing::after {
+    content: "";
+    display: inline-block;
+    position: absolute;
+    top: 0;
+  }
+  .dot-flashing::before {
+    left: -15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: #474748;
+    color: #474748;
+    animation: dot-flashing 0.8s infinite alternate;
+    animation-delay: 0s;
+  }
+  .dot-flashing::after {
+    left: 15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: #474748;
+    color: #474748;
+    animation: dot-flashing 0.8s infinite alternate;
+    animation-delay: 0.8s;
+  }
+  
+  @keyframes dot-flashing {
+    0% {
+      background-color: #474748;
+    }
+    50%, 100% {
+      background-color: rgba(161, 161, 162, 0.2);
+    }
+  }

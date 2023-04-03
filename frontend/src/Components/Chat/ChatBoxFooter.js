@@ -30,6 +30,49 @@ const ChatBoxFooter = ({
 
 
     console.log(currConvoID);
+    const handleChatKeyDown = (e) => {
+      if (e.key === 'Enter' || e.keyCode === 13) {
+        if (text) {
+          handleSubmit();
+        }
+      }
+    }
+    
+    const handleSubmit = () => {
+      if(inConvo){
+        if (text){
+          setWaitForResp(true);
+          const now = Temporal.Now.zonedDateTimeISO().toString();
+          const temp1 = {
+            message: text,
+            dateSent: now,
+            isUser: "true"
+          }
+          // Load user message on click
+          updateMessages((oldMessage) => [...oldMessage, temp1])
+
+          axios.post(process.env.REACT_APP_API_URL + "/chatlog", { conversation_id: currConvoID, chatlog: text,
+            time: now
+          })
+            .then((response) => {
+              const temp2 = {
+                message: response.data.agent.chatlog,
+                // dateSent: response.data.agent.time,
+                isUser: "false"
+              }
+              updateMessages((oldMessage) => [...oldMessage, temp2]);
+              setWaitForResp(false);
+              setText("");
+              console.log(text);
+            })
+            .catch((err) => console.log(err))
+        }else{
+         console.log("You must type something before asking AI for response :)")
+        }
+      }else{
+        console.log("must start a conversation to send a message to AI!");
+      }
+    }
 
     return(
     <HStack bgColor={'white'} p={5} paddingX={"3vw"} borderTop={'2px solid #EAEAEA'}>
@@ -87,47 +130,14 @@ const ChatBoxFooter = ({
         setText(e.target.value.slice(0, process.env.MAX_MESSAGE_LENGTH));
         }}
         isDisabled={waitingForResp || !inConvo}
+        onKeyDown={handleChatKeyDown}
       />
 
       <Button
         backgroundColor={"#3278cd"}
         colorScheme={'blue'}
         fontSize={'sm'}
-        onClick={() => {
-        if(inConvo){
-          if (text){
-            setWaitForResp(true);
-            const now = Temporal.Now.zonedDateTimeISO().toString();
-            const temp1 = {
-              message: text,
-              dateSent: now,
-              isUser: "true"
-            }
-            // Load user message on click
-            updateMessages((oldMessage) => [...oldMessage, temp1])
-
-            axios.post(process.env.REACT_APP_API_URL + "/chatlog", { conversation_id: currConvoID, chatlog: text,
-              time: now
-            })
-              .then((response) => {
-                const temp2 = {
-                  message: response.data.agent.chatlog,
-                  // dateSent: response.data.agent.time,
-                  isUser: "false"
-                }
-                updateMessages((oldMessage) => [...oldMessage, temp2]);
-                setWaitForResp(false);
-                setText("");
-                console.log(text);
-              })
-              .catch((err) => console.log(err))
-          }else{
-           console.log("You must type something before asking AI for response :)")
-          }
-        }else{
-          console.log("must start a conversation to send a message to AI!");
-        }
-      }}
+        onClick={handleSubmit}
       isDisabled={!inConvo || waitingForResp}>
         Send
       </Button>
