@@ -29,7 +29,6 @@ const ChatBoxFooter = ({
     const [text, setText] = useState("");
 
 
-    console.log(currConvoID);
     const handleChatKeyDown = (e) => {
       if (e.key === 'Enter' || e.keyCode === 13) {
         if (text) {

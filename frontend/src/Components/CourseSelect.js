@@ -4,7 +4,7 @@ import {useState} from "react";
 const CourseSelect = ({courses, setCurrCourse, wait, currCourse}) => {
 
     return (
-        <Box w='135px'>
+        <Box w='150px'>
             <Select 
             borderColor="white" 
             bg="white"

@@ -1,6 +1,6 @@
 import "../assets/globals.css";
-import { Route, useNavigate } from 'react-router-dom';
-import { Routes } from "react-router";
+import {Route} from 'react-router-dom';
+import {Routes} from "react-router";
 import StudentPage from "./StudentPage";
 import ProfessorPage from "./ProfessorPage";
 import ResearcherAnalytics from "./ResearcherAnalytics";
@@ -24,15 +24,20 @@ const App = ( {UTORid = ""} ) => {
   
 
   const getUserId = async () => {
+    setIsLoading(true);
     const user_id = await axios.post(process.env.REACT_APP_API_URL + "/get-user", {utorid: UTORid})
       .then((res) => {
         setuserId(res.data.user_id);
         setAuth(res.data.user_role);
         // console.log(res.data.user_id);
-        return res.data.user_id
+        setIsLoading(false);
+        return res.data.user_id;
       })
-      .catch((e) => {console.log(e)})
-      return user_id
+      .catch((e) => {
+        console.log(e)
+        setIsLoading(false);
+      });
+    return user_id;
   }
 
   const getAllCourses = async (user_id) => {
@@ -71,16 +76,40 @@ const App = ( {UTORid = ""} ) => {
   return isLoading ? <CustomSpinner /> :
     (<>
         <Routes>
-          { auth === "ST" ? <Route path="/" element={
-            <StudentPage
-              UTORid={UTORid} 
-              userId={userId}
-              currCourse={currCourse}
-              setCurrCourse={setCurrCourse}
-              courses={courses} 
-              semester={currCourse.semester}
-            />
-            } /> : null}
+          {auth === "ST" ? <React.Fragment>
+            <Route path="/" element={
+              <StudentPage
+                UTORid={UTORid}
+                currCourse={currCourse}
+                setCurrCourse={setCurrCourse}
+                courses={courses}
+                semester={currCourse.semester}
+                userId={userId}
+              />
+            } />
+            <Route path={"/model-1"} element={
+              <StudentPage
+                UTORid={UTORid}
+                currCourse={currCourse}
+                setCurrCourse={setCurrCourse}
+                courses={courses}
+                semester={currCourse.semester}
+                modelNum={1}
+                userId={userId}
+              />
+            }/>
+            <Route path={"/model-2"} element={
+              <StudentPage
+                UTORid={UTORid}
+                currCourse={currCourse}
+                setCurrCourse={setCurrCourse}
+                courses={courses}
+                semester={currCourse.semester}
+                modelNum={2}
+                userId={userId}
+              />
+            }/>
+          </React.Fragment> : null}
             { auth === "IS" ? <React.Fragment>
               <Route path="/Professor" element={<ProfessorPage/>} />
 
