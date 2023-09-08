@@ -58,8 +58,8 @@ class Conversation(models.Model):
     user_id = models.CharField(max_length=50)  
     start_time = models.DateTimeField(default=now)
     end_time = models.DateTimeField(blank=True, null=True)
-    status = models.CharField(max_length=1)
-    report = models.BooleanField()
+    status = models.CharField(max_length=1, default='A')
+    report = models.BooleanField(default=False)
     comfortability_rating = models.IntegerField()
 
     def __str__(self):

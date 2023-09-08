@@ -34,10 +34,11 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api',
         include([
-            path('/student/', include('students.urls', namespace='student')),
+            path('/students/', include('students.urls', namespace='students')),
             path('/user', include('users.urls', namespace='users')),
             path('/course', include('course.urls', namespace='course')),
             path('/models', include('models.urls', namespace='models')),
+            path('/student', include('student.urls', namespace='student')),
             path('/analytics', include('analytics.urls', namespace='analytics')),
             path('/administrative', include('administrative.urls', namespace='administrative')),
             path('/swagger/schema', schema_view.with_ui('swagger', cache_timeout=0), name="swagger-schema"),

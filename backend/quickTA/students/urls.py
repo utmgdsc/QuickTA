@@ -22,12 +22,11 @@ urlpatterns = [
     # path('course/all', views.courses_get_all),
 
     # Student 
-    path('chatlog', views.chatlog_detail),
-    path('conversation', views.conversation_detail),
-    path('feedback', views.feedback_detail),
-    path('report', views.chatlog_history_detail),
-    path('incorrect-answer', views.report_conversation),
-    path('comfortability-rating', views.course_comfortability),
+    # path('chatlog', views.chatlog_detail),
+    # path('conversation', views.conversation_detail),
+    # path('feedback', views.feedback_detail),
+    # path('incorrect-answer', views.report_conversation),
+    # path('comfortability-rating', views.course_comfortability),
 
     # Instructor/Researcher views
     # ================================================================================================
