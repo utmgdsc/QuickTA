@@ -30,27 +30,27 @@ urlpatterns = [
 
     # Instructor/Researcher views
     # ================================================================================================
-    path('researcher/average-ratings', researcher_views.average_ratings),
-    path('researcher/average-ratings-csv', researcher_views.average_ratings_csv),
+    # path('researcher/average-ratings', researcher_views.average_ratings),
+    # path('researcher/average-ratings-csv', researcher_views.average_ratings_csv),
     
-    path('researcher/resolve-reported-conversation', researcher_views.resolve_reported_conversation),
-    path('researcher/reported-conversations', researcher_views.list_reported_conversations),
-    path('researcher/reported-conversations-csv', researcher_views.list_reported_conversations_csv),
+    # path('researcher/resolve-reported-conversation', researcher_views.resolve_reported_conversation),
+    # path('researcher/reported-conversations', researcher_views.list_reported_conversations),
+    # path('researcher/reported-conversations-csv', researcher_views.list_reported_conversations_csv),
     
-    path('researcher/report-chatlogs', researcher_views.get_reported_chatlogs),
-    path('researcher/reported-chatlogs-csv', researcher_views.get_reported_chatlogs_csv),
+    # path('researcher/report-chatlogs', researcher_views.get_reported_chatlogs),
+    # path('researcher/reported-chatlogs-csv', researcher_views.get_reported_chatlogs_csv),
     
-    path('researcher/avg-response-rate', researcher_views.get_average_response_rate),
-    path('researcher/avg-response-rate-csv', researcher_views.get_average_response_rate_csv),
+    # path('researcher/avg-response-rate', researcher_views.get_average_response_rate),
+    # path('researcher/avg-response-rate-csv', researcher_views.get_average_response_rate_csv),
     
-    path('researcher/most-common-words', researcher_views.get_most_common_words),
-    path('researcher/most-common-words-wordcloud', researcher_views.get_most_common_words_wordcloud),
+    # path('researcher/most-common-words', researcher_views.get_most_common_words),
+    # path('researcher/most-common-words-wordcloud', researcher_views.get_most_common_words_wordcloud),
     
-    path('researcher/avg-comfortability-rating', researcher_views.get_course_comfortability),
-    path('researcher/avg-comfortability-rating-csv', researcher_views.get_course_comfortability_csv),
-    path('researcher/get-filtered-chatlogs', researcher_views.get_filtered_chatlogs),
+    # path('researcher/avg-comfortability-rating', researcher_views.get_course_comfortability),
+    # path('researcher/avg-comfortability-rating-csv', researcher_views.get_course_comfortability_csv),
+    # path('researcher/get-filtered-chatlogs', researcher_views.get_filtered_chatlogs),
 
-    path('researcher/interaction-frequency', researcher_views.get_interaction_frequency),
+    # path('researcher/interaction-frequency', researcher_views.get_interaction_frequency),
 
     # path('researcher/course-student-list', researcher_views.get_course_users), -- implement pagination for total amount of students 
 

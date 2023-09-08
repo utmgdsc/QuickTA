@@ -29,6 +29,23 @@ class Conversation(models.Model):
     def __str__(self):
         return f"[{str(self.course)}] {str(self.user)} - Conversation {str(self.conversation_id)}"
     
+    def to_dict(self):
+        user = User.objects.get(user_id=self.user_id)
+        course = Course.objects.get(course_id=self.course_id)
+        return {
+            "course_name": course.name,
+            "course_id": self.course_id,
+            "user_id": self.user_id,
+            "user_name": user.name,
+            "utorid": user.utorid,
+            "conversation_id": str(self.conversation_id),
+            "start_time": self.start_time,
+            "end_time": self.end_time,
+            "status": self.status,
+            "reported": self.reported,
+            "comfortability_rating": self.comfortability_rating
+        }
+
 class Chatlog(models.Model):
     chatlog_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     conversation_id = models.CharField(max_length=100)
@@ -40,7 +57,19 @@ class Chatlog(models.Model):
     def __str__(self):
         return f"[{str(self.conversation)}] Chatlog - {str(self.chatlog_id)} {self.chatlog}"
     
-    def to_dict(self):
+    def to_dict(self, show_alias=False):
+
+        if show_alias:
+            convo = Conversation.objects.get(conversation_id=self.conversation_id)
+            user = User.objects.get(user_id=convo.user_id)
+            return {
+                "chatlog_id": str(self.chatlog_id),
+                "conversation_id": self.conversation_id,
+                "time": self.time,
+                "speaker": user.name if self.is_user else "Agent",
+                "chatlog": self.chatlog,
+                "delta": self.delta
+            }
         return {
             "chatlog_id": str(self.chatlog_id),
             "conversation_id": self.conversation_id,
@@ -58,6 +87,21 @@ class Report(models.Model):
 
     def __str__(self):
         return f"[{str(self.conversation)}] {self.msg}"
+    
+    def to_dict(self):
+        conversation = Conversation.objects.get(conversation_id=self.conversation_id)
+        user = User.objects.get(user_id=self.user_id)
+
+        return {
+            "course_id": conversation.course_id,
+            "conversation_id": self.conversation_id,
+            "user_id": self.user_id,
+            "user_name": user.name,
+            "utorid": user.utorid,
+            "time": self.time,
+            "status": self.status,
+            "msg": self.msg
+        }
 
 
 class Feedback(models.Model):
