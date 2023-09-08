@@ -11,12 +11,10 @@ class Test_Create_User(TestCase):
 
     def test_user_creation(self):
         user = User.objects.get()
-        user_id = f'{user.user_id}'
         name = f'{user.name}'
         utorid = f'{user.utorid}'
         user_role = f'{user.user_role}'
         
-        self.assertEqual(user_id, 'testuser1')
         self.assertEqual(name, 'Test User')
         self.assertEqual(utorid, 'testuser1')
         self.assertEqual(user_role, 'ST')

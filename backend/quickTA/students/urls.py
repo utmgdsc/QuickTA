@@ -11,14 +11,17 @@ urlpatterns = [
     # path('conversation/all', ConversationList.as_view(), name='conversation-list'),
     # path('chatlog/all', ChatlogList.as_view(), name='chatlog-detail'),
 
-    # Student view
-    # ================================================================================================
-    path('user', views.user_detail),
+    # User
+    # path('user', views.user_detail),
+    # path('get-user',views.get_user),
     path('user/courses', views.get_user_courses),
-    path('get-user',views.get_user),
+
+    # Course
     path('course', views.course_detail),
     path('get-course', views.course_get),
     path('course/all', views.courses_get_all),
+
+    # Student 
     path('chatlog', views.chatlog_detail),
     path('conversation', views.conversation_detail),
     path('feedback', views.feedback_detail),
@@ -52,6 +55,7 @@ urlpatterns = [
 
     path('researcher/course-student-list', researcher_views.get_course_users),
 
+    # LLMmodel views
     path('researcher/gptmodel-create', researcher_views.gptmodel_create),
     path('researcher/gptmodel-update', researcher_views.gptmodel_update),
     path('researcher/gptmodel-activate', researcher_views.gptmodel_select),
@@ -59,6 +63,7 @@ urlpatterns = [
     path('researcher/gptmodel-get-one', researcher_views.gptmodel_get_one),
     path('researcher/gptmodel-get-all', researcher_views.gptmodel_get_all),
     path('researcher/gptmodel-delete', researcher_views.gptmodel_delete),
+    
     # Admin view
     # ================================================================================================
     path('admin/add-user', admin_views.create_user),
@@ -74,3 +79,5 @@ urlpatterns = [
     path('admin/get-course-users/<str:course_id>/', admin_views.get_course_users),
     path('admin/get-course-unadded-users/', admin_views.get_courses_unadded_users)
 ]
+
+
