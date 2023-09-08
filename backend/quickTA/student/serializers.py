@@ -51,10 +51,6 @@ class ReportSerializer(ModelSerializer):
             model = Report
             fields = [
                 'conversation_id',
-                'course_id',
-                'user_id',
-                'name',
-                'utorid',
                 'time',
                 'status',
                 'msg'

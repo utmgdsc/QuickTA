@@ -7,6 +7,7 @@ urlpatterns = [
     # Conversation/Chatlog related views
     path('/conversation', ConversationView.as_view(), name='conversation'),
     path('/conversation/all', ConversationListView.as_view(), name='conversation_list'),
+    path('/conversation/history', ConversationHistoryCsvView.as_view(), name='conversation_history'),
     path('/chatlog', ChatlogView.as_view(), name='chatlog'),
     path('/chatlog/all', ChatlogListView.as_view(), name='chatlog_list'),
     path('/feedback', FeedbackView.as_view(), name='feedback'),

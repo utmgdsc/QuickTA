@@ -1,6 +1,7 @@
 import uuid
 import re
 import pytz 
+import csv
 
 from django.utils import timezone, dateparse
 from django.shortcuts import render
@@ -16,6 +17,7 @@ from course.models import Course
 from student.models import Conversation, Chatlog, Report, Feedback
 from django.shortcuts import get_object_or_404
 from django.http import Http404
+from django.http import HttpResponse
 
 # Create your views here.
 
@@ -86,7 +88,29 @@ class ConversationListView(APIView):
         conversations = Conversation.objects.all()
         serializer = ConversationSerializer(conversations, many=True)
         return JsonResponse(serializer.data, safe=False)
-    
+
+class ConversationHistoryCsvView(APIView):
+
+    def post(self, request):
+        conversation_id = request.data.get('conversation_id')
+        conversation = get_object_or_404(Conversation, conversation_id=conversation_id)
+        user = get_object_or_404(User, user_id=conversation.user_id)
+        chatlogs = Chatlog.objects.filter(conversation_id=conversation_id).order_by('time')
+
+        response = HttpResponse(
+            content_type='text/csv',
+            headers={'Content-Disposition': 'attachment; filename="convo-report.csv"'}
+        )
+        response["Access-Control-Expose-Headers"] = "Content-Type, Content-Disposition"
+
+        writer = csv.writer(response)
+        for chatlog in chatlogs:
+            formatted_time = chatlog.time.strftime("%m/%d/%Y %H:%M:%S")
+            speaker = str(user.name) if chatlog.is_user else 'QuickTA'
+            writer.writerow(['[' + formatted_time + ']', speaker, str(chatlog.chatlog)])
+
+        return response
+
 class ChatlogView(APIView):
 
     @swagger_auto_schema(
@@ -356,19 +380,4 @@ class CourseComfortabilityListView(APIView):
         course_comfortabilities = Conversation.objects.all()
         serializer = CourseComfortabilitySerializer(course_comfortabilities, many=True)
         return JsonResponse(serializer.data, safe=False)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

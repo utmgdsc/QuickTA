@@ -52,7 +52,7 @@ urlpatterns = [
 
     path('researcher/interaction-frequency', researcher_views.get_interaction_frequency),
 
-    path('researcher/course-student-list', researcher_views.get_course_users),
+    # path('researcher/course-student-list', researcher_views.get_course_users), -- implement pagination for total amount of students 
 
     # LLMmodel views
     path('researcher/gptmodel-create', researcher_views.gptmodel_create),

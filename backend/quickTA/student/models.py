@@ -50,7 +50,6 @@ class Chatlog(models.Model):
             "delta": self.delta
         }
 
-
 class Report(models.Model): 
     conversation_id = models.CharField(max_length=100)
     time = models.DateTimeField(default=now)
