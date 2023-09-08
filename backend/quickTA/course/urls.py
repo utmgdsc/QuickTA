@@ -11,4 +11,5 @@ urlpatterns = [
     path('/list', CourseMultipleList.as_view()),
     path('/enrollment', CourseEnrollment.as_view()),
     path('/users', CourseUserList.as_view()),
+    path('/unenrolled-users', CourseUnenrolledUsersList.as_view())
 ]

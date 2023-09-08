@@ -1,7 +1,7 @@
 import uuid
 from django.shortcuts import render
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework import status
 from rest_framework.views import APIView
@@ -10,8 +10,10 @@ from drf_yasg import openapi
 from course.models import Course
 from course.serializers import CourseSerializer
 from users.models import User
+from users.serializers import UserSerializer
 from utils.constants import ROLE_MAP, ROLE_MAP_ENUM, COURSE_ROLE_MAP
 from utils.handlers import ErrorResponse
+
 
 # Create your views here.
 class CourseView(APIView):
@@ -23,7 +25,7 @@ class CourseView(APIView):
             openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
             openapi.Parameter("course_code", openapi.IN_QUERY, description="Course code", type=openapi.TYPE_STRING),
             openapi.Parameter("semester", openapi.IN_QUERY, description="Semester", type=openapi.TYPE_STRING),
-             openapi.Parameter("students", in_=openapi.IN_QUERY, description="Include students (True/False)", type=openapi.TYPE_BOOLEAN),
+            openapi.Parameter("students", in_=openapi.IN_QUERY, description="Include students (True/False)", type=openapi.TYPE_BOOLEAN),
         ]
     )
     def get(self, request):
@@ -260,5 +262,41 @@ class CourseMultipleList(APIView):
         serializer = CourseSerializer(courses, many=True)
         return JsonResponse(serializer.data)
 
+class CourseUnenrolledUsersList(APIView):
+
+    # Gets all the students, instructors, admins and researchers that are not enrolled in a course
+    @swagger_auto_schema(
+        operation_summary="Get unenrolled users",
+        manual_parameters=[
+            openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("user_roles", openapi.IN_QUERY, description="List of user roles (ST = Student, IS = Instructor, RS = Researcher, AM = Admin)", type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING)),
+        ],
+        responses={200: "Unenrolled users", 404: "Course not found"}
+    )
+    def get(self, request):
+        """
+        Gets unenrolled users
+        """
+        course_id = request.query_params.get('course_id', '')
+        user_roles = request.query_params.get('user_roles', []).split(',')
+
+        course = get_object_or_404(Course, course_id=course_id)
+        unenrolled_users = {role: [] for role in user_roles}
+        
+        users_query = Q(user_role__in=user_roles) & (
+            ~Q(user_id__in=course.students) |
+            ~Q(user_id__in=course.instructors) |
+            ~Q(user_id__in=course.researchers) |
+            ~Q(user_id__in=course.admins)
+        )
+        users = User.objects.filter(users_query)
+
+        unenrolled_users = {
+            COURSE_ROLE_MAP[role]: [user for user in users if user.user_role == role and user.user_id not in getattr(course, COURSE_ROLE_MAP[role])]
+            for role in user_roles
+        }
+        response = {role: UserSerializer(users, many=True).data for role, users in unenrolled_users.items()}
+        return JsonResponse(response)
+    
 # TODO: Enroll multiple students in a course
 # TODO: Unenroll multiple students in a course
