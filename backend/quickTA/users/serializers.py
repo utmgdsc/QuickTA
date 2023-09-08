@@ -13,6 +13,7 @@ class UserSerializer(ModelSerializer):
     )
 
     user_role = serializers.ChoiceField(choices=USER_ROLE_CHOICES)
+    courses = serializers.ListField(child=serializers.CharField(max_length=200))
 
     class Meta:
         model = User
@@ -21,4 +22,7 @@ class UserSerializer(ModelSerializer):
             'name',
             'utorid',
             'user_role',
+            'courses'
         ]
+    
+    def get_courses(self, obj): return [str(course) for course in obj.courses]

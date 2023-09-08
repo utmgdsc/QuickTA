@@ -114,3 +114,36 @@ class UserView(APIView):
             return response
         return None
 
+
+class UserListView(APIView):
+        
+        @swagger_auto_schema(
+            operation_summary="Get all users",
+            responses={200: UserSerializer(many=True), 404: "No users found"}
+        )
+        def get(self, request):
+            """
+            Acquires all users.
+            """
+            users = User.objects.all()
+            serializer = UserSerializer(users, many=True)
+            return JsonResponse(serializer.data, safe=False)
+
+class UserCoursesListView(APIView):
+    
+    @swagger_auto_schema(
+        operation_summary="Get user's courses",
+        manual_parameters=[openapi.Parameter("user_id", openapi.IN_QUERY, description="User ID", type=openapi.TYPE_STRING)],
+        responses={200: "User's courses", 400: "Bad request", 404: "User not found"}
+    )
+    def get(self, request):
+        """
+        Acquires the courses of a certain user by user_id.
+        """
+        user_id = request.GET.get('user_id', '')
+        utorid = request.query_params.get('utorid', '')
+        if user_id == '' and utorid == '': 
+            return ErrorResponse("Bad request", status=status.HTTP_400_BAD_REQUEST)
+        
+        user = get_object_or_404(User, user_id=user_id)
+        return JsonResponse(user.courses, safe=False)
