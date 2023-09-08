@@ -11,33 +11,7 @@ from django.shortcuts import get_object_or_404
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-
-
-def ErrorResponse(error, status):
-
-    def parse_error(error):
-        """
-        Rules to parse the error message
-        """
-        error_message = error.replace('\"', "'")
-        return error_message
-
-    if not isinstance(error, dict):
-        return JsonResponse({"error": error}, status=status)
-
-    errors = {"error": {}}
-    for key, value in error.items():
-        if isinstance(value, str):
-            error_message = parse_error(value)
-        elif isinstance(value, list):
-            error_message = [parse_error(item) for item in value]
-        else:
-            error_message = value
-
-        errors["error"][key] = error_message
-
-    return JsonResponse(errors, status=status)
-
+from utils.handlers import ErrorResponse
 
 # Create your views here.
 class UserView(APIView):
@@ -73,7 +47,14 @@ class UserView(APIView):
     )
     def post(self, request):
         """
-        Creates a new user
+        Creates a new user.
+
+        A User can be of the following roles:
+        
+        - ST: student
+        - IS: instructor
+        - RS: researcher
+        - AM: admin
         """
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
@@ -90,6 +71,13 @@ class UserView(APIView):
     def patch(self, request):
         """
         Updates the user's information
+
+        A User can be of the following roles:
+        
+        - ST: student
+        - IS: instructor
+        - RS: researcher
+        - AM: admin
         """
 
         user_id = request.query_params.get('user_id', '')

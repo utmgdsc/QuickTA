@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+import djongo.models as djmodels
 
 # Create your models here.
 class User(models.Model):
@@ -8,7 +9,7 @@ class User(models.Model):
     name = models.CharField(max_length=200)
     utorid = models.CharField(max_length=10)
     user_role = models.CharField(max_length=2)
+    courses = djmodels.JSONField(default=[], blank=True, null=True)
 
     def __str__(self):
-        return self.name + "(" + self.user_id + ")"
-    
+        return self.name + "(" + str(self.user_id) + ")"

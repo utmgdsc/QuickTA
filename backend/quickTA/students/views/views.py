@@ -53,77 +53,7 @@ def get_user_courses(request):
             err = {"msg": "Get user course missing fields:" + ','.join(error)}
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(methods=['post'], request_body=CreateCourseRequest,
-    responses={
-        200: openapi.Response('Success', CreateCourseResponse),
-        400: openapi.Response('Bad Request', ErrorResponse)
-    })
-@api_view(['POST'])
-def course_detail(request):
-    """
-    Creates a new course.
 
-    Acquires the course_code and semester.
-    Returns the initialized course created with its course id, course name, course code and semester.
-    """
-    if request.method == 'POST':
-        # try:
-            # Check for duplicated courses
-            course_code = Course.objects.filter(
-                course_code=request.data['course_code'],
-                semester=request.data['semester']
-            )
-
-            if (len(course_code) != 0):
-                raise CourseAlreadyExistsError
-
-            # Save new course
-            course_id = str(uuid.uuid4())
-
-            # Date Parsing Start Date
-            start_date = request.data['start_date']
-            end_date = request.data['end_date']
-            
-            course = Course(
-                course_id=course_id,
-                course_code=request.data['course_code'],
-                semester=request.data['semester'],
-                course_name=request.data['course_name'],
-                start_date=start_date,
-                end_date=end_date
-            )
-            course.save()
-        
-            response = {
-                "course_id": course_id,
-                "course_code": request.data['course_code'],
-                "semester": request.data['semester'],
-                "course_name": request.data['course_name'],
-                "start_date": start_date,
-                "end_date": end_date
-            }
-
-            return Response(response, status=status.HTTP_201_CREATED)
-
-        # except CourseAlreadyExistsError:
-        #     return Response({"msg": "Course already exists."}, status=status.HTTP_403_FORBIDDEN)
-        # except:
-        #     error = []
-        #     if 'course_code' not in request.data.keys():
-        #         error.append("Course Code")
-        #     if 'semester' not in request.data.keys():
-        #         error.append("Semester")
-        #     err = {"msg": "Course missing fields:" + ','.join(error)}
-        #     return Response(err, status=status.HTTP_400_BAD_REQUEST)
-
-@swagger_auto_schema(methods=['post'], request_body=GetCourseRequest,
-    responses={
-        200: openapi.Response('Success', GetCourseResponse),
-        400: openapi.Response('Bad Request', ErrorResponse),
-        404: openapi.Response('Not Found', ErrorResponse)
-    })
-@api_view(['POST'])
-def course_get(request):
     """
     Retrieves a current course's information.
 
@@ -231,26 +161,6 @@ def conversation_detail(request):
             err = {"msg": "Conversation details missing fields: " + ','.join(error) + '.'}
 
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
-
-@swagger_auto_schema(methods=['get'],
-    responses={
-        200: openapi.Response('Success', GetAllCoursesResponse),
-        500: openapi.Response('Internal Server Error', ErrorResponse)
-    })
-@api_view(['GET'])
-def courses_get_all(request):
-    """
-    Retrieves all courses.
-
-    Returns all relevant information of all courses.
-    Each course's information includes the course ID, semester, code and name.
-    """
-    if request.method == 'GET':
-        try:
-            courses = Course.objects.all().values()
-            return JsonResponse({"courses": list(courses)})
-        except:
-            return Response("Internal server error.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @swagger_auto_schema(methods=['post'], request_body=GetChatlogRequest,
     responses={

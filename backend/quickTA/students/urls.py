@@ -17,9 +17,9 @@ urlpatterns = [
     path('user/courses', views.get_user_courses),
 
     # Course
-    path('course', views.course_detail),
-    path('get-course', views.course_get),
-    path('course/all', views.courses_get_all),
+    # path('course', views.course_detail),
+    # path('get-course', views.course_get),
+    # path('course/all', views.courses_get_all),
 
     # Student 
     path('chatlog', views.chatlog_detail),
