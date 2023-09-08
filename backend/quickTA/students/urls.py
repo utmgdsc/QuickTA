@@ -14,7 +14,7 @@ urlpatterns = [
     # User
     # path('user', views.user_detail),
     # path('get-user',views.get_user),
-    path('user/courses', views.get_user_courses),
+    # path('user/courses', views.get_user_courses),
 
     # Course
     # path('course', views.course_detail),

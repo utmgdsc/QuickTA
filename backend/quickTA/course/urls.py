@@ -8,5 +8,7 @@ urlpatterns = [
     # path('/list', user_list),
     path('', CourseView.as_view()),
     path('/all', CourseList.as_view()),
-    path('/enrollment', CourseEnrollment.as_view())
+    path('/list', CourseMultipleList.as_view()),
+    path('/enrollment', CourseEnrollment.as_view()),
+    path('/users', CourseUserList.as_view()),
 ]

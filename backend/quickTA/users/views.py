@@ -114,7 +114,6 @@ class UserView(APIView):
             return response
         return None
 
-
 class UserListView(APIView):
         
         @swagger_auto_schema(
@@ -147,3 +146,5 @@ class UserCoursesListView(APIView):
         
         user = get_object_or_404(User, user_id=user_id)
         return JsonResponse(user.courses, safe=False)
+
+# TODO: add a view to get all the courses the user is not in

@@ -2,7 +2,7 @@ import uuid
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework import status
 from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
@@ -97,7 +97,7 @@ class CourseView(APIView):
             openapi.Parameter("course_code", openapi.IN_QUERY, description="Course code", type=openapi.TYPE_STRING),
             openapi.Parameter("semester", openapi.IN_QUERY, description="Semester", type=openapi.TYPE_STRING)
             ],
-        responses={200: "Course deleted", 404: "Course not found"}
+        responses={200: "Course deleted", 404: "Course not found", 405: "Cannot delete course with enrolled users"}
     )
     def delete(self, request):
         """
@@ -107,7 +107,9 @@ class CourseView(APIView):
         """
         course_id = request.query_params.get('course_id', '')
         course = get_object_or_404(Course, course_id=course_id)
-        course.delete()
+
+        if course.students or course.instructors or course.researchers or course.admins:
+            return ErrorResponse("Cannot delete course with enrolled users", status.HTTP_405_METHOD_NOT_ALLOWED)
         return JsonResponse({"msg": "Course deleted"})
     
     def create_course(self, serializer):
@@ -212,5 +214,51 @@ class CourseEnrollment(APIView):
         Course.objects.filter(course_id=course_id).update(**{role_field: users})
         User.objects.filter(user_id=user_id).update(courses=courses)
         return JsonResponse({"msg": "Student unenrolled"})
+
+class CourseUserList(APIView):
     
-# TODO: View for acquiring multiple courses' information
+    @swagger_auto_schema(
+    operation_summary="Get students in a course by user roles",
+    manual_parameters=[
+        openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
+        openapi.Parameter("user_roles", openapi.IN_QUERY, description="List of user roles (ST = Student, IS = Instructor, RS = Researcher, AM = Admin)", type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING)),
+    ],
+    responses={200: "Students", 404: "Course not found"}
+    )
+    def get(self, request):
+        """
+        Acquires students in a course by user roles
+        """
+        course_id = request.query_params.get('course_id', '')
+        user_roles = request.query_params.get('user_roles', [])
+        user_roles = user_roles.split(',')
+
+
+        course = get_object_or_404(Course, course_id=course_id)
+        response = dict()
+        for role in user_roles:
+            role_field = COURSE_ROLE_MAP.get(role, None)
+            if role_field: response[role_field] = getattr(course, role_field) if getattr(course, role_field) else []
+
+        return JsonResponse(response)
+
+class CourseMultipleList(APIView):
+    @swagger_auto_schema(
+        operation_summary="Get multiple courses",
+        manual_parameters=[
+            openapi.Parameter("course_ids", openapi.IN_QUERY, description="List of course IDs", type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING)),
+        ],
+        responses={200: CourseSerializer(many=True), 404: "Course not found"}
+    )
+    def get(self, request):
+        """
+        Gets multiple courses
+        """
+        course_ids = request.query_params.get('course_ids', [])
+        course_ids = course_ids.split(',')
+        courses = get_list_or_404(Course, course_id__in=course_ids)
+        serializer = CourseSerializer(courses, many=True)
+        return JsonResponse(serializer.data)
+
+# TODO: Enroll multiple students in a course
+# TODO: Unenroll multiple students in a course
