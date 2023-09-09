@@ -18,4 +18,4 @@ class Course(models.Model):
     admins = djmodels.JSONField(default=[], blank=True, null=True)
 
     def __str__(self):
-        return self.course_code + " - " + self.course_name + "(" + str(self.course_id) + ")"
+        return self.course_code + " - " + self.course_name + "(" + str(self.course_id) + ")"   

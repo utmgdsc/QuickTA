@@ -1,23 +1,20 @@
-import uuid
-import re
-import pytz 
 import csv
+import pytz 
+import re
+import uuid
 
 from django.utils import timezone, dateparse
-from django.shortcuts import render
-from rest_framework.views import APIView
-from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse, JsonResponse
 from rest_framework import status
-from drf_yasg.utils import swagger_auto_schema
+from rest_framework.views import APIView
 from drf_yasg import openapi
-from utils.handlers import ErrorResponse
+from drf_yasg.utils import swagger_auto_schema
 from student.serializers import *
+from utils.handlers import ErrorResponse
 from users.models import User
 from course.models import Course
 from student.models import Conversation, Chatlog, Report, Feedback
-from django.shortcuts import get_object_or_404
-from django.http import Http404
-from django.http import HttpResponse
 
 # Create your views here.
 
