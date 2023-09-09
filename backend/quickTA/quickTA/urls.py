@@ -41,10 +41,10 @@ urlpatterns = [
             path('/student', include('student.urls', namespace='student')),
             path('/analytics', include('analytics.urls', namespace='analytics')),
             path('/administrative', include('administrative.urls', namespace='administrative')),
+            path('/researchers', include('researchers.urls')),
             path('/swagger/schema', schema_view.with_ui('swagger', cache_timeout=0), name="swagger-schema"),
             path('/redoc', schema_view.with_ui('redoc', cache_timeout=0), name="redoc-schema")
         ])
     ),
-    path('researchers/', include('researchers.urls'))
         
 ]

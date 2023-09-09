@@ -300,3 +300,61 @@ class CourseUnenrolledUsersList(APIView):
     
 # TODO: Enroll multiple students in a course
 # TODO: Unenroll multiple students in a course
+
+class CourseMultipleEnrollment(APIView):
+    @swagger_auto_schema(
+        operation_summary="Enroll multiple students in a course",
+        manual_parameters=[
+            openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
+        ],
+        # request_body=CourseMultipleUserSerializer(many=True),
+        responses={200: "Students enrolled", 404: "Course not found"}
+    )
+    def post(self, request):
+        """
+        Enrolls multiple students in a course
+        TODO: Implement endpoint
+        """
+        course_id = request.query_params.get('course_id', '')
+        course = get_object_or_404(Course, course_id=course_id)
+
+        students = request.data.get('students', [])
+        students = students.split(',')
+
+        for student in students:
+            user = get_object_or_404(User, user_id=student)
+            if student not in course.students:
+                course.students.append(student)
+                user.courses.append(course_id)
+        
+        Course.objects.filter(course_id=course_id).update(students=course.students)
+        User.objects.filter(user_id__in=students).update(courses=course.courses)
+        return JsonResponse({"msg": "Students enrolled"})
+
+    @swagger_auto_schema(
+        operation_summary="Unenroll multiple students from a course",
+        manual_parameters=[
+            openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
+        ],
+        responses={200: "Students unenrolled", 404: "Course not found"}
+    )
+    def delete(self, request):
+        """
+        Unenrolls multiple students from a course
+        TODO: Implement endpoint
+        """
+        course_id = request.query_params.get('course_id', '')
+        course = get_object_or_404(Course, course_id=course_id)
+
+        students = request.data.get('students', [])
+        students = students.split(',')
+
+        for student in students:
+            user = get_object_or_404(User, user_id=student)
+            if student in course.students:
+                course.students.remove(student)
+                user.courses.remove(course_id)
+        
+        Course.objects.filter(course_id=course_id).update(students=course.students)
+        User.objects.filter(user_id__in=students).update(courses=course.courses)
+        return JsonResponse({"msg": "Students unenrolled"})

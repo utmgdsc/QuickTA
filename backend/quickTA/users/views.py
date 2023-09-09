@@ -3,7 +3,7 @@ import uuid
 from rest_framework.views import APIView
 from django.http import JsonResponse
 from django.shortcuts import render
-from .serializers import UserSerializer
+from .serializers import UserSerializer, UserBatchAddSerializer
 from .models import User
 from rest_framework import status
 from django.http import Http404
@@ -12,6 +12,8 @@ from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from utils.handlers import ErrorResponse
+
+from utils.constants import ROLE_MAP_ENUM, ROLE_MAP
 
 # Create your views here.
 class UserView(APIView):
@@ -148,3 +150,26 @@ class UserCoursesListView(APIView):
         return JsonResponse(user.courses, safe=False)
 
 # TODO: add a view to get all the courses the user is not in
+class UserBatchAddView(APIView):
+
+    @swagger_auto_schema(
+        operation_summary="Add multiple users",
+        request_body=UserBatchAddSerializer(many=True),
+        manual_parameters=[openapi.Parameter("user_role", openapi.IN_QUERY, description="User role", type=openapi.TYPE_STRING, enum=ROLE_MAP_ENUM)],
+        responses={201: "Users created", 400: "Bad request"}
+    )
+    def post(self, request):
+        """
+        Creates multiple users. Defaults to student role if unspecified.
+
+        TODO: Check for duplicating users (based on utorid)
+        """
+        user_role = request.query_params.get('user_role', 'ST')
+        if user_role not in ROLE_MAP.keys():
+            return ErrorResponse("Bad request", status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = UserBatchAddSerializer(data=request.data, role=user_role, many=True)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse({"msg": "Users created"}, status=status.HTTP_201_CREATED)
+        return ErrorResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

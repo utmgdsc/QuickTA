@@ -18,7 +18,7 @@ class GPTModelView(APIView):
 
     @swagger_auto_schema(
         operation_description="Returns a GPT model given the model_id and course_id.",
-        responses={ 200: GPTModelSerializer(), 400: ErrorResponse, 500: ErrorResponse},
+        responses={ 200: GPTModelSerializer(), 400: "Bad Request", 404: "Model not found"},
         manual_parameters=[
             openapi.Parameter("model_id", openapi.IN_QUERY, type=openapi.TYPE_STRING),
             openapi.Parameter("course_id", openapi.IN_QUERY, type=openapi.TYPE_STRING)
@@ -56,7 +56,7 @@ class GPTModelView(APIView):
                 'best_of': openapi.Schema(type=openapi.TYPE_INTEGER)
             }
         ),
-        responses={ 200: GPTModelSerializer(), 400: ErrorResponse}
+        responses={ 200: GPTModelSerializer(), 400: "Bad Request"}
     )
     def post(self, request):
         """
@@ -92,7 +92,7 @@ class GPTModelView(APIView):
                 'best_of': openapi.Schema(type=openapi.TYPE_INTEGER)
             }
         ),
-        responses={ 200: GPTModelSerializer(), 400: ErrorResponse}
+        responses={ 200: GPTModelSerializer(), 400: "Bad Request"}
     )
     def put(self, request):
         """
@@ -154,7 +154,7 @@ class GPTModelListView(APIView):
 
     @swagger_auto_schema(
         operation_description="Returns all GPT models in the system.",
-        responses={ 200: GPTModelSerializer(many=True), 400: ErrorResponse, 500: ErrorResponse}
+        responses={ 200: GPTModelSerializer(many=True) }
     )
     def get(self, request, format=None):
         """
@@ -172,7 +172,7 @@ class ActivateGPTModelView(APIView):
             openapi.Parameter("model_id", openapi.IN_QUERY, type=openapi.TYPE_STRING),
             openapi.Parameter("course_id", openapi.IN_QUERY, type=openapi.TYPE_STRING)
         ],
-        responses={ 200: GPTModelSerializer(), 400: ErrorResponse, 404: "Model not found"}
+        responses={ 200: GPTModelSerializer(), 400: "Bad Request", 404: "Model not found"}
     )
     def get(self, request):
         """

@@ -14,50 +14,6 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 
-@swagger_auto_schema(methods=['post'], request_body=CreateMultipleUserRequest,
-    responses={
-        201: openapi.Response('Created', CreateMultipleUserResponse),
-        400: openapi.Response('Bad Request', ErrorResponse),
-        409: openapi.Response('User Already Exists', ErrorResponse)
-    })
-@api_view(['POST'])
-def create_multiple_users(request):
-    """
-    Adds multiple users.
-
-    List of Parameters:
-    
-        - users: List           Users array containing the following information for each user:
-    
-            - name: str         User name
-            - utorid: str       User's utorid
-            - user_role: str    User role ('ST' - Student, 'IS' - Instructor, 'RS' - researcher, 'AM' - admin)
-    """
-    if request.method == 'POST':
-        try:
-            response = { "users": [] }
-
-            for user in request.data['users']:
-                ret = user_functions.create_user(user)
-                if ret == OPERATION_FAILED:
-                    raise UserAlreadyExistsError
-                response['users'].append(ret)
-            return Response(ret, status=status.HTTP_201_CREATED)
-        
-        except UserAlreadyExistsError:
-            return Response({"msg": "User already exists."}, status=status.HTTP_409_CONFLICT)
-        except:
-            error = []
-            if 'name' not in request.data.keys():
-                error.append("Name")
-            if 'utorid' not in request.data.keys():
-                error.append("Utor ID")
-            if 'user_role' not in request.data.keys():
-                error.append("User Role")
-            err = {"msg": "User details missing fields:" + ','.join(error)}
-
-            return Response(err, status=status.HTTP_400_BAD_REQUEST)
-
 
 @swagger_auto_schema(methods=['post'], request_body=AddMultipleUserToCourseRequest,
     responses={
