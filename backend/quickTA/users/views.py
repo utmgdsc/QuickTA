@@ -1,4 +1,5 @@
 import uuid
+import csv
 
 from rest_framework.views import APIView
 from django.http import JsonResponse
@@ -14,6 +15,7 @@ from drf_yasg import openapi
 from utils.handlers import ErrorResponse
 
 from utils.constants import ROLE_MAP_ENUM, ROLE_MAP
+
 
 # Create your views here.
 class UserView(APIView):
@@ -173,3 +175,81 @@ class UserBatchAddView(APIView):
             serializer.save()
             return JsonResponse({"msg": "Users created"}, status=status.HTTP_201_CREATED)
         return ErrorResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserBatchAddCSVView(APIView):
+
+    def post(self, request):
+        """
+        Create mutiple users through csv file. Defaults to student role if unspecified.
+
+        Skips rows missing user_id, utorid, and name.
+        Adds rows where other fields are malformed except preiously metioned fields.
+
+        """
+        
+        if request.method != 'POST':
+            return ErrorResponse(f'Calling {request.method} for POST endpoint', status=status.HTTP_400_BAD_REQUEST)
+        
+        csv_file = [file for name, file in request.FILES.items() if name.endswith('.csv')]
+
+        if not csv_file:
+            return ErrorResponse("No csv uploaded", status=status.HTTP_400_BAD_REQUEST)
+        
+        if len(csv_file) != 1:
+            return ErrorResponse("Only upload single csv", status=status.HTTP_400_BAD_REQUEST)
+
+        user_role = request.query_params.get('type', 'ST')
+        course_id = request.query_params.get('course_id', '')
+
+        if course_id == '' or ROLE_MAP.get(user_role, '') == '':
+            return ErrorResponse("Bad request", status=status.HTTP_400_BAD_REQUEST)
+
+        data = {"users": [], "course_id": course_id, "type": user_role}
+        reader = csv.reader(csv_file[0])
+
+        cols = next(reader)
+
+        user_idx = -1
+        name_idx = -1
+        utoridx = -1
+        # role_idx = -1
+
+        for index, key in enumerate(cols):
+            if key == 'user_id': user_idx = index
+            elif key == 'name': name_idx = index
+            elif key == 'utorid': utoridx = index
+            # elif key == 'user_role': role_idx = index
+        
+        if not (user_idx != -1 and name_idx != -1 and utoridx != -1):
+            return ErrorResponse(f'Fields not present:\
+                                    {"user_id" if user_idx == -1 else ""}\
+                                    {"name" if name_idx == -1 else ""}\
+                                    {"utorid" if utoridx == -1 else ""}', 
+                                    status=status.HTTP_400_BAD_REQUEST)
+        
+        for row in reader:
+            l = [row[user_idx], row[name_idx], row[utoridx]]
+            if len(l) != 3:
+                continue
+                # SKIP rows with incomplete information
+            data["users"].append(l)
+            
+        serializer = UserBatchAddSerializer(data=data, role=user_role, many=True)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse({"msg": "Users created"}, status=status.HTTP_201_CREATED)
+        return ErrorResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            
+
+
+
+                
+
+                
+                
+
+        
+
+
+
