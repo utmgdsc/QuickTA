@@ -25,7 +25,7 @@ class CourseView(APIView):
             openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
             openapi.Parameter("course_code", openapi.IN_QUERY, description="Course code", type=openapi.TYPE_STRING),
             openapi.Parameter("semester", openapi.IN_QUERY, description="Semester", type=openapi.TYPE_STRING),
-            openapi.Parameter("students", in_=openapi.IN_QUERY, description="Include students (True/False)", type=openapi.TYPE_BOOLEAN),
+            openapi.Parameter("show_users", in_=openapi.IN_QUERY, description="Include user lists [True/False]", type=openapi.TYPE_BOOLEAN),
         ]
     )
     def get(self, request):
@@ -35,8 +35,7 @@ class CourseView(APIView):
             1. course_id, or
             2. course_code and semester
 
-        Additionally, you can send True/False to the 'students' parameter to get the list of students enrolled in the course.
-
+        Additionally, you can send True/False to the 'show_users' parameter to get the list of students enrolled in the course.
         """
         params = request.query_params
         course_id = params.get('course_id', '')
@@ -52,7 +51,11 @@ class CourseView(APIView):
 
         serializer = CourseSerializer(course, show_users=show_users)
         if show_users: return JsonResponse(serializer.data)
+        
         serializer.data.pop('students')
+        serializer.data.pop('instructors')
+        serializer.data.pop('researchers')
+        serializer.data.pop('admins')
         return JsonResponse(serializer.data)
         
     
@@ -65,6 +68,15 @@ class CourseView(APIView):
         """
         Creates a new course
         """
+        # Check for course uniqueness
+        course_code = request.data.get('course_code', '')
+        semester = request.data.get('semester', '')
+        if course_code == '' or semester == '':
+            return ErrorResponse("Bad request", status.HTTP_400_BAD_REQUEST)
+        
+        if Course.objects.filter(course_code=course_code, semester=semester):
+            return ErrorResponse("Course already exists", status.HTTP_400_BAD_REQUEST)
+
         serializer = CourseSerializer(data=request.data)
         if serializer.is_valid():
             res = self.create_course(serializer)
@@ -73,21 +85,36 @@ class CourseView(APIView):
     
     @swagger_auto_schema(
         operation_summary="Update course's information",
-        manual_parameters=[openapi.Parameter("course_id", openapi.IN_QUERY, description="course_id", type=openapi.TYPE_STRING)],
+        manual_parameters=[
+            openapi.Parameter("course_id", openapi.IN_QUERY, description="course_id", type=openapi.TYPE_STRING),
+            openapi.Parameter("course_code", openapi.IN_QUERY, description="course_code", type=openapi.TYPE_STRING),
+            openapi.Parameter("semester", openapi.IN_QUERY, description="semester", type=openapi.TYPE_STRING)
+        ],
         request_body=CourseSerializer,
-        responses={200: "User updated", 400: "Bad Request", 404: "User not found"}
+        responses={200: "User updated", 400: "Bad Request", 403: "Course already exists", 404: "User not found"}
     )
     def patch(self, request):
         """
         Updates the course's information
         """
-
         course_id = request.query_params.get('course_id', '')
+        course_code = request.query_params.get('course_code', '')
+        semester = request.query_params.get('semester', '')
 
-        course = get_object_or_404(Course, course_id=course_id)
+        new_course_code = request.data.get('course_code', '')
+        new_semester = request.data.get('semester', '')
+
+        if course_id == '' and (course_code == '' or semester == ''):
+            return ErrorResponse("Bad request", status.HTTP_400_BAD_REQUEST)
+        
+        if course_id: course = get_object_or_404(Course, course_id=course_id)
+        elif course_code and semester: course = get_object_or_404(Course, course_code=course_code, semester=semester)
+
         serializer = CourseSerializer(course, data=request.data, partial=True)
         if serializer.is_valid():
-            Course.objects.filter(coruse_id=course_id).update(**serializer.validated_data)
+            if (new_course_code == '' or new_semester == '') and Course.objects.filter(course_code=new_course_code, semester=new_semester): 
+                return ErrorResponse("Course already exists", status.HTTP_403_FORBIDDEN)
+            Course.objects.filter(coruse_id=course.course_id).update(**serializer.validated_data)
             return JsonResponse({"msg": "Course updated"})
 
         return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -108,7 +135,11 @@ class CourseView(APIView):
         TODO: delete all other relevant data as well - students, chatlogs, etc.
         """
         course_id = request.query_params.get('course_id', '')
-        course = get_object_or_404(Course, course_id=course_id)
+        course_code = request.query_params.get('course_code', '')
+        semester = request.query_params.get('semester', '')
+
+        if course_id: course = get_object_or_404(Course, course_id=course_id)
+        else: course = get_object_or_404(Course, course_code=course_code, semester=semester)
 
         if course.students or course.instructors or course.researchers or course.admins:
             return ErrorResponse("Cannot delete course with enrolled users", status.HTTP_405_METHOD_NOT_ALLOWED)
