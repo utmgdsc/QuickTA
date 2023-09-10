@@ -177,9 +177,12 @@ class CourseEnrollment(APIView):
         operation_summary="Enroll a student in a course",
         manual_parameters=[
             openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("course_code", openapi.IN_QUERY, description="User ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("semester", openapi.IN_QUERY, description="User role", type=openapi.TYPE_STRING),
             openapi.Parameter("user_id", openapi.IN_QUERY, description="User ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("utorid", openapi.IN_QUERY, description="Utorid", type=openapi.TYPE_STRING),
             openapi.Parameter("user_role", openapi.IN_QUERY, description="User role", type=openapi.TYPE_STRING, enum=ROLE_MAP_ENUM)
-            ],
+        ],
         responses={200: "User enrolled", 400: "User already enrolled", 404: "User or course not found"}
     )
     def post(self, request):
@@ -187,18 +190,25 @@ class CourseEnrollment(APIView):
         Enrolls a student in a course
         """
         course_id = request.query_params.get('course_id', '')
+        course_code = request.query_params.get('course_code', '')
+        semester = request.query_params.get('semester', '')
         user_id = request.query_params.get('user_id', '')
+        utorid = request.query_params.get('utorid', '')
         user_role = request.query_params.get('user_role', '')
+
         role_field = COURSE_ROLE_MAP.get(user_role, None)
 
         if not role_field:
             return ErrorResponse("User role is required", status.HTTP_400_BAD_REQUEST)
 
-        course = get_object_or_404(Course, course_id=course_id)
-        user = get_object_or_404(User, user_id=user_id)
+        if course_id: course = get_object_or_404(Course, course_id=course_id)
+        else: course = get_object_or_404(Course, course_code=course_code, semester=semester)
+        
+        if user_id: user = get_object_or_404(User, user_id=user_id)
+        else: user = get_object_or_404(User, utorid=utorid)
 
         # Check if user is already in the course
-        if user_id in [str(id) for id in getattr(course, role_field)]:
+        if user.user_id in [str(id) for id in getattr(course, role_field)]:
             return ErrorResponse(f"{ROLE_MAP[user_role].capitalize()} already enrolled", status.HTTP_400_BAD_REQUEST)
 
         users = getattr(course, role_field)
@@ -215,14 +225,27 @@ class CourseEnrollment(APIView):
         operation_summary="Unenroll a student from a course",
         manual_parameters=[
             openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("course_code", openapi.IN_QUERY, description="User ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("semester", openapi.IN_QUERY, description="User role", type=openapi.TYPE_STRING),
             openapi.Parameter("user_id", openapi.IN_QUERY, description="User ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("utorid", openapi.IN_QUERY, description="Utorid", type=openapi.TYPE_STRING),
             openapi.Parameter("user_role", openapi.IN_QUERY, description="User role", type=openapi.TYPE_STRING, enum=ROLE_MAP_ENUM),
         ],
         responses={200: "User unenrolled", 400: "User is not enrolled", 404: "User or course not found"}
     )
     def delete(self, request):
         """
-        Unenrolls a student from a course
+        Unenrolls a student from a course.
+
+        A course can be specified by:
+        
+            1. course_id, or
+            2. course_code and semester
+
+        A user can be specified by: 
+
+            1. user_id, or
+            2. utorid
         """
         course_id = request.query_params.get('course_id', '')
         user_id = request.query_params.get('user_id', '')
@@ -254,20 +277,26 @@ class CourseUserList(APIView):
     operation_summary="Get students in a course by user roles",
     manual_parameters=[
         openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
+        openapi.Parameter("course_code", openapi.IN_QUERY, description="Course code", type=openapi.TYPE_STRING),
+        openapi.Parameter("semester", openapi.IN_QUERY, description="Semester", type=openapi.TYPE_STRING),
         openapi.Parameter("user_roles", openapi.IN_QUERY, description="List of user roles (ST = Student, IS = Instructor, RS = Researcher, AM = Admin)", type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING)),
     ],
     responses={200: "Students", 404: "Course not found"}
     )
     def get(self, request):
         """
-        Acquires students in a course by user roles
+        Acquires students in a course by user roles.
         """
         course_id = request.query_params.get('course_id', '')
+        course_code = request.query_params.get('course_code', '')
+        semester = request.query_params.get('semester', '')
+
         user_roles = request.query_params.get('user_roles', [])
         user_roles = user_roles.split(',')
 
-
-        course = get_object_or_404(Course, course_id=course_id)
+        if course_id: course = get_object_or_404(Course, course_id=course_id)
+        else: course = get_object_or_404(Course, course_code=course_code, semester=semester)
+        
         response = dict()
         for role in user_roles:
             role_field = COURSE_ROLE_MAP.get(role, None)
@@ -285,7 +314,7 @@ class CourseMultipleList(APIView):
     )
     def get(self, request):
         """
-        Gets multiple courses
+        Gets multiple courses by their course ids.
         """
         course_ids = request.query_params.get('course_ids', [])
         course_ids = course_ids.split(',')
@@ -300,6 +329,8 @@ class CourseUnenrolledUsersList(APIView):
         operation_summary="Get unenrolled users",
         manual_parameters=[
             openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("course_code", openapi.IN_QUERY, description="Course code", type=openapi.TYPE_STRING),
+            openapi.Parameter("semester", openapi.IN_QUERY, description="Semester", type=openapi.TYPE_STRING),
             openapi.Parameter("user_roles", openapi.IN_QUERY, description="List of user roles (ST = Student, IS = Instructor, RS = Researcher, AM = Admin)", type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING)),
         ],
         responses={200: "Unenrolled users", 404: "Course not found"}
@@ -309,9 +340,12 @@ class CourseUnenrolledUsersList(APIView):
         Gets unenrolled users
         """
         course_id = request.query_params.get('course_id', '')
+        course_code = request.query_params.get('course_code', '')
+        semester = request.query_params.get('semester', '')
         user_roles = request.query_params.get('user_roles', []).split(',')
 
-        course = get_object_or_404(Course, course_id=course_id)
+        if course_id: course = get_object_or_404(Course, course_id=course_id)
+        else: course = get_object_or_404(Course, course_code=course_code, semester=semester)
         unenrolled_users = {role: [] for role in user_roles}
         
         users_query = Q(user_role__in=user_roles) & (
@@ -328,9 +362,6 @@ class CourseUnenrolledUsersList(APIView):
         }
         response = {role: UserSerializer(users, many=True).data for role, users in unenrolled_users.items()}
         return JsonResponse(response)
-    
-# TODO: Enroll multiple students in a course
-# TODO: Unenroll multiple students in a course
 
 class CourseMultipleEnrollment(APIView):
     @swagger_auto_schema(
@@ -338,6 +369,8 @@ class CourseMultipleEnrollment(APIView):
         request_body=CourseMultipleEnrollmentUserSerializer(many=True),
         manual_parameters=[
             openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("course_code", openapi.IN_QUERY, description="Course code", type=openapi.TYPE_STRING),
+            openapi.Parameter("semester", openapi.IN_QUERY, description="Semester", type=openapi.TYPE_STRING),
             openapi.Parameter("type", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING, enum=USER_SELECTION_TYPE),
             openapi.Parameter("user_role", openapi.IN_QUERY, description="User role", type=openapi.TYPE_STRING, enum=ROLE_MAP_ENUM),
         ],
@@ -349,7 +382,11 @@ class CourseMultipleEnrollment(APIView):
         """
         user_id_type = request.query_params.get('type', 'user_id')
         course_id = request.query_params.get('course_id', '')
-        course = get_object_or_404(Course, course_id=course_id)
+        course_code = request.query_params.get('course_code', '')
+        semester = request.query_params.get('semester', '')
+        
+        if course_id: course = get_object_or_404(Course, course_id=course_id)
+        else: course = get_object_or_404(Course, course_code=course_code, semester=semester)
 
         students = request.data.get('students', [])
         students = students.split(',')
@@ -368,7 +405,11 @@ class CourseMultipleEnrollment(APIView):
     
     @swagger_auto_schema(
         operation_summary="Unenroll multiple students from a course",
-        manual_parameters=[openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),],
+        manual_parameters=[
+            openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("course_code", openapi.IN_QUERY, description="Course code", type=openapi.TYPE_STRING),
+            openapi.Parameter("semester", openapi.IN_QUERY, description="Semester", type=openapi.TYPE_STRING),
+        ],
         responses={200: "Students unenrolled", 404: "Course not found"}
     )
     def delete(self, request):
@@ -377,7 +418,11 @@ class CourseMultipleEnrollment(APIView):
         TODO: Implement endpoint
         """
         course_id = request.query_params.get('course_id', '')
-        course = get_object_or_404(Course, course_id=course_id)
+        course_code = request.query_params.get('course_code', '')
+        semester = request.query_params.get('semester', '')
+
+        if course_id: course = get_object_or_404(Course, course_id=course_id)
+        else: course = get_object_or_404(Course, course_code=course_code, semester=semester)
 
         students = request.data.get('students', [])
         students = students.split(',')
