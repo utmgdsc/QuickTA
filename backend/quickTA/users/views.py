@@ -58,6 +58,11 @@ class UserView(APIView):
         - RS: researcher
         - AM: admin
         """
+        # Check for no duplicating utorids
+        utorid = request.data.get('utorid', '')
+        if utorid != '' and User.objects.filter(utorid=utorid):
+            return ErrorResponse("User with the same utorid exists", status=status.HTTP_400_BAD_REQUEST)
+
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             res = self.create_user(serializer)
@@ -66,7 +71,10 @@ class UserView(APIView):
     
     @swagger_auto_schema(
         operation_summary="Update user's information",
-        manual_parameters=[openapi.Parameter("user_id", openapi.IN_QUERY, description="User ID", type=openapi.TYPE_STRING)],
+        manual_parameters=[
+            openapi.Parameter("user_id", openapi.IN_QUERY, description="User ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("utorid", openapi.IN_QUERY, description="Utorid", type=openapi.TYPE_STRING)
+        ],
         request_body=UserSerializer,
         responses={200: "User updated", 400: "Bad Request", 404: "User not found"}
     )
@@ -83,17 +91,28 @@ class UserView(APIView):
         """
 
         user_id = request.query_params.get('user_id', '')
-        user = get_object_or_404(User, user_id=user_id)
+        utorid = request.query_params.get('utorid', '')
+        updated_utorid = request.data.get('utorid', '') 
+
+        user = get_object_or_404(User, user_id=user_id) if user_id != "" else get_object_or_404(User, utorid=utorid)
+
         serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
-            User.objects.filter(user_id=user_id).update(**serializer.validated_data)
+            if user_id: User.objects.filter(user_id=user_id).update(**serializer.validated_data)
+            elif utorid: 
+                if updated_utorid and User.objects.filter(utorid=updated_utorid):
+                    return ErrorResponse("User with the same utorid exists", status=status.HTTP_400_BAD_REQUEST)
+                User.objects.filter(utorid=utorid).update(**serializer.validated_data)
             return JsonResponse({"msg": "User updated"})
 
         return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     @swagger_auto_schema(
         operation_summary="Delete a user",
-        manual_parameters=[openapi.Parameter("user_id", openapi.IN_QUERY, description="User ID", type=openapi.TYPE_STRING)],
+        manual_parameters=[
+            openapi.Parameter("user_id", openapi.IN_QUERY, description="User ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("utorid", openapi.IN_QUERY, description="Utorid", type=openapi.TYPE_STRING)
+        ],
         responses={200: "User deleted", 404: "User not found"}
     )
     def delete(self, request):
@@ -101,8 +120,19 @@ class UserView(APIView):
         Deletes a user
         """
         user_id = request.query_params.get('user_id', '')
-        user = get_object_or_404(User, user_id=user_id)
-        user.delete()
+        utorid = request.query_params.get('utorid', '')
+        if user_id == '' and utorid == '':
+            return ErrorResponse("Bad request", status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if user is enrolled with courses
+        if user_id: user = get_object_or_404(User, user_id=user_id)
+        elif utorid: user = get_object_or_404(User, utorid=utorid)
+        if user.courses:
+            return ErrorResponse("User is enrolled with courses", status=status.HTTP_400_BAD_REQUEST)
+
+        if user_id: User.objects.filter(user_id=user_id).delete()
+        elif utorid: User.objects.filter(utorid=utorid).delete()
+
         return JsonResponse({"msg": "User deleted"})
     
     def create_user(self, serializer):
@@ -134,19 +164,21 @@ class UserCoursesListView(APIView):
     
     @swagger_auto_schema(
         operation_summary="Get user's courses",
-        manual_parameters=[openapi.Parameter("user_id", openapi.IN_QUERY, description="User ID", type=openapi.TYPE_STRING)],
+        manual_parameters=[
+            openapi.Parameter("user_id", openapi.IN_QUERY, description="User ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("utorid", openapi.IN_QUERY, description="Utorid", type=openapi.TYPE_STRING)
+        ],
         responses={200: "User's courses", 400: "Bad request", 404: "User not found"}
     )
     def get(self, request):
         """
         Acquires the courses of a certain user by user_id.
         """
-        user_id = request.GET.get('user_id', '')
+        user_id = request.query_params.get('user_id', '')
         utorid = request.query_params.get('utorid', '')
-        if user_id == '' and utorid == '': 
-            return ErrorResponse("Bad request", status=status.HTTP_400_BAD_REQUEST)
         
-        user = get_object_or_404(User, user_id=user_id)
+        if user_id: user = get_object_or_404(User, user_id=user_id)
+        else: user = get_object_or_404(User, utorid=utorid)
         return JsonResponse(user.courses, safe=False)
 
 # TODO: add a view to get all the courses the user is not in

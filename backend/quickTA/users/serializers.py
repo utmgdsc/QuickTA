@@ -13,7 +13,7 @@ class UserSerializer(ModelSerializer):
     )
 
     user_role = serializers.ChoiceField(choices=USER_ROLE_CHOICES)
-    courses = serializers.ListField(child=serializers.CharField(max_length=200))
+    courses = serializers.ListField(child=serializers.CharField(max_length=200), required=False)
 
     class Meta:
         model = User
@@ -44,7 +44,7 @@ class UserBatchAddSerializer(ModelSerializer):
         super().__init__(*args, **kwargs)
         self.role = role
 
-    def to_internal_value(self,data):
+    def to_internal_value(self, data):
         if 'user_role' not in data: 
             data['user_role'] = self.role
         data['user_id'] = uuid.uuid4()

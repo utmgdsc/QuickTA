@@ -8,10 +8,10 @@ from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from course.models import Course
-from course.serializers import CourseSerializer
+from course.serializers import CourseSerializer, CourseMultipleEnrollmentUserSerializer
 from users.models import User
 from users.serializers import UserSerializer
-from utils.constants import ROLE_MAP, ROLE_MAP_ENUM, COURSE_ROLE_MAP
+from utils.constants import ROLE_MAP, ROLE_MAP_ENUM, COURSE_ROLE_MAP, USER_SELECTION_TYPE
 from utils.handlers import ErrorResponse
 
 
@@ -42,7 +42,7 @@ class CourseView(APIView):
         course_id = params.get('course_id', '')
         course_code = params.get('course_code', '')
         course_semester = params.get('semester', '')
-        students = params.get('students', False)
+        show_users = params.get('show_users', False)
 
         if course_id == '' and (course_code == '' or course_semester == ''):
             return JsonResponse({"msg": "Course not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -50,8 +50,8 @@ class CourseView(APIView):
         if course_id: course = get_object_or_404(Course, course_id=course_id)
         elif course_code and course_semester: course = get_object_or_404(Course, course_code=course_code, semester=course_semester)
 
-        serializer = CourseSerializer(course)
-        if students: return JsonResponse(serializer.data)
+        serializer = CourseSerializer(course, show_users=show_users)
+        if show_users: return JsonResponse(serializer.data)
         serializer.data.pop('students')
         return JsonResponse(serializer.data)
         
@@ -304,38 +304,40 @@ class CourseUnenrolledUsersList(APIView):
 class CourseMultipleEnrollment(APIView):
     @swagger_auto_schema(
         operation_summary="Enroll multiple students in a course",
+        request_body=CourseMultipleEnrollmentUserSerializer(many=True),
         manual_parameters=[
             openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("type", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING, enum=USER_SELECTION_TYPE),
+            openapi.Parameter("user_role", openapi.IN_QUERY, description="User role", type=openapi.TYPE_STRING, enum=ROLE_MAP_ENUM),
         ],
-        # request_body=CourseMultipleUserSerializer(many=True),
         responses={200: "Students enrolled", 404: "Course not found"}
     )
     def post(self, request):
         """
-        Enrolls multiple students in a course
-        TODO: Implement endpoint
+        Enrolls multiple students in a course. Acquires either a list of user_ids or utorids.
         """
+        user_id_type = request.query_params.get('type', 'user_id')
         course_id = request.query_params.get('course_id', '')
         course = get_object_or_404(Course, course_id=course_id)
 
         students = request.data.get('students', [])
         students = students.split(',')
 
-        for student in students:
-            user = get_object_or_404(User, user_id=student)
-            if student not in course.students:
-                course.students.append(student)
-                user.courses.append(course_id)
-        
-        Course.objects.filter(course_id=course_id).update(students=course.students)
-        User.objects.filter(user_id__in=students).update(courses=course.courses)
-        return JsonResponse({"msg": "Students enrolled"})
+        # Validate user_role
+        user_role = request.query_params.get('user_role', '')
+        if user_role not in ROLE_MAP.keys():
+            return ErrorResponse("Please provide an accepted user role [ST/IS/RS/AM].", status.HTTP_400_BAD_REQUEST)
 
+        if user_id_type == 'user_id': 
+            self.enroll_by_user_id(course, students)
+        else: 
+            self.enroll_by_utorid(course, students)
+
+        return JsonResponse({"msg": "Students enrolled"})
+    
     @swagger_auto_schema(
         operation_summary="Unenroll multiple students from a course",
-        manual_parameters=[
-            openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
-        ],
+        manual_parameters=[openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),],
         responses={200: "Students unenrolled", 404: "Course not found"}
     )
     def delete(self, request):
@@ -358,3 +360,25 @@ class CourseMultipleEnrollment(APIView):
         Course.objects.filter(course_id=course_id).update(students=course.students)
         User.objects.filter(user_id__in=students).update(courses=course.courses)
         return JsonResponse({"msg": "Students unenrolled"})
+    
+    def enroll_by_user_id(self, course, students):
+        
+        for student in students:
+            user = get_object_or_404(User, user_id=student)
+            if student not in course.students:
+                course.students.append(student)
+                user.courses.append(course.course_id)
+
+        Course.objects.filter(course_id=course.course_id).update(students=course.students)
+        User.objects.filter(user_id__in=students).update(courses=course.courses)
+    
+    def enroll_by_utorid(self, course, students):
+
+        for student in students:
+            user = get_object_or_404(User, utorid=student)
+            if student not in course.students:
+                course.students.append(student)
+                user.courses.append(course.course_id)
+
+        Course.objects.filter(course_id=course.course_id).update(students=course.students)
+        User.objects.filter(utorid__in=students).update(courses=course.courses)

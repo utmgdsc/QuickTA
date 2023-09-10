@@ -12,4 +12,5 @@ class User(models.Model):
     courses = djmodels.JSONField(default=[], blank=True, null=True)
 
     def __str__(self):
-        return self.name + "(" + str(self.user_id) + ")"
+        return f"User(user_id={self.user_id}, name={self.name}, utorid={self.utorid}, user_role={self.user_role}, courses={self.courses})"
+    
