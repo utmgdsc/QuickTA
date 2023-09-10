@@ -9,7 +9,8 @@ urlpatterns = [
     path('', CourseView.as_view()),
     path('/all', CourseList.as_view()),
     path('/list', CourseMultipleList.as_view()),
-    path('/enrollment', CourseEnrollment.as_view()),
+    path('/enroll', CourseEnrollment.as_view()),
     path('/users', CourseUserList.as_view()),
-    path('/unenrolled-users', CourseUnenrolledUsersList.as_view())
+    path('/unenrolled-users', CourseUnenrolledUsersList.as_view()),
+    path('/enroll/multiple', CourseMultipleEnrollment.as_view()),
 ]

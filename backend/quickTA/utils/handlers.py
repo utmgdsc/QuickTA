@@ -24,3 +24,5 @@ def ErrorResponse(error, status):
         errors["error"][key] = error_message
 
     return JsonResponse(errors, status=status)
+
+ 
