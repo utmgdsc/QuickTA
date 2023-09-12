@@ -1,19 +1,17 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
+import React from "react";
+import ReactDOM from "react-dom/client";
 import App from "./Pages/App";
-import {
-  ChakraProvider,
-} from "@chakra-ui/react";
+import { ChakraProvider } from "@chakra-ui/react";
 import theme from "./assets/theme";
-import {BrowserRouter} from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
+import AdminPage from "./Pages/AdminPage";
 
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-    <ChakraProvider theme={theme}>
-      <BrowserRouter>
-        <App UTORid={"teststudent5"}/>
-      </BrowserRouter>
-    </ChakraProvider>
+  <ChakraProvider theme={theme}>
+    <BrowserRouter>
+      {/* <App UTORid={"choiman3"} /> */}
+      <AdminPage UTORID={"choiman3"} />
+    </BrowserRouter>
+  </ChakraProvider>
 );
-
