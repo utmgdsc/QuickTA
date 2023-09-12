@@ -15,6 +15,7 @@ import {
   Thead,
   Tr,
   useDisclosure,
+  Skeleton,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -25,6 +26,7 @@ import AddUser from "./AddUser";
 const CourseDrawer = ({ isOpen, onClose, course_id }) => {
   const [studentList, setStudentList] = useState([]);
   const [disableFlag, setDisableFlag] = useState(false);
+  const [loading, setLoading] = useState(false);
   const {
     isOpen: isOpenInstructors,
     onOpen: onOpenInstructors,
@@ -35,6 +37,7 @@ const CourseDrawer = ({ isOpen, onClose, course_id }) => {
     onOpen: onOpenStudent,
     onClose: onCloseStudent,
   } = useDisclosure();
+
   const fetchCourseList = async (course_id) => {
     await axios
       .get(
@@ -85,9 +88,11 @@ const CourseDrawer = ({ isOpen, onClose, course_id }) => {
   useEffect(() => {
     if (course_id) {
       setDisableFlag(true);
+      setLoading(true);
       fetchCourseList(course_id).then(() => {
         setDisableFlag(false);
       });
+      setLoading(false);
       console.log(studentList);
     }
   }, [course_id]);
@@ -132,31 +137,51 @@ const CourseDrawer = ({ isOpen, onClose, course_id }) => {
                     <Th>name</Th>
                   </Tr>
                 </Thead>
-                <Tbody>
-                  {studentList.map((student, index) => {
-                    return (
-                      <Tr key={hashing(student.user_id)}>
-                        <Td key={hashing(student.utorid)}>{student.utorid}</Td>
-                        <Td key={hashing(student.name)}>{student.name}</Td>
+                {loading ? (
+                  <Tbody>
+                    {studentList.map((student, index) => {
+                      return (
+                        <Tr key={hashing(student.user_id)}>
+                          <Td key={hashing(student.utorid)}>
+                            {student.utorid}
+                          </Td>
+                          <Td key={hashing(student.name)}>{student.name}</Td>
+                          <Td>
+                            <Button variant={"ghost"} isDisabled={disableFlag}>
+                              <FontAwesomeIcon
+                                icon={faTrashCan}
+                                size={"2x"}
+                                onClick={() => {
+                                  //  Remove student from classroom and get new list of students
+                                  setDisableFlag(true);
+                                  deleteUser(course_id, student.user_id);
+                                  deleteElement(student.user_id);
+                                  setDisableFlag(false);
+                                }}
+                              />
+                            </Button>
+                          </Td>
+                        </Tr>
+                      );
+                    })}
+                  </Tbody>
+                ) : (
+                  <Tbody size={"md"}>
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((item) => (
+                      <Tr key={item}>
                         <Td>
-                          <Button variant={"ghost"} isDisabled={disableFlag}>
-                            <FontAwesomeIcon
-                              icon={faTrashCan}
-                              size={"2x"}
-                              onClick={() => {
-                                //  Remove student from classroom and get new list of students
-                                setDisableFlag(true);
-                                deleteUser(course_id, student.user_id);
-                                deleteElement(student.user_id);
-                                setDisableFlag(false);
-                              }}
-                            />
-                          </Button>
+                          <Skeleton height="16px" width="100%" />
+                        </Td>
+                        <Td>
+                          <Skeleton height="16px" width="100%" />
+                        </Td>
+                        <Td>
+                          <Skeleton height="16px" width="100%" />
                         </Td>
                       </Tr>
-                    );
-                  })}
-                </Tbody>
+                    ))}
+                  </Tbody>
+                )}
               </Table>
             </TableContainer>
           </DrawerBody>
