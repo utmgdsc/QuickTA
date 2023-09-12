@@ -219,37 +219,33 @@ class UserBatchAddCsvView(APIView):
 
     @swagger_auto_schema(
         operation_summary="Add multiple users through csv file",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'course_id': openapi.Schema(type=openapi.TYPE_STRING, description="Course ID"),
-                'files': openapi.Schema(
-                    type=openapi.TYPE_FILE,
-                    description="CSV file"
-                )
-            },
-            required=['course_id', 'files']
-        ),
-        consumes=["multipart/form-data"],
+        manual_parameters=[
+            openapi.Parameter(name="files", in_=openapi.IN_FORM, type=openapi.TYPE_FILE, required=True, description="Document"),
+            openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("course_code", openapi.IN_QUERY, description="Course code", type=openapi.TYPE_STRING),
+            openapi.Parameter("semester", openapi.IN_QUERY, description="Semester", type=openapi.TYPE_STRING),
+        ],
         responses={201: "Users created", 400: "Bad request"}
     )
-    @action(detail=False, parser_classes=(MultiPartParser, ), name='files', url_path='files')
-   
+    @action(detail=False, methods=['post'])
     def post(self, request):
         """
         Create mutiple users through csv file. Defaults to student role if unspecified.
 
-        Skips rows missing utorid, and name.
-        Adds rows where other fields are malformed except preiously metioned fields.
-
+        Skips rows missing 'utorid' and 'name' column headers.
+        Optional column with header 'role' defaults to 'ST' student role.
         """
         csv_file = request.FILES['files']
         if not csv_file: return ErrorResponse("No csv uploaded", status=status.HTTP_400_BAD_REQUEST)
 
         course_id = request.query_params.get('course_id', '')
+        course_code = request.query_params.get('course_code', '')
+        semester = request.query_params.get('semester', '')
         user_role = request.query_params.get('user_role', 'ST')
         if not(course_id): return ErrorResponse("Bad request", status=status.HTTP_400_BAD_REQUEST)
-        course = get_object_or_404(Course, course_id=course_id)
+        
+        if course_id: course = get_object_or_404(Course, course_id=course_id)
+        else: course = get_object_or_404(Course, course_code=course_code, semester=semester)
 
         # Handle csv file
         file_data = csv_file.read().decode(encoding='utf-8-sig')
