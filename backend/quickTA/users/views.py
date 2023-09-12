@@ -232,6 +232,11 @@ class UserBatchAddCsvView(APIView):
         """
         Create mutiple users through csv file. Defaults to student role if unspecified.
 
+        Course can be specified by either:
+        
+            1. course_id or 
+            2. course_code and semester.
+
         Skips rows missing 'utorid' and 'name' column headers.
         Optional column with header 'role' defaults to 'ST' student role.
         """
