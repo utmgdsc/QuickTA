@@ -1,6 +1,7 @@
 from rest_framework.serializers import *
 from rest_framework import serializers
 from .models import *
+from course.models import Course
 
 class UserSerializer(ModelSerializer):
     
@@ -37,16 +38,21 @@ class UserBatchAddSerializer(ModelSerializer):
             'name',
             'utorid',
             'user_role',
+            'courses'
         ]
 
     def __init__(self, *args, **kwargs):
         role = kwargs.pop('role', None)
         super().__init__(*args, **kwargs)
-        self.role = role
+        if role: self.role = role
 
     def to_internal_value(self, data):
         if 'user_role' not in data: 
             data['user_role'] = self.role
-        data['user_id'] = uuid.uuid4()
+        data['user_id'] = uuid.uuid4()      
+        
+        courses = data.pop('courses', [])
+        data['courses'] = courses
+
         return super().to_internal_value(data)
 

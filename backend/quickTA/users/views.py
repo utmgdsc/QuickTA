@@ -1,6 +1,8 @@
 import uuid
 import csv
 
+from rest_framework.parsers import MultiPartParser
+from rest_framework.decorators import action
 from rest_framework.views import APIView
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -12,8 +14,9 @@ from django.shortcuts import get_object_or_404
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from utils.handlers import ErrorResponse
 
+from course.models import Course
+from utils.handlers import ErrorResponse
 from utils.constants import ROLE_MAP_ENUM, ROLE_MAP
 
 
@@ -189,7 +192,9 @@ class UserBatchAddView(APIView):
     @swagger_auto_schema(
         operation_summary="Add multiple users",
         request_body=UserBatchAddSerializer(many=True),
-        manual_parameters=[openapi.Parameter("user_role", openapi.IN_QUERY, description="User role", type=openapi.TYPE_STRING, enum=ROLE_MAP_ENUM)],
+        manual_parameters=[
+            openapi.Parameter("user_role", openapi.IN_QUERY, description="User role", type=openapi.TYPE_STRING, enum=ROLE_MAP_ENUM),
+        ],
         responses={201: "Users created", 400: "Bad request"}
     )
     def post(self, request):
@@ -208,80 +213,104 @@ class UserBatchAddView(APIView):
             return JsonResponse({"msg": "Users created"}, status=status.HTTP_201_CREATED)
         return ErrorResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class UserBatchAddCSVView(APIView):
+class UserBatchAddCsvView(APIView):
 
+    parser_classes = (MultiPartParser,)
+
+    @swagger_auto_schema(
+        operation_summary="Add multiple users through csv file",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'course_id': openapi.Schema(type=openapi.TYPE_STRING, description="Course ID"),
+                'files': openapi.Schema(
+                    type=openapi.TYPE_FILE,
+                    description="CSV file"
+                )
+            },
+            required=['course_id', 'files']
+        ),
+        consumes=["multipart/form-data"],
+        responses={201: "Users created", 400: "Bad request"}
+    )
+    @action(detail=False, parser_classes=(MultiPartParser, ), name='files', url_path='files')
+   
     def post(self, request):
         """
         Create mutiple users through csv file. Defaults to student role if unspecified.
 
-        Skips rows missing user_id, utorid, and name.
+        Skips rows missing utorid, and name.
         Adds rows where other fields are malformed except preiously metioned fields.
 
         """
-        
-        if request.method != 'POST':
-            return ErrorResponse(f'Calling {request.method} for POST endpoint', status=status.HTTP_400_BAD_REQUEST)
-        
-        csv_file = [file for name, file in request.FILES.items() if name.endswith('.csv')]
+        csv_file = request.FILES['files']
+        if not csv_file: return ErrorResponse("No csv uploaded", status=status.HTTP_400_BAD_REQUEST)
 
-        if not csv_file:
-            return ErrorResponse("No csv uploaded", status=status.HTTP_400_BAD_REQUEST)
-        
-        if len(csv_file) != 1:
-            return ErrorResponse("Only upload single csv", status=status.HTTP_400_BAD_REQUEST)
-
-        user_role = request.query_params.get('type', 'ST')
         course_id = request.query_params.get('course_id', '')
+        user_role = request.query_params.get('user_role', 'ST')
+        if not(course_id): return ErrorResponse("Bad request", status=status.HTTP_400_BAD_REQUEST)
+        course = get_object_or_404(Course, course_id=course_id)
 
-        if course_id == '' or ROLE_MAP.get(user_role, '') == '':
-            return ErrorResponse("Bad request", status=status.HTTP_400_BAD_REQUEST)
+        # Handle csv file
+        file_data = csv_file.read().decode(encoding='utf-8-sig')
+        lines = file_data.split("\n")
 
-        data = {"users": [], "course_id": course_id, "type": user_role}
-        reader = csv.reader(csv_file[0])
-
-        cols = next(reader)
-
-        user_idx = -1
-        name_idx = -1
-        utoridx = -1
-        # role_idx = -1
-
-        for index, key in enumerate(cols):
-            if key == 'user_id': user_idx = index
-            elif key == 'name': name_idx = index
-            elif key == 'utorid': utoridx = index
-            # elif key == 'user_role': role_idx = index
+        name_idx, utorid_idx, user_role_idx = -1, -1, -1
+        for index, key in enumerate(lines[0].split(",")):
+            if key == 'name': name_idx = index
+            if key == 'utorid': utorid_idx = index
+            if key == 'role': user_role_idx = index
         
-        if not (user_idx != -1 and name_idx != -1 and utoridx != -1):
-            return ErrorResponse(f'Fields not present:\
-                                    {"user_id" if user_idx == -1 else ""}\
-                                    {"name" if name_idx == -1 else ""}\
-                                    {"utorid" if utoridx == -1 else ""}', 
-                                    status=status.HTTP_400_BAD_REQUEST)
+        if not (name_idx != -1 and utorid_idx != -1):
+            return ErrorResponse(f'Fields not present: {"name" if name_idx == -1 else ""} {"utorid" if utorid_idx == -1 else ""}', status=status.HTTP_400_BAD_REQUEST)
         
-        for row in reader:
-            l = [row[user_idx], row[name_idx], row[utoridx]]
-            if len(l) != 3:
+        successful_users = []
+        existing_users = []
+        failed_users = []
+
+        for i, line in enumerate(lines[1:]):
+
+            row = line.split(",")
+            utorid = row[utorid_idx]
+            name = row[name_idx]
+            role = row[user_role_idx] if user_role_idx != -1 else user_role
+
+            if not (utorid and name): 
+                failed_users.append(f'Row {i+2}: missing utorid or name')
                 continue
-                # SKIP rows with incomplete information
-            data["users"].append(l)
             
-        serializer = UserBatchAddSerializer(data=data, role=user_role, many=True)
+            if User.objects.filter(utorid=utorid):
+                user = User.objects.get(utorid=utorid)
+                if course_id not in user.courses:
+                    user.courses = user.courses + [course_id]
+                    User.objects.filter(utorid=utorid).update(courses=user.courses)
+                data = { 'utorid': utorid, 'name': name, 'user_role': role, 'courses': [course_id] }
+                existing_users.append(data)
+                continue
+
+            data = { 'utorid': utorid, 'name': name, 'user_role': role, 'courses': [course_id] }
+            successful_users.append(data)
+        
+        serializer = UserBatchAddSerializer(data=successful_users, many=True)
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse({"msg": "Users created"}, status=status.HTTP_201_CREATED)
+
+            # Add existing users to course
+            all_users = existing_users + successful_users
+            for user in all_users:
+                user_id = User.objects.get(utorid=user['utorid']).user_id
+                if user['user_role'] == 'ST': course.students.append(user_id) if user_id not in course.students else None
+                elif user['user_role'] == 'IS': course.instructors.append(user_id) if user_id not in course.instructors else None
+                elif user['user_role'] == 'RS': course.researchers.append(user_id) if user_id not in course.researchers else None
+                elif user['user_role'] == 'AM': course.admins.append(user_id) if user_id not in course.admins else None
+
+                Course.objects.filter(course_id=course.course_id).update(
+                    students=course.students,
+                    instructors=course.instructors,
+                    researchers=course.researchers,
+                    admins=course.admins
+                )
+
+            existing_users = [f"{user['utorid']}: {user['name']}" for user in existing_users]
+            return JsonResponse({"msg": f"Users created.{' Modified existing users (utorid: name): ' + (', '.join(existing_users) if existing_users else '') + '.'}{' Failed to add users: ' + (', '.join(failed_users) if failed_users else '') + '.'}"}, status=status.HTTP_201_CREATED)
         return ErrorResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-            
-
-
-
-                
-
-                
-                
-
-        
-
-
-
