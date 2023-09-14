@@ -1,6 +1,7 @@
 import uuid
 from django.shortcuts import render
 from models.models import GPTModel
+from rest_framework import status
 # from models.serializers import GPTModelSerializer
 import students.functions as gptmodel_functions
 from django.http import JsonResponse
@@ -21,16 +22,14 @@ class GPTModelView(APIView):
         responses={ 200: GPTModelSerializer(), 400: "Bad Request", 404: "Model not found"},
         manual_parameters=[
             openapi.Parameter("model_id", openapi.IN_QUERY, type=openapi.TYPE_STRING),
-            openapi.Parameter("course_id", openapi.IN_QUERY, type=openapi.TYPE_STRING)
         ]
     )
     def get(self, request):
         """
         Returns a GPT model given the model_id and course_id.
         """
-        course_id = request.query_params.get('course_id', '')
         model_id = request.query_params.get('model_id', '')
-        gpt_model = get_object_or_404(GPTModel, course_id=course_id, model_id=model_id)
+        gpt_model = get_object_or_404(GPTModel, model_id=model_id)
         serializer = GPTModelSerializer(gpt_model)
         return JsonResponse(serializer.data)
 
@@ -71,10 +70,12 @@ class GPTModelView(APIView):
     
     @swagger_auto_schema(
         operation_description="Updates a GPT Model given the parameter specifications.",
+        manual_parameters=[
+            openapi.Parameter("model_id", openapi.IN_QUERY, type=openapi.TYPE_STRING),
+        ],
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'model_id': openapi.Schema(type=openapi.TYPE_STRING),
                 'model_name': openapi.Schema(type=openapi.TYPE_STRING),
                 'course_id': openapi.Schema(type=openapi.TYPE_STRING),
                 'status': openapi.Schema(type=openapi.TYPE_BOOLEAN),
@@ -94,16 +95,17 @@ class GPTModelView(APIView):
         ),
         responses={ 200: GPTModelSerializer(), 400: "Bad Request"}
     )
-    def put(self, request):
+    def patch(self, request):
         """
         Updates a GPT Model given the parameter specifications.
         """
+        model_id = request.query_params.get('model_id', '')
         data = request.data
-        serializer = self.update_gptmodel(data)
+        serializer = self.update_gptmodel(data, model_id)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data)
-        return ErrorResponse(serializer.errors)
+        return ErrorResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     @swagger_auto_schema(
         operation_description="Deletes a GPT Model given the model_id and course_id.",
@@ -132,13 +134,13 @@ class GPTModelView(APIView):
         serializer = GPTModelSerializer(data=data)
         return serializer
     
-    def update_gptmodel(self,data):
+    def update_gptmodel(self, data, model_id):
         """
         Updates a GPT Model given the parameter specifications.
         """
-        model_id = data['model_id']
-        gpt_model = GPTModel.objects.filter(model_id=model_id).update(**data)
-        serializer = GPTModelSerializer(gpt_model)
+        GPTModel.objects.filter(model_id=model_id).update(**data)
+        data['model_id'] = model_id
+        serializer = GPTModelSerializer(data=data)
         return serializer
                    
 class GPTModelListView(APIView):
@@ -162,7 +164,7 @@ class GPTModelListView(APIView):
         """
         gpt_models = GPTModel.objects.all()
         serializer = GPTModelSerializer(gpt_models, many=True)
-        return JsonResponse(serializer.data)
+        return JsonResponse({"models": serializer.data}) 
 
 class ActivateGPTModelView(APIView):
 
@@ -170,20 +172,18 @@ class ActivateGPTModelView(APIView):
         operation_description="Activates a selected GPTModel",
         manual_parameters=[
             openapi.Parameter("model_id", openapi.IN_QUERY, type=openapi.TYPE_STRING),
-            openapi.Parameter("course_id", openapi.IN_QUERY, type=openapi.TYPE_STRING)
         ],
-        responses={ 200: GPTModelSerializer(), 400: "Bad Request", 404: "Model not found"}
+        responses={ 200: 'Model activated', 400: "Bad Request", 404: "Model not found"}
     )
     def get(self, request):
         """
         Activates a selected GPTModel.
         """
-        course_id = request.query_params.get('course_id', '')
         model_id = request.query_params.get('model_id', '')
-        self.deactivate_current_gptmodel(course_id)
-        current_model = self.activate_gptmodel(course_id, model_id)
-        serializer = GPTModelSerializer(current_model)
-        return JsonResponse(serializer.data)
+
+        get_object_or_404(GPTModel, model_id=model_id)
+        GPTModel.objects.filter(model_id=model_id).update(status=True)
+        return JsonResponse({'msg': 'Model activated successfully.'})
 
     def deactivate_current_gptmodel(self, course_id):
         GPTModel.objects.filter(course_id=course_id).update(status=False)
@@ -191,3 +191,21 @@ class ActivateGPTModelView(APIView):
     def activate_gptmodel(self, course_id, model_id):
         GPTModel.objects.filter(course_id=course_id, model_id=model_id).update(status=True)
         return get_object_or_404(GPTModel, course_id=course_id, model_id=model_id)
+    
+class DeactivateGPTModelView(APIView):
+
+    @swagger_auto_schema(
+        operation_description="Deactivates a selected GPTModel",
+        manual_parameters=[
+            openapi.Parameter("model_id", openapi.IN_QUERY, type=openapi.TYPE_STRING),
+        ],
+        responses={ 200: "Model deactivated", 400: "Bad Request", 404: "Model not found"}
+    )
+    def get(self, request):
+        """
+        Deactivates a selected GPTModel.
+        """
+        model_id = request.query_params.get('model_id', '')
+        get_object_or_404(GPTModel, model_id=model_id)
+        GPTModel.objects.filter(model_id=model_id).update(status=False)
+        return JsonResponse({'msg': 'Model deactivated successfully.'})
