@@ -14,6 +14,7 @@ from student.serializers import *
 from utils.handlers import ErrorResponse
 from users.models import User
 from course.models import Course
+from models.models import GPTModel
 from student.models import Conversation, Chatlog, Report, Feedback
 
 # Create your views here.
@@ -51,7 +52,9 @@ class ConversationView(APIView):
         """
         user_id = request.query_params.get('user_id', '')
         course_id = request.query_params.get('course_id', '')
+        model_id = request.query_params.get('model_id', '')
 
+        model = get_object_or_404(GPTModel, model_id=model_id)
         user = get_object_or_404(User, user_id=user_id)
         course = get_object_or_404(Course, course_id=course_id)
         serializer = self.create_conversation(user, course)
@@ -133,6 +136,15 @@ class ChatlogView(APIView):
         delta = current_time - last_chatlog.time if last_chatlog else current_time - conversation.start_time
         user_chatlog = self.create_chatlog(conversation, chatlog, True, current_time, delta)
 
+
+
+        # Check whether convo id is from an 'active' model
+        # if it is continue procedure, else send response
+        model = get_object_or_404(GPTModel, model=conversation.model_id)
+
+        if model.status == 'I':
+            return ErrorResponse("Model not active", status.HTTP_403_FORBIDDEN)
+        
         # 2. Acquire LLM chatlog response 
         # course = get_object_or_404(Course, course_id=conversation.course_id)
         # model_response = model.get_response(conversation_id, course.course_id, chatlog)
