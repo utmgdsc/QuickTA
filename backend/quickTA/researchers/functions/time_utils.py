@@ -1,7 +1,7 @@
 import calendar
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-from ..models import Course
+from course.models import Course
 from django.utils.timezone import now
 
 def get_dates(course_id, view, timezone):
@@ -85,13 +85,13 @@ def get_monthly_time(timezone):
     tz = ZoneInfo(timezone)
 
     t1 = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-    
     # Wraps December around to Jan
     next_month = t1.month + 1
-    if (t1.month + 1 > 12):
-        next_month = 1
-        next_year = t1.year + 1
+    if (next_month > 12):
+        next_month, next_year = 1, t1.year + 1
         t2 = t1.replace(year=next_year, month=next_month)
+    else: 
+        t2 = t1.replace(month=next_month)
     
     t1 = t1.astimezone(tz)
     t2 = t2.astimezone(tz)

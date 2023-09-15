@@ -1,5 +1,7 @@
 import uuid
 import csv
+import datetime as dt
+
 from io import BytesIO
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -17,8 +19,8 @@ from course.helpers import get_course
 from student.models import Conversation, Chatlog, Feedback, Report
 from utils.handlers import ErrorResponse
 from researchers.helpers import *
-from students.functions.time_utils import *
-from students.functions.common_topics import generate_wordcloud, get_wordcloud_image
+from researchers.functions.time_utils import *
+from researchers.functions.common_topics import generate_wordcloud, get_wordcloud_image
 
 # Create your views here.
 class AverageRatingsView(APIView):
@@ -42,7 +44,8 @@ class AverageRatingsView(APIView):
         """
         params = request.query_params
         course = get_course(params)
-        conversations = get_filtered_convos(params.course_id, params.filter, timezone='America/Toronto')
+        filter = params.get('filter', '')
+        conversations = get_filtered_convos(course.course_id, filter, timezone='America/Toronto')
         
         # Acquire all of the ratings of a course given the conversations
         conversation_ids = [convo.conversation_id for convo in conversations]
@@ -72,7 +75,8 @@ class FeedbackCsvView(APIView):
             """
             params = request.query_params
             course = get_course(params)
-            conversations = get_filtered_convos(params.course_id, params.filter, timezone='America/Toronto')
+            filter = params.get('filter', '')
+            conversations = get_filtered_convos(course.course_id, filter, timezone='America/Toronto')
             
             # Acquire all of the ratings of a course given the conversations
             conversation_ids = [convo.conversation_id for convo in conversations]
@@ -85,10 +89,12 @@ class FeedbackCsvView(APIView):
             writer = csv.writer(response)
             writer.writerow([ 'Course ID', 'Conversation ID', 'User Name', 'Utorid', 'Rating', 'Feedback Message' ])
 
-            for convo in conversations:
-                rating = get_object_or_404(Feedback, conversation_id=convo.conversation_id)
-                user = get_object_or_404(User, user_id=convo.user_id)
-                writer.writerow([ convo.course_id, convo.conversation_id, user.name, user.utorid, rating.rating, rating.msg ])
+            for convo in ratings:
+                conversation_id = convo.conversation_id
+                rating = get_object_or_404(Feedback, conversation_id=conversation_id)
+                conversation = get_object_or_404(Conversation, conversation_id=conversation_id)
+                user = get_object_or_404(User, user_id=conversation.user_id)
+                writer.writerow([ conversation.course_id, convo.conversation_id, user.name, user.utorid, rating.rating])
 
             return response
 
@@ -141,12 +147,13 @@ class ReportedConversationsListView(APIView):
         """
         params = request.query_params
         course = get_course(params)
-        conversations = get_filtered_convos(params.course_id, params.filter, timezone='America/Toronto')
+        filter = params.get('filter', '')
+        conversations = get_filtered_convos(course.course_id, filter, timezone='America/Toronto')
         conversation_ids = [convo.conversation_id for convo in conversations]
         reports = Report.objects.filter(conversation_id__in=conversation_ids)
         response = { 
             "total_reported": len(reports),
-            "reports": { idx : [report.to_dict() for report in reports] for idx in range(len(reports)) } 
+            "reports": [ report.to_dict() for report in reports ]  
         } 
         return JsonResponse(response)
 
@@ -181,7 +188,8 @@ class ReportedConversationsCsvView(APIView):
         """
         params = request.query_params
         course = get_course(params)
-        conversations = get_filtered_convos(params.course_id, params.filter, timezone='America/Toronto')
+        filter = params.get('filter', '')
+        conversations = get_filtered_convos(course.course_id, filter, timezone='America/Toronto')
         conversation_ids = [convo.conversation_id for convo in conversations]
         reports = Report.objects.filter(conversation_id__in=conversation_ids)
         
@@ -247,7 +255,8 @@ class ReportedChatlogsCsvView(APIView):
         writer.writerow([ 'Course ID', 'Conversation ID', 'Time', 'Speaker', 'Chatlog', 'Delta' ])
 
         for chatlog in chatlogs:
-            writer.writerow([ course_id, chatlog.conversation_id, chatlog.time, chatlog.speaker, chatlog.chatlog, chatlog.delta ])
+            chat = chatlog.to_dict(show_alias=True)
+            writer.writerow([ course_id, chatlog.conversation_id, chatlog.time, chat['speaker'], chatlog.chatlog, chat['delta'] ])
 
         return response    
 
@@ -272,7 +281,8 @@ class AverageResponseRateView(APIView):
             """
             params = request.query_params
             course = get_course(params)
-            conversations = get_filtered_convos(params.course_id, params.filter, timezone='America/Toronto')
+            filter = params.get('filter', '')
+            conversations = get_filtered_convos(course.course_id, filter, timezone='America/Toronto')
             
             conversation_ids = [convo.conversation_id for convo in conversations]
             chatlogs = Chatlog.objects.filter(conversation_id__in=conversation_ids)
@@ -286,7 +296,8 @@ class AverageResponseRateView(APIView):
             Acquires the average response rate for a course given its chatlogs.
             """
             deltas = [chatlog.delta for chatlog in chatlogs if chatlog.is_user]
-            average_delta = sum(deltas) / len(deltas)
+            average_delta = str(sum(deltas, dt.timedelta()) / len(deltas))
+            deltas = [str(delta) for delta in deltas]
             return average_delta, deltas
 
 class ResponseRateCsvView(APIView):
@@ -313,8 +324,8 @@ class ResponseRateCsvView(APIView):
         """
         params = request.query_params
         course = get_course(params)
-        course_id = course.course_id
-        conversations = get_filtered_convos(params.course_id, params.filter, timezone='America/Toronto')
+        filter = params.get('filter', '')
+        conversations = get_filtered_convos(course.course_id, filter, timezone='America/Toronto')
         
         conversation_ids = [convo.conversation_id for convo in conversations]
         chatlogs = Chatlog.objects.filter(conversation_id__in=conversation_ids)
@@ -328,7 +339,7 @@ class ResponseRateCsvView(APIView):
         for chatlog in chatlogs:
             convo = get_object_or_404(Conversation, conversation_id=chatlog.conversation_id)
             user = get_object_or_404(User, user_id=convo.user_id)
-            writer.writerow([ course_id, chatlog.conversation_id, user.name, user.utorid, chatlog.delta ])
+            writer.writerow([ course.course_id, chatlog.conversation_id, user.name, user.utorid, chatlog.delta ])
 
         return response 
 
@@ -337,8 +348,10 @@ class ResponseRateCsvView(APIView):
         Acquires the average response rate for a course given its chatlogs.
         """
         deltas = [chatlog.delta for chatlog in chatlogs if chatlog.is_user]
-        average_delta = sum(deltas) / len(deltas)
+        average_delta = str(sum(deltas, dt.timedelta()) / len(deltas))
+        deltas = [str(delta) for delta in deltas]
         return average_delta, deltas
+
 
 class MostCommonWordsView(APIView):
         
@@ -364,7 +377,8 @@ class MostCommonWordsView(APIView):
             """
             params = request.query_params
             course = get_course(params)
-            conversations = get_filtered_convos(params.course_id, params.filter, timezone='America/Toronto')
+            filter = params.get('filter', '')
+            conversations = get_filtered_convos(course.course_id, filter, timezone='America/Toronto')
             
             conversation_ids = [convo.conversation_id for convo in conversations]
             sentences = [chatlog.chatlog for chatlog in Chatlog.objects.filter(conversation_id__in=conversation_ids) if chatlog.is_user]
@@ -397,7 +411,8 @@ class MostCommonWordsWordcloudView(APIView):
         """
         params = request.query_params
         course = get_course(params)
-        conversations = get_filtered_convos(params.course_id, params.filter, timezone='America/Toronto')
+        filter = params.get('filter', '')
+        conversations = get_filtered_convos(course.course_id, filter, timezone='America/Toronto')
         
         conversation_ids = [convo.conversation_id for convo in conversations]
         sentences = [chatlog.chatlog for chatlog in Chatlog.objects.filter(conversation_id__in=conversation_ids) if chatlog.is_user]
@@ -433,11 +448,18 @@ class AverageCourseComfortabilityView(APIView):
         """
         params = request.query_params
         course = get_course(params)
-        conversations = get_filtered_convos(params.course_id, params.filter, timezone='America/Toronto')
+        filter = params.get('filter', '')
         
+        conversations = get_filtered_convos(course.course_id, filter, timezone='America/Toronto')
         comfortability_ratings = [convo.comfortability_rating for convo in conversations]
-        avg_comfortability_rating = sum(comfortability_ratings) / len(comfortability_ratings)
-        response = { "avg_comfortability_rating": avg_comfortability_rating, "all_comfortability_ratings": comfortability_ratings }
+
+        adjusted_ratings = [num for num in comfortability_ratings if isinstance(num, int)]
+        print(adjusted_ratings)
+        total = sum(adjusted_ratings)
+        avg = total / len(comfortability_ratings)
+        adjusted_avg = total / len(adjusted_ratings)
+        
+        response = { "adjusted_avg_comfortability_rating": adjusted_avg, "avg_comfortability_rating": avg, "all_comfortability_ratings": comfortability_ratings }
         return JsonResponse(response)
 
 class CourseComfortabilityCsvView(APIView):
@@ -461,9 +483,9 @@ class CourseComfortabilityCsvView(APIView):
         """
         params = request.query_params
         course = get_course(params)
+        filter = params.get('filter', '')
 
-        conversations = get_filtered_convos(params.course_id, params.filter, timezone='America/Toronto')
-        comfortability_ratings = [convo.comfortability_rating for convo in conversations]
+        conversations = get_filtered_convos(course.course_id, filter, timezone='America/Toronto')
         
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="comfortability_ratings.csv"'
@@ -497,8 +519,9 @@ class InteractionFrequencyView(APIView):
         """
         params = request.query_params
         course = get_course(params)
-        dates = get_all_dates(params.course_id, params.filter, timezone='America/Toronto')
-        interactions = get_filtered_interactions(params.course_id, dates, timezone='America/Toronto')
+        filter = params.get('filter', '')
+        dates = get_all_dates(course.course_id, filter, timezone='America/Toronto')
+        interactions = get_filtered_interactions(course.course_id, dates, timezone='America/Toronto')
         response = { "interactions": interactions }
         return JsonResponse(response)
 
@@ -516,7 +539,7 @@ class FilteredChatlogsView(APIView):
         Acquires all chatlogs for a course given a filter.
         """
         conversations_list = []
-        conversations = Conversation.object.filter()
+        conversations = Conversation.objects.filter()
         for convo in conversations:
             conversation_id = convo.conversation_id
             convo_dict = convo.to_dict()
@@ -524,10 +547,10 @@ class FilteredChatlogsView(APIView):
             try: feedback = Feedback.objects.get(conversation_id=conversation_id)
             except: feedback = None
 
-            if (feedback): 
-                convo_dict['rating']
-                convo_dict['msg']
+            if (feedback):
+                convo_dict['rating'] = feedback.rating 
+                convo_dict['msg'] = feedback.feedback_msg
             
             conversations_list.append(convo_dict)
 
-        return JsonResponse(conversations_list)   
+        return JsonResponse({"conversations": conversations_list})   

@@ -149,14 +149,14 @@ class ChatlogView(APIView):
         user_chatlog = self.create_chatlog(conversation.conversation_id, chatlog, True, current_time, delta)
 
         model = get_object_or_404(GPTModel, model_id=conversation.model_id)
-        if model.status: return ErrorResponse("Model not active", status.HTTP_406_NOT_ACCEPTABLE)
+        if not model.status: return ErrorResponse("Model not active", status.HTTP_406_NOT_ACCEPTABLE)
         
         # 2. Acquire LLM chatlog response 
         # course = get_object_or_404(Course, course_id=conversation.course_id)
         # model_response = model.get_response(conversation_id, course.course_id, chatlog)
         model_response = "Hello world"
         model_time = timezone.now()
-        model_chatlog = self.create_chatlog(conversation, model_response, False, model_time, delta)
+        model_chatlog = self.create_chatlog(conversation.conversation_id, model_response, False, model_time, None)
 
         model_time = model_time.astimezone(pytz.timezone(location)).isoformat() + "[" + location + "]"
         user_time = current_time.astimezone(pytz.timezone(location)).isoformat() + "[" + location + "]"
@@ -185,11 +185,11 @@ class ChatlogView(APIView):
         chatlog_id = uuid.uuid4()
         chatlog = Chatlog(
             chatlog_id=str(chatlog_id),
-            conversation_id=str(),
+            conversation_id=str(cid),
             time=time,
             is_user=is_user,
             chatlog=chatlog,
-            delta=delta,
+            delta=delta
         )
         chatlog.save()
         return chatlog

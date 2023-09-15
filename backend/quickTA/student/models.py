@@ -28,17 +28,20 @@ class Conversation(models.Model):
     )
 
     def __str__(self):
-        return f"[{str(self.course)}] {str(self.user)} - Conversation {str(self.conversation_id)}"
+        return f"[{str(self.course_id)}] {str(self.user_id)} - Conversation {str(self.conversation_id)}"
     
     def to_dict(self):
-        user = User.objects.get(user_id=self.user_id)
-        course = Course.objects.get(course_id=self.course_id)
+        user, course = None, None
+        try:
+            user = User.objects.get(user_id=self.user_id)
+            course = Course.objects.get(course_id=self.course_id)
+        except: pass
         return {
-            "course_name": course.name,
+            "course_name": course.course_name if course else "Unknown",
             "course_id": self.course_id,
             "user_id": self.user_id,
-            "user_name": user.name,
-            "utorid": user.utorid,
+            "user_name": user.name if user else "Anonymous",
+            "utorid": user.utorid if user else "Anonymous",
             "conversation_id": str(self.conversation_id),
             "start_time": self.start_time,
             "end_time": self.end_time,
@@ -70,7 +73,7 @@ class Chatlog(models.Model):
                 "time": self.time,
                 "speaker": user.name if self.is_user else "Agent",
                 "chatlog": self.chatlog,
-                "delta": self.delta
+                "delta": str(self.delta) if self.delta else None
             }
         return {
             "chatlog_id": str(self.chatlog_id),
@@ -78,7 +81,7 @@ class Chatlog(models.Model):
             "time": self.time,
             "is_user": self.is_user,
             "chatlog": self.chatlog,
-            "delta": self.delta
+            "delta": str(self.delta) if self.delta else None
         }
 
 class Report(models.Model): 
@@ -92,12 +95,12 @@ class Report(models.Model):
     
     def to_dict(self):
         conversation = Conversation.objects.get(conversation_id=self.conversation_id)
-        user = User.objects.get(user_id=self.user_id)
+        user = User.objects.get(user_id=conversation.user_id)
 
         return {
             "course_id": conversation.course_id,
             "conversation_id": self.conversation_id,
-            "user_id": self.user_id,
+            "user_id": user.user_id,
             "user_name": user.name,
             "utorid": user.utorid,
             "time": self.time,
@@ -113,3 +116,15 @@ class Feedback(models.Model):
 
     def __str__(self):
         return f"[{str(self.conversation)}] Feedback"
+    
+    def to_dict(self):
+        conversation = None
+        try:
+            conversation = Conversation.objects.get(conversation_id=self.conversation_id)
+        except: pass
+
+        return {
+            "course_id": conversation.course_id if conversation else "Unknown",
+            "rating": self.rating,
+            "feedback_msg": self.feedback_msg
+        }

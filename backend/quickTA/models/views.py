@@ -3,7 +3,7 @@ from django.shortcuts import render
 from models.models import GPTModel
 from rest_framework import status
 # from models.serializers import GPTModelSerializer
-import students.functions as gptmodel_functions
+import researchers.functions as gptmodel_functions
 from django.http import JsonResponse
 from utils.handlers import ErrorResponse
 from drf_yasg import openapi

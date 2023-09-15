@@ -69,9 +69,9 @@ urlpatterns = [
     # path('admin/add-multiple-user', admin_views.create_multiple_users),
 
  #   path('admin/add-user-course', admin_views.add_user_course),
-    path('admin/add-multiple-user-course', admin_views.add_multiple_user_course),
+    # path('admin/add-multiple-user-course', admin_views.add_multiple_user_course),
   #  path('admin/remove-user-course', admin_views.remove_user_course),
-    path('admin/import-all-students-from-csv', admin_views.import_all_students_from_csv),
+    # path('admin/import-all-students-from-csv', admin_views.import_all_students_from_csv),
 
     # path('admin/get-all-courses', admin_views.get_all_courses),
     # path('admin/delete-course/<str:course_id>/', admin_views.delete_course),

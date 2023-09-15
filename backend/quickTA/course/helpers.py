@@ -11,5 +11,5 @@ def get_course(params):
     course_semester = params.get('semester', '')
     
     if course_id: course = get_object_or_404(Course, course_id=course_id)
-    elif course_code and course_semester: course = get_object_or_404(Course, course_code=course_code, semester=course_semester)
+    else: course = get_object_or_404(Course, course_code=course_code, semester=course_semester)
     return course
