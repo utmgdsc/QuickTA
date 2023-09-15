@@ -1,5 +1,6 @@
 import uuid
 import csv
+from datetime import datetime
 
 from rest_framework.parsers import MultiPartParser
 from rest_framework.decorators import action
@@ -184,6 +185,9 @@ class UserCoursesListView(APIView):
         
         if user_id: user = get_object_or_404(User, user_id=user_id)
         else: user = get_object_or_404(User, utorid=utorid)
+
+        if user.user_role == 'ST':
+            return JsonResponse([course for course in user.courses if course.end_date > datetime.now()], safe=False)
         return JsonResponse(user.courses, safe=False)
 
 # TODO: add a view to get all the courses the user is not in
