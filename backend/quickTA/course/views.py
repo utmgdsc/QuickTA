@@ -323,6 +323,8 @@ class CourseMultipleList(APIView):
         Gets multiple courses by their course ids.
         """
         course_ids = request.query_params.get('course_ids', [])
+        if not course_ids: return JsonResponse({"courses": []})
+        
         course_ids = course_ids.split(',')
         courses = get_list_or_404(Course, course_id__in=course_ids)
         serializer = CourseSerializer(courses, many=True, show_users=True)

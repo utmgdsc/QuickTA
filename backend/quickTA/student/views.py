@@ -52,8 +52,12 @@ class ConversationView(APIView):
         user_id = request.query_params.get('user_id', '')
         course_id = request.query_params.get('course_id', '')
 
+
         user = get_object_or_404(User, user_id=user_id)
         course = get_object_or_404(Course, course_id=course_id)
+        
+        # set previous conversation status to 'I' (Inactive), and create new conversation
+        Conversation.objects.filter(user_id=user_id).update(status='I')
         serializer = self.create_conversation(user, course)
 
         if serializer.is_valid():
