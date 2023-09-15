@@ -10,4 +10,5 @@ urlpatterns = [
     path('/gpt', GPTModelView.as_view()),
     path('/gpt/all', GPTModelListView.as_view()),
     path('/gpt/activate', ActivateGPTModelView.as_view()),
+    path('/gpt/deactive', DeactivateGPTModelView.as_view()),
 ]
