@@ -12,6 +12,7 @@ from course.models import Course
 class Conversation(models.Model):
     conversation_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     course_id = models.CharField(max_length=100)
+    model_id = models.CharField(max_length=100)
     user_id = models.CharField(max_length=50)  
     start_time = models.DateTimeField(default=now)
     end_time = models.DateTimeField(blank=True, null=True)
@@ -43,7 +44,8 @@ class Conversation(models.Model):
             "end_time": self.end_time,
             "status": self.status,
             "reported": self.reported,
-            "comfortability_rating": self.comfortability_rating
+            "comfortability_rating": self.comfortability_rating,
+            "model_id": self.model_id
         }
 
 class Chatlog(models.Model):
