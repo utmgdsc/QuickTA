@@ -32,6 +32,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+APPEND_SLASH = False
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -44,8 +46,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'users',
+    'models',
+    'course',
+    'analytics',
+    'administrative',
+    'student',
     'students',
-    'researchers'
+    'researchers',
 ]
 
 MIDDLEWARE = [

@@ -20,3 +20,4 @@ class Test_Create_User(TestCase):
         self.assertEqual(name, 'Test User')
         self.assertEqual(utorid, 'testuser1')
         self.assertEqual(user_role, 'ST')
+

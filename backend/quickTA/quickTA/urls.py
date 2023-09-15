@@ -32,13 +32,19 @@ schema_view = swagger_get_schema_view(
 urlpatterns = [
     # path('app/', include('myapp.urls')),
     path('admin/', admin.site.urls),
-    path('api/',
+    path('api',
         include([
-            path('', include('students.urls', namespace='user')),
-            path('swagger/schema/', schema_view.with_ui('swagger', cache_timeout=0), name="swagger-schema"),
-            path('redoc', schema_view.with_ui('redoc', cache_timeout=0), name="redoc-schema")
+            path('/students/', include('students.urls', namespace='students')),
+            path('/user', include('users.urls', namespace='users')),
+            path('/course', include('course.urls', namespace='course')),
+            path('/models', include('models.urls', namespace='models')),
+            path('/student', include('student.urls', namespace='student')),
+            path('/analytics', include('analytics.urls', namespace='analytics')),
+            path('/administrative', include('administrative.urls', namespace='administrative')),
+            path('/researchers', include('researchers.urls')),
+            path('/swagger/schema', schema_view.with_ui('swagger', cache_timeout=0), name="swagger-schema"),
+            path('/redoc', schema_view.with_ui('redoc', cache_timeout=0), name="redoc-schema")
         ])
     ),
-    path('researchers/', include('researchers.urls'))
         
 ]
