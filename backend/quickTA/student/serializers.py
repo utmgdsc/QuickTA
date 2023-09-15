@@ -10,6 +10,7 @@ class ConversationSerializer(ModelSerializer):
             'conversation_id',
             'user_id',
             'course_id',
+            'model_id',
             'start_time',
             'end_time',
             'status',

@@ -24,4 +24,4 @@ class GPTModel(models.Model):
     best_of = models.IntegerField(default=1)
 
     def __str__(self):
-        return self.model_id + " " + self.model_name
+        return str(self.model_id) + " " + self.model_name

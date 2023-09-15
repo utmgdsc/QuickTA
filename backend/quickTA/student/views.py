@@ -8,6 +8,8 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from rest_framework import status
 from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser
+
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from student.serializers import *
@@ -43,6 +45,7 @@ class ConversationView(APIView):
         manual_parameters=[
             openapi.Parameter("user_id", openapi.IN_QUERY, description="User ID", type=openapi.TYPE_STRING),
             openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),            
+            openapi.Parameter("model_id", openapi.IN_QUERY, description="Model ID", type=openapi.TYPE_STRING),
         ],
         responses={201: ConversationSerializer(), 400: "Bad Request"}
     )
@@ -60,7 +63,7 @@ class ConversationView(APIView):
         
         # set previous conversation status to 'I' (Inactive), and create new conversation
         Conversation.objects.filter(user_id=user_id).update(status='I')
-        serializer = self.create_conversation(user, course)
+        serializer = self.create_conversation(user, course, model)
 
         if serializer.is_valid():
             serializer.save()
@@ -68,12 +71,13 @@ class ConversationView(APIView):
         return ErrorResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     
-    def create_conversation(self, user, course):
+    def create_conversation(self, user, course, model):
         course_id = uuid.uuid4()
         serializer = ConversationSerializer(
             data={
                 "conversation_id": str(course_id),
                 "course_id": str(course.course_id),
+                "model_id": str(model.model_id),
                 "user_id": str(user.user_id),
             }
         )    
@@ -94,8 +98,17 @@ class ConversationListView(APIView):
 
 class ConversationHistoryCsvView(APIView):
 
+    parser_classes = [MultiPartParser]
+
+    @swagger_auto_schema(
+        operation_summary="Get conversation history",
+        responses={200: openapi.Response('File Attachment', schema=openapi.Schema(type=openapi.TYPE_FILE))},
+        manual_parameters=[
+            openapi.Parameter("conversation_id", openapi.IN_QUERY, description="Conversation ID", type=openapi.TYPE_STRING),
+        ]
+    )
     def post(self, request):
-        conversation_id = request.data.get('conversation_id')
+        conversation_id = request.query_params.get('conversation_id')
         conversation = get_object_or_404(Conversation, conversation_id=conversation_id)
         user = get_object_or_404(User, user_id=conversation.user_id)
         chatlogs = Chatlog.objects.filter(conversation_id=conversation_id).order_by('time')
@@ -118,12 +131,8 @@ class ChatlogView(APIView):
 
     @swagger_auto_schema(
         operation_summary="Create a new chatlog",
-        manual_parameters=[
-            openapi.Parameter("conversation_id", openapi.IN_QUERY, description="Conversation ID", type=openapi.TYPE_STRING),
-            openapi.Parameter("is_user", openapi.IN_QUERY, description="Is user", type=openapi.TYPE_BOOLEAN),
-            openapi.Parameter("chatlog", openapi.IN_QUERY, description="Chatlog", type=openapi.TYPE_STRING),
-        ],
-        responses={201: ConversationSerializer(), 400: "Bad Request"}
+        request_body=ChatlogSerializer(),
+        responses={201: ConversationSerializer(), 400: "Bad Request", 406: "Model not active"}
     )
     def post(self, request):
         """
@@ -137,22 +146,16 @@ class ChatlogView(APIView):
         conversation = get_object_or_404(Conversation, conversation_id=conversation_id)
         last_chatlog = Chatlog.objects.filter(conversation_id=conversation_id).order_by('-time').first()
         delta = current_time - last_chatlog.time if last_chatlog else current_time - conversation.start_time
-        user_chatlog = self.create_chatlog(conversation, chatlog, True, current_time, delta)
+        user_chatlog = self.create_chatlog(conversation.conversation_id, chatlog, True, current_time, delta)
 
-
-
-        # Check whether convo id is from an 'active' model
-        # if it is continue procedure, else send response
-        model = get_object_or_404(GPTModel, model=conversation.model_id)
-
-        if model.status == 'I':
-            return ErrorResponse("Model not active", status.HTTP_403_FORBIDDEN)
+        model = get_object_or_404(GPTModel, model_id=conversation.model_id)
+        if model.status: return ErrorResponse("Model not active", status.HTTP_406_NOT_ACCEPTABLE)
         
         # 2. Acquire LLM chatlog response 
         # course = get_object_or_404(Course, course_id=conversation.course_id)
         # model_response = model.get_response(conversation_id, course.course_id, chatlog)
         model_response = "Hello world"
-        model_time = timezone.now() 
+        model_time = timezone.now()
         model_chatlog = self.create_chatlog(conversation, model_response, False, model_time, delta)
 
         model_time = model_time.astimezone(pytz.timezone(location)).isoformat() + "[" + location + "]"
@@ -170,15 +173,19 @@ class ChatlogView(APIView):
             return current_time, location
         else:
             idx = time.find('[')
-            location = re.search(r"\[(.*?)\]", time).group()[1:-1]
-            current_time = dateparse.parse_datetime(time[:idx])
+            location = re.search(r"\[(.*?)\]", time)
+
+            if location is not None: location = location.group()[1:-1]
+            else: location = 'America/Toronto'
+            
+            current_time = dateparse.parse_datetime(time[:idx]).replace(tzinfo=pytz.timezone("UTC"))
             return current_time, location
 
     def create_chatlog(self, cid, chatlog, is_user, time, delta):
         chatlog_id = uuid.uuid4()
         chatlog = Chatlog(
             chatlog_id=str(chatlog_id),
-            conversation_id=str(cid),
+            conversation_id=str(),
             time=time,
             is_user=is_user,
             chatlog=chatlog,
@@ -234,7 +241,7 @@ class FeedbackView(APIView):
 
     @swagger_auto_schema(
         operation_summary="Create a new feedback",
-        response_body=FeedbackSerializer(),
+        request_body=FeedbackSerializer(),
         responses={201: FeedbackSerializer(), 400: "Bad Request"}
     )
     def post(self, request):
@@ -246,6 +253,9 @@ class FeedbackView(APIView):
         feedback_msg = request.data.get('feedback_msg', '')
         
         convo = get_object_or_404(Conversation, conversation_id=conversation_id)
+        if Feedback.objects.filter(conversation_id=conversation_id):
+            return ErrorResponse("Feedback already exists", status=status.HTTP_400_BAD_REQUEST)
+        
         serializer = self.create_feedback(conversation_id, rating, feedback_msg)
 
         if serializer.is_valid():
@@ -260,7 +270,11 @@ class FeedbackView(APIView):
             rating=rating,
             feedback_msg=feedback_msg
         )
-        serializer = FeedbackSerializer(feedback)
+        serializer = FeedbackSerializer(data={
+            "conversation_id": conversation_id,
+            "rating": rating,
+            "feedback_msg": feedback_msg
+        })
         return serializer
     
     def update_conversation_status(self, conversation):
@@ -283,23 +297,23 @@ class ReportView(APIView):
 
     @swagger_auto_schema(
         operation_summary="Get report details",
-        responses={200: ReportSerializer(), 404: "Report not found"},
+        responses={200: ReportSerializer(many=True), 404: "Report not found"},
         manual_parameters=[
             openapi.Parameter("conversation_id", openapi.IN_QUERY, description="Conversation ID", type=openapi.TYPE_STRING),
         ]
     )
     def get(self, request):
         """
-        Acquires the details of a certain report by conversation_id.
+        Acquires the details of certain report[s] by conversation_id.
         """
         conversation_id = request.query_params.get('conversation_id', '')
-        report = get_object_or_404(Report, conversation_id=conversation_id)
-        serializer = ReportSerializer(report)
-        return JsonResponse(serializer.data)
+        report = Report.objects.filter(conversation_id=conversation_id)
+        serializer = ReportSerializer(report, many=True)
+        return JsonResponse({"reports": serializer.data})
 
     @swagger_auto_schema(
         operation_summary="Create a new report",
-        response_body=ReportSerializer(),
+        request_body=ReportSerializer(),
         responses={201: ReportSerializer(), 400: "Bad Request", 404: "Conversation not found"}
     )
     def post(self, request):
@@ -311,7 +325,7 @@ class ReportView(APIView):
         
         conversation = get_object_or_404(Conversation, conversation_id=conversation_id)
         serializer = self.create_report(conversation_id, msg)
-        if not serializer.is_valid():
+        if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
         return ErrorResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -321,7 +335,10 @@ class ReportView(APIView):
             conversation_id=conversation_id,
             msg=msg
         )
-        serializer = ReportSerializer(report)
+        serializer = ReportSerializer(data={
+            "conversation_id": conversation_id,
+            "msg": msg
+        })
         return serializer
 
 class ReportListView(APIView):
@@ -356,8 +373,8 @@ class CourseComfortabilityView(APIView):
             return JsonResponse(serializer.data)
     
         @swagger_auto_schema(
-            operation_summary="Create a new course comfortability",
-            response_body=CourseComfortabilitySerializer(),
+            operation_summary="Set course comfortability for a conversation",
+            request_body=CourseComfortabilitySerializer(),
             responses={201: CourseComfortabilitySerializer(), 400: "Bad Request", 404: "Conversation not found"}
         )
         def post(self, request):
@@ -368,15 +385,14 @@ class CourseComfortabilityView(APIView):
             comfortability_rating = request.data.get('comfortability_rating', '')
         
             serializer = self.set_course_comfortability(conversation_id, comfortability_rating)
-            if not serializer.is_valid():
-                serializer.save()
+            if serializer.is_valid():
                 return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
             return ErrorResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         def set_course_comfortability(self, conversation_id, comfortability_rating):
             conversation = get_object_or_404(Conversation, conversation_id=conversation_id)
-            conversation = Conversation.objects.filter(conversation_id=conversation.conversation_id).update(comfortability_rating=comfortability_rating).first()
-            serializer = CourseComfortabilitySerializer(conversation)
+            conversation = Conversation.objects.filter(conversation_id=conversation.conversation_id).update(comfortability_rating=comfortability_rating)
+            serializer = CourseComfortabilitySerializer(data={'conversation_id': conversation_id, 'comfortability_rating': comfortability_rating})
             return serializer
 
 class CourseComfortabilityListView(APIView):
