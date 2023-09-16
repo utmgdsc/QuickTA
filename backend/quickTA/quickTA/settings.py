@@ -115,7 +115,11 @@ DATABASES = {
         'CLIENT': {
             # 'host': 'mongodb+srv://admin:cEWQJjkyDAracCLY@quickta.dmbx3ix.mongodb.net/?retryWrites=true&w=majority'
             'host': 'mongodb+srv://admin:admin@cluster0.qatcnyw.mongodb.net/?retryWrites=true&w=majority'
-        }  
+            # 'host': 'mongodb://127.0.0.1:27017'
+        },
+        'OPTIONS': {
+            'max_connections': 5000,
+        },
     }
 }
 

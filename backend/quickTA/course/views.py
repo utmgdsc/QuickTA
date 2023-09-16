@@ -8,7 +8,8 @@ from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from course.models import Course
-from course.serializers import CourseSerializer, CourseMultipleEnrollmentUserSerializer
+from course.serializers import *
+from models.serializers import GPTModelSerializer
 from users.models import User
 from users.serializers import UserSerializer
 from utils.constants import ROLE_MAP, ROLE_MAP_ENUM, COURSE_ROLE_MAP, USER_SELECTION_TYPE
@@ -316,7 +317,7 @@ class CourseMultipleList(APIView):
         manual_parameters=[
             openapi.Parameter("course_ids", openapi.IN_QUERY, description="List of course IDs", type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING)),
         ],
-        responses={200: CourseSerializer(many=True), 404: "Course not found"}
+        responses={200: CourseMultipleSerializer(many=True), 404: "Course not found"}
     )
     def get(self, request):
         """
@@ -327,8 +328,33 @@ class CourseMultipleList(APIView):
         
         course_ids = course_ids.split(',')
         courses = get_list_or_404(Course, course_id__in=course_ids)
-        serializer = CourseSerializer(courses, many=True, show_users=True)
+        serializer = CourseMultipleSerializer(courses, many=True)
         return JsonResponse({"courses": serializer.data})
+
+class CourseModelList(APIView):
+    
+    @swagger_auto_schema(
+        operation_summary="Get all models from the given course",
+        manual_parameters=[
+            openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("course_code", openapi.IN_QUERY, description="Course Code", type=openapi.TYPE_STRING),
+            openapi.Parameter("semester", openapi.IN_QUERY, description="Semester", type=openapi.TYPE_STRING),
+        ],
+        responses={200: GPTModelSerializer(many=True), 404: "Course Not found"}
+    )
+    def get(self, request):
+        course_id = request.query_params.get("course_id", "")
+        course_code = request.query_params.get("course_code", "")
+        semester = request.query_params.get("semester", "")
+
+        if course_id: course = get_object_or_404(Course, course_id=course_id)
+        else: course = get_object_or_404(Course, course_code=course_code, semester=semester)
+
+        serializer = CourseModelSerializer(data={}, course_id=course.course_id)
+        if serializer.is_valid():
+            return JsonResponse(serializer.data)
+        return ErrorResponse(serializer.errors, status.HTTP_400_BAD_REQUEST)
+    
 
 class CourseUnenrolledUsersList(APIView):
 

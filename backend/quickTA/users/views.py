@@ -247,7 +247,6 @@ class UserBatchAddCsvView(APIView):
         course_code = request.query_params.get('course_code', '')
         semester = request.query_params.get('semester', '')
         user_role = request.query_params.get('user_role', 'ST')
-        if not(course_id): return ErrorResponse("Bad request", status=status.HTTP_400_BAD_REQUEST)
         
         if course_id: course = get_object_or_404(Course, course_id=course_id)
         else: course = get_object_or_404(Course, course_code=course_code, semester=semester)
@@ -315,3 +314,7 @@ class UserBatchAddCsvView(APIView):
             existing_users = [f"{user['utorid']}: {user['name']}" for user in existing_users]
             return JsonResponse({"msg": f"Users created.{' Modified existing users (utorid: name): ' + (', '.join(existing_users) if existing_users else '') + '.'}{' Failed to add users: ' + (', '.join(failed_users) if failed_users else '') + '.'}"}, status=status.HTTP_201_CREATED)
         return ErrorResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class TestView(APIView):
+    def get(self, request):
+        return JsonResponse({"msg": "Test message"})

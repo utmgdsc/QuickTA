@@ -6,6 +6,7 @@ import djongo.models as djmodels
 class GPTModel(models.Model):
     model_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     model_name = models.TextField(max_length=100)
+    model_description = models.TextField(max_length=2000)
     course_id = models.CharField(max_length=100)
     status = models.BooleanField(default=True)
 
@@ -29,6 +30,34 @@ class GPTModel(models.Model):
     
     def get_model_id(self):
         return str(self.model_id)
+    
+    def to_dict(self):
+        return {
+            "model_id": str(self.model_id),
+            "model_name": self.model_name,
+            "model_description": self.model_description,
+            "course_id": self.course_id,
+            "status": self.status,
+            "model": self.model,
+            "prompt": self.prompt,
+            "max_tokens": self.max_tokens,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n,
+            "stream": self.stream,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+            "functions": self.functions,
+            "function_call": self.function_call,
+        }
+    
+    def to_student_dict(self):
+        return {
+            "model_id": str(self.model_id),
+            "model_name": self.model_name,
+            "course_id": self.course_id,
+            "status": self.status
+        }
     
     def get_settings(self, include_functions=False):
         settings = {
