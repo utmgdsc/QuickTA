@@ -43,16 +43,13 @@ class GPTModelView(APIView):
                 'status': openapi.Schema(type=openapi.TYPE_BOOLEAN),
                 'model': openapi.Schema(type=openapi.TYPE_STRING),
                 'prompt': openapi.Schema(type=openapi.TYPE_STRING),
-                'suffix': openapi.Schema(type=openapi.TYPE_STRING),
                 'max_tokens': openapi.Schema(type=openapi.TYPE_INTEGER),
                 'temperature': openapi.Schema(type=openapi.TYPE_NUMBER),
                 'top_p': openapi.Schema(type=openapi.TYPE_NUMBER),
                 'n': openapi.Schema(type=openapi.TYPE_INTEGER),
                 'stream': openapi.Schema(type=openapi.TYPE_BOOLEAN),
-                'logprobs': openapi.Schema(type=openapi.TYPE_INTEGER),
                 'presence_penalty': openapi.Schema(type=openapi.TYPE_NUMBER),
                 'frequency_penalty': openapi.Schema(type=openapi.TYPE_NUMBER),
-                'best_of': openapi.Schema(type=openapi.TYPE_INTEGER)
             }
         ),
         responses={ 200: GPTModelSerializer(), 400: "Bad Request"}
@@ -81,16 +78,13 @@ class GPTModelView(APIView):
                 'status': openapi.Schema(type=openapi.TYPE_BOOLEAN),
                 'model': openapi.Schema(type=openapi.TYPE_STRING),
                 'prompt': openapi.Schema(type=openapi.TYPE_STRING),
-                'suffix': openapi.Schema(type=openapi.TYPE_STRING),
                 'max_tokens': openapi.Schema(type=openapi.TYPE_INTEGER),
                 'temperature': openapi.Schema(type=openapi.TYPE_NUMBER),
                 'top_p': openapi.Schema(type=openapi.TYPE_NUMBER),
                 'n': openapi.Schema(type=openapi.TYPE_INTEGER),
                 'stream': openapi.Schema(type=openapi.TYPE_BOOLEAN),
-                'logprobs': openapi.Schema(type=openapi.TYPE_INTEGER),
                 'presence_penalty': openapi.Schema(type=openapi.TYPE_NUMBER),
                 'frequency_penalty': openapi.Schema(type=openapi.TYPE_NUMBER),
-                'best_of': openapi.Schema(type=openapi.TYPE_INTEGER)
             }
         ),
         responses={ 200: GPTModelSerializer(), 400: "Bad Request"}

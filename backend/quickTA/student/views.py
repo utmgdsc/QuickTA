@@ -18,6 +18,7 @@ from users.models import User
 from course.models import Course
 from models.models import GPTModel
 from student.models import Conversation, Chatlog, Report, Feedback
+import models.config.main as model_functions
 
 # Create your views here.
 
@@ -150,11 +151,13 @@ class ChatlogView(APIView):
 
         model = get_object_or_404(GPTModel, model_id=conversation.model_id)
         if not model.status: return ErrorResponse("Model not active", status.HTTP_406_NOT_ACCEPTABLE)
+        if model.course_id != conversation.course_id: return ErrorResponse("Model does not belong to course", status.HTTP_406_NOT_ACCEPTABLE)
         
         # 2. Acquire LLM chatlog response 
         # course = get_object_or_404(Course, course_id=conversation.course_id)
         # model_response = model.get_response(conversation_id, course.course_id, chatlog)
-        model_response = "Hello world"
+        # model_response = "Hello world"
+        model_response = model_functions.get_response(conversation, model, chatlog)
         model_time = timezone.now()
         model_chatlog = self.create_chatlog(conversation.conversation_id, model_response, False, model_time, None)
 

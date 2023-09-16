@@ -12,14 +12,11 @@ class GPTModelSerializer(ModelSerializer):
             'status',
             'model',
             'prompt',
-            'suffix',
             'max_tokens',
             'temperature',
             'top_p',
             'n',
             'stream',
-            'logprobs',
             'presence_penalty',
-            'frequency_penalty',
-            'best_of'
+            'frequency_penalty'
         ]
