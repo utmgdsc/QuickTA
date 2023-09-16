@@ -11,4 +11,5 @@ urlpatterns = [
     path('/courses', UserCoursesListView.as_view()),
     path('/batch-add', UserBatchAddView.as_view()),
     path('/batch-add/csv', UserBatchAddCsvView.as_view()),
+    path('/test', TestView.as_view()),
 ]
