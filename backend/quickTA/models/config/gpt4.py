@@ -1,5 +1,6 @@
 import openai
 import environ
+import time
 from student.models import Conversation
 from models.models import GPTResponse
 
@@ -54,7 +55,6 @@ def completion(conversation, settings, chatlog):
         choices=response['choices'],
         usage=response['usage']
     )
-
     gpt_response.save()
 
     return agent_response
