@@ -170,6 +170,10 @@ class CourseList(APIView):
         """
         courses = Course.objects.all()
         serializer = CourseSerializer(courses, many=True, show_users=True)
+
+        for i, course in enumerate(serializer.data):
+            for role in COURSE_ROLE_MAP:
+                serializer.data[i][COURSE_ROLE_MAP[role]] = UserSerializer(User.objects.filter(user_id__in=course[COURSE_ROLE_MAP[role]]), many=True).data
         return JsonResponse(serializer.data, safe=False)
 
 class CourseEnrollment(APIView):
@@ -307,7 +311,9 @@ class CourseUserList(APIView):
         response = dict()
         for role in user_roles:
             role_field = COURSE_ROLE_MAP.get(role, None)
-            if role_field: response[role_field] = getattr(course, role_field) if getattr(course, role_field) else []
+            if role_field: 
+                response[role_field] = getattr(course, role_field) if getattr(course, role_field) else []
+                response[role_field] = UserSerializer(User.objects.filter(user_id__in=response[role_field]), many=True).data
 
         return JsonResponse(response)
 
