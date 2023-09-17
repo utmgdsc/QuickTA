@@ -16,6 +16,7 @@ import {
   Tr,
   useDisclosure,
   Skeleton,
+  VStack,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -26,7 +27,6 @@ import AddUser from "./AddUser";
 const CourseDrawer = ({ isOpen, onClose, course_id }) => {
   const [studentList, setStudentList] = useState([]);
   const [disableFlag, setDisableFlag] = useState(false);
-  const [loading, setLoading] = useState(false);
   const {
     isOpen: isOpenInstructors,
     onOpen: onOpenInstructors,
@@ -47,6 +47,7 @@ const CourseDrawer = ({ isOpen, onClose, course_id }) => {
         setStudentList(res.data.students);
       })
       .catch((err) => console.log(err));
+    setDisableFlag(false);
   };
 
   const hashing = (str, seed = 0) => {
@@ -88,12 +89,7 @@ const CourseDrawer = ({ isOpen, onClose, course_id }) => {
   useEffect(() => {
     if (course_id) {
       setDisableFlag(true);
-      setLoading(true);
-      fetchCourseList(course_id).then(() => {
-        setDisableFlag(false);
-      });
-      setLoading(false);
-      console.log(studentList);
+      fetchCourseList(course_id);
     }
   }, [course_id]);
 
@@ -105,7 +101,7 @@ const CourseDrawer = ({ isOpen, onClose, course_id }) => {
           <DrawerCloseButton />
           <DrawerHeader>Edit Course List</DrawerHeader>
           <DrawerBody>
-            <HStack>
+            <HStack style={{ margin: "8px 0" }}>
               <Button onClick={onOpenStudent} isDisabled={disableFlag}>
                 Add Student
               </Button>
@@ -130,14 +126,15 @@ const CourseDrawer = ({ isOpen, onClose, course_id }) => {
               />
             </HStack>
             <TableContainer>
-              <Table variant={"striped"} colorScheme={"blue"}>
+              <Table variant={"striped"} colorScheme={"blackAlpha"}>
                 <Thead>
-                  <Tr>
-                    <Th>utorid</Th>
-                    <Th>name</Th>
+                  <Tr background={"#5E85D4"}>
+                    <Th color={"white"}>Utorid</Th>
+                    <Th color={"white"}>Name</Th>
+                    <Th color={"white"}></Th>
                   </Tr>
                 </Thead>
-                {loading ? (
+                {studentList.length !== 0 ? (
                   <Tbody>
                     {studentList.map((student, index) => {
                       return (
@@ -167,19 +164,21 @@ const CourseDrawer = ({ isOpen, onClose, course_id }) => {
                   </Tbody>
                 ) : (
                   <Tbody size={"md"}>
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((item) => (
-                      <Tr key={item}>
-                        <Td>
-                          <Skeleton height="16px" width="100%" />
-                        </Td>
-                        <Td>
-                          <Skeleton height="16px" width="100%" />
-                        </Td>
-                        <Td>
-                          <Skeleton height="16px" width="100%" />
-                        </Td>
-                      </Tr>
-                    ))}
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map(
+                      (item) => (
+                        <Tr key={item}>
+                          <Td>
+                            <Skeleton height="16px" width="100%" />
+                          </Td>
+                          <Td>
+                            <Skeleton height="16px" width="100%" />
+                          </Td>
+                          <Td>
+                            <Skeleton height="16px" width="100%" />
+                          </Td>
+                        </Tr>
+                      )
+                    )}
                   </Tbody>
                 )}
               </Table>
