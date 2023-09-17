@@ -36,7 +36,7 @@ const AdminPage = ({ UTORID }) => {
 
   const handleSubmit = () => {
     const payload = { name, utorid, user_role: userRole };
-    axios.post(process.env.REACT_APP_API_URL + "/admin/add-user", 
+    axios.post(process.env.REACT_APP_API_URL + "/user/enroll",
       payload)
     .then(response => {
       return response.json();
@@ -48,7 +48,7 @@ const AdminPage = ({ UTORID }) => {
 
 
   const fetchAllCourses = () => {
-    axios.get(process.env.REACT_APP_API_URL + "/admin/get-all-courses")
+    axios.get(process.env.REACT_APP_API_URL + "/course/all")
       .then((res) => {
         if(res.data.courses){
           setCourseList(res.data.courses)

@@ -34,25 +34,16 @@ const ModelRemover = ({courseid, deleting, setDeleting, allModels}) => {
   const deleteModel = async () => {
     setDeleting(true);
     if (await isActive(removeModel.id)){
-      await axios.post(process.env.REACT_APP_API_URL + "/researcher/gptmodel-delete", {
-        course_id: courseid,
-        model_id: removeModel.id,
-      })
+      await axios.delete(process.env.REACT_APP_API_URL + `/models/gpt?course_id=${courseid}&model_id=${removeModel.id}`)
         .then(async (res) => {
-          await axios.post(process.env.REACT_APP_API_URL + "/researcher/gptmodel-activate", {
-            course_id: courseid,
-            model_id: allModels[0].model_id
-          })
+          await axios.get(process.env.REACT_APP_API_URL + `/models/gpt/activate?course_id=${courseid}&model_id=${allModels[0].model_id}`)
             .then((res) => {})
             .catch((err) => console.log(err))
           setDeleting(false);
         })
         .catch((err) => console.log(err))
     }else{
-      await axios.post(process.env.REACT_APP_API_URL + "/researcher/gptmodel-delete", {
-        course_id: courseid,
-        model_id: removeModel.id,
-      })
+      await axios.delete(process.env.REACT_APP_API_URL + `/models/gpt?course_id=${courseid}&model_id=${removeModel.id}`)
         .then((res) => setDeleting(false))
         .catch((err) => console.log(err))
     }
@@ -60,10 +51,7 @@ const ModelRemover = ({courseid, deleting, setDeleting, allModels}) => {
   }
 
   const isActive = async (modelid) => {
-    return await axios.post(process.env.REACT_APP_API_URL + "/researcher/gptmodel-get-one", {
-      course_id: courseid,
-      model_id: modelid
-    })
+    return await axios.post(process.env.REACT_APP_API_URL + `/models/gpt?model_id=${modelid}&course_id=${courseid}`)
       .then((res) => res.data.status)
       .catch((err) => {
         console.log(err);

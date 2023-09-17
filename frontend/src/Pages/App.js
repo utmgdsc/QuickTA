@@ -204,6 +204,24 @@ const App = ({ UTORid = "" }) => {
         {auth === "AD" ? (
           <React.Fragment>
             <Route path="/" element={<AdminPage UTORID={UTORid} />} />
+          <Route
+          path="/ResearcherAnalytics"
+          element={
+            <ResearcherAnalytics
+              userid={userId}
+              UTORid={UTORid}
+              courses={courses}
+              setCurrCourse={setCurrCourse}
+              currCourse={currCourse}
+              courseCode={currCourse.course_code}
+              courseName={currCourse.course_name}
+              semester={currCourse.semester}
+              setIsLoading={setIsLoading}
+              isLoading={isLoading}
+              setCourses={setCourses}
+            />
+              }
+            />
           </React.Fragment>
         ) : null}
 

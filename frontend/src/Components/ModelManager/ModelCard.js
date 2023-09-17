@@ -68,9 +68,7 @@ const ModelCard = ({modelName, colorScheme, modelId, courseid, modelStatus, setC
 
     const updateModel = async () => {
       setEnabling(true);
-      await axios.post(process.env.REACT_APP_API_URL + "/researcher/gptmodel-update", {
-        model_id: modelId,
-        course_id: courseid,
+      await axios.patch(process.env.REACT_APP_API_URL + `/models/gpt?model_id=${modelId}`, {
         model_name: newModelSettings.name,
         model: newModelSettings.model,
         prompt: newModelSettings.prompt,
@@ -85,7 +83,7 @@ const ModelCard = ({modelName, colorScheme, modelId, courseid, modelStatus, setC
 
     const enableModel = async () => {
       setEnabling(true);
-      await axios.post(process.env.REACT_APP_API_URL + "/researcher/gptmodel-activate", {course_id: courseid, model_id: modelId})
+      await axios.get(process.env.REACT_APP_API_URL + `/models/gpt/activate?course_id=${courseid}&model_id=${modelId}`)
         .then((res) => {
           setCurrentModel(modelId);
           setEnabling(false);
@@ -94,7 +92,7 @@ const ModelCard = ({modelName, colorScheme, modelId, courseid, modelStatus, setC
     }
 
     const fetchModelDetails = async () => {
-        return await axios.post(process.env.REACT_APP_API_URL + "/researcher/gptmodel-get-one", {model_id: modelId, course_id: courseid})
+        return await axios.get(process.env.REACT_APP_API_URL + `/models/gpt/activate?model_id=${modelId}&course_id=${courseid}`)
           .then((res) => {
               const model_settings = res.data
               setModelSettings({

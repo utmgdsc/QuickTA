@@ -33,7 +33,7 @@ const CourseCreator = ({ userid, setCourses, setCurrCourse, setIsLoading }) => {
         // Gets all the courses a student is enrolled in
         // Pass getUserId return
         setIsLoading(true);
-        return axios.post(process.env.REACT_APP_API_URL + "/user/courses", {user_id: userid})
+        return axios.get(process.env.REACT_APP_API_URL + `/user/courses?user_id=${userid}`)
           .then((res) => {
               if(res.data.courses) {
                   setCourses(res.data.courses.map((course) => ({course_id: course.course_id,
@@ -123,7 +123,7 @@ const CourseCreator = ({ userid, setCourses, setCurrCourse, setIsLoading }) => {
                               })
                                 .then(async (res) => {
                                     const new_course_id = res.data.course_id
-                                    await axios.post(process.env.REACT_APP_API_URL + "/researcher/gptmodel-create", {
+                                    await axios.post(process.env.REACT_APP_API_URL + "/models/gpt", {
                                         course_id: new_course_id,
                                         model_name: newCourse.course_code,
                                         model: "text-davinci-002",
@@ -136,10 +136,10 @@ const CourseCreator = ({ userid, setCourses, setCurrCourse, setIsLoading }) => {
                                         presence_penalty: 0.6
                                     })
                                       .then(async (res) => {
-                                          await axios.post(process.env.REACT_APP_API_URL + "/admin/add-user-course", {
+                                          await axios.post(process.env.REACT_APP_API_URL + "/course/enroll", {
                                               user_id: userid,
                                               course_id: new_course_id,
-                                              type: "instructor"
+                                              user_role: "IS"
                                           })
                                             .then((res) => {
                                                 getAllCourses()

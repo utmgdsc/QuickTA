@@ -16,7 +16,7 @@ const UploadCourseList = ({courseID}) => {
     formData.append('file', file);
     formData.append('course_id', courseID);
   
-    await axios.post(process.env.REACT_APP_API_URL + '/admin/import-all-students-from-csv', formData)
+    await axios.post(process.env.REACT_APP_API_URL + '/user/batch-add/csv', formData)
       .then(res => {
       // Handle the response
       console.log(res);

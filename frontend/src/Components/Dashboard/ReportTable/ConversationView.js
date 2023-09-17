@@ -18,7 +18,7 @@ const ConversationView = ({isOpen, onClose, convo_id}) => {
     const fileDownload = require('js-file-download');
 
     const fetchConversation = async (conversation_id) => {
-        await axios.post(process.env.REACT_APP_API_URL + "/researcher/report-chatlogs", {conversation_id: convo_id})
+        await axios.get(process.env.REACT_APP_API_URL + `/researchers/report-chatlogs?conversation_id=${convo_id}`)
         .then((res) => {setConvo(res.data.conversations)})
         .catch((err) => console.log(err))
     }

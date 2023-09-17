@@ -21,7 +21,7 @@ const AddUser = ({course_id, isOpen, onClose, type, handleClose, parentDisable})
 
   const fetchUnenrolledUsers = (course_id, type) => {
     setDisableAdd(true);
-    axios.get(process.env.REACT_APP_API_URL + `/admin/get-course-unadded-users/?course_id=${course_id}&type=${type}`)
+    axios.get(process.env.REACT_APP_API_URL + `/course/unenrolled-users?course_id=${course_id}&type=${type}`)
       .then((res) => {
         if(res.data.users){
           setUserList(res.data.users);
@@ -110,7 +110,7 @@ const AddUser = ({course_id, isOpen, onClose, type, handleClose, parentDisable})
                 console.log(usersToAdd)
                 setDisableAdd(true);
                 console.log({users: usersToAdd, course_id: course_id, type: (type==="student" ? "student" : "instructor")});
-                axios.post(process.env.REACT_APP_API_URL + "/admin/add-multiple-user-course", {users: usersToAdd, course_id: course_id, type: (type==="student" ? "student" : "instructor")})
+                axios.post(process.env.REACT_APP_API_URL + "/course/enroll/multiple", {users: usersToAdd, course_id: course_id, type: (type==="student" ? "student" : "instructor")})
                   .then((res) => {
                     removeUsers(usersToAdd);
                     parentDisable(true);

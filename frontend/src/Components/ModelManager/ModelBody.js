@@ -37,7 +37,7 @@ const ModelBody = ({ courseid, setLoadingModel, loadingModel }) => {
     // make api call to get the model id & models here
     const getAllModels = async () => {
       setLoadingModel(true);
-      await axios.post(process.env.REACT_APP_API_URL + "/researcher/gptmodel-get", {course_id: courseid})
+      await axios.get(process.env.REACT_APP_API_URL + "/models/get", {course_id: courseid})
         .then((res) => {
             setCurrentModel("null")
             setAllModels(res.data.gpt_models.map((obj) => {

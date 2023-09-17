@@ -50,7 +50,7 @@ const ChatBoxFooter = ({
           // Load user message on click
           updateMessages((oldMessage) => [...oldMessage, temp1])
 
-          axios.post(process.env.REACT_APP_API_URL + "/chatlog", { conversation_id: currConvoID, chatlog: text,
+          axios.post(process.env.REACT_APP_API_URL + "/student/chatlog", { conversation_id: currConvoID, chatlog: text,
             time: now
           })
             .then((response) => {
@@ -85,7 +85,7 @@ const ChatBoxFooter = ({
           console.log("You're already in a conversation!");
         }else{
           console.log("Started a conversation!")
-          axios.post(process.env.REACT_APP_API_URL + "/conversation", {user_id: userId, 
+          axios.post(process.env.REACT_APP_API_URL + "/student/conversation", {user_id: userId,
           course_id: course_ID})
           .then(
             (response) => {

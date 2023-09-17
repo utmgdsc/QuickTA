@@ -17,7 +17,7 @@ const ChatOpenSurvey = ({conversation_id, isOpen, onClose}) => {
   const [showTooltip, setSliderTooltip] = useState(false);
 
   const sendComfort = async () => {
-    await axios.post(process.env.REACT_APP_API_URL + "/comfortability-rating", {conversation_id: conversation_id, comfortability_rating: sliderVal})
+    await axios.post(process.env.REACT_APP_API_URL + "/student/comfortability-rating", {conversation_id: conversation_id, comfortability_rating: sliderVal})
       .then((res) => {
         onClose();
         setSliderVal(1);

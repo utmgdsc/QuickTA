@@ -136,7 +136,28 @@ class GPTModelView(APIView):
         data['model_id'] = model_id
         serializer = GPTModelSerializer(data=data)
         return serializer
-                   
+
+class GPTModelCourseListView(APIView):
+    """
+    Get all models in a course given course id
+
+    """
+    def get(self, request):
+        course_id = request.query_params.get('course_id', '')
+        course_code = request.query_params.get('course_code', '')
+        semester = request.query_params.get('semester', '')
+
+        if course_id:
+            course = get_object_or_404(Course, course_id=course_id)
+        else:
+            course = get_object_or_404(Course, course_code=course_code, semester=semester)
+
+        models = GPTModel.objects.filter(course_id=course.course_id)
+
+        models = [model.to_dict() for model in models]
+
+        return JsonResponse({'models': models})
+
 class GPTModelListView(APIView):
     """
     View to list all GPT models in the system.

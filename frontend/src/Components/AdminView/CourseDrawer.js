@@ -19,7 +19,7 @@ const CourseDrawer = ({isOpen, onClose, course_id}) => {
   const {isOpen: isOpenInstructors, onOpen: onOpenInstructors, onClose: onCloseInstructors} = useDisclosure();
   const {isOpen: isOpenStudent, onOpen: onOpenStudent, onClose: onCloseStudent} = useDisclosure();
   const fetchCourseList = async (course_id) => {
-    await axios.get(process.env.REACT_APP_API_URL + `/admin/get-course-users/${course_id}/`)
+    await axios.get(process.env.REACT_APP_API_URL + `/course/users?course_id=${course_id}`)
       .then((res) => {
         setStudentList(res.data.students);
       })
@@ -42,7 +42,7 @@ const CourseDrawer = ({isOpen, onClose, course_id}) => {
   };
 
   const deleteUser = (course_id, user_id, role="student") => {
-    axios.post(process.env.REACT_APP_API_URL + "/admin/remove-user-course", {course_id: course_id, user_id: user_id, type: role})
+    axios.delete(process.env.REACT_APP_API_URL + `/course/enroll?course_id=${course_id}&user_id=${user_id}&type=${role}`)
       .then((res) => {})
       .catch((err) => console.log(err))
   }
