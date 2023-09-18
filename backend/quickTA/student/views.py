@@ -54,13 +54,16 @@ class ConversationView(APIView):
         """
         Creates a new conversation
         """
-        user_id = request.query_params.get('user_id', '')
-        course_id = request.query_params.get('course_id', '')
-        model_id = request.query_params.get('model_id', '')
+        user_id = request.data.get('user_id', '')
+        course_id = request.data.get('course_id', '')
+        model_id = request.data.get('model_id', '')
+
+        print(model_id, user_id, course_id)
 
         model = get_object_or_404(GPTModel, model_id=model_id)
         user = get_object_or_404(User, user_id=user_id)
         course = get_object_or_404(Course, course_id=course_id)
+
         
         # set previous conversation status to 'I' (Inactive), and create new conversation
         Conversation.objects.filter(user_id=user_id).update(status='I')

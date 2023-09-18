@@ -87,24 +87,9 @@ const App = ({ UTORid = "" }) => {
       });
   };
 
-  const getModels = async (course) => {
-    let params = "course_id=" + course.course_id;
-    axios
-      .get(process.env.REACT_APP_API_URL + `/course/models?${params}`)
-      .then((res) => {
-        let data = res.data;
-        setModels(data.models);
-        setCurrModel(data.models[0]);
-      });
-  };
-
   useEffect(() => {
     if (UTORid) {
-      getUserId().then((user) => {
-        if (user.user_role == "ST") {
-          getModels(currCourse);
-        }
-      });
+      getUserId();
     }
   }, [UTORid]);
 
