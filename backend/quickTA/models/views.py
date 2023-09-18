@@ -9,6 +9,7 @@ from utils.handlers import ErrorResponse
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.views import APIView
+from course.models import Course
 from models.serializers import GPTModelSerializer
 from django.shortcuts import get_object_or_404
 
@@ -106,6 +107,7 @@ class GPTModelView(APIView):
         responses={ 200: GPTModelSerializer(), 404: "Model not found" },
         manual_parameters=[
             openapi.Parameter("model_id", openapi.IN_QUERY, type=openapi.TYPE_STRING),
+            openapi.Parameter("model_name", openapi.IN_QUERY, type=openapi.TYPE_STRING),
             openapi.Parameter("course_id", openapi.IN_QUERY, type=openapi.TYPE_STRING)
         ]
     )
@@ -115,8 +117,11 @@ class GPTModelView(APIView):
         """
         course_id = request.query_params.get('course_id', '')
         model_id = request.query_params.get('model_id', '')
-        gpt_model = get_object_or_404(GPTModel, course_id=course_id, model_id=model_id)
-        gpt_model.delete()
+        model_name = request.query_params.get('model_name', '')
+        
+        if model_id: GPTModel.objects.filter(course_id=course_id, model_id=model_id).delete()
+        else: GPTModel.objects.filter(course_id=course_id, model_name=model_name).delete()
+
         return JsonResponse({'msg': 'GPT Model deleted successfully.'})
 
     def create_gptmodel(self, data):
