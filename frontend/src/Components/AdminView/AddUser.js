@@ -89,13 +89,12 @@ const AddUser = ({
       onClose={onClose}
       scrollBehavior={"inside"}
       size="xl"
+    >
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>
           Add {type === "instructor" ? "Instructors" : "Students"}
-        </ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
+          <ModalCloseButton />
           <Stack spacing={3}>
             <ModalCloseButton />
             <InputGroup>
