@@ -15,6 +15,8 @@ import AdminPage from "./AdminPage";
 const App = ({ UTORid = "" }) => {
   const [courses, setCourses] = useState([]);
   const [currCourse, setCurrCourse] = useState({});
+  const [models, setModels] = useState([]);
+  const [currModel, setCurrModel] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setuserId] = useState("");
   const [courseName, setCourseName] = useState("");
@@ -23,12 +25,15 @@ const App = ({ UTORid = "" }) => {
 
   const getUserId = async () => {
     setIsLoading(true);
-    const user_id = await axios
-      .post(process.env.REACT_APP_API_URL + "/get-user", { utorid: UTORid })
-      .then((res) => {
-        setuserId(res.data.user_id);
+    const user = await axios
+      .get(process.env.REACT_APP_API_URL + `/user?utorid=${UTORid}`)
+      .then(async (res) => {
+        // User authentication
+        let data = res.data;
+        setuserId(data.user_id);
+        let courses = await getAllCourses(data.courses);
         setAuth(res.data.user_role);
-        // console.log(res.data.user_id);
+
         setIsLoading(false);
         return res.data.user_id;
       })
@@ -36,16 +41,16 @@ const App = ({ UTORid = "" }) => {
         console.log(e);
         setIsLoading(false);
       });
-    return user_id;
+
+    return user;
   };
 
-  const getAllCourses = async (user_id) => {
+  const getAllCourses = async (courses) => {
     // Gets all the courses a student is enrolled in
     // Pass getUserId return
+    let params = "course_ids=" + courses.join(",");
     await axios
-      .post(process.env.REACT_APP_API_URL + "/user/courses", {
-        user_id: user_id,
-      })
+      .get(process.env.REACT_APP_API_URL + `/course/list?${params}`)
       .then((res) => {
         if (res.data.courses) {
           setCourses(
@@ -85,10 +90,7 @@ const App = ({ UTORid = "" }) => {
 
   useEffect(() => {
     if (UTORid) {
-      getUserId().then((userid) => {
-        getAllCourses(userid);
-      });
-      console.log(auth);
+      getUserId();
     }
   }, [UTORid]);
 
@@ -145,7 +147,6 @@ const App = ({ UTORid = "" }) => {
         {auth === "IS" ? (
           <React.Fragment>
             <Route path="/Professor" element={<ProfessorPage />} />
-
             <Route
               path="/ResearcherAnalytics"
               element={
@@ -188,6 +189,24 @@ const App = ({ UTORid = "" }) => {
         {auth === "AM" ? (
           <React.Fragment>
             <Route path="/" element={<AdminPage UTORID={UTORid} />} />
+            <Route
+              path="/ResearcherAnalytics"
+              element={
+                <ResearcherAnalytics
+                  userid={userId}
+                  UTORid={UTORid}
+                  courses={courses}
+                  setCurrCourse={setCurrCourse}
+                  currCourse={currCourse}
+                  courseCode={currCourse.course_code}
+                  courseName={currCourse.course_name}
+                  semester={currCourse.semester}
+                  setIsLoading={setIsLoading}
+                  isLoading={isLoading}
+                  setCourses={setCourses}
+                />
+              }
+            />
           </React.Fragment>
         ) : null}
 

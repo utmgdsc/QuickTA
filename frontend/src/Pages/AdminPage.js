@@ -54,7 +54,7 @@ const AdminPage = ({ UTORID }) => {
   const handleSubmit = () => {
     const payload = { name, utorid, user_role: userRole };
     axios
-      .post(process.env.REACT_APP_API_URL + "/admin/add-user", payload)
+      .post(process.env.REACT_APP_API_URL + "/user", payload)
       .then((response) => {
         return response.json();
       })
@@ -66,10 +66,10 @@ const AdminPage = ({ UTORID }) => {
 
   const fetchAllCourses = () => {
     axios
-      .get(process.env.REACT_APP_API_URL + "/admin/get-all-courses")
+      .get(process.env.REACT_APP_API_URL + "/course/all")
       .then((res) => {
-        if (res.data.courses) {
-          setCourseList(res.data.courses);
+        if (res.data) {
+          setCourseList(res.data);
         }
       })
       .catch((err) => {});
@@ -113,7 +113,7 @@ const AdminPage = ({ UTORID }) => {
       <Box overflow={"hidden"} ml={"12vw"} mr={"12vw"}>
         <HStack>
           <CourseCreator
-            userid={userid}
+            utorid={UTORID}
             setCourses={setCourses}
             setCurrCourse={setCurrCourse}
             setIsLoading={setIsLoading}

@@ -67,7 +67,7 @@ const FeedbackSurvey = ({ isOpen, onClose, conversation_id, updateConvoID, updat
               onChange={(e) => {setFeedback(e.target.value)}}/>
               <Button colorScheme={'green'} onClick={async () => {
                 console.log(conversation_id, sliderVal, feedback);
-                await axios.post(process.env.REACT_APP_API_URL + "/feedback", {
+                await axios.post(process.env.REACT_APP_API_URL + "/student/feedback", {
                   conversation_id: conversation_id,
                   rating: sliderVal, feedback_msg: feedback
                 })
@@ -92,7 +92,7 @@ const FeedbackSurvey = ({ isOpen, onClose, conversation_id, updateConvoID, updat
                     setIsSurveyDisabled(true);
                   }else{
                     (async () => {
-                      await axios.post(process.env.REACT_APP_API_URL + "/feedback", {conversation_id: conversation_id,
+                      await axios.post(process.env.REACT_APP_API_URL + "/student/feedback", {conversation_id: conversation_id,
                       rating: sliderVal, feedback_msg: ""})
                       updateConvoID("");
                       updateInConvo(false);

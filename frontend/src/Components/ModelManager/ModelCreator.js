@@ -64,7 +64,7 @@ const ModelCreator = ({creating, setCreating, courseid}) => {
 
     const createModel = async () => {
         setCreating(true);
-        await axios.post(process.env.REACT_APP_API_URL + "/researcher/gptmodel-create", {
+        await axios.post(process.env.REACT_APP_API_URL + "/models/gpt", {
             course_id: courseid,
             model_name: newModel.name,
             model: newModel.model,

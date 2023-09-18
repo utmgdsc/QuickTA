@@ -25,11 +25,7 @@ const DatedGraph = ({isWeekly, courseID}) => {
     }
 
     const fetchGraphData = async () => {
-        return await axios.post(process.env.REACT_APP_API_URL + "/researcher/interaction-frequency", {
-            course_id : courseID,
-            filter: (isWeekly === 1 ? "Weekly" : "Monthly"),
-            timezone: "America/Toronto"
-        })
+        return await axios.get(process.env.REACT_APP_API_URL + `/researchers/interaction-frequency?course_id=${courseID}&filter=${(isWeekly === 1 ? "Weekly" : "Monthly")}&timezone=America/Toronto`)
         .then((res) => {
             // console.log(isWeekly, "Call");
             if (isWeekly === 1) {

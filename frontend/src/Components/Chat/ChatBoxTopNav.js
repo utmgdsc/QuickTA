@@ -38,7 +38,7 @@ const ChatBoxTopNav = ({courseCode, currConvoID}) => {
         py={8} px={5}
         onClick={() => {
         if(currConvoID){
-        axios.post(process.env.REACT_APP_API_URL + "/report", {conversation_id: currConvoID})
+        axios.post(process.env.REACT_APP_API_URL + '/student/conversation/history?conversation_id=${currConvoID}', {conversation_id: currConvoID})
           .then((response) => {
             if(response.headers['content-disposition']){
               fileDownload(response.data, response.headers['content-disposition'].split('"')[1]);
@@ -90,8 +90,7 @@ const ChatBoxTopNav = ({courseCode, currConvoID}) => {
             </Button>
             <Button colorScheme={'red'} onClick={() => {
               if (reportMsg){
-                axios.post(process.env.REACT_APP_API_URL + "/incorrect-answer", {conversation_id: currConvoID,
-                  msg: reportMsg})
+                axios.post(process.env.REACT_APP_API_URL + "/student/report", {conversation_id: currConvoID, msg: reportMsg})
                   .then((res) => console.log("Reported!"))
                   .catch((err) => console.log(err))
                 onClose();

@@ -37,11 +37,12 @@ const CourseDrawer = ({ isOpen, onClose, course_id }) => {
     onOpen: onOpenStudent,
     onClose: onCloseStudent,
   } = useDisclosure();
-
   const fetchCourseList = async (course_id) => {
+    let user_roles = "ST";
     await axios
       .get(
-        process.env.REACT_APP_API_URL + `/admin/get-course-users/${course_id}/`
+        process.env.REACT_APP_API_URL +
+          `/course/users?course_id=${course_id}&user_roles=${user_roles}`
       )
       .then((res) => {
         setStudentList(res.data.students);
@@ -71,11 +72,10 @@ const CourseDrawer = ({ isOpen, onClose, course_id }) => {
 
   const deleteUser = (course_id, user_id, role = "student") => {
     axios
-      .post(process.env.REACT_APP_API_URL + "/admin/remove-user-course", {
-        course_id: course_id,
-        user_id: user_id,
-        type: role,
-      })
+      .delete(
+        process.env.REACT_APP_API_URL +
+          `/course/enroll?course_id=${course_id}&user_id=${user_id}&type=${role}`
+      )
       .then((res) => {})
       .catch((err) => console.log(err));
   };
@@ -106,7 +106,7 @@ const CourseDrawer = ({ isOpen, onClose, course_id }) => {
                 Add Student
               </Button>
               <AddUser
-                type={"student"}
+                type={"ST"}
                 course_id={course_id}
                 onClose={onCloseStudent}
                 isOpen={isOpenStudent}
@@ -117,7 +117,7 @@ const CourseDrawer = ({ isOpen, onClose, course_id }) => {
                 Add Instructor
               </Button>
               <AddUser
-                type={"instructor"}
+                type={"IS"}
                 course_id={course_id}
                 onClose={onCloseInstructors}
                 isOpen={isOpenInstructors}

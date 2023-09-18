@@ -43,12 +43,18 @@ const AddUser = ({
     axios
       .get(
         process.env.REACT_APP_API_URL +
-          `/admin/get-course-unadded-users/?course_id=${course_id}&type=${type}`
+          `/course/unenrolled-users?course_id=${course_id}&user_roles=${type}`
       )
       .then((res) => {
-        if (res.data.users) {
-          setUserList(res.data.users);
-          setToAdd(Array(res.data.users.length).fill(false));
+        if (res.data) {
+          if (type == "ST") {
+            setUserList(res.data.students);
+            setToAdd(Array(res.data.students.length).fill(false));
+          }
+          if (type == "IS") {
+            setUserList(res.data.instructors);
+            setToAdd(Array(res.data.instructors.length).fill(false));
+          }
         }
         setDisableAdd(false);
       })
@@ -83,11 +89,13 @@ const AddUser = ({
       onClose={onClose}
       scrollBehavior={"inside"}
       size="xl"
-    >
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>
           Add {type === "instructor" ? "Instructors" : "Students"}
+        </ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
           <Stack spacing={3}>
             <ModalCloseButton />
             <InputGroup>
@@ -137,59 +145,56 @@ const AddUser = ({
                 </Tbody>
               </Table>
             </TableContainer>
+            <HStack>
+              <Spacer />
+              <Button
+                variant={"solid"}
+                onClick={() => {
+                  let usersToAdd = userList;
+                  usersToAdd = usersToAdd
+                    .filter((e, index) => toAdd[index] === true)
+                    .map((userObj, i) => userObj.user_id);
+                  console.log(usersToAdd);
+                  setDisableAdd(true);
+                  console.log({
+                    users: usersToAdd,
+                    course_id: course_id,
+                    type: type === "student" ? "student" : "instructor",
+                  });
+                  axios
+                    .post(
+                      process.env.REACT_APP_API_URL + "/course/enroll/multiple",
+                      {
+                        users: usersToAdd,
+                        course_id: course_id,
+                        type: type === "student" ? "student" : "instructor",
+                      }
+                    )
+                    .then((res) => {
+                      removeUsers(usersToAdd);
+                      parentDisable(true);
+                      setDisableAdd(false);
+                      onClose();
+                      handleClose(course_id).then(() => {
+                        parentDisable(false);
+                      });
+                    })
+                    .catch((err) => {
+                      parentDisable(true);
+                      setDisableAdd(false);
+                      onClose();
+                      handleClose(course_id).then(() => {
+                        parentDisable(false);
+                      });
+                    });
+                }}
+                isDisabled={disableAdd}
+              >
+                Add
+              </Button>
+            </HStack>
           </Stack>
         </ModalBody>
-        <ModalFooter>
-          <HStack>
-            <Spacer />
-            <Button
-              variant={"solid"}
-              onClick={() => {
-                let usersToAdd = userList;
-                usersToAdd = usersToAdd
-                  .filter((e, index) => toAdd[index] === true)
-                  .map((userObj, i) => userObj.user_id);
-                console.log(usersToAdd);
-                setDisableAdd(true);
-                console.log({
-                  users: usersToAdd,
-                  course_id: course_id,
-                  type: type === "student" ? "student" : "instructor",
-                });
-                axios
-                  .post(
-                    process.env.REACT_APP_API_URL +
-                      "/admin/add-multiple-user-course",
-                    {
-                      users: usersToAdd,
-                      course_id: course_id,
-                      type: type === "student" ? "student" : "instructor",
-                    }
-                  )
-                  .then((res) => {
-                    removeUsers(usersToAdd);
-                    parentDisable(true);
-                    setDisableAdd(false);
-                    onClose();
-                    handleClose(course_id).then(() => {
-                      parentDisable(false);
-                    });
-                  })
-                  .catch((err) => {
-                    parentDisable(true);
-                    setDisableAdd(false);
-                    onClose();
-                    handleClose(course_id).then(() => {
-                      parentDisable(false);
-                    });
-                  });
-              }}
-              isDisabled={disableAdd}
-            >
-              Add
-            </Button>
-          </HStack>
-        </ModalFooter>
       </ModalContent>
     </Modal>
   );
