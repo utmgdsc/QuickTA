@@ -42,8 +42,7 @@ const ReportTable = ( { course_ID, isWeekly, setIsLoading } ) => {
 
 
     const fetchReports = async () => {
-      return await axios.post(process.env.REACT_APP_API_URL + "/researcher/reported-conversations", {course_id: course_ID, filter: (isWeekly === 1 ? "Weekly" : (isWeekly === 0 ? "Monthly" : "All"))
-      , timezone: "America/Toronto"})
+      return await axios.get(process.env.REACT_APP_API_URL + `/researcher/reported-conversations?course_id=${course_ID}&filter=${(isWeekly === 1 ? "Weekly" : (isWeekly === 0 ? "Monthly" : "All"))}timezone=America/Toronto`)
         .then((res) => {
           setIsLoading(true);
           const entries = [];
@@ -65,7 +64,7 @@ const ReportTable = ( { course_ID, isWeekly, setIsLoading } ) => {
         fetchReports();
         console.log(reportList);
       }
-    }, [course_ID, isWeekly]);
+    }, [course_ID]);
 
     console.log(reportList, rowIndex);
     return (
