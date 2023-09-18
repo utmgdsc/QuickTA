@@ -24,12 +24,17 @@ import {
   FormLabel,
   Input,
   Select,
+  Skeleton,
+  ButtonGroup,
+  IconButton,
 } from "@chakra-ui/react";
+import { SearchIcon } from "@chakra-ui/icons";
 import TopNav from "../Components/TopNav";
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import CourseDrawer from "../Components/AdminView/CourseDrawer";
 import CourseCreator from "../Components/Dashboard/CourseCreator";
+import { AiFillContainer } from "react-icons/ai";
 
 const AdminPage = ({ UTORID }) => {
   const [courseIndex, setCourseIndex] = useState(0);
@@ -44,6 +49,7 @@ const AdminPage = ({ UTORID }) => {
   const [courses, setCourses] = useState([]);
   const [currCourse, setCurrCourse] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingCourses, setIsLoadingCourses] = useState(false);
 
   const handleSubmit = () => {
     const payload = { name, utorid, user_role: userRole };
@@ -91,6 +97,7 @@ const AdminPage = ({ UTORID }) => {
   useEffect(() => {
     if (UTORID.length !== 0) {
       fetchAllCourses();
+      setIsLoadingCourses(true);
     }
   }, [UTORID]);
 
@@ -156,6 +163,7 @@ const AdminPage = ({ UTORID }) => {
                 >
                   <option value="ST">Student</option>
                   <option value="IS">Instructor</option>
+                  <option value="RS">Researcher</option>
                   <option value="AM">Admin</option>
                 </Select>
               </FormControl>
@@ -176,45 +184,115 @@ const AdminPage = ({ UTORID }) => {
 
         <TableContainer>
           <Table
+            size="md"
             style={{
               marginTop: "1rem",
               backgroundColor: "white",
               borderRadius: "0.5rem",
             }}
           >
-            <Thead>
+            <Thead
+              style={{
+                backgroundColor: "#5E85D4",
+                borderRadius: "0.5rem",
+              }}
+            >
               <Tr>
-                <Th>Course ID</Th>
-                <Th>Semester</Th>
-                <Th>Instructors</Th>
+                <Th color={"white"}>Course ID</Th>
+                <Th color={"white"}>Semester</Th>
+                <Th color={"white"}>Course Name</Th>
+                <Th color={"white"}>Instructors</Th>
+                <Th color={"white"}></Th>
               </Tr>
             </Thead>
-            <Tbody>
-              {courseList.map((obj, index) => {
-                return (
-                  <Tooltip
-                    key={obj.toString()}
-                    label={"Click on me to edit course list"}
-                  >
-                    <Tr
-                      key={hashing(obj.course_id)}
-                      onClick={() => {
-                        //   Open the chakra drawer to display
-                        setCourseIndex(index);
-                        console.log(courseList[courseIndex]);
-                        onOpen();
-                      }}
+            {courseList.length !== 0 ? (
+              <Tbody>
+                {courseList.map((obj, index) => {
+                  return (
+                    <Tooltip
+                      key={obj.toString()}
+                      label={"Click on me to edit course list"}
                     >
-                      <Td key={hashing(obj.course_name)}>{obj.course_name}</Td>
-                      <Td key={hashing(obj.semester)}>{obj.semester}</Td>
-                      <Td key={hashing(obj.instructors.toString())}>
-                        {obj.instructors.toString()}
-                      </Td>
-                    </Tr>
-                  </Tooltip>
-                );
-              })}
-            </Tbody>
+                      <Tr
+                        key={hashing(obj.course_id)}
+                        onClick={() => {
+                          setCourseIndex(index);
+                          console.log(courseList[courseIndex]);
+                          onOpen();
+                        }}
+                        style={{
+                          cursor: "pointer", // Change cursor to pointer
+                          backgroundColor:
+                            index % 2 == 0 ? "transparent" : "#EDF5FD", // Initial background color
+                          transition: "background-color 0.3s", // Add a smooth transition
+                        }}
+                        onMouseEnter={(e) => {
+                          // Change background color on hover
+                          e.currentTarget.style.backgroundColor = "#e0e0e0"; // Change to your desired hover color
+                        }}
+                        onMouseLeave={(e) => {
+                          // Reset background color on mouse leave
+                          e.currentTarget.style.backgroundColor =
+                            index % 2 == 0 ? "transparent" : "#EDF5FD";
+                        }}
+                      >
+                        <Td>{obj.course_code}</Td>
+                        <Td>{obj.semester}</Td>
+                        <Td>{obj.course_name}</Td>
+                        <Td
+                          style={{
+                            whiteSpace: "wrap",
+                          }}
+                        >
+                          {obj.instructors.join(", ")}
+                        </Td>
+                        <Td>
+                          <ButtonGroup>
+                            <IconButton
+                              aria-label="Course details"
+                              variant="solid"
+                              icon={<SearchIcon />}
+                            />
+                            <IconButton
+                              aria-label="Model details"
+                              variant="solid"
+                              icon={<AiFillContainer />}
+                            />
+                          </ButtonGroup>
+                        </Td>
+                      </Tr>
+                    </Tooltip>
+                  );
+                })}
+              </Tbody>
+            ) : isLoadingCourses ? (
+              <Tbody>
+                {[1, 2, 3].map((item) => (
+                  <Tr key={item}>
+                    <Td>
+                      <Skeleton height="12px" width="100%" />
+                    </Td>
+                    <Td>
+                      <Skeleton height="12px" width="100%" />
+                    </Td>
+                    <Td>
+                      <Skeleton height="12px" width="100%" />
+                    </Td>
+                    <Td>
+                      <Skeleton height="12px" width="100%" />
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            ) : (
+              <Tbody>
+                <Tr>
+                  <Td colSpan={3}>
+                    <Center>No Courses Found</Center>
+                  </Td>
+                </Tr>
+              </Tbody>
+            )}
           </Table>
         </TableContainer>
         {courseList.length !== 0 ? (
@@ -223,6 +301,8 @@ const AdminPage = ({ UTORID }) => {
             onClose={onClose}
             course_id={courseList[courseIndex].course_id}
           />
+        ) : isLoadingCourses ? (
+          <VStack></VStack>
         ) : (
           <VStack>
             <Center>No Courses Found</Center>

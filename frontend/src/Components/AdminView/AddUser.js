@@ -9,6 +9,7 @@ import {
   ModalBody,
   ModalCloseButton,
   ModalContent,
+  ModalFooter,
   ModalHeader,
   ModalOverlay,
   Spacer,
@@ -83,26 +84,33 @@ const AddUser = ({
   }, [course_id, isOpen]);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      scrollBehavior={"inside"}
+      size="xl"
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>
           Add {type === "instructor" ? "Instructors" : "Students"}
         </ModalHeader>
         <ModalCloseButton />
-
         <ModalBody>
           <Stack spacing={3}>
+            <ModalCloseButton />
             <InputGroup>
               <InputLeftAddon children={"UTORid"} />
               <Input type={"text"} variant={"outline"} />
             </InputGroup>
-
             <InputGroup>
               <InputLeftAddon children={"Name"} />
               <Input type={"text"} variant={"outline"} />
             </InputGroup>
+          </Stack>
+        </ModalHeader>
 
+        <ModalBody>
+          <Stack spacing={3}>
             <TableContainer>
               <Table>
                 <Thead>
@@ -137,7 +145,6 @@ const AddUser = ({
                 </Tbody>
               </Table>
             </TableContainer>
-
             <HStack>
               <Spacer />
               <Button

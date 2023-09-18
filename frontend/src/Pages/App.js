@@ -41,6 +41,7 @@ const App = ({ UTORid = "" }) => {
         console.log(e);
         setIsLoading(false);
       });
+
     return user;
   };
 
@@ -146,7 +147,6 @@ const App = ({ UTORid = "" }) => {
         {auth === "IS" ? (
           <React.Fragment>
             <Route path="/Professor" element={<ProfessorPage />} />
-
             <Route
               path="/ResearcherAnalytics"
               element={
