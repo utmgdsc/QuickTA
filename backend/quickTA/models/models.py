@@ -6,7 +6,7 @@ import djongo.models as djmodels
 class GPTModel(models.Model):
     model_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     model_name = models.TextField(max_length=100)
-    model_description = models.TextField(max_length=2000)
+    model_description = models.TextField(max_length=2000, default="")
     course_id = models.CharField(max_length=100)
     status = models.BooleanField(default=True)
 
@@ -75,6 +75,13 @@ class GPTModel(models.Model):
             settings["functions"] = self.functions
             settings["function_call"] = self.function_call
         return settings
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['model_id'], name='model_id_idx'),
+            models.Index(fields=['model_name'], name='model_name'),
+            models.Index(fields=['course_id'], name='course_id'),
+        ]
 
 class GPTResponse(models.Model):
     conversation_id = models.TextField(max_length=100)

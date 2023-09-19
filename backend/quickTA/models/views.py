@@ -12,6 +12,7 @@ from rest_framework.views import APIView
 from course.models import Course
 from models.serializers import GPTModelSerializer
 from django.shortcuts import get_object_or_404
+from django.core.cache import cache
 
 
 # Create your views here.
@@ -152,14 +153,16 @@ class GPTModelCourseListView(APIView):
         course_code = request.query_params.get('course_code', '')
         semester = request.query_params.get('semester', '')
 
-        if course_id:
-            course = get_object_or_404(Course, course_id=course_id)
-        else:
-            course = get_object_or_404(Course, course_code=course_code, semester=semester)
+        cache_key = f'gptmodel_course_list_{course_id}_{course_code}_{semester}'
+        models = cache.get(cache_key)
 
-        models = GPTModel.objects.filter(course_id=course.course_id)
+        if not models:
+            if course_id: course = get_object_or_404(Course, course_id=course_id)
+            else: course = get_object_or_404(Course, course_code=course_code, semester=semester)
 
-        models = [model.to_dict() for model in models]
+            models = GPTModel.objects.filter(course_id=course.course_id)
+            models = [model.to_dict() for model in models]
+        cache.set(cache_key, models, 60*60*24*7)
 
         return JsonResponse({'models': models})
 

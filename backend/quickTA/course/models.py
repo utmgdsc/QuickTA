@@ -19,3 +19,10 @@ class Course(models.Model):
 
     def __str__(self):
         return self.course_code + " - " + self.course_name + "(" + str(self.course_id) + ")"   
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['course_id'], name='course_id_idx'),
+            models.Index(fields=['course_name'], name='course_name'),
+            models.Index(fields=['semester'], name='semester'),
+        ]

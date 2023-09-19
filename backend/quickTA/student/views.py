@@ -19,7 +19,7 @@ from course.models import Course
 from models.models import GPTModel
 from student.models import Conversation, Chatlog, Report, Feedback
 import models.config.main as model_functions
-
+from django.core.cache import cache
 # Create your views here.
 
 # Create a conversation
@@ -54,7 +54,7 @@ class ConversationView(APIView):
         """
         Creates a new conversation
         """
-        user_id = request.data.get('user_id', '')
+        user_id = request.data.get('user_id', '') 
         course_id = request.data.get('course_id', '')
         model_id = request.data.get('model_id', '')
 
@@ -146,13 +146,22 @@ class ChatlogView(APIView):
         chatlog = request.data.get('chatlog', '')
         current_time, location = self.get_time(request)
 
+
         # 1. Create user chatlog record
-        conversation = get_object_or_404(Conversation, conversation_id=conversation_id)
+        conversation_cache_key = "chatlog_conversation_" + str(conversation_id)
+        conversation = cache.get(conversation_cache_key)
+        if not conversation:
+            conversation = get_object_or_404(Conversation, conversation_id=conversation_id)
+            cache.set(conversation_cache_key, conversation, 60*60*24)
         last_chatlog = Chatlog.objects.filter(conversation_id=conversation_id).order_by('-time').first()
         delta = current_time - last_chatlog.time if last_chatlog else current_time - conversation.start_time
         user_chatlog = self.create_chatlog(conversation.conversation_id, chatlog, True, current_time, delta)
-
-        model = get_object_or_404(GPTModel, model_id=conversation.model_id)
+        
+        model_cache_key = "chatlog_model_" + str(conversation.model_id)
+        model = cache.get(model_cache_key)
+        if not model: 
+            model = get_object_or_404(GPTModel, model_id=conversation.model_id)
+            cache.set(model_cache_key, model, 60*60*24)
         if not model.status: return ErrorResponse("Model not active", status.HTTP_406_NOT_ACCEPTABLE)
         if model.course_id != conversation.course_id: return ErrorResponse("Model does not belong to course", status.HTTP_406_NOT_ACCEPTABLE)
         

@@ -1,6 +1,6 @@
 import uuid
 import csv
-
+import time
 from rest_framework.parsers import MultiPartParser
 from rest_framework.decorators import action
 from rest_framework.views import APIView
@@ -11,6 +11,7 @@ from .models import User
 from rest_framework import status
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django.core.cache import cache
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -37,13 +38,18 @@ class UserView(APIView):
         """
         user_id = request.GET.get('user_id', '')
         utorid = request.GET.get('utorid', '')
+        cache_key = f"{user_id}-{utorid}"
         if user_id == '' and utorid == '':
             return JsonResponse({"msg": "User not found found"})
         
-        if user_id: user = get_object_or_404(User, user_id=user_id)
-        elif utorid: user = get_object_or_404(User, utorid=utorid)
+        user = cache.get(cache_key)
+        if user is None:
+            if user_id: user = get_object_or_404(User, user_id=user_id)
+            else: user = get_object_or_404(User, utorid=utorid)
+        cache.set(cache_key, user, 60*60*24*7)
 
         serializer = UserSerializer(user)
+
         return JsonResponse(serializer.data)
         
     

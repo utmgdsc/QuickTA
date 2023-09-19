@@ -14,8 +14,9 @@ from users.models import User
 from users.serializers import UserSerializer
 from utils.constants import ROLE_MAP, ROLE_MAP_ENUM, COURSE_ROLE_MAP, USER_SELECTION_TYPE
 from utils.handlers import ErrorResponse
-
-
+from django.views.decorators.cache import cache_page
+from django.views.decorators.cache import cache_page as django_cache_page
+from django.core.cache import cache
 # Create your views here.
 class CourseView(APIView):
 
@@ -331,12 +332,18 @@ class CourseMultipleList(APIView):
         """
         course_ids = request.query_params.get('course_ids', [])
         if not course_ids: return JsonResponse({"courses": []})
+
+        cache_key = 'courses_multiple_list_' + course_ids
+        courses = cache.get(cache_key)
         
-        course_ids = course_ids.split(',')
-        courses = get_list_or_404(Course, course_id__in=course_ids)
+        if not courses:
+            course_ids = course_ids.split(',')
+            courses = get_list_or_404(Course, course_id__in=course_ids)
+        cache.set(cache_key, courses, 60*60*24*7)
+
         serializer = CourseMultipleSerializer(courses, many=True)
         return JsonResponse({"courses": serializer.data})
-
+    
 class CourseModelList(APIView):
     
     @swagger_auto_schema(
@@ -349,17 +356,23 @@ class CourseModelList(APIView):
         responses={200: GPTModelSerializer(many=True), 404: "Course Not found"}
     )
     def get(self, request):
-        course_id = request.query_params.get("course_id", "")
-        course_code = request.query_params.get("course_code", "")
-        semester = request.query_params.get("semester", "")
+        course_id = request.query_params.get('course_id', '')
+        course_code = request.query_params.get('course_code', '')
+        semester = request.query_params.get('semester', '')
 
-        if course_id: course = get_object_or_404(Course, course_id=course_id)
-        else: course = get_object_or_404(Course, course_code=course_code, semester=semester)
+        cache_key = f'course_model_list_{course_id}_{course_code}_{semester}'
+        models = cache.get(cache_key)
 
-        serializer = CourseModelSerializer(data={}, course_id=course.course_id)
-        if serializer.is_valid():
-            return JsonResponse(serializer.data)
-        return ErrorResponse(serializer.errors, status.HTTP_400_BAD_REQUEST)
+        if not models:
+            if course_id: course = get_object_or_404(Course, course_id=course_id)
+            else: course = get_object_or_404(Course, course_code=course_code, semester=semester)
+
+            models = GPTModel.objects.filter(course_id=course.course_id)
+            models = [model.to_student_dict() for model in models]
+        cache.set(cache_key, models, 60*60*24*7)
+
+        return JsonResponse({'models': models})
+
     
 
 class CourseUnenrolledUsersList(APIView):

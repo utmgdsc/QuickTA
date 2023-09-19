@@ -14,3 +14,8 @@ class User(models.Model):
     def __str__(self):
         return f"User(user_id={self.user_id}, name={self.name}, utorid={self.utorid}, user_role={self.user_role}, courses={self.courses})"
     
+    class Meta:
+        indexes = [
+            models.Index(fields=['user_id'], name='user_id_idx'),
+            models.Index(fields=['utorid'], name='utorid_idx'),
+        ]
