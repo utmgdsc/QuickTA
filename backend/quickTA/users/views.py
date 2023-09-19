@@ -187,7 +187,13 @@ class UserCoursesListView(APIView):
         else: user = get_object_or_404(User, utorid=utorid)
 
         if user.user_role == 'ST':
-            return JsonResponse([course for course in user.courses if course.end_date > datetime.now()], safe=False)
+            # lst = []
+            # for course in user.courses:
+            #     c = get_object_or_404(Course, course_id=course)
+            #     if c.end_date > datetime.now():
+            #         lst.append(course)
+            #
+            return JsonResponse([course for course in user.courses if get_object_or_404(Course, course_id=course).end_date > datetime.now()], safe=False)
         return JsonResponse(user.courses, safe=False)
 
 # TODO: add a view to get all the courses the user is not in
