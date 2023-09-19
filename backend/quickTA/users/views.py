@@ -1,11 +1,5 @@
 import uuid
-import csv
-<<<<<<< HEAD
-import time
-=======
 from datetime import datetime
-
->>>>>>> 2039ddbceb2f0cea3a7757c027928e68a58efb0a
 from rest_framework.parsers import MultiPartParser
 from rest_framework.decorators import action
 from rest_framework.views import APIView
