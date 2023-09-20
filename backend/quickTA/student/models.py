@@ -11,6 +11,7 @@ from course.models import Course
 # Create your models here.
 class Conversation(models.Model):
     conversation_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    conversation_name = models.CharField(max_length=100, blank=True, null=True)
     course_id = models.CharField(max_length=100)
     model_id = models.CharField(max_length=100)
     user_id = models.CharField(max_length=50)  

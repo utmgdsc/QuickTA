@@ -112,34 +112,6 @@ const App = ({ UTORid = "" }) => {
                 />
               }
             />
-            <Route
-              path={"/model-1"}
-              element={
-                <StudentPage
-                  UTORid={UTORid}
-                  currCourse={currCourse}
-                  setCurrCourse={setCurrCourse}
-                  courses={courses}
-                  semester={currCourse.semester}
-                  modelNum={1}
-                  userId={userId}
-                />
-              }
-            />
-            <Route
-              path={"/model-2"}
-              element={
-                <StudentPage
-                  UTORid={UTORid}
-                  currCourse={currCourse}
-                  setCurrCourse={setCurrCourse}
-                  courses={courses}
-                  semester={currCourse.semester}
-                  modelNum={2}
-                  userId={userId}
-                />
-              }
-            />
           </React.Fragment>
         ) : null}
         {auth === "IS" ? (

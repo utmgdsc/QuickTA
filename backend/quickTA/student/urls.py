@@ -7,7 +7,9 @@ urlpatterns = [
     # Conversation/Chatlog related views
     path('/conversation', ConversationView.as_view(), name='conversation'),
     path('/conversation/all', ConversationListView.as_view(), name='conversation_list'),
-    path('/conversation/history', ConversationHistoryCsvView.as_view(), name='conversation_history'),
+    path('/conversation/history', ConversationHistoryView.as_view(), name='conversation_history'),
+    path('/conversation/history/csv', ConversationHistoryCsvView.as_view(), name='conversation_history_csv'),
+    path('/conversation/chatlog', ConversationChatlogsView.as_view(), name='conversation_history_list'),
     path('/chatlog', ChatlogView.as_view(), name='chatlog'),
     path('/chatlog/all', ChatlogListView.as_view(), name='chatlog_list'),
     path('/feedback', FeedbackView.as_view(), name='feedback'),
@@ -16,7 +18,6 @@ urlpatterns = [
     path('/report/all', ReportListView.as_view(), name='report_list'),
     path('/course-comfortability', CourseComfortabilityView.as_view(), name='course_comfortability'),
     path('/course-comfortability/all', CourseComfortabilityListView.as_view(), name='course_comfortability_list'),
-
 ]
 
 

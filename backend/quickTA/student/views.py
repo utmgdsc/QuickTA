@@ -58,14 +58,9 @@ class ConversationView(APIView):
         course_id = request.data.get('course_id', '')
         model_id = request.data.get('model_id', '')
 
-        print(model_id, user_id, course_id)
-
         model = get_object_or_404(GPTModel, model_id=model_id)
-        print(model)
         user = get_object_or_404(User, user_id=user_id)
-        print(user)
         course = get_object_or_404(Course, course_id=course_id)
-        print(course)
 
         
         # set previous conversation status to 'I' (Inactive), and create new conversation
@@ -134,6 +129,22 @@ class ConversationHistoryCsvView(APIView):
 
         return response
 
+class ConversationChatlogsView(APIView):
+
+    @swagger_auto_schema(  
+        operation_summary="Get all chatlogs from a conversation",
+        responses={200: ConversationChatlogSerializer(many=True)},
+        manual_parameters=[
+            openapi.Parameter("conversation_id", openapi.IN_QUERY, description="Conversation ID", type=openapi.TYPE_STRING),
+        ]
+    )
+    def get(self, request):
+        conversation_id = request.query_params.get('conversation_id', '')
+        serializer = ConversationChatlogSerializer(conversation_id=conversation_id, data={})
+        if serializer.is_valid():
+            return JsonResponse(serializer.data, status=status.HTTP_200_OK)
+        return ErrorResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class ChatlogView(APIView):
 
     @swagger_auto_schema(
@@ -153,7 +164,7 @@ class ChatlogView(APIView):
         # 1. Create user chatlog record
         conversation_cache_key = "chatlog_conversation_" + str(conversation_id)
         conversation = cache.get(conversation_cache_key)
-        print("conversation", conversation)
+
         if not conversation:
             conversation = get_object_or_404(Conversation, conversation_id=conversation_id)
             cache.set(conversation_cache_key, conversation, 60*60*24)
@@ -163,7 +174,7 @@ class ChatlogView(APIView):
         
         model_cache_key = "chatlog_model_" + str(conversation.model_id)
         model = cache.get(model_cache_key)
-        print("model", model)
+
         if not model: 
             model = get_object_or_404(GPTModel, model_id=conversation.model_id)
             cache.set(model_cache_key, model, 60*60*24)
@@ -429,3 +440,22 @@ class CourseComfortabilityListView(APIView):
         serializer = CourseComfortabilitySerializer(course_comfortabilities, many=True)
         return JsonResponse(serializer.data, safe=False)
 
+class ConversationHistoryView(APIView):
+
+    @swagger_auto_schema(
+        operation_summary="Get conversation history",
+        manual_parameters=[
+            openapi.Parameter("user_id", openapi.IN_QUERY, description="User ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
+        ],
+        responses={200: ConversationSerializer}
+    )
+    def get(self, request):
+        """
+        Gets all conversations of a user from that course
+        """
+        user_id = request.query_params.get('user_id', '')
+        course_id = request.query_params.get('course_id', '')
+        conversations = Conversation.objects.filter(user_id=user_id, course_id=course_id).order_by('-start_time')
+        serializer = ConversationHistorySerializer(conversations, many=True)
+        return JsonResponse({"conversations": serializer.data})

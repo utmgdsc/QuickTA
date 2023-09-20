@@ -1,3 +1,4 @@
+import pytz
 from rest_framework.serializers import *
 from rest_framework import serializers
 from .models import *
@@ -18,6 +19,17 @@ class ConversationSerializer(ModelSerializer):
             'comfortability_rating'
         ]
 
+class ConversationHistorySerializer(ModelSerializer):
+    class Meta:
+        model = Conversation
+        fields = [
+            'conversation_id',
+            'conversation_name',
+            'model_id',
+            'start_time',
+            'end_time',
+        ]
+
 class ChatlogSerializer(ModelSerializer):
 
     class Meta:
@@ -31,6 +43,44 @@ class ChatlogSerializer(ModelSerializer):
             'delta'
         ]
 
+   
+
+
+class ConversationChatlogSerializer(ModelSerializer):
+    
+    class Chatlogs(ModelSerializer):
+        time = serializers.SerializerMethodField()
+        class Meta:
+            model = Chatlog
+            fields = [
+               'conversation_id',
+                'chatlog_id',
+                'time',
+                'is_user',
+                'chatlog',
+            ]
+        
+        def get_time(self, obj):
+            location = 'America/Toronto'
+            return obj.time.astimezone(pytz.timezone(location)).isoformat() + "[" + location + "]"
+
+    def __init__(self, *args, **kwargs):
+        self.conversation_id = kwargs.pop('conversation_id', "")
+        super().__init__(*args, **kwargs)
+
+    chatlogs = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Conversation
+        fields = [
+            'conversation_id',
+            'chatlogs'
+        ]
+        
+    def get_chatlogs(self, obj):
+        chatlogs = Chatlog.objects.filter(conversation_id=self.conversation_id)
+        serializer = self.Chatlogs(chatlogs, many=True)
+        return serializer.data
 class FeedbackSerializer(ModelSerializer):
 
     class Meta:

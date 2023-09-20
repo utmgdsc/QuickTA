@@ -60,7 +60,7 @@ const ChatBoxTopNav = ({ courseCode, currConvoID }) => {
             axios
               .post(
                 process.env.REACT_APP_API_URL +
-                  "/student/conversation/history?conversation_id=${currConvoID}",
+                  "/student/conversation/history/csv?conversation_id=${currConvoID}",
                 { conversation_id: currConvoID }
               )
               .then((response) => {
