@@ -61,14 +61,34 @@ const StudentPage = ({
       .then((res) => {
         let data = res.data;
         console.log(data);
-        setModels(data.models);
-        setCurrModel(data.models[0]);
+        if(data.models){
+          setModels(data.models);
+
+          if(sessionStorage.getItem("selectedModel") == null){
+            sessionStorage.setItem("selectedModel", "0");
+          }
+          
+          let model = data.models[parseInt(sessionStorage.getItem("selectedModel"))]
+
+          setCurrModel({
+            model_id: model.course_id,
+            model_name: model.model_name,
+            course_id: model.course_id,
+            status: model.status
+          });
+
+        }else{
+          console.log("No models for this course!")
+        }
+        
       });
   };
 
   useEffect(() => {
-    getModels(currCourse);
-  }, [courses]);
+    if(courses){
+      getModels(currCourse);
+    }
+  }, [currCourse]);
 
   return (
     <div

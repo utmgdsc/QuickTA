@@ -82,7 +82,30 @@ const ChatBoxFooter = ({
         console.log("You must type something before asking AI for response :)");
       }
     } else {
-      console.log("must start a conversation to send a message to AI!");
+      // console.log("must start a conversation to send a message to AI!");
+      if(text){
+        console.log("Started a conversation!");
+        setWaitForResp(true);
+        console.log(`userid: ${userId}\ncourse_ID: ${course_ID}\nmodel_ID: ${model_ID}`);
+        axios
+              .post(process.env.REACT_APP_API_URL + "/student/conversation", {
+                user_id: userId,
+                course_id: course_ID,
+                model_id: model_ID,
+              })
+              .then((response) => {
+                updateConvoID(response.data.conversation_id);
+                updateInConvo(true);
+                setWaitForResp(false);
+                setText("");
+                console.log(text);
+                // onOpenComfortability();
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+      }
+      
     }
   };
 
@@ -93,7 +116,7 @@ const ChatBoxFooter = ({
       paddingX={"3vw"}
       borderTop={"2px solid #EAEAEA"}
     >
-      <Button
+      {/* <Button
         px={8}
         colorScheme={"green"}
         fontSize={"sm"}
@@ -121,12 +144,12 @@ const ChatBoxFooter = ({
         isDisabled={inConvo}
       >
         Start Conversation
-      </Button>
-      <ChatOpenSurvey
+      </Button> */}
+      {/* <ChatOpenSurvey
         isOpen={isOpenComfortability}
         onClose={onCloseComfortability}
         conversation_id={currConvoID}
-      />
+      /> */}
       <Button
         colorScheme={"red"}
         fontSize={"sm"}
@@ -135,7 +158,7 @@ const ChatBoxFooter = ({
             console.log(messages);
             onOpenFeedback();
           } else {
-            console.log("Must be in a convo to leave one :>");
+            console.log("Must be in a convo to leave one or please send at least one msg :>");
           }
         }}
         isDisabled={!inConvo || (inConvo && messages.length == 0)}
@@ -159,7 +182,7 @@ const ChatBoxFooter = ({
         onChange={(e) => {
           setText(e.target.value.slice(0, process.env.MAX_MESSAGE_LENGTH));
         }}
-        isDisabled={waitingForResp || !inConvo}
+        isDisabled={waitingForResp}
         onKeyDown={handleChatKeyDown}
       />
 
@@ -168,7 +191,7 @@ const ChatBoxFooter = ({
         colorScheme={"blue"}
         fontSize={"sm"}
         onClick={handleSubmit}
-        isDisabled={!inConvo || waitingForResp}
+        isDisabled={waitingForResp}
       >
         Send
       </Button>

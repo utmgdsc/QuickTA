@@ -15,8 +15,6 @@ import AdminPage from "./AdminPage";
 const App = ({ UTORid = "" }) => {
   const [courses, setCourses] = useState([]);
   const [currCourse, setCurrCourse] = useState({});
-  const [models, setModels] = useState([]);
-  const [currModel, setCurrModel] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setuserId] = useState("");
   const [courseName, setCourseName] = useState("");
