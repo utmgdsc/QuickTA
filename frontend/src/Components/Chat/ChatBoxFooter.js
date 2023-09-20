@@ -86,11 +86,7 @@ const ChatBoxFooter = ({
     } else {
       // console.log("must start a conversation to send a message to AI!");
       if (text) {
-        console.log("Started a conversation!");
         setWaitForResp(true);
-        console.log(
-          `userid: ${userId}\ncourse_ID: ${course_ID}\nmodel_ID: ${model_ID}`
-        );
         axios
           .post(process.env.REACT_APP_API_URL + "/student/conversation", {
             user_id: userId,

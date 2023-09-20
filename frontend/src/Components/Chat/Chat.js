@@ -1,12 +1,4 @@
-import {
-  Box,
-  Button,
-  IconButton,
-  useRadio,
-  HStack,
-  Spacer,
-  Avatar,
-} from "@chakra-ui/react";
+import { Box, Button, IconButton, Avatar } from "@chakra-ui/react";
 import ChatBoxTopNav from "./ChatBoxTopNav";
 import ChatBox from "./ChatBox";
 import ChatBoxFooter from "./ChatBoxFooter";
@@ -14,6 +6,7 @@ import { useState, useEffect } from "react";
 import CourseSelect from "../CourseSelect";
 import ModelSelect from "../ModelSelect";
 import { HamburgerIcon, SmallAddIcon } from "@chakra-ui/icons";
+import axios from "axios";
 
 const Chat = ({
   currCourse,
@@ -29,88 +22,67 @@ const Chat = ({
   const [currConvoID, updateConvoID] = useState("");
   const [waitingForResp, setWaitForResp] = useState(false);
   const [openConvoHistory, setOpenConvoHistory] = useState(false);
-  const [conversations, setConversations] = useState([
-    {
-      conversation_id: "1",
-      conversation_name: "Conversation 1",
-      avatar: "https://i.imgur.com/2WZtUZa.png",
-    },
-    {
-      conversation_id: "2",
-      conversation_name: "Conversation 2",
-      avatar: "https://i.imgur.com/2WZtUZa.png",
-    },
-    {
-      conversation_id: "3",
-      conversation_name: "Conversation 3",
-      avatar: "https://i.imgur.com/2WZtUZa.png",
-    },
-    {
-      conversation_id: "4",
-      conversation_name: "Conversation 4",
-      avatar: "https://i.imgur.com/2WZtUZa.png",
-    },
-    {
-      conversation_id: "5",
-      conversation_name: "Conversation 5",
-      avatar: "https://i.imgur.com/2WZtUZa.png",
-    },
-    {
-      conversation_id: "6",
-      conversation_name: "Conversation 6",
-      avatar: "https://i.imgur.com/2WZtUZa.png",
-    },
-    {
-      conversation_id: "7",
-      conversation_name: "Conversation 7",
-      avatar: "https://i.imgur.com/2WZtUZa.png",
-    },
-    {
-      conversation_id: "8",
-      conversation_name: "Conversation 8",
-      avatar: "https://i.imgur.com/2WZtUZa.png",
-    },
-    {
-      conversation_id: "9",
-      conversation_name: "Conversation 9",
-      avatar: "https://i.imgur.com/2WZtUZa.png",
-    },
-    {
-      conversation_id: "A",
-      conversation_name: "Conversation 10",
-      avatar: "https://i.imgur.com/2WZtUZa.png",
-    },
-    {
-      conversation_id: "B",
-      conversation_name: "Conversation 11",
-      avatar: "https://i.imgur.com/2WZtUZa.png",
-    },
-    {
-      conversation_id: "12",
-      conversation_name: "Conversation 12",
-      avatar: "https://i.imgur.com/2WZtUZa.png",
-    },
-    {
-      conversation_id: "13",
-      conversation_name: "Conversation 13",
-      avatar: "https://i.imgur.com/2WZtUZa.png",
-    },
-    {
-      conversation_id: "14",
-      conversation_name: "Conversation 14",
-      avatar: "https://i.imgur.com/2WZtUZa.png",
-    },
-    {
-      conversation_id: "15",
-      conversation_name: "Conversation 15",
-      avatar: "https://i.imgur.com/2WZtUZa.png",
-    },
-    {
-      conversation_id: "16",
-      conversation_name: "Conversation 16",
-      avatar: "https://i.imgur.com/2WZtUZa.png",
-    },
-  ]);
+  const [conversations, setConversations] = useState([]);
+
+  const getConversations = async () => {
+    let params = "course_id=" + currCourse.course_id + "&user_id=" + userId;
+    axios
+      .get(
+        process.env.REACT_APP_API_URL +
+          `/student/conversation/history?${params}`
+      )
+      .then((res) => {
+        let data = res.data;
+        if (data.conversations) setConversations(data.conversations);
+      });
+  };
+
+  const getConversationMessages = async () => {
+    updateMessages([]);
+    setWaitForResp(true);
+    let params = `conversation_id=${currConvoID}&user_id=${userId}&course_id=${currCourse.course_id}`;
+    axios
+      .get(
+        process.env.REACT_APP_API_URL +
+          `/student/conversation/chatlog?${params}`
+      )
+      .then((res) => {
+        let data = res.data;
+        if (data.chatlogs) {
+          let msgs = data.chatlogs.map((msg) => {
+            return {
+              message: msg.chatlog,
+              dateSent: msg.time,
+              isUser: msg.is_user == true ? "true" : "false",
+            };
+          });
+          updateMessages(msgs);
+        }
+        setWaitForResp(false);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const createNewConversation = async () => {
+    axios
+      .post(process.env.REACT_APP_API_URL + "/student/conversation", {
+        user_id: userId,
+        course_id: currCourse.course_id,
+        model_id: currModel.model_id,
+      })
+      .then(async (res) => {
+        updateConvoID(res.data.conversation_id);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  useEffect(() => {
+    getConversations();
+  }, [currCourse]);
 
   return (
     <>
@@ -183,7 +155,10 @@ const Chat = ({
                     size="sm"
                     leftIcon={<SmallAddIcon />}
                     onClick={() => {
-                      console.log("New Conversation button clicked!");
+                      updateInConvo(false);
+                      updateConvoID("");
+                      updateMessages([]);
+                      createNewConversation();
                     }}
                   >
                     New Conversation
@@ -200,7 +175,7 @@ const Chat = ({
               }}
             >
               <div>
-                {conversations.map((convo) => {
+                {conversations.map((convo, index) => {
                   return (
                     <Box
                       key={convo.conversation_id}
@@ -214,8 +189,10 @@ const Chat = ({
                         borderBottom: "1px solid #EAEAEA",
                         cursor: "pointer",
                       }}
-                      hover={{
-                        background: "#D1D1D1",
+                      onClick={() => {
+                        updateConvoID(convo.conversation_id);
+                        updateInConvo(true);
+                        getConversationMessages();
                       }}
                     >
                       <Avatar
@@ -230,7 +207,13 @@ const Chat = ({
                         }}
                         alt="User Avatar"
                       />
-                      {openConvoHistory && <div>{convo.conversation_name}</div>}
+                      {openConvoHistory && (
+                        <div>
+                          {convo.conversation_name
+                            ? convo.conversation_name
+                            : `Conversation ${index + 1}`}
+                        </div>
+                      )}
                     </Box>
                   );
                 })}
