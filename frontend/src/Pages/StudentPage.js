@@ -15,42 +15,6 @@ const StudentPage = ({
   modelNum = null,
   userId,
 }) => {
-  // Function used for CSC343 auth in PCRS and Reflections
-  // Only be called in student redirects with `model-{x}`
-  // const setModel = async (model_num) => {
-  //   //   Reflection
-  //   if (model_num === 1) {
-  //     for (let i = 0; i < courses.length; i++) {
-  //       if (courses[i].course_id === "28baadb7-ee0f-42d6-bc57-0f6058656a5a") {
-  //         //   Set 343 reflection course as our current course
-  //         sessionStorage.setItem("selected", `${i}`);
-  //       }
-  //     }
-  //   }
-  //   //  PCRS
-  //   if (model_num === 2) {
-  //     for (let i = 0; i < courses.length; i++) {
-  //       if (courses[i].course_id === "3fc9dc7c-fc3d-4272-9501-7f9ffef52c77") {
-  //         //  Set 343 PCRS course as our current course
-  //         sessionStorage.setItem("selected", `${i}`);
-  //       }
-  //     }
-  //   }
-
-  //   //  After verification set the current course to this new model
-  //   setCurrCourse({
-  //     course_id:
-  //       courses[parseInt(sessionStorage.getItem("selected"))].course_id,
-  //     course_code:
-  //       courses[parseInt(sessionStorage.getItem("selected"))].course_code,
-  //     semester: courses[parseInt(sessionStorage.getItem("selected"))].semester,
-  //     course_name:
-  //       courses[parseInt(sessionStorage.getItem("selected"))].course_name,
-  //   });
-  //   console.log("SET CALLED ON", model_num);
-  //   console.log(courses);
-  // };
-
   const [models, setModels] = useState([]);
   const [currModel, setCurrModel] = useState({});
 
@@ -60,32 +24,25 @@ const StudentPage = ({
       .get(process.env.REACT_APP_API_URL + `/course/models?${params}`)
       .then((res) => {
         let data = res.data;
-        console.log(data);
-        if(data.models){
+
+        if (data.models) {
           setModels(data.models);
 
-          if(sessionStorage.getItem("selectedModel") == null){
+          if (sessionStorage.getItem("selectedModel") == null) {
             sessionStorage.setItem("selectedModel", "0");
           }
-          
-          let model = data.models[parseInt(sessionStorage.getItem("selectedModel"))]
 
-          setCurrModel({
-            model_id: model.course_id,
-            model_name: model.model_name,
-            course_id: model.course_id,
-            status: model.status
-          });
-
-        }else{
-          console.log("No models for this course!")
+          setCurrModel(
+            data.models[parseInt(sessionStorage.getItem("selectedModel"))]
+          );
+        } else {
+          console.log("No models for this course!");
         }
-        
       });
   };
 
   useEffect(() => {
-    if(courses){
+    if (courses) {
       getModels(currCourse);
     }
   }, [currCourse]);
@@ -95,7 +52,7 @@ const StudentPage = ({
       style={{
         backgroundColor: "#F1F1F1",
         width: "100vw",
-        height: "110vh",
+        minHeight: "100vh",
       }}
     >
       <TopNav UTORid={UTORid} />

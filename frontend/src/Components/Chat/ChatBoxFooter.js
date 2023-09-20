@@ -47,65 +47,69 @@ const ChatBoxFooter = ({
     }
   };
 
-  const handleSubmit = () => {
+  const getResponse = async (conversation_id, response) => {
+    // Load user message on click
+    const now = Temporal.Now.zonedDateTimeISO().toString();
+    const userText = {
+      message: text ? text : response,
+      dateSent: now,
+      isUser: "true",
+    };
+    updateMessages((oldMessage) => [...oldMessage, userText]);
+    axios
+      .post(process.env.REACT_APP_API_URL + "/student/chatlog", {
+        conversation_id: currConvoID ? currConvoID : conversation_id,
+        chatlog: text,
+        time: now,
+      })
+      .then((response) => {
+        const agentResponse = {
+          message: response.data.agent.chatlog,
+          dateSent: response.data.agent.time,
+          isUser: "false",
+        };
+        updateMessages((oldMessage) => [...oldMessage, agentResponse]);
+        setWaitForResp(false);
+        setText("");
+      })
+      .catch((err) => console.log(err));
+  };
+
+  const handleSubmit = async () => {
     if (inConvo) {
       if (text) {
         setWaitForResp(true);
-        const now = Temporal.Now.zonedDateTimeISO().toString();
-        const temp1 = {
-          message: text,
-          dateSent: now,
-          isUser: "true",
-        };
-        // Load user message on click
-        updateMessages((oldMessage) => [...oldMessage, temp1]);
-
-        axios
-          .post(process.env.REACT_APP_API_URL + "/student/chatlog", {
-            conversation_id: currConvoID,
-            chatlog: text,
-            time: now,
-          })
-          .then((response) => {
-            const temp2 = {
-              message: response.data.agent.chatlog,
-              dateSent: response.data.agent.time,
-              isUser: "false",
-            };
-            updateMessages((oldMessage) => [...oldMessage, temp2]);
-            setWaitForResp(false);
-            setText("");
-            console.log(text);
-          })
-          .catch((err) => console.log(err));
+        await getResponse();
       } else {
         console.log("You must type something before asking AI for response :)");
       }
     } else {
       // console.log("must start a conversation to send a message to AI!");
-      if(text){
+      if (text) {
         console.log("Started a conversation!");
         setWaitForResp(true);
-        console.log(`userid: ${userId}\ncourse_ID: ${course_ID}\nmodel_ID: ${model_ID}`);
+        console.log(
+          `userid: ${userId}\ncourse_ID: ${course_ID}\nmodel_ID: ${model_ID}`
+        );
         axios
-              .post(process.env.REACT_APP_API_URL + "/student/conversation", {
-                user_id: userId,
-                course_id: course_ID,
-                model_id: model_ID,
-              })
-              .then((response) => {
-                updateConvoID(response.data.conversation_id);
-                updateInConvo(true);
-                setWaitForResp(false);
-                setText("");
-                console.log(text);
-                // onOpenComfortability();
-              })
-              .catch((err) => {
-                console.log(err);
-              });
+          .post(process.env.REACT_APP_API_URL + "/student/conversation", {
+            user_id: userId,
+            course_id: course_ID,
+            model_id: model_ID,
+          })
+          .then(async (res) => {
+            updateConvoID(res.data.conversation_id);
+            updateInConvo(true);
+            setWaitForResp(true);
+            setText("");
+            let conversation_id = res.data.conversation_id;
+            let chatlog = text;
+            await getResponse(conversation_id, chatlog);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
       }
-      
     }
   };
 
@@ -116,40 +120,6 @@ const ChatBoxFooter = ({
       paddingX={"3vw"}
       borderTop={"2px solid #EAEAEA"}
     >
-      {/* <Button
-        px={8}
-        colorScheme={"green"}
-        fontSize={"sm"}
-        onClick={() => {
-          if (inConvo) {
-            console.log("You're already in a conversation!");
-          } else {
-            console.log("Started a conversation!");
-            axios
-              .post(process.env.REACT_APP_API_URL + "/student/conversation", {
-                user_id: userId,
-                course_id: course_ID,
-                model_id: model_ID,
-              })
-              .then((response) => {
-                updateConvoID(response.data.conversation_id);
-                updateInConvo(true);
-                onOpenComfortability();
-              })
-              .catch((err) => {
-                console.log(err);
-              });
-          }
-        }}
-        isDisabled={inConvo}
-      >
-        Start Conversation
-      </Button> */}
-      {/* <ChatOpenSurvey
-        isOpen={isOpenComfortability}
-        onClose={onCloseComfortability}
-        conversation_id={currConvoID}
-      /> */}
       <Button
         colorScheme={"red"}
         fontSize={"sm"}
@@ -158,7 +128,9 @@ const ChatBoxFooter = ({
             console.log(messages);
             onOpenFeedback();
           } else {
-            console.log("Must be in a convo to leave one or please send at least one msg :>");
+            console.log(
+              "Must be in a convo to leave one or please send at least one msg :>"
+            );
           }
         }}
         isDisabled={!inConvo || (inConvo && messages.length == 0)}

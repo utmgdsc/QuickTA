@@ -44,7 +44,6 @@ const Chat = ({
           as={"div"}
           bgColor={"white"}
           overflow={"hidden"}
-          mt={5}
           border={"1px solid #EAEAEA"}
           borderTopRadius={"lg"}
           borderBottomRadius={"lg"}
