@@ -52,7 +52,7 @@ const StudentPage = ({
       style={{
         backgroundColor: "#F1F1F1",
         width: "100vw",
-        height: "110vh",
+        minHeight: "100vh",
       }}
     >
       <TopNav UTORid={UTORid} />
