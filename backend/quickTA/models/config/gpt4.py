@@ -29,6 +29,8 @@ def completion(conversation, settings, chatlog):
         messages = conversation.conversation_log
         messages.append({"role": "user", "content": f"{chatlog}"})
 
+    print(messages)
+
     # Acquire GPT-4 response
     response = openai.ChatCompletion.create(
         model=model,
@@ -60,6 +62,8 @@ def completion(conversation, settings, chatlog):
     return agent_response
 
 def get_response(conversation, settings, chatlog):
-    if not settings['stream']: response = completion(conversation, settings, chatlog)
-    else: response = "[Placeholder] Hello World"
+    response = completion(conversation, settings, chatlog)
+    # if not settings['stream']: 
+    # else: response = "[Placeholder] Hello World"
+    if not response: response = "Sorry for the invconvenience. Currently having difficulties. Please try again later."
     return response

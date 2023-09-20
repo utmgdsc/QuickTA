@@ -10,10 +10,15 @@ const ModelSelect = ({ models, setCurrModel, wait, currModel }) => {
         boxShadow="1px 2px 3px 1px rgba(0,0,0,0.12)"
         onChange={(e) => {
           setCurrModel(models[parseInt(e.target.value)]);
-          sessionStorage.setItem('selectedModel', parseInt(e.target.value).toString())
+          sessionStorage.setItem(
+            "selectedModel",
+            parseInt(e.target.value).toString()
+          );
+          console.log("selected model", models[parseInt(e.target.value)]);
+          console.log(currModel.model_id);
           // Object.keys(courses[parseInt(e.target.value)]).forEach((key) => {sessionStorage.setItem(key, courses[parseInt(e.target.value)][key])});
         }}
-        value={parseInt(sessionStorage.getItem('selectedModel'))}
+        value={parseInt(sessionStorage.getItem("selectedModel"))}
         isDisabled={wait}
         mb={5}
       >

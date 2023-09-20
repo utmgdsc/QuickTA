@@ -61,8 +61,11 @@ class ConversationView(APIView):
         print(model_id, user_id, course_id)
 
         model = get_object_or_404(GPTModel, model_id=model_id)
+        print(model)
         user = get_object_or_404(User, user_id=user_id)
+        print(user)
         course = get_object_or_404(Course, course_id=course_id)
+        print(course)
 
         
         # set previous conversation status to 'I' (Inactive), and create new conversation
@@ -150,6 +153,7 @@ class ChatlogView(APIView):
         # 1. Create user chatlog record
         conversation_cache_key = "chatlog_conversation_" + str(conversation_id)
         conversation = cache.get(conversation_cache_key)
+        print("conversation", conversation)
         if not conversation:
             conversation = get_object_or_404(Conversation, conversation_id=conversation_id)
             cache.set(conversation_cache_key, conversation, 60*60*24)
@@ -159,6 +163,7 @@ class ChatlogView(APIView):
         
         model_cache_key = "chatlog_model_" + str(conversation.model_id)
         model = cache.get(model_cache_key)
+        print("model", model)
         if not model: 
             model = get_object_or_404(GPTModel, model_id=conversation.model_id)
             cache.set(model_cache_key, model, 60*60*24)
