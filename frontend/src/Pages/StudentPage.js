@@ -12,6 +12,7 @@ const StudentPage = ({
   courses,
   isLoading,
   UTORid,
+  auth,
   modelNum = null,
   userId,
 }) => {
@@ -55,7 +56,7 @@ const StudentPage = ({
         minHeight: "100vh",
       }}
     >
-      <TopNav UTORid={UTORid} />
+      <TopNav UTORid={UTORid} auth={auth} />
       {courses.length === 0 ? (
         <Box ml={"12vw"} mr={"12vw"}>
           Sorry, you are not enrolled in any courses!

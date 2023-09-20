@@ -35,8 +35,9 @@ import { useEffect, useRef, useState } from "react";
 import CourseDrawer from "../Components/AdminView/CourseDrawer";
 import CourseCreator from "../Components/Dashboard/CourseCreator";
 import { AiFillContainer } from "react-icons/ai";
+import NotFoundPage from "../Components/NotFoundPage";
 
-const AdminPage = ({ UTORID }) => {
+const AdminPage = ({ UTORID, auth }) => {
   const [courseIndex, setCourseIndex] = useState(0);
   const [courseList, setCourseList] = useState([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -101,6 +102,10 @@ const AdminPage = ({ UTORID }) => {
     }
   }, [UTORID]);
 
+  if (auth !== "AM") {
+    return <NotFoundPage />;
+  }
+
   return UTORID.length !== 0 ? (
     <div
       style={{
@@ -109,7 +114,7 @@ const AdminPage = ({ UTORID }) => {
         height: "100vw",
       }}
     >
-      <TopNav UTORid={UTORID} />
+      <TopNav UTORid={UTORID} auth={auth} />
       <Box overflow={"hidden"} ml={"12vw"} mr={"12vw"}>
         <HStack>
           <CourseCreator

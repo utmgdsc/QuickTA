@@ -97,88 +97,64 @@ const App = ({ UTORid = "" }) => {
   ) : (
     <>
       <Routes>
-        {auth === "ST" ? (
-          <React.Fragment>
-            <Route
-              path="/"
-              element={
-                <StudentPage
-                  UTORid={UTORid}
-                  currCourse={currCourse}
-                  setCurrCourse={setCurrCourse}
-                  courses={courses}
-                  semester={currCourse.semester}
-                  userId={userId}
-                />
-              }
+        <Route
+          path="/"
+          element={
+            <StudentPage
+              UTORid={UTORid}
+              auth={auth}
+              currCourse={currCourse}
+              setCurrCourse={setCurrCourse}
+              courses={courses}
+              semester={currCourse.semester}
+              userId={userId}
             />
-          </React.Fragment>
-        ) : null}
-        {auth === "IS" ? (
-          <React.Fragment>
-            <Route path="/Professor" element={<ProfessorPage />} />
-            <Route
-              path="/ResearcherAnalytics"
-              element={
-                <ResearcherAnalytics
-                  userid={userId}
-                  UTORid={UTORid}
-                  courses={courses}
-                  setCurrCourse={setCurrCourse}
-                  currCourse={currCourse}
-                  courseCode={currCourse.course_code}
-                  courseName={currCourse.course_name}
-                  semester={currCourse.semester}
-                  setIsLoading={setIsLoading}
-                  isLoading={isLoading}
-                  setCourses={setCourses}
-                />
-              }
+          }
+        />
+        <Route
+          path="/analytics"
+          element={
+            <ResearcherAnalytics
+              userid={userId}
+              UTORid={UTORid}
+              auth={auth}
+              courses={courses}
+              setCurrCourse={setCurrCourse}
+              currCourse={currCourse}
+              courseCode={currCourse.course_code}
+              courseName={currCourse.course_name}
+              semester={currCourse.semester}
+              setIsLoading={setIsLoading}
+              isLoading={isLoading}
+              setCourses={setCourses}
             />
+          }
+        />
 
-            <Route
-              path="/"
-              element={
-                <ResearcherModels
-                  UTORid={UTORid}
-                  courses={courses}
-                  setCurrCourse={setCurrCourse}
-                  currCourse={currCourse}
-                  courseCode={currCourse.course_code}
-                  courseName={currCourse.course_name}
-                  semester={currCourse.semester}
-                />
-              }
+        <Route
+          path="/models"
+          element={
+            <ResearcherModels
+              UTORid={UTORid}
+              auth={auth}
+              courses={courses}
+              setCurrCourse={setCurrCourse}
+              currCourse={currCourse}
+              courseCode={currCourse.course_code}
+              courseName={currCourse.course_name}
+              semester={currCourse.semester}
             />
-            <Route
-              path="/ResearcherFilters"
-              element={<ResearcherFilterPage UTORid={UTORid} />}
-            />
-          </React.Fragment>
-        ) : null}
-        {auth === "AM" ? (
-          <React.Fragment>
-            <Route path="/" element={<AdminPage UTORID={UTORid} />} />
-            <Route
-              path="/ResearcherAnalytics"
-              element={
-                <ResearcherAnalytics
-                  userid={userId}
-                  UTORid={UTORid}
-                  courses={courses}
-                  setCurrCourse={setCurrCourse}
-                  currCourse={currCourse}
-                  courseCode={currCourse.course_code}
-                  courseName={currCourse.course_name}
-                  semester={currCourse.semester}
-                  setIsLoading={setIsLoading}
-                  isLoading={isLoading}
-                  setCourses={setCourses}
-                />
-              }
-            />
-          </React.Fragment>
-        ) : null}
+          }
+        />
+        {/* TO BE FIXED */}
+        {/* <Route
+          path="/filters"
+          element={<ResearcherFilterPage UTORid={UTORid} auth={auth} />}
+        /> */}
+        <Route
+          path="/settings"
+          element={<AdminPage UTORID={UTORid} auth={auth} />}
+        />
 
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
