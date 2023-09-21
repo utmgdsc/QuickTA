@@ -9,6 +9,7 @@ import {
 } from "@chakra-ui/react"
 import {useState} from "react";
 import axios from "axios";
+import ErrorDrawer from "../ErrorDrawer";
 
 const ModelCreator = ({creating, setCreating, courseid}) => {
     const {isOpen, onOpen, onClose} = useDisclosure();
@@ -21,7 +22,8 @@ const ModelCreator = ({creating, setCreating, courseid}) => {
         presence_pen: 0.0,
         freq_pen: 0.0
     });
-
+    const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+    const [error, setError] = useState();
     function updateField(e){
         setNewModel({
             ...newModel,
@@ -75,7 +77,10 @@ const ModelCreator = ({creating, setCreating, courseid}) => {
             frequency_penalty: newModel.freq_pen
         })
           .then((res) => {setCreating(false); console.log(newModel);})
-          .catch((err) => console.log(err))
+          .catch((err) => {
+            setError(err);
+            onErrOpen();
+          })
     }
 
     return (
@@ -166,6 +171,7 @@ const ModelCreator = ({creating, setCreating, courseid}) => {
                   </ModalFooter>
               </ModalContent>
           </Modal>
+          <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
       </>
     );
 }

@@ -29,6 +29,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import ErrorDrawer from "../ErrorDrawer";
 
 const ModelCard = ({
   modelName,
@@ -50,7 +51,8 @@ const ModelCard = ({
     presence_pen: 0.0,
     freq_pen: 0.0,
   });
-
+  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const [error, setError] = useState();
   function updateField(e) {
     setModelSettings({
       ...newModelSettings,
@@ -95,7 +97,10 @@ const ModelCard = ({
       .then((res) => {
         setEnabling(false);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        setError(err);
+        onErrOpen();
+      });
   };
 
   const enableModel = async () => {
@@ -109,7 +114,10 @@ const ModelCard = ({
         setCurrentModel(modelId);
         setEnabling(false);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        setError(err);
+        onErrOpen();
+      });
   };
 
   const fetchModelDetails = async () => {
@@ -128,7 +136,10 @@ const ModelCard = ({
         });
         console.log(res.data.max_tokens);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        setError(err);
+        onErrOpen();
+      });
   };
 
   return (
@@ -279,6 +290,7 @@ const ModelCard = ({
           </ModalFooter>
         </ModalContent>
       </Modal>
+      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
     </>
   );
 };

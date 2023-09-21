@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Avatar } from "@chakra-ui/react";
+import {Box, Button, IconButton, Avatar, useDisclosure, TabList, Tabs, Tab} from "@chakra-ui/react";
 import ChatBoxTopNav from "./ChatBoxTopNav";
 import ChatBox from "./ChatBox";
 import ChatBoxFooter from "./ChatBoxFooter";
@@ -7,6 +7,7 @@ import CourseSelect from "../CourseSelect";
 import ModelSelect from "../ModelSelect";
 import { HamburgerIcon, SmallAddIcon } from "@chakra-ui/icons";
 import axios from "axios";
+import ErrorDrawer from "../ErrorDrawer";
 
 const Chat = ({
   currCourse,
@@ -16,13 +17,18 @@ const Chat = ({
   currModel,
   setCurrModel,
   userId,
+  waitingForResp,
+  setWaitForResp
 }) => {
   const [messages, updateMessages] = useState([]);
   const [inConvo, updateInConvo] = useState(false);
   const [currConvoID, updateConvoID] = useState("");
-  const [waitingForResp, setWaitForResp] = useState(false);
   const [openConvoHistory, setOpenConvoHistory] = useState(false);
   const [conversations, setConversations] = useState([]);
+  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const [error, setError] = useState();
+  const [pastConvoID, updatePastID] = useState("");
+  const [disableAll, setDisableAll] = useState(false);
 
   const getConversations = async () => {
     let params = "course_id=" + currCourse.course_id + "&user_id=" + userId;
@@ -34,13 +40,17 @@ const Chat = ({
       .then((res) => {
         let data = res.data;
         if (data.conversations) setConversations(data.conversations);
+      })
+      .catch((err) =>{
+        setError(err);
+        onErrOpen();
       });
   };
 
-  const getConversationMessages = async () => {
+  const getConversationMessages = async (convoID) => {
     updateMessages([]);
     setWaitForResp(true);
-    let params = `conversation_id=${currConvoID}&user_id=${userId}&course_id=${currCourse.course_id}`;
+    let params = `conversation_id=${convoID}&user_id=${userId}&course_id=${currCourse.course_id}`;
     axios
       .get(
         process.env.REACT_APP_API_URL +
@@ -61,7 +71,8 @@ const Chat = ({
         setWaitForResp(false);
       })
       .catch((err) => {
-        console.log(err);
+        setError(err);
+        onErrOpen();
       });
   };
 
@@ -76,7 +87,8 @@ const Chat = ({
         updateConvoID(res.data.conversation_id);
       })
       .catch((err) => {
-        console.log(err);
+        setError(err);
+        onErrOpen();
       });
   };
 
@@ -93,14 +105,14 @@ const Chat = ({
               courses={courses}
               currCourse={currCourse}
               setCurrCourse={setCurrCourse}
-              wait={inConvo}
+              inConvo={inConvo}
             />
 
             <ModelSelect
               models={models}
               currModel={currModel}
               setCurrModel={setCurrModel}
-              wait={inConvo}
+              inConvo={inConvo}
             />
           </div>
         </div>
@@ -155,6 +167,7 @@ const Chat = ({
                     size="sm"
                     leftIcon={<SmallAddIcon />}
                     onClick={() => {
+                      setDisableAll(false);
                       updateInConvo(false);
                       updateConvoID("");
                       updateMessages([]);
@@ -190,9 +203,17 @@ const Chat = ({
                         cursor: "pointer",
                       }}
                       onClick={() => {
-                        updateConvoID(convo.conversation_id);
-                        updateInConvo(true);
-                        getConversationMessages();
+                        // click same convo again to clear chat of past conversation
+                        if(convo.conversation_id == pastConvoID){
+                          updatePastID("");
+                          setDisableAll(false);
+                          getConversationMessages(currConvoID);
+                        }else{
+                          updatePastID(convo.conversation_id);
+                          getConversationMessages(pastConvoID);
+                          setDisableAll(true);
+                        }
+                        // updateInConvo(true);
                       }}
                     >
                       <Avatar
@@ -242,10 +263,12 @@ const Chat = ({
               messages={messages}
               waitingForResp={waitingForResp}
               setWaitForResp={setWaitForResp}
+              disableAll={disableAll}
             />
           </Box>
         </Box>
       </Box>
+      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
     </>
   );
 };

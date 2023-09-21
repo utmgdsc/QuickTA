@@ -22,12 +22,16 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBug, faDownload } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { useState } from "react";
+import ErrorDrawer from "../ErrorDrawer";
 
 const ChatBoxTopNav = ({ courseCode, currConvoID }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const fileDownload = require("js-file-download");
   const [reportMsg, setReportMsg] = useState("");
+  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const [error, setError] = useState();
   return (
+  <>
     <HStack paddingY={"4vh"} paddingX={"4vw"}>
       <Avatar>
         <AvatarBadge boxSize={"1em"} bg={"green.300"} />
@@ -71,7 +75,10 @@ const ChatBoxTopNav = ({ courseCode, currConvoID }) => {
                   );
                 }
               })
-              .catch((err) => console.log(err));
+              .catch((err) => {
+                setError(err);
+                onErrOpen();
+              });
           } else {
             console.log("Must be in a conversation to download the chatlog!");
           }
@@ -135,7 +142,10 @@ const ChatBoxTopNav = ({ courseCode, currConvoID }) => {
                       msg: reportMsg,
                     })
                     .then((res) => console.log("Reported!"))
-                    .catch((err) => console.log(err));
+                    .catch((err) => {
+                        setError(err);
+                        onErrOpen();
+                    });
                   onClose();
                 }
               }}
@@ -146,6 +156,8 @@ const ChatBoxTopNav = ({ courseCode, currConvoID }) => {
         </ModalContent>
       </Modal>
     </HStack>
+    <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
+  </>
   );
 };
 

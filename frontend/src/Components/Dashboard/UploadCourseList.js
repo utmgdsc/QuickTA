@@ -1,11 +1,14 @@
-import React from "react";
+import React, {useState} from "react";
 import { useEffect } from "react";
 import axios from "axios";
 import { whiten } from "@chakra-ui/theme-tools";
+import {useDisclosure} from "@chakra-ui/react";
+import ErrorDrawer from "../ErrorDrawer";
 
 const UploadCourseList = ({courseID}) => {
   const dropArea = React.useRef(null);
-
+  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const [error, setError] = useState();
   // Handles the drag and drop operation of a CSV file
   const handleDrop = async (event) => {
     event.preventDefault();
@@ -22,7 +25,8 @@ const UploadCourseList = ({courseID}) => {
       console.log(res);
     }).catch(err => {
       // Handle the error
-      console.log(err);
+      setError(err);
+      onErrOpen();
     });
   }
 
@@ -58,6 +62,7 @@ const UploadCourseList = ({courseID}) => {
   }, []);
 
   return (
+  <>
     <div
       ref={dropArea}
       onDrop={handleDrop}
@@ -73,6 +78,8 @@ const UploadCourseList = ({courseID}) => {
     >
       Import Student Course List
     </div>
+    <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
+  </>
   );
 }
 

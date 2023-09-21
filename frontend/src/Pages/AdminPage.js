@@ -36,6 +36,7 @@ import CourseDrawer from "../Components/AdminView/CourseDrawer";
 import CourseCreator from "../Components/Dashboard/CourseCreator";
 import { AiFillContainer } from "react-icons/ai";
 import NotFoundPage from "../Components/NotFoundPage";
+import ErrorDrawer from "../Components/ErrorDrawer";
 
 const AdminPage = ({ UTORID, auth }) => {
   const [courseIndex, setCourseIndex] = useState(0);
@@ -51,7 +52,8 @@ const AdminPage = ({ UTORID, auth }) => {
   const [currCourse, setCurrCourse] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingCourses, setIsLoadingCourses] = useState(false);
-
+  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const [error, setError] = useState();
   const handleSubmit = () => {
     const payload = { name, utorid, user_role: userRole };
     axios
@@ -59,8 +61,9 @@ const AdminPage = ({ UTORID, auth }) => {
       .then((response) => {
         return response.json();
       })
-      .catch((error) => {
-        console.log(error);
+      .catch((err) => {
+        setError(err);
+        onErrOpen();
       });
     setIsOpenCreateUser(false);
   };
@@ -73,7 +76,10 @@ const AdminPage = ({ UTORID, auth }) => {
           setCourseList(res.data);
         }
       })
-      .catch((err) => {});
+      .catch((err) => {
+        setError(err);
+        onErrOpen();
+      });
   };
 
   const hashing = (str, seed = 0) => {
@@ -106,7 +112,7 @@ const AdminPage = ({ UTORID, auth }) => {
     return <NotFoundPage />;
   }
 
-  return UTORID.length !== 0 ? (
+  return (UTORID.length !== 0 ? (
     <div
       style={{
         backgroundColor: "#F1F1F1",
@@ -314,8 +320,10 @@ const AdminPage = ({ UTORID, auth }) => {
           </VStack>
         )}
       </Box>
+      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
     </div>
-  ) : null;
+  ) : null
+  )
 };
 
 export default AdminPage;

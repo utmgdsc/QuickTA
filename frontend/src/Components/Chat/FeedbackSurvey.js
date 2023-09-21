@@ -4,10 +4,11 @@ import {
   ModalHeader,
   ModalOverlay,
   Slider, SliderFilledTrack,
-  SliderMark, SliderThumb, SliderTrack, Spacer, Textarea, Tooltip, VStack
+  SliderMark, SliderThumb, SliderTrack, Spacer, Textarea, Tooltip, useDisclosure, VStack
 } from '@chakra-ui/react'
-import {useState} from "react";
+import React, {useState} from "react";
 import axios from "axios";
+import ErrorDrawer from "../ErrorDrawer";
 
 const FeedbackSurvey = ({ isOpen, onClose, conversation_id, updateConvoID, updateInConvo, updateMessages }) => {
 
@@ -16,8 +17,10 @@ const FeedbackSurvey = ({ isOpen, onClose, conversation_id, updateConvoID, updat
   const [askFeedBack, setFeedBackPopup] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [isSurveyDisabled, setIsSurveyDisabled] = useState(false);
-
+  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const [error, setError] = useState();
   return (
+    <>
     <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose}>
       <ModalOverlay/>
       <ModalContent>
@@ -79,7 +82,10 @@ const FeedbackSurvey = ({ isOpen, onClose, conversation_id, updateConvoID, updat
                     setIsSurveyDisabled(false);
                     onClose();
                   })
-                  .catch((err) => console.log(err))
+                  .catch((err) => {
+                    setError(err);
+                    onErrOpen();
+                  })
               }
               }>Submit</Button>
             </VStack>)
@@ -93,7 +99,10 @@ const FeedbackSurvey = ({ isOpen, onClose, conversation_id, updateConvoID, updat
                   }else{
                     (async () => {
                       await axios.post(process.env.REACT_APP_API_URL + "/student/feedback", {conversation_id: conversation_id,
-                      rating: sliderVal, feedback_msg: ""})
+                      rating: sliderVal, feedback_msg: ""}).catch((err) => {
+                        setError(err);
+                        onErrOpen();
+                      })
                       updateConvoID("");
                       updateInConvo(false);
                       updateMessages([]);
@@ -110,6 +119,8 @@ const FeedbackSurvey = ({ isOpen, onClose, conversation_id, updateConvoID, updat
         </ModalFooter>
       </ModalContent>
     </Modal>
+    <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
+  </>
   )
 }
 

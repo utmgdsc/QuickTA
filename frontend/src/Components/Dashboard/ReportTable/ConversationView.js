@@ -7,20 +7,25 @@ import {
     ModalOverlay,
     Table, Tbody,
     Td,
-    Thead, Tr
+    Thead, Tr, useDisclosure
 } from "@chakra-ui/react";
 import axios from "axios";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import CustomSpinner from "../../CustomSpinner";
+import ErrorDrawer from "../../ErrorDrawer";
 
 const ConversationView = ({isOpen, onClose, convo_id}) => {
     const [convo, setConvo] = useState([]);
     const fileDownload = require('js-file-download');
-
+    const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+    const [error, setError] = useState();
     const fetchConversation = async (conversation_id) => {
         await axios.get(process.env.REACT_APP_API_URL + `/researchers/report-chatlogs?conversation_id=${convo_id}`)
         .then((res) => {setConvo(res.data.conversations)})
-        .catch((err) => console.log(err))
+        .catch((err) => {
+            setError(err);
+            onErrOpen();
+        })
     }
     
     useEffect(() => {
@@ -29,7 +34,8 @@ const ConversationView = ({isOpen, onClose, convo_id}) => {
         }
     }, [convo_id]);
 
-    return( 
+    return(
+        <>
         <Modal isOpen={isOpen} onClose={onClose} scrollBehavior={"inside"}>
             <ModalOverlay/>
             <ModalContent>
@@ -68,12 +74,17 @@ const ConversationView = ({isOpen, onClose, convo_id}) => {
                                   fileDownload(res.data, res.headers['content-disposition'].split('"')[1]);
                               }
                           })
-                          .catch((err) => console.log(err))
+                          .catch((err) => {
+                            setError(err);
+                            onErrOpen();
+                          })
                     }}>Download</Button>
                     <ModalCloseButton>Close</ModalCloseButton>
                 </ModalFooter>
             </ModalContent>
         </Modal>
+        <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
+    </>
     );
 }
 

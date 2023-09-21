@@ -18,11 +18,13 @@ import {
 import { InfoOutlineIcon } from "@chakra-ui/icons";
 import { useState } from "react";
 import axios from "axios";
+import ErrorDrawer from "../ErrorDrawer";
 
 const ChatOpenSurvey = ({ conversation_id, isOpen, onClose }) => {
   const [sliderVal, setSliderVal] = useState(1);
   const [showTooltip, setSliderTooltip] = useState(false);
-
+  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const [error, setError] = useState();
   const sendComfort = async () => {
     await axios
       .post(process.env.REACT_APP_API_URL + "/student/course-comfortability", {
@@ -33,10 +35,14 @@ const ChatOpenSurvey = ({ conversation_id, isOpen, onClose }) => {
         onClose();
         setSliderVal(1);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        setError(err);
+        onErrOpen();
+      });
   };
 
   return (
+  <>
     <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
@@ -116,6 +122,8 @@ const ChatOpenSurvey = ({ conversation_id, isOpen, onClose }) => {
         </ModalFooter>
       </ModalContent>
     </Modal>
+    <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
+  </>
   );
 };
 

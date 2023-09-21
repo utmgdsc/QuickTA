@@ -20,13 +20,15 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import axios from "axios";
+import ErrorDrawer from "../ErrorDrawer";
 
 const ModelRemover = ({ courseid, deleting, setDeleting, allModels }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [removeModel, setRemoveModel] = useState({
     id: "",
   });
-
+  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const [error, setError] = useState();
   function updateField(e) {
     setRemoveModel({
       ...removeModel,
@@ -56,7 +58,8 @@ const ModelRemover = ({ courseid, deleting, setDeleting, allModels }) => {
         console.log(res);
       })
       .catch((err) => {
-        console.log(err);
+        setError(err);
+        onErrOpen();
       });
     setDeleting(false);
   };
@@ -69,8 +72,9 @@ const ModelRemover = ({ courseid, deleting, setDeleting, allModels }) => {
       )
       .then((res) => res.data.status)
       .catch((err) => {
-        console.log(err);
         setDeleting(false);
+        setError(err);
+        onErrOpen();
       });
   };
 
@@ -144,6 +148,7 @@ const ModelRemover = ({ courseid, deleting, setDeleting, allModels }) => {
           </ModalFooter>
         </ModalContent>
       </Modal>
+      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
     </>
   );
 };
