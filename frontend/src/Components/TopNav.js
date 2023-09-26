@@ -19,15 +19,6 @@ import { NavLink } from "react-router-dom";
 
 const TopNav = ({ UTORid, auth }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [showNavbar, setShowNavbar] = useState(false);
-
-  if (["IS", "AM", "RS"].includes(auth)) {
-    return <></>;
-  }
-
-  if (["IS", "AM", "RS"].includes(auth)) {
-    setShowNavbar(true);
-  }
 
   return (
     <HStack
@@ -47,42 +38,38 @@ const TopNav = ({ UTORid, auth }) => {
 
       <Spacer />
 
-      {showNavbar ? (
-        <></>
-      ) : (
-        <HStack
-          spacing="2vw"
-          style={{
-            marginRight: "2vw",
-          }}
-        >
-          {["IS", "AM", "RS"].includes(auth) && (
-            <NavLink to="/" exact activeClassName="active-link">
-              Home
-            </NavLink>
-          )}
-          {["IS", "AM", "RS"].includes(auth) && (
-            <NavLink to="/analytics" activeClassName="active-link">
-              Analytics
-            </NavLink>
-          )}
-          {["IS", "AM", "RS"].includes(auth) && (
-            <NavLink to="/models" activeClassName="active-link">
-              Models
-            </NavLink>
-          )}
-          {["IS", "AM", "RS"].includes(auth) && (
-            <NavLink to="/filter" activeClassName="active-link">
-              Filter
-            </NavLink>
-          )}
-          {auth === "AM" && (
-            <NavLink to="/settings" activeClassName="active-link">
-              Settings
-            </NavLink>
-          )}
-        </HStack>
-      )}
+      <HStack
+        spacing="2vw"
+        style={{
+          marginRight: "2vw",
+        }}
+      >
+        {["IS", "AM", "RS"].includes(auth) && (
+          <NavLink to="/" exact activeClassName="active-link">
+            Home
+          </NavLink>
+        )}
+        {["IS", "AM", "RS"].includes(auth) && (
+          <NavLink to="/analytics" activeClassName="active-link">
+            Analytics
+          </NavLink>
+        )}
+        {["IS", "AM", "RS"].includes(auth) && (
+          <NavLink to="/models" activeClassName="active-link">
+            Models
+          </NavLink>
+        )}
+        {["IS", "AM", "RS"].includes(auth) && (
+          <NavLink to="/filter" activeClassName="active-link">
+            Filter
+          </NavLink>
+        )}
+        {auth === "AM" && (
+          <NavLink to="/settings" activeClassName="active-link">
+            Settings
+          </NavLink>
+        )}
+      </HStack>
 
       <Text textAlign="right">
         <Text fontSize="2xs" marginRight="0.2vw">
