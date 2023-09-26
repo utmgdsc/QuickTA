@@ -1,6 +1,6 @@
 import { Select, Box } from "@chakra-ui/react";
 
-const ModelSelect = ({ models, setCurrModel, wait, currModel }) => {
+const ModelSelect = ({ models, setCurrModel, inConvo, currModel }) => {
   console.log("models", models);
   return (
     <Box w="150px">
@@ -19,7 +19,7 @@ const ModelSelect = ({ models, setCurrModel, wait, currModel }) => {
           // Object.keys(courses[parseInt(e.target.value)]).forEach((key) => {sessionStorage.setItem(key, courses[parseInt(e.target.value)][key])});
         }}
         value={parseInt(sessionStorage.getItem("selectedModel"))}
-        isDisabled={wait}
+        isDisabled={inConvo}
         mb={5}
       >
         {models.map(({ model_name }, index) => (

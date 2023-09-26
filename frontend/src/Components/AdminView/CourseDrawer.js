@@ -23,6 +23,7 @@ import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrashCan } from "@fortawesome/free-solid-svg-icons";
 import AddUser from "./AddUser";
+import ErrorDrawer from "../ErrorDrawer";
 
 const CourseDrawer = ({ isOpen, onClose, course_id }) => {
   const [studentList, setStudentList] = useState([]);
@@ -37,6 +38,8 @@ const CourseDrawer = ({ isOpen, onClose, course_id }) => {
     onOpen: onOpenStudent,
     onClose: onCloseStudent,
   } = useDisclosure();
+  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const [error, setError] = useState();
   const fetchCourseList = async (course_id) => {
     let user_roles = "ST";
     await axios
@@ -47,7 +50,10 @@ const CourseDrawer = ({ isOpen, onClose, course_id }) => {
       .then((res) => {
         setStudentList(res.data.students);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        setError(err);
+        onErrOpen();
+      });
     setDisableFlag(false);
   };
 
@@ -77,7 +83,10 @@ const CourseDrawer = ({ isOpen, onClose, course_id }) => {
           `/course/enroll?course_id=${course_id}&user_id=${user_id}&type=${role}`
       )
       .then((res) => {})
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        setError(err);
+        onErrOpen();
+      });
   };
 
   const deleteElement = (user_id) => {
@@ -186,6 +195,7 @@ const CourseDrawer = ({ isOpen, onClose, course_id }) => {
           </DrawerBody>
         </DrawerContent>
       </Drawer>
+      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
     </>
   );
 };

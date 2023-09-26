@@ -1,11 +1,12 @@
-import { VStack, Flex, Spacer, Button, Tooltip } from "@chakra-ui/react";
+import {VStack, Flex, Spacer, Button, Tooltip, useDisclosure} from "@chakra-ui/react";
 import StatCard from "./StatCard";
 import DatedGraph from "./DatedGraph";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import axios from "axios";
 import { useState } from "react";
 import FrequencyCard from "./FrequencyCard";
 import fileDownload from "js-file-download";
+import ErrorDrawer from "../../ErrorDrawer";
 
 const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
   const [avgRating, setAvgRating] = useState({
@@ -25,7 +26,8 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
 
   // Fetch file loader for headers
   const fileDownload = require("js-file-download");
-
+  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const [error, setError] = useState();
   function computePrevAvg(data, currAvg) {
     // we need to look at avg of indices 0, .. , data-2
     if (data.length <= 1) {
@@ -56,7 +58,8 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
           });
         })
         .catch((err) => {
-          console.log(err);
+          setError(err);
+          onErrOpen();
         });
     }
 
@@ -80,7 +83,8 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
           });
         })
         .catch((err) => {
-          console.log(err);
+          setError(err);
+          onErrOpen();
         });
     }
 
@@ -103,7 +107,8 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
           });
         })
         .catch((err) => {
-          console.log(err);
+          setError(err);
+          onErrOpen();
         });
     }
 
@@ -121,7 +126,8 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
           setNumReport({ numReport: res.data.total_reported });
         })
         .catch((err) => {
-          console.log(err);
+          setError(err);
+          onErrOpen();
         });
     }
 
@@ -152,7 +158,10 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
             ])
           );
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+          setError(err);
+          onErrOpen();
+        });
     }
   };
 
@@ -194,7 +203,10 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
                       );
                     }
                   })
-                  .catch((err) => console.log(err));
+                  .catch((err) => {
+                    setError(err);
+                    onErrOpen();
+                  });
               }
             }}
             title={"Average Rating"}
@@ -225,7 +237,10 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
                       );
                     }
                   })
-                  .catch((err) => console.log(err));
+                  .catch((err) => {
+                    setError(err);
+                    onErrOpen();
+                  });
               }
             }}
             title={"Average Response Rate"}
@@ -256,7 +271,10 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
                       );
                     }
                   })
-                  .catch((err) => console.log(err));
+                  .catch((err) => {
+                    setError(err);
+                    onErrOpen();
+                  });
               }
             }}
             title={"Average Course Comfortability Rating"}
@@ -287,7 +305,10 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
                       );
                     }
                   })
-                  .catch((err) => console.log(err));
+                  .catch((err) => {
+                    setError(err);
+                    onErrOpen();
+                  });
               }
             }}
             title={"Reported Conversations"}
@@ -331,11 +352,15 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
                 document.body.appendChild(link);
                 link.click();
               })
-              .catch((err) => console.log(err));
+              .catch((err) => {
+                setError(err);
+                onErrOpen();
+              });
           }
         }}
         m={4}
       />
+      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
     </>
   );
 };

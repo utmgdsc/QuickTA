@@ -1,9 +1,19 @@
-import { Box } from "@chakra-ui/react";
+import {
+  Box,
+  Drawer,
+  DrawerBody, DrawerCloseButton,
+  DrawerContent,
+  DrawerHeader,
+  DrawerOverlay,
+  Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay,
+  useDisclosure
+} from "@chakra-ui/react";
 import TopNav from "../Components/TopNav";
 import Chat from "../Components/Chat/Chat";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import axios from "axios";
 import { useState } from "react";
+import ErrorDrawer from "../Components/ErrorDrawer";
 
 const StudentPage = ({
   currCourse,
@@ -18,14 +28,16 @@ const StudentPage = ({
 }) => {
   const [models, setModels] = useState([]);
   const [currModel, setCurrModel] = useState({});
-
+  const [waitingForResp, setWaitForResp] = useState(false);
+  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const [error, setError] = useState();
   const getModels = async (course) => {
     let params = "course_id=" + course.course_id;
     axios
       .get(process.env.REACT_APP_API_URL + `/course/models?${params}`)
       .then((res) => {
         let data = res.data;
-
+        setWaitForResp(true);
         if (data.models) {
           setModels(data.models);
 
@@ -39,7 +51,11 @@ const StudentPage = ({
         } else {
           console.log("No models for this course!");
         }
-      });
+        setWaitForResp(false);
+      }).catch((err) => {
+        setError(err);
+        onErrOpen();
+    });
   };
 
   useEffect(() => {
@@ -71,9 +87,12 @@ const StudentPage = ({
           semester={semester}
           courses={courses}
           models={models}
+          waitingForResp={waitingForResp}
+          setWaitForResp={setWaitForResp}
           style={{ position: "relative" }}
         />
       )}
+      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
     </div>
   );
 };

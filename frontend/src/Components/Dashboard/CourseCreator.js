@@ -17,8 +17,9 @@ import {
   HStack,
 } from "@chakra-ui/react";
 import { Temporal } from "@js-temporal/polyfill";
-import { useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
+import ErrorDrawer from "../ErrorDrawer";
 const CourseCreator = ({
   userid,
   utorid,
@@ -36,7 +37,8 @@ const CourseCreator = ({
   const [semester, setNewSemester] = useState(
     Temporal.Now.plainDateISO().toString().substring(2, 4) + "F"
   );
-
+  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const [error, setError] = useState();
   function updateField(e) {
     setNewCourse({
       ...newCourse,
@@ -84,7 +86,8 @@ const CourseCreator = ({
         setIsLoading(false);
       })
       .catch((err) => {
-        console.log(err);
+        setError(err);
+        onErrOpen();
         setIsLoading(false);
       });
   };
@@ -224,11 +227,20 @@ const CourseCreator = ({
                             .then((res) => {
                               getAllCourses();
                             })
-                            .catch((err) => console.log(err));
+                            .catch((err) => {
+                                setError(err);
+                                onErrOpen();
+                            });
                         })
-                        .catch((err) => console.log(err));
+                        .catch((err) => {
+                            setError(err);
+                            onErrOpen();
+                        });
                     })
-                    .catch((err) => console.log(err));
+                    .catch((err) => {
+                        setError(err);
+                        onErrOpen();
+                    });
                 }
                 setNewCourse({ course_code: "", course_name: "" });
                 setNewSemester(
@@ -255,6 +267,7 @@ const CourseCreator = ({
           </ModalFooter>
         </ModalContent>
       </Modal>
+      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
     </>
   );
 };

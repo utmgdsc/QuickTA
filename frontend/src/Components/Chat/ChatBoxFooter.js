@@ -10,6 +10,7 @@ import axios from "axios";
 import { Temporal } from "@js-temporal/polyfill";
 import FeedbackSurvey from "./FeedbackSurvey";
 import ChatOpenSurvey from "./ChatOpenSurvey";
+import ErrorDrawer from "../ErrorDrawer";
 
 const ChatBoxFooter = ({
   updateMessages,
@@ -23,6 +24,7 @@ const ChatBoxFooter = ({
   setWaitForResp,
   userId,
   model_ID,
+  disableAll,
 }) => {
   const {
     isOpen: isOpenFeedback,
@@ -35,7 +37,12 @@ const ChatBoxFooter = ({
     onOpen: onOpenComfortability,
     onClose: onCloseComfortability,
   } = useDisclosure();
-
+  const {
+    isOpen: isErrOpen,
+    onOpen: onErrOpen,
+    onClose: onErrClose
+  } = useDisclosure();
+  const [error, setError] = useState();
   const [sliderVal, setSliderVal] = useState(0);
   const [text, setText] = useState("");
 
@@ -72,7 +79,10 @@ const ChatBoxFooter = ({
         setWaitForResp(false);
         setText("");
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        setError(err);
+        onErrOpen();
+      });
   };
 
   const handleSubmit = async () => {
@@ -103,67 +113,71 @@ const ChatBoxFooter = ({
             await getResponse(conversation_id, chatlog);
           })
           .catch((err) => {
-            console.log(err);
+            setError(err);
+            onErrOpen();
           });
       }
     }
   };
 
   return (
-    <HStack
-      bgColor={"white"}
-      p={5}
-      paddingX={"3vw"}
-      borderTop={"2px solid #EAEAEA"}
-    >
-      <Button
-        colorScheme={"red"}
-        fontSize={"sm"}
-        onClick={() => {
-          if (inConvo && messages) {
-            console.log(messages);
-            onOpenFeedback();
-          } else {
-            console.log(
-              "Must be in a convo to leave one or please send at least one msg :>"
-            );
-          }
-        }}
-        isDisabled={!inConvo || (inConvo && messages.length == 0)}
+      <>
+      <HStack
+        bgColor={"white"}
+        p={5}
+        paddingX={"3vw"}
+        borderTop={"2px solid #EAEAEA"}
       >
-        End chat
-      </Button>
+        <Button
+          colorScheme={"red"}
+          fontSize={"sm"}
+          onClick={() => {
+            if (inConvo && messages) {
+              console.log(messages);
+              onOpenFeedback();
+            } else {
+              console.log(
+                "Must be in a convo to leave one or please send at least one msg :>"
+              );
+            }
+          }}
+          isDisabled={!inConvo || (inConvo && messages.length == 0) || disableAll}
+        >
+          End chat
+        </Button>
 
-      <FeedbackSurvey
-        isOpen={isOpenFeedback}
-        onClose={onCloseFeedback}
-        conversation_id={currConvoID}
-        updateConvoID={updateConvoID}
-        updateInConvo={updateInConvo}
-        updateMessages={updateMessages}
-      />
+        <FeedbackSurvey
+          isOpen={isOpenFeedback}
+          onClose={onCloseFeedback}
+          conversation_id={currConvoID}
+          updateConvoID={updateConvoID}
+          updateInConvo={updateInConvo}
+          updateMessages={updateMessages}
+        />
 
-      <Input
-        variant={"filled"}
-        placeholder={"Enter your message here"}
-        value={text}
-        onChange={(e) => {
-          setText(e.target.value.slice(0, process.env.MAX_MESSAGE_LENGTH));
-        }}
-        isDisabled={waitingForResp}
-        onKeyDown={handleChatKeyDown}
-      />
+        <Input
+          variant={"filled"}
+          placeholder={"Enter your message here"}
+          value={text}
+          onChange={(e) => {
+            setText(e.target.value.slice(0, process.env.MAX_MESSAGE_LENGTH));
+          }}
+          isDisabled={waitingForResp || disableAll}
+          onKeyDown={handleChatKeyDown}
+        />
 
-      <Button
-        backgroundColor={"#3278cd"}
-        colorScheme={"blue"}
-        fontSize={"sm"}
-        onClick={handleSubmit}
-        isDisabled={waitingForResp}
-      >
-        Send
-      </Button>
-    </HStack>
+        <Button
+          backgroundColor={"#3278cd"}
+          colorScheme={"blue"}
+          fontSize={"sm"}
+          onClick={handleSubmit}
+          isDisabled={waitingForResp || disableAll}
+        >
+          Send
+        </Button>
+      </HStack>
+      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
+      </>
   );
 };
 

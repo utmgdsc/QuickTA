@@ -11,6 +11,8 @@ import axios from "axios";
 import CustomSpinner from "../Components/CustomSpinner";
 import NotFoundPage from "../Components/NotFoundPage";
 import AdminPage from "./AdminPage";
+import {useDisclosure} from "@chakra-ui/react";
+import ErrorDrawer from "../Components/ErrorDrawer";
 
 const App = ({ UTORid = "" }) => {
   const [courses, setCourses] = useState([]);
@@ -20,7 +22,8 @@ const App = ({ UTORid = "" }) => {
   const [courseName, setCourseName] = useState("");
   const [auth, setAuth] = useState("");
   // const [auth, setAuth] = useState("student");
-
+  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const [error, setError] = useState();
   const getUserId = async () => {
     setIsLoading(true);
     const user = await axios
@@ -35,8 +38,9 @@ const App = ({ UTORid = "" }) => {
         setIsLoading(false);
         return res.data.user_id;
       })
-      .catch((e) => {
-        console.log(e);
+      .catch((err) => {
+        setError(err);
+        onErrOpen();
         setIsLoading(false);
       });
 
@@ -81,7 +85,8 @@ const App = ({ UTORid = "" }) => {
         setIsLoading(false);
       })
       .catch((err) => {
-        console.log(err);
+        setError(err);
+        onErrOpen();
         setIsLoading(false);
       });
   };
@@ -158,6 +163,7 @@ const App = ({ UTORid = "" }) => {
 
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
     </>
   );
 };

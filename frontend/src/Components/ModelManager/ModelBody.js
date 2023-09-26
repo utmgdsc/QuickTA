@@ -6,7 +6,7 @@ import {
   Heading,
   Text,
   Flex,
-  Button,
+  Button, useDisclosure,
 } from "@chakra-ui/react";
 import ModelCreator from "./ModelCreator";
 import { useEffect, useState } from "react";
@@ -19,7 +19,8 @@ const ModelBody = ({ courseid, setLoadingModel, loadingModel }) => {
   const [currentModel, setCurrentModel] = useState("");
   const [allModels, setAllModels] = useState([{}]);
   const [processing, setProcessing] = useState(false);
-
+  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const [error, setError] = useState();
   const cardStyle = {
     backgroundColor: "white",
     boxShadow: "1px 2px 3px 1px rgba(0,0,0,0.12)",
@@ -46,7 +47,10 @@ const ModelBody = ({ courseid, setLoadingModel, loadingModel }) => {
         setAllModels(data.models);
         setLoadingModel(false);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        setError(err);
+        onErrOpen();
+      });
   };
 
   useEffect(() => {
@@ -56,6 +60,7 @@ const ModelBody = ({ courseid, setLoadingModel, loadingModel }) => {
   }, [courseid, processing, currentModel]);
 
   return (
+      <>
     <Box style={cardStyle} mt={5}>
       <Heading as="h2">
         <span style={titleStyle}>Model Information</span>
@@ -101,6 +106,7 @@ const ModelBody = ({ courseid, setLoadingModel, loadingModel }) => {
         )}
       </Flex>
     </Box>
+        </>
   );
 };
 

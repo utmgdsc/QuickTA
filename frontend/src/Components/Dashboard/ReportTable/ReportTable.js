@@ -18,8 +18,9 @@ import {
 } from "@chakra-ui/react";
 
 import axios from "axios";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import ConversationView from "./ConversationView";
+import ErrorDrawer from "../../ErrorDrawer";
 
 const ReportTable = ( { course_ID, isWeekly, setIsLoading } ) => {
   const {isOpen, onOpen, onClose} = useDisclosure();
@@ -39,7 +40,8 @@ const ReportTable = ( { course_ID, isWeekly, setIsLoading } ) => {
 
   const [reportList, changeReportList] = useState([{}]);
   const [rowIndex, setRowIndex] = useState(0);
-
+  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const [error, setError] = useState();
 
     const fetchReports = async () => {
       return await axios.post(process.env.REACT_APP_API_URL + `/researchers/reported-conversations?filter=${(isWeekly === 1 ? "Weekly" : (isWeekly === 0 ? "Monthly" : "All"))}&course_id=${course_ID}&timezone=America/Toronto`)
@@ -56,7 +58,10 @@ const ReportTable = ( { course_ID, isWeekly, setIsLoading } ) => {
           changeReportList(entries);
           setIsLoading(false);
         })
-        .catch((err) => console.log(err))
+        .catch((err) => {
+            setError(err);
+            onErrOpen();
+        })
     };
 
     useEffect(() => {
@@ -68,7 +73,7 @@ const ReportTable = ( { course_ID, isWeekly, setIsLoading } ) => {
 
     console.log(reportList, rowIndex);
     return (
-
+    <>
         <Box style={cardStyle} mt={6}>
             <Heading as='h2'><span style={titleStyle}>Reported Conversations (Detailed)</span></Heading>
             <TableContainer>
@@ -103,6 +108,8 @@ const ReportTable = ( { course_ID, isWeekly, setIsLoading } ) => {
             </TableContainer>
           {reportList.length !== 0 ? <ConversationView isOpen={isOpen} onClose={onClose} convo_id={reportList[rowIndex].conversation_id}/> : <VStack><Center>No reported Conversations!</Center></VStack>}
         </Box>
+        <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
+    </>
     );
 }
 

@@ -1,11 +1,12 @@
 import {
-    Box, 
-    Heading,
+    Box,
+    Heading, useDisclosure,
 } from "@chakra-ui/react";
 import { Temporal } from "@js-temporal/polyfill";
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import Chart from "react-apexcharts";
+import ErrorDrawer from "../../ErrorDrawer";
 
 const DatedGraph = ({isWeekly, courseID}) => {
     // console.log(isWeekly);
@@ -23,7 +24,8 @@ const DatedGraph = ({isWeekly, courseID}) => {
         fontSize: "20px",
         lineHeight: '25px'
     }
-
+    const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+    const [error, setError] = useState();
     const fetchGraphData = async () => {
         return await axios.get(process.env.REACT_APP_API_URL + `/researchers/interaction-frequency?course_id=${courseID}&filter=${(isWeekly === 1 ? "Weekly" : "Monthly")}&timezone=America/Toronto`)
         .then((res) => {
@@ -70,7 +72,10 @@ const DatedGraph = ({isWeekly, courseID}) => {
                 // console.log(date);
             }
         })
-        .catch((err) => console.log(err))
+        .catch((err) => {
+            setError(err);
+            onErrOpen();
+        })
     }
 
     useEffect(()=>{
@@ -81,6 +86,7 @@ const DatedGraph = ({isWeekly, courseID}) => {
     
 
     return (
+        <>
         <Box style={cardStyle}>
             <Heading as='h2'><span style={titleStyle}>Total Interactions</span></Heading>
             
@@ -110,6 +116,8 @@ const DatedGraph = ({isWeekly, courseID}) => {
                 }]} type="line" 
             />
         </Box>
+            <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
+        </>
     );
 }
 
