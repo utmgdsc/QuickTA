@@ -1,4 +1,13 @@
-import {Box, Button, IconButton, Avatar, useDisclosure, TabList, Tabs, Tab} from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  IconButton,
+  Avatar,
+  useDisclosure,
+  TabList,
+  Tabs,
+  Tab,
+} from "@chakra-ui/react";
 import ChatBoxTopNav from "./ChatBoxTopNav";
 import ChatBox from "./ChatBox";
 import ChatBoxFooter from "./ChatBoxFooter";
@@ -7,11 +16,8 @@ import CourseSelect from "../CourseSelect";
 import ModelSelect from "../ModelSelect";
 import { CloseIcon, HamburgerIcon, SmallAddIcon } from "@chakra-ui/icons";
 import axios from "axios";
-<<<<<<< HEAD
 import "../../assets/styles.css";
-=======
 import ErrorDrawer from "../ErrorDrawer";
->>>>>>> a85f9932d0bccd33fca824482be85cce0044a9b0
 
 const Chat = ({
   currCourse,
@@ -22,14 +28,18 @@ const Chat = ({
   setCurrModel,
   userId,
   waitingForResp,
-  setWaitForResp
+  setWaitForResp,
 }) => {
   const [messages, updateMessages] = useState([]);
   const [inConvo, updateInConvo] = useState(false);
   const [currConvoID, updateConvoID] = useState("");
   const [openConvoHistory, setOpenConvoHistory] = useState(false);
   const [conversations, setConversations] = useState([]);
-  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const {
+    isOpen: isErrOpen,
+    onOpen: onErrOpen,
+    onClose: onErrClose,
+  } = useDisclosure();
   const [error, setError] = useState();
   const [pastConvoID, updatePastID] = useState("");
   const [disableAll, setDisableAll] = useState(false);
@@ -45,7 +55,7 @@ const Chat = ({
         let data = res.data;
         if (data.conversations) setConversations(data.conversations);
       })
-      .catch((err) =>{
+      .catch((err) => {
         setError(err);
         onErrOpen();
       });
@@ -219,11 +229,11 @@ const Chat = ({
                       }}
                       onClick={() => {
                         // click same convo again to clear chat of past conversation
-                        if(convo.conversation_id == pastConvoID){
+                        if (convo.conversation_id == pastConvoID) {
                           updatePastID("");
                           setDisableAll(false);
                           getConversationMessages(currConvoID);
-                        }else{
+                        } else {
                           updatePastID(convo.conversation_id);
                           getConversationMessages(pastConvoID);
                           setDisableAll(true);
@@ -304,7 +314,7 @@ const Chat = ({
           </Box>
         </Box>
       </Box>
-      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
+      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </>
   );
 };
