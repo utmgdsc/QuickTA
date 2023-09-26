@@ -10,6 +10,7 @@ openai.api_key = env('OPENAI_KEY')
 
 def completion(conversation, settings, chatlog):
 
+    conversation_name = conversation.conversation_name
     model = settings['model'] if settings['model'] else "gpt-4"
     prompt = settings['prompt']
     max_tokens = settings['max_tokens']
@@ -25,11 +26,10 @@ def completion(conversation, settings, chatlog):
             {"role": "system", "content": f"{prompt}"},
             {"role": "user", "content": f"{chatlog}"},
         ]
+        conversation_name = get_conversation_name(chatlog)
     else:
         messages = conversation.conversation_log
         messages.append({"role": "user", "content": f"{chatlog}"})
-
-    print(messages)
 
     # Acquire GPT-4 response
     response = openai.ChatCompletion.create(
@@ -46,7 +46,7 @@ def completion(conversation, settings, chatlog):
     # Post response processing
     agent_response = response['choices'][0]['message']['content']
     messages.append({"role": "assistant", "content": f"{agent_response}"})
-    Conversation.objects.filter(conversation_id=conversation.conversation_id).update(conversation_log=messages)
+    Conversation.objects.filter(conversation_id=conversation.conversation_id).update(conversation_log=messages, conversation_name=conversation_name)
     gpt_response = GPTResponse(
         conversation_id=str(conversation.conversation_id),
         model_id=conversation.model_id,
@@ -59,11 +59,27 @@ def completion(conversation, settings, chatlog):
     )
     gpt_response.save()
 
-    return agent_response
+    return agent_response, conversation_name
+
+def get_conversation_name(chatlog):
+    response = openai.Completion.create(
+        model="gpt-3.5-turbo-instruct",
+        prompt="Label this conversation with a name that is less than 6 words: \n\nChatlog: " + chatlog + "\n\nConversation name:",
+        temperature=1,
+        top_p=0,
+        max_tokens=8,
+        n=1,
+        frequency_penalty=0,
+        presence_penalty=0.6,  
+    )
+    conversation_name = response['choices'][0]['text'].strip().replace("'", "").replace('"', '')
+    return conversation_name
+
+    
 
 def get_response(conversation, settings, chatlog):
-    response = completion(conversation, settings, chatlog)
+    response, conversation_name = completion(conversation, settings, chatlog)
     # if not settings['stream']: 
     # else: response = "[Placeholder] Hello World"
     if not response: response = "Sorry for the invconvenience. Currently having difficulties. Please try again later."
-    return response
+    return response, conversation_name

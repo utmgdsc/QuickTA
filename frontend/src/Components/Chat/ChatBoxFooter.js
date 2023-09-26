@@ -25,6 +25,8 @@ const ChatBoxFooter = ({
   userId,
   model_ID,
   disableAll,
+  conversations,
+  setConversations,
 }) => {
   const {
     isOpen: isOpenFeedback,
@@ -40,7 +42,7 @@ const ChatBoxFooter = ({
   const {
     isOpen: isErrOpen,
     onOpen: onErrOpen,
-    onClose: onErrClose
+    onClose: onErrClose,
   } = useDisclosure();
   const [error, setError] = useState();
   const [sliderVal, setSliderVal] = useState(0);
@@ -78,6 +80,17 @@ const ChatBoxFooter = ({
         updateMessages((oldMessage) => [...oldMessage, agentResponse]);
         setWaitForResp(false);
         setText("");
+
+        // Update conversation name
+        let new_convo = conversations[0];
+        new_convo = {
+          ...new_convo,
+          conversation_name: response.data.conversation_name,
+        };
+        console.log("old", conversations);
+        let new_conversations = [new_convo, ...conversations.slice(1)];
+        console.log(new_conversations);
+        setConversations(new_conversations);
       })
       .catch((err) => {
         setError(err);
@@ -104,10 +117,13 @@ const ChatBoxFooter = ({
             model_id: model_ID,
           })
           .then(async (res) => {
-            updateConvoID(res.data.conversation_id);
+            let data = res.data;
+            updateConvoID(data.conversation_id);
             updateInConvo(true);
             setWaitForResp(true);
             setText("");
+            data["conversation_name"] = ".....";
+            setConversations([res.data, ...conversations]);
             let conversation_id = res.data.conversation_id;
             let chatlog = text;
             await getResponse(conversation_id, chatlog);
@@ -121,7 +137,7 @@ const ChatBoxFooter = ({
   };
 
   return (
-      <>
+    <>
       <HStack
         bgColor={"white"}
         p={5}
@@ -141,7 +157,9 @@ const ChatBoxFooter = ({
               );
             }
           }}
-          isDisabled={!inConvo || (inConvo && messages.length == 0) || disableAll}
+          isDisabled={
+            !inConvo || (inConvo && messages.length == 0) || disableAll
+          }
         >
           End chat
         </Button>
@@ -176,8 +194,8 @@ const ChatBoxFooter = ({
           Send
         </Button>
       </HStack>
-      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
-      </>
+      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
+    </>
   );
 };
 

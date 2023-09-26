@@ -51,7 +51,11 @@ const ModelCard = ({
     presence_pen: 0.0,
     freq_pen: 0.0,
   });
-  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const {
+    isOpen: isErrOpen,
+    onOpen: onErrOpen,
+    onClose: onErrClose,
+  } = useDisclosure();
   const [error, setError] = useState();
   function updateField(e) {
     setModelSettings({
@@ -290,7 +294,7 @@ const ModelCard = ({
           </ModalFooter>
         </ModalContent>
       </Modal>
-      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
+      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </>
   );
 };

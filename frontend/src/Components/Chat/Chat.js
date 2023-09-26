@@ -242,7 +242,11 @@ const Chat = ({
                       }}
                     >
                       <Avatar
-                        name={convo.conversation_id}
+                        name={
+                          convo.conversation_name
+                            ? convo.conversation_name
+                            : "C " + index
+                        }
                         backgroundColor="#7CA2DE"
                         style={{
                           width: "40px",
@@ -310,6 +314,8 @@ const Chat = ({
               waitingForResp={waitingForResp}
               setWaitForResp={setWaitForResp}
               disableAll={disableAll}
+              conversations={conversations}
+              setConversations={setConversations}
             />
           </Box>
         </Box>

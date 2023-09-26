@@ -8,7 +8,6 @@ class GPTModelSerializer(ModelSerializer):
         fields = [
             'model_id',
             'model_name',
-            'course_id',
             'status',
             'model',
             'prompt',
