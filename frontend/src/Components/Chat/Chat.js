@@ -228,17 +228,8 @@ const Chat = ({
                         width: "100%",
                       }}
                       onClick={() => {
-                        // click same convo again to clear chat of past conversation
-                        if (convo.conversation_id == pastConvoID) {
-                          updatePastID("");
-                          setDisableAll(false);
-                          getConversationMessages(currConvoID);
-                        } else {
-                          updatePastID(convo.conversation_id);
-                          getConversationMessages(pastConvoID);
-                          setDisableAll(true);
-                        }
-                        // updateInConvo(true);
+                        getConversationMessages(convo.conversation_id);
+                        setDisableAll(true);
                       }}
                     >
                       <Avatar
@@ -270,7 +261,7 @@ const Chat = ({
                         >
                           {convo.conversation_name
                             ? convo.conversation_name
-                            : `Conversation123143 ${index + 1}`}
+                            : `Conversation ${index + 1}`}
                         </span>
                       )}
                     </Box>

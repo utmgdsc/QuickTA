@@ -56,7 +56,7 @@ const ChatBoxFooter = ({
     }
   };
 
-  const getResponse = async (conversation_id, response) => {
+  const getResponse = async (conversation_id, response, currConversations) => {
     // Load user message on click
     const now = Temporal.Now.zonedDateTimeISO().toString();
     const userText = {
@@ -82,14 +82,13 @@ const ChatBoxFooter = ({
         setText("");
 
         // Update conversation name
-        let new_convo = conversations[0];
+        let new_convo = currConversations[0];
         new_convo = {
           ...new_convo,
           conversation_name: response.data.conversation_name,
         };
-        console.log("old", conversations);
-        let new_conversations = [new_convo, ...conversations.slice(1)];
-        console.log(new_conversations);
+
+        let new_conversations = [new_convo, ...currConversations.slice(1)];
         setConversations(new_conversations);
       })
       .catch((err) => {
@@ -122,11 +121,14 @@ const ChatBoxFooter = ({
             updateInConvo(true);
             setWaitForResp(true);
             setText("");
-            data["conversation_name"] = ".....";
-            setConversations([res.data, ...conversations]);
+
+            data["conversation_name"] = "New Conversation";
+            let currConversations = [res.data, ...conversations];
+            setConversations(currConversations);
+
             let conversation_id = res.data.conversation_id;
             let chatlog = text;
-            await getResponse(conversation_id, chatlog);
+            await getResponse(conversation_id, chatlog, currConversations);
           })
           .catch((err) => {
             setError(err);

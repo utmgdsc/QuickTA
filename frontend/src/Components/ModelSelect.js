@@ -1,7 +1,6 @@
 import { Select, Box } from "@chakra-ui/react";
 
 const ModelSelect = ({ models, setCurrModel, inConvo, currModel }) => {
-  console.log("models", models);
   return (
     <Box w="150px">
       <Select
