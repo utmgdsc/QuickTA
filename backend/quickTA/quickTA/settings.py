@@ -114,7 +114,7 @@ DATABASES = {
         'ENFORCE_SCHEMA': False,
         'CLIENT': {
             # 'host': 'mongodb+srv://admin:cEWQJjkyDAracCLY@quickta.dmbx3ix.mongodb.net/?retryWrites=true&w=majority'
-            'host': 'mongodb+srv://admin:Xtew2UVZQbexVsYw@quickta.jypfcah.mongodb.net/?retryWrites=true&w=majority'
+            'host': env('MONGODB')
             # 'host': 'mongodb://127.0.0.1:27017'
         },
         'OPTIONS': {
