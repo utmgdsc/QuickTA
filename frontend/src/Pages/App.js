@@ -14,13 +14,14 @@ import AdminPage from "./AdminPage";
 import {useDisclosure} from "@chakra-ui/react";
 import ErrorDrawer from "../Components/ErrorDrawer";
 
-const App = ({ UTORid = "" }) => {
+const App = () => {
   const [courses, setCourses] = useState([]);
   const [currCourse, setCurrCourse] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setuserId] = useState("");
   const [courseName, setCourseName] = useState("");
   const [auth, setAuth] = useState("");
+  const [UTORid, setUtorID] = useState("");
   // const [auth, setAuth] = useState("student");
   const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
   const [error, setError] = useState();
@@ -32,6 +33,7 @@ const App = ({ UTORid = "" }) => {
         // User authentication
         let data = res.data;
         setuserId(data.user_id);
+        setUtorID(data.utorid)
         let courses = await getAllCourses(data.courses);
         setAuth(res.data.user_role);
 
