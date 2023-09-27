@@ -47,7 +47,11 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
     }
     let x = currAvg * data.length;
     x -= data[data.length - 1];
-    return Math.round((currAvg - x / (data.length - 1)) * 100) / 100;
+    if(data.length === 1){
+      return Math.round((currAvg - x / (1)) * 100) / 100;
+    }else{
+      return Math.round((currAvg - x / (data.length - 1)) * 100) / 100;
+    }
   }
 
   const fetchData = async (endpoint) => {
@@ -62,10 +66,10 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
         )
         .then((res) => {
           setAvgRating({
-            avgRating: Math.round(res.data.avg_ratings * 100) / 100,
+            avgRating: Math.round(res.data.avg_rating * 100) / 100,
             avgRatingDelta: computePrevAvg(
               res.data.all_ratings,
-              res.data.avg_ratings
+              res.data.avg_rating
             ),
           });
         })

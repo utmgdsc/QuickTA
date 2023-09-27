@@ -5,7 +5,7 @@ import {
     Divider,
     useDisclosure,
     Input,
-    Box, Heading, Stack, HStack, NumberInputField, NumberInput
+    Box, Heading, Stack, HStack, NumberInputField, NumberInput, Textarea, Select
 } from "@chakra-ui/react"
 import {useState} from "react";
 import axios from "axios";
@@ -17,6 +17,7 @@ const ModelCreator = ({creating, setCreating, courseid}) => {
         name: "",
         model: "",
         prompt: "",
+        temperature: 0,
         maxTokens: 0,
         topP: 0.0,
         presence_pen: 0.0,
@@ -45,19 +46,21 @@ const ModelCreator = ({creating, setCreating, courseid}) => {
         })
     }
 
-
     function isValid(obj){
         for(const [key, value] of Object.entries(obj)){
             if (["name", "model", "prompt"].includes(key)) {
                 if (value.length <= 0) {
+                    console.log(`Invalid length for ${key}`)
                     return false;
                 }
             }else if(key === "maxTokens") {
                 if (isNaN(value) || value < 0) {
+                    console.log('Invalid maxTokens')
                     return false
                 }
             }else {
                 if (isNaN(value)) {
+                    console.log("One of the values is NaN")
                     return false
                 }
             }
@@ -71,6 +74,7 @@ const ModelCreator = ({creating, setCreating, courseid}) => {
             model_name: newModel.name,
             model: newModel.model,
             prompt: newModel.prompt,
+            temperature: newModel.temperature,
             max_tokens: newModel.maxTokens,
             top_p: newModel.topP,
             presence_penalty: newModel.presence_pen,
@@ -101,15 +105,33 @@ const ModelCreator = ({creating, setCreating, courseid}) => {
                                      value={newModel.name} name={"name"}/>
 
                               <FormLabel>Model</FormLabel>
-                              <Input onChange={updateField}
-                                     value={newModel.model} name={"model"}/>
+                              {/*<Input onChange={updateField}*/}
+                              {/*       value={newModel.model} name={"model"}/>*/}
+                              <Select
+                                  onChange={updateField}
+                                  name={"model"}
+                                  placeholder={"Please select an option"}
+                              >
+                                  {['gpt-4', 'gpt-3.5-turbo', 'gpt-3.5-turbo-16k'].map((model, index) => (
+                                      <option key={index} value={model}>{model}</option>
+                                  ))}
+                              </Select>
 
                               <FormLabel>Prompt</FormLabel>
-                              <Input onChange={updateField}
-                                     value={newModel.prompt} name={"prompt"}/>
+                              <Textarea
+                                  onChange={updateField}
+                                  value={newModel.prompt}
+                                  name={"prompt"}
+                                  style={{ minHeight: "320px" }}
+                              />
                           </FormControl>
 
                           <FormControl id={"Optional Parameters"}>
+                              <FormLabel>Temperature</FormLabel>
+                              <NumberInput>
+                                  <NumberInputField onChange={updateInt} name={"temperature"} value={newModel.temperature}/>
+                              </NumberInput>
+
                               <FormLabel>Max Tokens</FormLabel>
                               <NumberInput>
                                   <NumberInputField onChange={updateInt} name={"maxTokens"} value={newModel.maxTokens}/>
@@ -143,11 +165,14 @@ const ModelCreator = ({creating, setCreating, courseid}) => {
                                       name: "",
                                       model: "",
                                       prompt: "",
+                                      temperature: 0,
                                       maxTokens: 0,
                                       topP: 0.0,
                                       presence_pen: 0.0,
                                       freq_pen: 0.0
                                   });
+                              }else{
+                                  console.log("Invalid Model!");
                               }
                           }}>
                               Create Model
@@ -158,6 +183,7 @@ const ModelCreator = ({creating, setCreating, courseid}) => {
                                   name: "",
                                   model: "",
                                   prompt: "",
+                                  temperature: 0,
                                   maxTokens: 0,
                                   topP: 0.0,
                                   presence_pen: 0.0,

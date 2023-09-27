@@ -57,16 +57,16 @@ const ResearcherModels = ({
           setLoadingModel={setLoadingModel}
           loadingModel={loadingModel}
         />
-        <Link to={"/ResearcherFilters"}>
-          <Button my={5} mx={2} colorScheme={"blue"}>
-            Redirect to Filters
-          </Button>
-        </Link>
-        <Link to={"/ResearcherAnalytics"}>
-          <Button my={5} mx={2} colorScheme={"blue"}>
-            Redirect to Analytics
-          </Button>
-        </Link>
+        {/*<Link to={"/ResearcherFilters"}>*/}
+        {/*  <Button my={5} mx={2} colorScheme={"blue"}>*/}
+        {/*    Redirect to Filters*/}
+        {/*  </Button>*/}
+        {/*</Link>*/}
+        {/*<Link to={"/ResearcherAnalytics"}>*/}
+        {/*  <Button my={5} mx={2} colorScheme={"blue"}>*/}
+        {/*    Redirect to Analytics*/}
+        {/*  </Button>*/}
+        {/*</Link>*/}
       </Box>
     </div>
   );
