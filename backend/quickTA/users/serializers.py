@@ -23,7 +23,9 @@ class UserSerializer(ModelSerializer):
             'name',
             'utorid',
             'user_role',
-            'courses'
+            'courses',
+            'model_id',
+            'new_user'
         ]
     
     def get_courses(self, obj): return [str(course) for course in obj.courses]
@@ -38,7 +40,9 @@ class UserBatchAddSerializer(ModelSerializer):
             'name',
             'utorid',
             'user_role',
-            'courses'
+            'courses',
+            'model_id',
+            'new_user'
         ]
 
     def __init__(self, *args, **kwargs):
