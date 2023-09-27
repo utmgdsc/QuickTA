@@ -14,7 +14,7 @@ import AdminPage from "./AdminPage";
 import { useDisclosure } from "@chakra-ui/react";
 import ErrorDrawer from "../Components/ErrorDrawer";
 
-const App = ({ UTORid = "" }) => {
+const App = () => {
   const [courses, setCourses] = useState([]);
   const [currCourse, setCurrCourse] = useState({});
   const [isLoading, setIsLoading] = useState(true);
@@ -22,6 +22,7 @@ const App = ({ UTORid = "" }) => {
   const [model_id, setModelId] = useState("");
   const [courseName, setCourseName] = useState("");
   const [auth, setAuth] = useState("");
+  const [UTORid, setUtorID] = useState("choiman3");
   // const [auth, setAuth] = useState("student");
   const {
     isOpen: isErrOpen,
@@ -37,6 +38,7 @@ const App = ({ UTORid = "" }) => {
         // User authentication
         let data = res.data;
         setuserId(data.user_id);
+        setUtorID(data.utorid);
         let courses = await getAllCourses(data.courses);
         setAuth(res.data.user_role);
         if('model_id' in data){

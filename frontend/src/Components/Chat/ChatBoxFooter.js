@@ -82,17 +82,20 @@ const ChatBoxFooter = ({
         setWaitForResp(false);
         setText("");
 
-        // Update conversation name
-        let new_convo = currConversations[0];
-        new_convo = {
-          ...new_convo,
-          conversation_name: response.data.conversation_name,
-        };
+        // Update conversation name for new conversations
+        if (currConversations) {
+          let new_convo = currConversations[0];
+          new_convo = {
+            ...new_convo,
+            conversation_name: response.data.conversation_name,
+          };
 
-        let new_conversations = [new_convo, ...currConversations.slice(1)];
-        setConversations(new_conversations);
+          let new_conversations = [new_convo, ...currConversations.slice(1)];
+          setConversations(new_conversations);
+        }
       })
       .catch((err) => {
+        console.log(err);
         setError(err);
         onErrOpen();
       });
@@ -132,6 +135,7 @@ const ChatBoxFooter = ({
             await getResponse(conversation_id, chatlog, currConversations);
           })
           .catch((err) => {
+            console.log(err);
             setError(err);
             onErrOpen();
           });
