@@ -73,6 +73,7 @@ const ReportTable = ({ course_ID, isWeekly, setIsLoading }) => {
         setIsLoading(false);
       })
       .catch((err) => {
+        setIsLoading(false);
         setError(err);
         onErrOpen();
       });
