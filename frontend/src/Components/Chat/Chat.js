@@ -29,6 +29,7 @@ const Chat = ({
   userId,
   waitingForResp,
   setWaitForResp,
+  model_id,
 }) => {
   const [messages, updateMessages] = useState([]);
   const [inConvo, updateInConvo] = useState(false);
@@ -95,7 +96,7 @@ const Chat = ({
       .post(process.env.REACT_APP_API_URL + "/student/conversation", {
         user_id: userId,
         course_id: currCourse.course_id,
-        model_id: currModel.model_id,
+        model_id: model_id.length === 0 ?  currModel.model_id : model_id,
       })
       .then(async (res) => {
         updateConvoID(res.data.conversation_id);
@@ -124,6 +125,7 @@ const Chat = ({
 
             <ModelSelect
               models={models}
+              model={model_id}
               currModel={currModel}
               setCurrModel={setCurrModel}
               inConvo={inConvo}
@@ -299,6 +301,7 @@ const Chat = ({
               updateInConvo={updateInConvo}
               currConvoID={currConvoID}
               updateConvoID={updateConvoID}
+              model_id={model_id}
               course_ID={currCourse.course_id}
               model_ID={currModel.model_id}
               messages={messages}

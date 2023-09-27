@@ -25,12 +25,15 @@ const StudentPage = ({
   auth,
   modelNum = null,
   userId,
+  model_id,
 }) => {
   const [models, setModels] = useState([]);
   const [currModel, setCurrModel] = useState({});
   const [waitingForResp, setWaitForResp] = useState(false);
   const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
   const [error, setError] = useState();
+
+  // Only called on users other than students
   const getModels = async (course) => {
     let params = "course_id=" + course.course_id;
     axios
@@ -59,7 +62,7 @@ const StudentPage = ({
   };
 
   useEffect(() => {
-    if (courses) {
+    if (courses && (!["ST"].includes(auth))) {
       getModels(currCourse);
     }
   }, [currCourse]);
@@ -87,6 +90,7 @@ const StudentPage = ({
           semester={semester}
           courses={courses}
           models={models}
+          model_id={model_id}
           waitingForResp={waitingForResp}
           setWaitForResp={setWaitForResp}
           style={{ position: "relative" }}

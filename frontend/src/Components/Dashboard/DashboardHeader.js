@@ -22,16 +22,16 @@ const DashboardHeader = ({courseCode, courseName, currCourse, courses, setCurrCo
                 <CourseSelect currCourse={currCourse} courses={courses} setCurrCourse={setCurrCourse} courseName={courseName} inConvo={false}/>
                 <HStack spacing={3}>
                   <Link to={"/"}>
-                    <Button colorScheme={"blue"} style={{backgroundColor: '#2C54A7', color: 'white'}}>To Models Page</Button>
+                    {/* <Button colorScheme={"blue"} style={{backgroundColor: '#2C54A7', color: 'white'}}>To Models Page</Button> */}
                   </Link>
                   <Link to={"/ResearcherFilters"}>
-                    <Button colorScheme={"blue"} style={{backgroundColor: '#2C54A7', color: 'white'}}>To Filters Page</Button>
+                    {/* <Button colorScheme={"blue"} style={{backgroundColor: '#2C54A7', color: 'white'}}>To Filters Page</Button> */}
                   </Link>
                 </HStack>
                 <Spacer/>
                 {/* <Button>{{currCourse}}</Button> */}
-                <UploadCourseList courseID={currCourse.course_id} />
-                <CourseCreator userid={userid} setCourses={setCourses} setCurrCourse={setCurrCourse} setIsLoading={setIsLoading}/>
+                {/* <UploadCourseList courseID={currCourse.course_id} /> */}
+                {/* <CourseCreator userid={userid} setCourses={setCourses} setCurrCourse={setCurrCourse} setIsLoading={setIsLoading}/> */}
             </HStack>
             <Heading as='h1' size="lg" color='#2C54A7' lineHeight='0.9' mt={5}>{courseCode}: {courseName}</Heading>
             <Text size='lg'>Admin Dashboard</Text>

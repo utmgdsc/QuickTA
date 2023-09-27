@@ -19,6 +19,7 @@ const App = ({ UTORid = "" }) => {
   const [currCourse, setCurrCourse] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setuserId] = useState("");
+  const [model_id, setModelId] = useState("");
   const [courseName, setCourseName] = useState("");
   const [auth, setAuth] = useState("");
   // const [auth, setAuth] = useState("student");
@@ -38,7 +39,9 @@ const App = ({ UTORid = "" }) => {
         setuserId(data.user_id);
         let courses = await getAllCourses(data.courses);
         setAuth(res.data.user_role);
-
+        if('model_id' in data){
+          setModelId(data.model_id);
+        }
         setIsLoading(false);
         return res.data.user_id;
       })

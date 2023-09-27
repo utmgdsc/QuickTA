@@ -1,9 +1,14 @@
 import { Select, Box } from "@chakra-ui/react";
 
-const ModelSelect = ({ models, setCurrModel, inConvo, currModel }) => {
+const ModelSelect = ({ models, setCurrModel, inConvo, currModel, model_id }) => {
   return (
     <Box w="150px">
-      <Select
+      {model_id ? <Select placeholder={model_id}
+        borderColor="white"
+        bg="white"
+        boxShadow="1px 2px 3px 1px rgba(0,0,0,0.12)"
+        mb={5}/> : 
+        <Select
         borderColor="white"
         bg="white"
         boxShadow="1px 2px 3px 1px rgba(0,0,0,0.12)"
@@ -26,7 +31,7 @@ const ModelSelect = ({ models, setCurrModel, inConvo, currModel }) => {
             {model_name}
           </option>
         ))}
-      </Select>
+      </Select>}
     </Box>
   );
 };
