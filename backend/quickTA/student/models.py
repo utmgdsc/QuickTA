@@ -114,7 +114,7 @@ class Report(models.Model):
 class Feedback(models.Model):
     conversation_id = models.CharField(max_length=100)
     rating = models.FloatField()
-    feedback_msg = models.TextField(max_length=1000)
+    feedback_msg = models.TextField(max_length=1000, blank=True, null=True)
 
     def __str__(self):
         return f"[{str(self.conversation)}] Feedback"
