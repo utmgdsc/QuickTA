@@ -54,14 +54,9 @@ const TopNav = ({ UTORid, auth }) => {
             Analytics
           </NavLink>
         )}
-        {["IS", "AM", "RS"].includes(auth) && (
+        {["AM", "RS"].includes(auth) && (
           <NavLink to="/models" activeClassName="active-link">
             Models
-          </NavLink>
-        )}
-        {["IS", "AM", "RS"].includes(auth) && (
-          <NavLink to="/filter" activeClassName="active-link">
-            Filter
           </NavLink>
         )}
         {auth === "AM" && (

@@ -19,6 +19,7 @@ frontend/.env.test.local
 frontend/.env.production.local
 .idea/*
 
+
 frontend/npm-debug.log*
 frontend/yarn-debug.log*
 frontend/yarn-error.log*

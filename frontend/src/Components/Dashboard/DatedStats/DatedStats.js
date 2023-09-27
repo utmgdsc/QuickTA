@@ -1,4 +1,11 @@
-import {VStack, Flex, Spacer, Button, Tooltip, useDisclosure} from "@chakra-ui/react";
+import {
+  VStack,
+  Flex,
+  Spacer,
+  Button,
+  Tooltip,
+  useDisclosure,
+} from "@chakra-ui/react";
 import StatCard from "./StatCard";
 import DatedGraph from "./DatedGraph";
 import React, { useEffect } from "react";
@@ -26,7 +33,11 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
 
   // Fetch file loader for headers
   const fileDownload = require("js-file-download");
-  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const {
+    isOpen: isErrOpen,
+    onOpen: onErrOpen,
+    onClose: onErrClose,
+  } = useDisclosure();
   const [error, setError] = useState();
   function computePrevAvg(data, currAvg) {
     // we need to look at avg of indices 0, .. , data-2
@@ -169,7 +180,7 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
     if (courseID) {
       setIsLoading(true);
       fetchData("/researchers/average-ratings");
-      fetchData("/researchers/avg-comfortability");
+      // fetchData("/researchers/avg-comfortability");
       fetchData("/researchers/avg-response-rate");
       fetchData("/researchers/reported-conversations");
       fetchData("/researchers/most-common-words");
@@ -255,40 +266,6 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
                 axios
                   .get(
                     process.env.REACT_APP_API_URL +
-                      `/researchers/avg-comfortability-csv?filter=${
-                        isWeekly === 1
-                          ? "Weekly"
-                          : isWeekly === 0
-                          ? "Monthly"
-                          : "All"
-                      }&course_id=${courseID}&timezone=America/Toronto`
-                  )
-                  .then((response) => {
-                    if (response.headers["content-disposition"]) {
-                      fileDownload(
-                        response.data,
-                        response.headers["content-disposition"].split('"')[1]
-                      );
-                    }
-                  })
-                  .catch((err) => {
-                    setError(err);
-                    onErrOpen();
-                  });
-              }
-            }}
-            title={"Average Course Comfortability Rating"}
-            num={avgComfort.avgComfort}
-            delta={avgComfort.avgComfortDelta}
-            unit={"☆"}
-          />
-
-          <StatCard
-            callBack={() => {
-              if (courseID && isWeekly != null) {
-                axios
-                  .get(
-                    process.env.REACT_APP_API_URL +
                       `/researchers/reported-conversations-csv?filter=${
                         isWeekly === 1
                           ? "Weekly"
@@ -360,7 +337,7 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
         }}
         m={4}
       />
-      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
+      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </>
   );
 };

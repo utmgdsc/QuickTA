@@ -96,6 +96,7 @@ const ModelCard = ({
           top_p: newModelSettings.topP,
           presence_penalty: newModelSettings.presence_pen,
           frequency_penalty: newModelSettings.freq_pen,
+          temperature: newModelSettings.temperature,
         }
       )
       .then((res) => {
@@ -137,6 +138,7 @@ const ModelCard = ({
           topP: model_settings.top_p,
           presence_pen: model_settings.presence_penalty,
           freq_pen: model_settings.frequency_penalty,
+          temperature: model_settings.temperature,
         });
         console.log(res.data.max_tokens);
       })
@@ -247,6 +249,13 @@ const ModelCard = ({
                   onChange={updateField}
                   value={newModelSettings.freq_pen}
                   name={"freq_pen"}
+                />
+
+                <FormLabel>Temperature</FormLabel>
+                <Input
+                  onChange={updateField}
+                  value={newModelSettings.temperature}
+                  name={"temperature"}
                 />
               </FormControl>
             </Stack>

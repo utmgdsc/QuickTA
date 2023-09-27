@@ -454,6 +454,8 @@ class CourseMultipleEnrollment(APIView):
             user_id = student.get('user_id', '')
             utorid = student.get('utorid', '')
 
+            print("Adding " + utorid + "...")
+
             if user_id: user = get_object_or_404(User, user_id=user_id)
             else: user = get_object_or_404(User, utorid=utorid)
 
