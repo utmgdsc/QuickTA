@@ -93,3 +93,46 @@
   color: white !important;
   border-radius: 5% !important;
 }
+
+@media (min-width: 640px) {
+  .conversation-history-bar {
+    width: 100% !important;
+  }
+
+  .full-width {
+    width: 100% !important;
+  }
+  .hamburger-icon {
+    display: none; /* Hide hamburger icon */
+  }
+  .top-nav-buttons {
+    display: hidden !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .hidden {
+    display: none !important;
+  }
+
+  .full-width {
+    width: 100% !important;
+  }
+
+  .conversation-history-bar-full-height {
+    height: 70vh !important;
+  }
+  .chatbox-topnav-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
+  }
+  .top-nav-buttons-text {
+    display: none !important;
+  }
+  .top-nav-button {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+}

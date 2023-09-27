@@ -9,6 +9,6 @@ def get_response(conversation: Conversation, model: GPTModel, chatlog) -> Dict:
     response = ""
     
     if model_settings['model'] in ['gpt-4', 'gpt-3.5-turbo']:
-        response = gpt4.get_response(conversation, model_settings, chatlog)
+        response, conversation_name = gpt4.get_response(conversation, model_settings, chatlog)
     
-    return response
+    return response, conversation_name

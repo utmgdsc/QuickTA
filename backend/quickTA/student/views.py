@@ -185,13 +185,13 @@ class ChatlogView(APIView):
         # course = get_object_or_404(Course, course_id=conversation.course_id)
         # model_response = model.get_response(conversation_id, course.course_id, chatlog)
         # model_response = "Hello world"
-        model_response = model_functions.get_response(conversation, model, chatlog)
+        model_response, conversation_name = model_functions.get_response(conversation, model, chatlog)
         model_time = timezone.now()
         model_chatlog = self.create_chatlog(conversation.conversation_id, model_response, False, model_time, None)
 
         model_time = model_time.astimezone(pytz.timezone(location)).isoformat() + "[" + location + "]"
         user_time = current_time.astimezone(pytz.timezone(location)).isoformat() + "[" + location + "]"
-        response = self.get_chatlog_response(user_chatlog, model_chatlog, user_time, model_time)
+        response = self.get_chatlog_response(user_chatlog, model_chatlog, user_time, model_time, conversation_name)
 
         return JsonResponse(response, status=status.HTTP_201_CREATED)
     
@@ -225,10 +225,11 @@ class ChatlogView(APIView):
         chatlog.save()
         return chatlog
     
-    def get_chatlog_response(self, user_chatlog, model_chatlog, user_time, model_time):
+    def get_chatlog_response(self, user_chatlog, model_chatlog, user_time, model_time, conversation_name):
         user_chatlog = user_chatlog.to_dict()
         model_chatlog = model_chatlog.to_dict()
         return {
+            "conversation_name": conversation_name,
             "agent": {
                 **model_chatlog,
                 "time": model_time

@@ -1,12 +1,22 @@
-import {Box, Button, IconButton, Avatar, useDisclosure, TabList, Tabs, Tab} from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  IconButton,
+  Avatar,
+  useDisclosure,
+  TabList,
+  Tabs,
+  Tab,
+} from "@chakra-ui/react";
 import ChatBoxTopNav from "./ChatBoxTopNav";
 import ChatBox from "./ChatBox";
 import ChatBoxFooter from "./ChatBoxFooter";
 import { useState, useEffect } from "react";
 import CourseSelect from "../CourseSelect";
 import ModelSelect from "../ModelSelect";
-import { HamburgerIcon, SmallAddIcon } from "@chakra-ui/icons";
+import { CloseIcon, HamburgerIcon, SmallAddIcon } from "@chakra-ui/icons";
 import axios from "axios";
+import "../../assets/styles.css";
 import ErrorDrawer from "../ErrorDrawer";
 
 const Chat = ({
@@ -18,14 +28,18 @@ const Chat = ({
   setCurrModel,
   userId,
   waitingForResp,
-  setWaitForResp
+  setWaitForResp,
 }) => {
   const [messages, updateMessages] = useState([]);
   const [inConvo, updateInConvo] = useState(false);
   const [currConvoID, updateConvoID] = useState("");
   const [openConvoHistory, setOpenConvoHistory] = useState(false);
   const [conversations, setConversations] = useState([]);
-  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const {
+    isOpen: isErrOpen,
+    onOpen: onErrOpen,
+    onClose: onErrClose,
+  } = useDisclosure();
   const [error, setError] = useState();
   const [pastConvoID, updatePastID] = useState("");
   const [disableAll, setDisableAll] = useState(false);
@@ -41,7 +55,7 @@ const Chat = ({
         let data = res.data;
         if (data.conversations) setConversations(data.conversations);
       })
-      .catch((err) =>{
+      .catch((err) => {
         setError(err);
         onErrOpen();
       });
@@ -98,7 +112,7 @@ const Chat = ({
 
   return (
     <>
-      <Box ml={"12vw"} mr={"12vw"}>
+      <Box ml={"10vw"} mr={"10vw"}>
         <div style={{ width: "315px" }}>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <CourseSelect
@@ -130,6 +144,12 @@ const Chat = ({
           }}
         >
           <Box
+            className={
+              `conversation-history-bar` +
+              (openConvoHistory
+                ? " full-width conversation-history-bar-full-height"
+                : " hidden")
+            }
             style={{
               width: openConvoHistory ? "20%" : "70px",
               height: "100%",
@@ -140,7 +160,6 @@ const Chat = ({
               style={{
                 display: "flex",
                 width: "100%",
-                justifyContent: "space-between",
                 padding: "20px 16px",
                 borderBottom: "1px solid #EAEAEA",
                 alignItems: "center",
@@ -152,7 +171,7 @@ const Chat = ({
                   border={"1px solid #EAEAEA"}
                   aria-label="Open Conversation History Menu"
                   size="sm"
-                  icon={<HamburgerIcon />}
+                  icon={openConvoHistory ? <CloseIcon /> : <HamburgerIcon />}
                   onClick={() => {
                     setOpenConvoHistory(!openConvoHistory);
                   }}
@@ -160,22 +179,27 @@ const Chat = ({
               </div>
               {/* New Conversation button */}
               {openConvoHistory && (
-                <div>
-                  <Button
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    width: "100%",
+                  }}
+                >
+                  <IconButton
                     backgroundColor="#ACCDEC"
                     color="#555"
                     size="sm"
-                    leftIcon={<SmallAddIcon />}
+                    icon={<SmallAddIcon />}
                     onClick={() => {
                       setDisableAll(false);
                       updateInConvo(false);
                       updateConvoID("");
                       updateMessages([]);
                       createNewConversation();
+                      setOpenConvoHistory(false);
                     }}
-                  >
-                    New Conversation
-                  </Button>
+                  />
                 </div>
               )}
             </div>
@@ -201,23 +225,19 @@ const Chat = ({
                         padding: "10px",
                         borderBottom: "1px solid #EAEAEA",
                         cursor: "pointer",
+                        width: "100%",
                       }}
                       onClick={() => {
-                        // click same convo again to clear chat of past conversation
-                        if(convo.conversation_id == pastConvoID){
-                          updatePastID("");
-                          setDisableAll(false);
-                          getConversationMessages(currConvoID);
-                        }else{
-                          updatePastID(convo.conversation_id);
-                          getConversationMessages(pastConvoID);
-                          setDisableAll(true);
-                        }
-                        // updateInConvo(true);
+                        getConversationMessages(convo.conversation_id);
+                        setDisableAll(true);
                       }}
                     >
                       <Avatar
-                        name={convo.conversation_id}
+                        name={
+                          convo.conversation_name
+                            ? convo.conversation_name
+                            : "C " + index
+                        }
                         backgroundColor="#7CA2DE"
                         style={{
                           width: "40px",
@@ -229,11 +249,20 @@ const Chat = ({
                         alt="User Avatar"
                       />
                       {openConvoHistory && (
-                        <div>
+                        <span
+                          style={{
+                            fontSize: "14px",
+                            fontWeight: "500",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden", // Hide any overflowing text
+                            textOverflow: "ellipsis", // Display ellipsis for overflow
+                            maxWidth: "100%", // Adju
+                          }}
+                        >
                           {convo.conversation_name
                             ? convo.conversation_name
                             : `Conversation ${index + 1}`}
-                        </div>
+                        </span>
                       )}
                     </Box>
                   );
@@ -242,14 +271,26 @@ const Chat = ({
             </div>
           </Box>
           <Box
-            style={{
-              minWidth: openConvoHistory ? "80%" : "calc(100% - 70px)",
-            }}
+            className={
+              `chat-box` + (openConvoHistory ? " hidden" : " full-width")
+            }
+            style={{ minWidth: openConvoHistory ? "80%" : "calc(100% - 70px)" }}
           >
-            <ChatBoxTopNav
-              courseCode={currCourse.course_code}
-              currConvoID={currConvoID}
-            />
+            <div
+              style={{
+                display: "flex",
+                borderBottom: "1px solid #EAEAEA",
+                alignItems: "center",
+                backgroundColor: "#F9F9F9",
+              }}
+            >
+              <ChatBoxTopNav
+                openConvoHistory={openConvoHistory}
+                setOpenConvoHistory={setOpenConvoHistory}
+                courseCode={currCourse.course_code}
+                currConvoID={currConvoID}
+              />
+            </div>
             <ChatBox messages={messages} waitingForResp={waitingForResp} />
             <ChatBoxFooter
               userId={userId}
@@ -264,11 +305,13 @@ const Chat = ({
               waitingForResp={waitingForResp}
               setWaitForResp={setWaitForResp}
               disableAll={disableAll}
+              conversations={conversations}
+              setConversations={setConversations}
             />
           </Box>
         </Box>
       </Box>
-      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
+      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </>
   );
 };

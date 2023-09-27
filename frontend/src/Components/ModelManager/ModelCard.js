@@ -51,7 +51,11 @@ const ModelCard = ({
     presence_pen: 0.0,
     freq_pen: 0.0,
   });
-  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const {
+    isOpen: isErrOpen,
+    onOpen: onErrOpen,
+    onClose: onErrClose,
+  } = useDisclosure();
   const [error, setError] = useState();
   function updateField(e) {
     setModelSettings({
@@ -92,6 +96,7 @@ const ModelCard = ({
           top_p: newModelSettings.topP,
           presence_penalty: newModelSettings.presence_pen,
           frequency_penalty: newModelSettings.freq_pen,
+          temperature: newModelSettings.temperature,
         }
       )
       .then((res) => {
@@ -133,6 +138,7 @@ const ModelCard = ({
           topP: model_settings.top_p,
           presence_pen: model_settings.presence_penalty,
           freq_pen: model_settings.frequency_penalty,
+          temperature: model_settings.temperature,
         });
         console.log(res.data.max_tokens);
       })
@@ -244,6 +250,13 @@ const ModelCard = ({
                   value={newModelSettings.freq_pen}
                   name={"freq_pen"}
                 />
+
+                <FormLabel>Temperature</FormLabel>
+                <Input
+                  onChange={updateField}
+                  value={newModelSettings.temperature}
+                  name={"temperature"}
+                />
               </FormControl>
             </Stack>
           </ModalBody>
@@ -290,7 +303,7 @@ const ModelCard = ({
           </ModalFooter>
         </ModalContent>
       </Modal>
-      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
+      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </>
   );
 };

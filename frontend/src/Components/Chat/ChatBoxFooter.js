@@ -25,6 +25,8 @@ const ChatBoxFooter = ({
   userId,
   model_ID,
   disableAll,
+  conversations,
+  setConversations,
 }) => {
   const {
     isOpen: isOpenFeedback,
@@ -40,7 +42,7 @@ const ChatBoxFooter = ({
   const {
     isOpen: isErrOpen,
     onOpen: onErrOpen,
-    onClose: onErrClose
+    onClose: onErrClose,
   } = useDisclosure();
   const [error, setError] = useState();
   const [sliderVal, setSliderVal] = useState(0);
@@ -54,7 +56,7 @@ const ChatBoxFooter = ({
     }
   };
 
-  const getResponse = async (conversation_id, response) => {
+  const getResponse = async (conversation_id, response, currConversations) => {
     // Load user message on click
     const now = Temporal.Now.zonedDateTimeISO().toString();
     const userText = {
@@ -78,6 +80,16 @@ const ChatBoxFooter = ({
         updateMessages((oldMessage) => [...oldMessage, agentResponse]);
         setWaitForResp(false);
         setText("");
+
+        // Update conversation name
+        let new_convo = currConversations[0];
+        new_convo = {
+          ...new_convo,
+          conversation_name: response.data.conversation_name,
+        };
+
+        let new_conversations = [new_convo, ...currConversations.slice(1)];
+        setConversations(new_conversations);
       })
       .catch((err) => {
         setError(err);
@@ -104,13 +116,19 @@ const ChatBoxFooter = ({
             model_id: model_ID,
           })
           .then(async (res) => {
-            updateConvoID(res.data.conversation_id);
+            let data = res.data;
+            updateConvoID(data.conversation_id);
             updateInConvo(true);
             setWaitForResp(true);
             setText("");
+
+            data["conversation_name"] = "New Conversation";
+            let currConversations = [res.data, ...conversations];
+            setConversations(currConversations);
+
             let conversation_id = res.data.conversation_id;
             let chatlog = text;
-            await getResponse(conversation_id, chatlog);
+            await getResponse(conversation_id, chatlog, currConversations);
           })
           .catch((err) => {
             setError(err);
@@ -121,7 +139,7 @@ const ChatBoxFooter = ({
   };
 
   return (
-      <>
+    <>
       <HStack
         bgColor={"white"}
         p={5}
@@ -141,7 +159,9 @@ const ChatBoxFooter = ({
               );
             }
           }}
-          isDisabled={!inConvo || (inConvo && messages.length == 0) || disableAll}
+          isDisabled={
+            !inConvo || (inConvo && messages.length == 0) || disableAll
+          }
         >
           End chat
         </Button>
@@ -176,8 +196,8 @@ const ChatBoxFooter = ({
           Send
         </Button>
       </HStack>
-      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
-      </>
+      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
+    </>
   );
 };
 

@@ -12,7 +12,7 @@ class GPTModel(models.Model):
 
     # OpenAI Completion Parameters
     model = models.TextField(max_length=40)
-    prompt = models.TextField(max_length=2000)
+    prompt = models.TextField(max_length=10000)
     max_tokens = models.IntegerField(default=300)
     temperature = models.FloatField(default=1)
     top_p = models.FloatField(default=1)

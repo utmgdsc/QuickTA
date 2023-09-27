@@ -9,6 +9,7 @@ class ConversationSerializer(ModelSerializer):
         model = Conversation
         fields = [
             'conversation_id',
+            'conversation_name',
             'user_id',
             'course_id',
             'model_id',

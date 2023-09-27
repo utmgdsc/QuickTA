@@ -13,7 +13,7 @@ const ChatBox = ({ messages, waitingForResp }) => {
     <VStack
       background={"#F9F9F9"}
       style={{
-        height: "50vh",
+        height: "53.5vh",
         overflowY: "scroll",
         padding: "0vw 1.5vw 0vw 1.5vw",
         overflowWrap: "break-word",
