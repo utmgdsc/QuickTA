@@ -37,6 +37,8 @@ class UserView(APIView):
         """
         user_id = request.GET.get('user_id', '')
         utorid = request.GET.get('utorid', '')
+        if not(utorid): utorid = request.headers['Utorid']
+        
         cache_key = f"{user_id}-{utorid}"
         if user_id == '' and utorid == '':
             return JsonResponse({"msg": "User not found found"})
