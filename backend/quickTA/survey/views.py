@@ -125,7 +125,7 @@ class SurveyView(APIView):
         Acquires the details of a survey.
         """
         questions = get_object_or_404(Survey, survey_id=request.query_params.get('survey_id', ''))
-        serializer = SurveySerializer(questions, many=True)
+        serializer = SurveySerializer(questions)
         return JsonResponse(serializer.data, safe=False)
 
     @swagger_auto_schema(
@@ -206,7 +206,12 @@ class SurveyAllQuestionsView(APIView):
         survey = get_object_or_404(Survey, survey_id=survey_id)
         questions = SurveyQuestion.objects.filter(question_id__in=survey.ordering)
         serializer = SurveyQuestionSerializer(questions, many=True)
-        return JsonResponse(serializer.data, safe=False)
+        response = {
+            "survey_id": survey_id,
+            "type": survey.type,
+            "questions": serializer.data
+        }
+        return JsonResponse(response)
 
 class ActiveSurveyView(APIView):
     @swagger_auto_schema(
@@ -241,7 +246,7 @@ class AnswerQuestionView(APIView):
 
     @swagger_auto_schema(
         operation_summary="Answer a survey question",
-        request_body=AnswerQuestionSerializer,
+        request_body=AnswerQuestionSerializer(many=True),
         responses={200: "Answered question", 400: "Bad Request"}
     )
     def post(self, request):
@@ -249,12 +254,14 @@ class AnswerQuestionView(APIView):
         Answer a survey question
 
         - user_id/utorid - user id or utorid
+        - survey_id - survey id
         - question_id - question id 
+        - conversation_id - conversation id (only applicable to 'Post' questions)
         - answer - answer to the question
         - survey_type - Pre/Post (Pre-survey/Post-survey)
         """
-        serializer = AnswerQuestionSerializer(data=request.data)
+        serializer = AnswerQuestionSerializer(data=request.data, many=True)
         if serializer.is_valid():
             serializer.create(validated_data=serializer.validated_data)
-            return JsonResponse(data={},status=status.HTTP_200_OK)
+            return JsonResponse(data={"msg": "Answered question"},status=status.HTTP_200_OK)
         return ErrorResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

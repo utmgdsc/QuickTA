@@ -15,8 +15,8 @@ import ErrorDrawer from "../ErrorDrawer";
 const ChatBoxFooter = ({
   updateMessages,
   inConvo,
-  updateInConvo,
   currConvoID,
+  updateInConvo,
   updateConvoID,
   course_ID,
   messages,
