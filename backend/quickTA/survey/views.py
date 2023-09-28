@@ -101,7 +101,7 @@ class SurveyQuestionListView(APIView):
 
     @swagger_auto_schema(
         operation_summary="Get all survey questions",
-        responses={200: SurveyQuestionSerializer(many=True), 404: "User not found"},
+        responses={200: SurveyQuestionSerializer(many=True), 404: "Survey question not found"},
     )
     def get(self, request):
         """
