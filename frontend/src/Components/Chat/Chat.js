@@ -30,6 +30,7 @@ const Chat = ({
   waitingForResp,
   setWaitForResp,
   model_id,
+  UTORid,
 }) => {
   const [messages, updateMessages] = useState([]);
   const [inConvo, updateInConvo] = useState(false);
@@ -310,6 +311,7 @@ const Chat = ({
               disableAll={disableAll}
               conversations={conversations}
               setConversations={setConversations}
+              UTORid={UTORid}
             />
           </Box>
         </Box>

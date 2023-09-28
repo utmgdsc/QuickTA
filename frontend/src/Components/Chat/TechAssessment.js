@@ -10,7 +10,7 @@ import React, {useState} from "react";
 import axios from "axios";
 import ErrorDrawer from "../ErrorDrawer";
 
-const TechAssessment = ({ isOpen, onClose, conversation_id, updateConvoID, updateInConvo, updateMessages }) => {
+const TechAssessment = ({ isOpen, onClose, conversation_id, updateConvoID, updateInConvo, updateMessages, UTORid }) => {
 
   const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
   const {isOpen: isPostQOpen, onOpen: onPostQOpen, onClose: onPostQClose} = useDisclosure();

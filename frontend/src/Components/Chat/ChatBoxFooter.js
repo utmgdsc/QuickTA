@@ -2,7 +2,15 @@ import {
   Button,
   HStack,
   Input,
-  Tooltip,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
+  Radio,
+  RadioGroup,
+  Text,
+  VStack,
   useDisclosure,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
@@ -28,6 +36,7 @@ const ChatBoxFooter = ({
   conversations,
   setConversations,
   model_id,
+  UTORid,
 }) => {
   const {
     isOpen: isOpenTechAssessment,
@@ -178,6 +187,7 @@ const ChatBoxFooter = ({
           updateConvoID={updateConvoID}
           updateInConvo={updateInConvo}
           updateMessages={updateMessages}
+          UTORid={UTORid}
         />
 
         <Input
