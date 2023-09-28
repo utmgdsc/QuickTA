@@ -8,7 +8,7 @@ import {
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Temporal } from "@js-temporal/polyfill";
-import FeedbackSurvey from "./FeedbackSurvey";
+import TechAssessment from "./TechAssessment";
 import ChatOpenSurvey from "./ChatOpenSurvey";
 import ErrorDrawer from "../ErrorDrawer";
 
@@ -30,9 +30,9 @@ const ChatBoxFooter = ({
   model_id,
 }) => {
   const {
-    isOpen: isOpenFeedback,
-    onOpen: onOpenFeedback,
-    onClose: onCloseFeedback,
+    isOpen: isOpenTechAssessment,
+    onOpen: onOpenTechAssessment,
+    onClose: onCloseTechAssessment,
   } = useDisclosure();
   // after conversations ends disclosure
   const {
@@ -157,7 +157,7 @@ const ChatBoxFooter = ({
           onClick={() => {
             if (inConvo && messages) {
               console.log(messages);
-              onOpenFeedback();
+              onOpenTechAssessment();
             } else {
               console.log(
                 "Must be in a convo to leave one or please send at least one msg :>"
@@ -171,9 +171,9 @@ const ChatBoxFooter = ({
           End chat
         </Button>
 
-        <FeedbackSurvey
-          isOpen={isOpenFeedback}
-          onClose={onCloseFeedback}
+        <TechAssessment
+          isOpen={isOpenTechAssessment}
+          onClose={onCloseTechAssessment}
           conversation_id={currConvoID}
           updateConvoID={updateConvoID}
           updateInConvo={updateInConvo}
