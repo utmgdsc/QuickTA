@@ -1,6 +1,7 @@
 from django.shortcuts import render
 
 import uuid
+import random
 from enum import Enum
 from django.db import models
 import djongo.models as djmodels
@@ -71,11 +72,11 @@ class AssessmentQuestionView(APIView):
     )
     def patch(self, request):
         asmnt_question_id = request.query_params.get('assessment_question_id', '')
-        question = get_object_or_404(SurveyQuestion, assessment_question_id=asmnt_question_id)
+        question = get_object_or_404(AssessmentQuestion, assessment_question_id=asmnt_question_id)
         serializer = AssessmentQuestionSerializer(question, data=request.data, partial=True)
 
         if serializer.is_valid():
-            SurveyQuestion.objects.filter(assessment_question_id=asmnt_question_id).update(**serializer.validated_data)
+            AssessmentQuestion.objects.filter(assessment_question_id=asmnt_question_id).update(**serializer.validated_data)
             return JsonResponse(serializer.data)
         return ErrorResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -198,3 +199,50 @@ class AssessmentListView(APIView):
         surveys = Survey.objects.all()
         serializer = AssessmentSerializer(surveys, many=True)
         return JsonResponse(serializer.data, safe=False)
+
+class AnswerAsessmentQuestionView(APIView):
+    @swagger_auto_schema(
+        operation_summary="Answer an assessment question",
+        request_body=AnswerAssessmentQuestionSerializer,
+        responses={200: "Answered assessment question", 400: "Bad Request"}
+    )
+    def post(self, request):
+        """
+        Answer an assessment question
+        """
+        serializer = AnswerAssessmentQuestionSerializer(data=request.data)
+        if serializer.is_valid():
+            asmnt_question = serializer.create(validated_data=serializer.validated_data)
+            
+            # Send back the correct response
+            response = {
+                "assessment_question_id": asmnt_question.assessment_question_id,
+                "correct_answer": asmnt_question.correct_answer,
+                "correct_answer_flavor_text": asmnt_question.correct_answer_flavor_text,
+                "correct": request.data['answer'] == asmnt_question.correct_answer
+            }
+
+            return JsonResponse(response, status=status.HTTP_200_OK)
+        return ErrorResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class RandomAssessmentQuestionView(APIView):
+    @swagger_auto_schema(
+        operation_summary="Get a random assessment question",
+        manual_parameters=[
+            openapi.Parameter("assessment_id", openapi.IN_QUERY, description="Assessment ID", type=openapi.TYPE_STRING),
+        ],
+        responses={200: AssessmentQuestionSerializer(), 404: "Assessment Question not found"},
+    )
+    def get(self, request):
+        """
+        Acquires a random assessment question from the assessment question bank.
+        """
+        assessment_id = request.query_params.get('assessment_id', '')
+        assessment = get_object_or_404(Assessment, assessment_id=assessment_id)
+        question_bank = assessment.question_bank
+        if len(question_bank) == 0:
+            return ErrorResponse("Assessment question bank is empty", status=status.HTTP_400_BAD_REQUEST)
+        question_id = random.choice(question_bank)
+        question = get_object_or_404(AssessmentQuestion, assessment_question_id=question_id)
+        serializer = AssessmentQuestionSerializer(question)
+        return JsonResponse(serializer.data)
