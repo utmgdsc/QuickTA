@@ -7,6 +7,7 @@ import djongo.models as djmodels
 class QuestionType(Enum):
     SCALE = 'Scale'
     MULTIPLE_CHOICE = 'MultipleChoice'
+    OPEN_ENDED = 'OpenEnded'
 
 class SurveyQuestion(models.Model):
     question_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
@@ -14,6 +15,7 @@ class SurveyQuestion(models.Model):
     question = models.TextField()
     question_type = models.TextField(choices = [(tag.name, tag.value) for tag in QuestionType])
     answers = djmodels.JSONField(default = [], null=True, blank=True)
+    open_ended_answer = models.TextField(null=True, blank=True)
     numeric_answer = models.FloatField(null=True, blank=True)
 
 

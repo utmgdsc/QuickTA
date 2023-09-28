@@ -4,6 +4,7 @@ from .views import *
 app_name = 'survey_api'
 
 urlpatterns = [
+    # Pre/Post question endpoints
     path('', SurveyView.as_view()),
     path('/all', SurveryListView.as_view()),
     path('/details', SurveyAllQuestionsView.as_view()),

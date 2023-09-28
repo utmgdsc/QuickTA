@@ -18,6 +18,7 @@ class User(models.Model):
     new_user = models.BooleanField(default=True)
     pre_survey = djmodels.JSONField(default=[], blank=True, null=True)
     post_survey = djmodels.JSONField(default=[], blank=True, null=True)
+    assessment_responses = djmodels.JSONField(default=[], blank=True, null=True)
 
     def __str__(self):
         return f"User(user_id={self.user_id}, name={self.name}, utorid={self.utorid}, user_role={self.user_role}, courses={self.courses})"
