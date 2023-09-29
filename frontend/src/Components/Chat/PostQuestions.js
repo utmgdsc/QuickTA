@@ -25,6 +25,7 @@ const PostQuestions = ({
   isOpen,
   onOpen,
   onClose,
+  onOpenTechAssessment,
   UTORid,
   conversation_id,
 }) => {
@@ -207,6 +208,15 @@ const PostQuestions = ({
             </VStack>
           </ModalBody>
           <ModalFooter>
+            <Button
+              onClick={() => {
+                onClose();
+                onOpenTechAssessment();
+              }}
+            >
+              Back
+            </Button>
+            <Spacer />
             <Button
               onClick={() => {
                 console.log("Submit button clicked");

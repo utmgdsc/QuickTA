@@ -181,8 +181,9 @@ const ChatBoxFooter = ({
         </Button>
 
         <TechAssessment
-          isOpen={isOpenTechAssessment}
-          onClose={onCloseTechAssessment}
+          isOpenTechAssessment={isOpenTechAssessment}
+          onOpenTechAssessment={onOpenTechAssessment}
+          onCloseTechAssessment={onCloseTechAssessment}
           conversation_id={currConvoID}
           updateConvoID={updateConvoID}
           updateInConvo={updateInConvo}

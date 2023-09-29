@@ -175,3 +175,23 @@
   width: 150px;
   text-align: center;
 }
+
+/* Colors */
+.selected-border {
+  border: 3px solid #2c5fce !important;
+  background: #7292d6 !important;
+}
+
+.wrong-border {
+  border: 3px solid #a51e1e !important;
+  background: #bd6262 !important;
+}
+
+.correct-border {
+  border: 3px solid #115511 !important;
+  background: #589758 !important;
+}
+
+.hidden-border {
+  border: 3px solid white !important;
+}

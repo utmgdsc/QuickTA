@@ -20,8 +20,9 @@ import ErrorDrawer from "../ErrorDrawer";
 import PostQuestions from "./PostQuestions";
 
 const TechAssessment = ({
-  isOpen,
-  onClose,
+  isOpenTechAssessment,
+  onOpenTechAssessment,
+  onCloseTechAssessment,
   conversation_id,
   updateConvoID,
   updateInConvo,
@@ -56,12 +57,16 @@ const TechAssessment = ({
           "/assessment/question/random?assessment_id=8dd15ed3-da48-487b-82ac-6c2ae12f93b6"
       )
       .then((res) => {
-        setCode({ question: res.data.question, language: res.data.language });
-        setOptions(res.data.choices);
-        setAnswer(res.data.correct_answer);
-        setAnswerFlavorText(res.data.correct_answer_flavor_text);
-        setAssessmentQuestionID(res.data.assessment_question_id);
-        console.log(res.data.choices);
+        let data = res.data;
+        let { question, parsedCode } = parseCode(data.question);
+        setCode({
+          question: question,
+          code: parsedCode,
+          language: data.language,
+        });
+        setOptions(data.choices);
+        setAssessmentQuestionID(data.assessment_question_id);
+        console.log(data.choices);
       })
       .catch((err) => {
         setError(err);
@@ -73,12 +78,22 @@ const TechAssessment = ({
     fetchCodeQuestion();
   }, [UTORid]);
 
+  const parseCode = (text) => {
+    let start = text.indexOf("```python");
+    let end = text.indexOf("```", start + 1);
+    let parsedCode = text.substring(start + 9, end);
+
+    let question = text.substring(0, start);
+
+    return { question, parsedCode };
+  };
+
   return (
     <>
       <Modal
         closeOnOverlayClick={false}
-        isOpen={isOpen}
-        onClose={onClose}
+        isOpen={isOpenTechAssessment}
+        onClose={onCloseTechAssessment}
         size={"lg"}
       >
         <ModalOverlay />
@@ -94,19 +109,30 @@ const TechAssessment = ({
           </ModalHeader>
           <ModalBody>
             <VStack>
+              {}
               <Box width={"100%"} m={5} p={3}>
+                <Text>{code.question}</Text>
                 <SyntaxHighlighter
                   showLineNumbers={true}
                   wrapLongLines={true}
                   language={"python"}
                   codeTagProps={{ style: { fontSize: "12px" } }}
                 >
-                  {code.question}
+                  {code.code}
                 </SyntaxHighlighter>
               </Box>
               <RadioGroup display="grid" gridGap={4}>
                 {options.map((element) => (
                   <Button
+                    className={
+                      studentResponse !== element.choice
+                        ? "hidden-border"
+                        : !answer
+                        ? "selected-border"
+                        : element.choice != studentResponse
+                        ? "correct-border"
+                        : "wrong-border"
+                    }
                     isDisabled={disableAll}
                     onClick={(e) => {
                       setStudentResponse(element.choice);
@@ -134,37 +160,43 @@ const TechAssessment = ({
               </Text>
             ) : null}
             <Button
-              isDisabled={studentResponse === null || disableAll}
+              isDisabled={studentResponse === null}
               onClick={() => {
-                console.log("Here");
-                //Display Flavor Text
-                setDisableAll(true);
+                if (!disableAll) {
+                  //Display Flavor Text
+                  setDisableAll(true);
 
-                axios
-                  .post(
-                    process.env.REACT_APP_API_URL +
-                      "/assessment/question/answer",
-                    {
-                      utorid: UTORid,
-                      conversation_id: conversation_id,
-                      assessment_question_id: assessement_question_id,
-                      answer: studentResponse,
-                    }
-                  )
-                  .then((res) => {
-                    console.log(res);
-                  })
-                  .catch((err) => {
-                    setError(err);
-                    onErrOpen();
-                  });
-                setDisplayAnswer(true);
-                setTimeout(() => {
-                  onClose();
+                  axios
+                    .post(
+                      process.env.REACT_APP_API_URL +
+                        "/assessment/question/answer",
+                      {
+                        utorid: UTORid,
+                        conversation_id: conversation_id,
+                        assessment_question_id: assessement_question_id,
+                        answer: studentResponse,
+                      }
+                    )
+                    .then((res) => {
+                      let data = res.data;
+                      setAnswer(data.correct_answer);
+                      setAnswerFlavorText(data.correct_answer_flavor_text);
+                    })
+                    .catch((err) => {
+                      setError(err);
+                      onErrOpen();
+                    });
+                  setDisplayAnswer(true);
+                  // setTimeout(() => {
+                  //   onCloseTechAssessment();
+                  //   onPostQOpen();
+                  // }, 5000);
+
+                  console.log("Submitted answer");
+                } else {
+                  onCloseTechAssessment();
                   onPostQOpen();
-                }, 5000);
-
-                console.log("Submitted answer");
+                }
               }}
             >
               Next
@@ -176,6 +208,7 @@ const TechAssessment = ({
         isOpen={isPostQOpen}
         onOpen={onPostQOpen}
         onClose={onPostQClose}
+        onOpenTechAssessment={onOpenTechAssessment}
       />
       <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </>
