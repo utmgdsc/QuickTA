@@ -95,6 +95,7 @@ const TechAssessment = ({
         isOpen={isOpenTechAssessment}
         onClose={onCloseTechAssessment}
         size={"lg"}
+        scrollBehavior="inside"
       >
         <ModalOverlay />
         <ModalContent>
