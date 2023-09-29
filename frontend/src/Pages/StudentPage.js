@@ -68,6 +68,7 @@ const StudentPage = ({
       })
       .catch((err) => {
         setError(err);
+        console.log(err);
         onErrOpen();
       });
   };

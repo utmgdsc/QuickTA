@@ -47,9 +47,9 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
     }
     let x = currAvg * data.length;
     x -= data[data.length - 1];
-    if(data.length === 1){
-      return Math.round((currAvg - x / (1)) * 100) / 100;
-    }else{
+    if (data.length === 1) {
+      return Math.round((currAvg - x / 1) * 100) / 100;
+    } else {
       return Math.round((currAvg - x / (data.length - 1)) * 100) / 100;
     }
   }
@@ -75,6 +75,8 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
         })
         .catch((err) => {
           setError(err);
+          console.log(err);
+          console.log(err);
           onErrOpen();
         });
     }
@@ -100,6 +102,8 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
         })
         .catch((err) => {
           setError(err);
+          console.log(err);
+          console.log(err);
           onErrOpen();
         });
     }
@@ -115,15 +119,14 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
         )
         .then((res) => {
           setAvgRespTime({
-            avgRespTime: Math.round(res.data.avg_response_rate * 100) / 100,
-            avgRespTimeDelta: computePrevAvg(
-              res.data.all_response_rates,
-              res.data.avg_response_rate
-            ),
+            avgRespTime: res.data.avg_response_rate,
+            // avgRespTimeDelta: "-",
           });
         })
         .catch((err) => {
           setError(err);
+          console.log(err);
+          console.log(err);
           onErrOpen();
         });
     }
@@ -143,6 +146,8 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
         })
         .catch((err) => {
           setError(err);
+          console.log(err);
+          console.log(err);
           onErrOpen();
         });
     }
@@ -176,6 +181,8 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
         })
         .catch((err) => {
           setError(err);
+          console.log(err);
+          console.log(err);
           onErrOpen();
         });
     }
@@ -184,8 +191,8 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
   useEffect(() => {
     if (courseID) {
       setIsLoading(true);
-      fetchData("/researchers/average-ratings");
       // fetchData("/researchers/avg-comfortability");
+      fetchData("/researchers/average-ratings");
       fetchData("/researchers/avg-response-rate");
       fetchData("/researchers/reported-conversations");
       fetchData("/researchers/most-common-words");
@@ -222,6 +229,8 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
                     })
                     .catch((err) => {
                       setError(err);
+                      console.log(err);
+                      console.log(err);
                       onErrOpen();
                     });
                 }
@@ -256,6 +265,8 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
                     })
                     .catch((err) => {
                       setError(err);
+                      console.log(err);
+                      console.log(err);
                       onErrOpen();
                     });
                 }
@@ -290,6 +301,8 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
                     })
                     .catch((err) => {
                       setError(err);
+                      console.log(err);
+                      console.log(err);
                       onErrOpen();
                     });
                 }
@@ -299,11 +312,11 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
               delta={0}
               unit={""}
             />
-            </VStack>
+          </VStack>
           <Spacer />
           <DatedGraph isWeekly={isWeekly} courseID={courseID} />
-          </HStack>
-        </Flex>
+        </HStack>
+      </Flex>
       <FrequencyCard
         words={commonWords}
         callBack={() => {
@@ -338,6 +351,8 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
               })
               .catch((err) => {
                 setError(err);
+                console.log(err);
+                console.log(err);
                 onErrOpen();
               });
           }

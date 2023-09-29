@@ -110,6 +110,7 @@ const ModelCreator = ({ creating, setCreating, courseid }) => {
       })
       .catch((err) => {
         setError(err);
+        console.log(err);
         onErrOpen();
       });
   };

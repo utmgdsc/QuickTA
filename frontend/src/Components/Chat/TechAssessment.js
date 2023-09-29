@@ -70,6 +70,7 @@ const TechAssessment = ({
       })
       .catch((err) => {
         setError(err);
+        console.log(err);
         onErrOpen();
       });
   };
@@ -186,6 +187,7 @@ const TechAssessment = ({
                     })
                     .catch((err) => {
                       setError(err);
+                      console.log(err);
                       onErrOpen();
                     });
                   setDisplayAnswer(true);

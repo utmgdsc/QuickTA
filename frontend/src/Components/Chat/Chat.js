@@ -62,6 +62,7 @@ const Chat = ({
       })
       .catch((err) => {
         setError(err);
+        console.log(err);
         onErrOpen();
       });
   };
@@ -91,6 +92,7 @@ const Chat = ({
       })
       .catch((err) => {
         setError(err);
+        console.log(err);
         onErrOpen();
       });
   };
@@ -109,6 +111,7 @@ const Chat = ({
       })
       .catch((err) => {
         setError(err);
+        console.log(err);
         onErrOpen();
       });
   };

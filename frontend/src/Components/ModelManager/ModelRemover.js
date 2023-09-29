@@ -27,7 +27,11 @@ const ModelRemover = ({ courseid, deleting, setDeleting, allModels }) => {
   const [removeModel, setRemoveModel] = useState({
     id: "",
   });
-  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const {
+    isOpen: isErrOpen,
+    onOpen: onErrOpen,
+    onClose: onErrClose,
+  } = useDisclosure();
   const [error, setError] = useState();
   function updateField(e) {
     setRemoveModel({
@@ -59,6 +63,7 @@ const ModelRemover = ({ courseid, deleting, setDeleting, allModels }) => {
       })
       .catch((err) => {
         setError(err);
+        console.log(err);
         onErrOpen();
       });
     setDeleting(false);
@@ -74,6 +79,7 @@ const ModelRemover = ({ courseid, deleting, setDeleting, allModels }) => {
       .catch((err) => {
         setDeleting(false);
         setError(err);
+        console.log(err);
         onErrOpen();
       });
   };
@@ -148,7 +154,7 @@ const ModelRemover = ({ courseid, deleting, setDeleting, allModels }) => {
           </ModalFooter>
         </ModalContent>
       </Modal>
-      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
+      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </>
   );
 };

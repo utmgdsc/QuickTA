@@ -106,6 +106,7 @@ const ChatBoxFooter = ({
       .catch((err) => {
         console.log(err);
         setError(err);
+        console.log(err);
         onErrOpen();
       });
   };
@@ -146,6 +147,7 @@ const ChatBoxFooter = ({
           .catch((err) => {
             console.log(err);
             setError(err);
+            console.log(err);
             onErrOpen();
           });
       }

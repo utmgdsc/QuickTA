@@ -67,6 +67,7 @@ const AdminPage = ({ UTORID, auth }) => {
       })
       .catch((err) => {
         setError(err);
+        console.log(err);
         onErrOpen();
       });
     setIsOpenCreateUser(false);
@@ -82,6 +83,7 @@ const AdminPage = ({ UTORID, auth }) => {
       })
       .catch((err) => {
         setError(err);
+        console.log(err);
         onErrOpen();
       });
   };

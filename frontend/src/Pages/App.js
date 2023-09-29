@@ -41,7 +41,7 @@ const App = () => {
         setUtorID(data.utorid);
         let courses = await getAllCourses(data.courses);
         setAuth(res.data.user_role);
-        if(auth === "ST"){
+        if (auth === "ST") {
           setModelId(data.model_id);
         }
         setIsLoading(false);
@@ -49,6 +49,7 @@ const App = () => {
       })
       .catch((err) => {
         setError(err);
+        console.log(err);
         onErrOpen();
         setIsLoading(false);
       });
@@ -96,6 +97,7 @@ const App = () => {
       .catch((err) => {
         console.log(err);
         setError(err);
+        console.log(err);
         onErrOpen();
         setIsLoading(false);
       });

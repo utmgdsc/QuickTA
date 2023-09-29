@@ -70,11 +70,13 @@ const PostQuestions = ({
             setError("Error fetching prompt question");
             onErrOpen();
             setError(err);
+            console.log(err);
             onErrOpen();
           });
       })
       .catch((err) => {
         setError(err);
+        console.log(err);
         onErrOpen();
       });
   };
@@ -110,6 +112,7 @@ const PostQuestions = ({
       })
       .catch((err) => {
         setError(err);
+        console.log(err);
         onErrOpen();
       });
   };

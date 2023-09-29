@@ -134,6 +134,7 @@ const ChatBoxTopNav = ({
                   })
                   .catch((err) => {
                     setError(err);
+                    console.log(err);
                     onErrOpen();
                   });
               } else {
@@ -214,6 +215,7 @@ const ChatBoxTopNav = ({
                       .then((res) => console.log("Reported!"))
                       .catch((err) => {
                         setError(err);
+                        console.log(err);
                         onErrOpen();
                       });
                     onClose();

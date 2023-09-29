@@ -58,23 +58,15 @@ const ReportTable = ({ course_ID, isWeekly, setIsLoading }) => {
       )
       .then((res) => {
         setIsLoading(true);
-        const entries = [];
-        for (const obj in Object.keys(res.data.reported_conversations)) {
-          entries.push({
-            conversation_id:
-              res.data.reported_conversations[obj]["conversation_id"],
-            user_id: res.data.reported_conversations[obj]["user_id"],
-            time: res.data.reported_conversations[obj]["time"],
-            msg: res.data.reported_conversations[obj]["msg"],
-          });
-        }
-        console.log(entries);
-        changeReportList(entries);
+        let data = res.data;
+
+        changeReportList(data.reports);
         setIsLoading(false);
       })
       .catch((err) => {
         setIsLoading(false);
         setError(err);
+        console.log(err);
         onErrOpen();
       });
   };
