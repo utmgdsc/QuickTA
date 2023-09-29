@@ -20,6 +20,7 @@ import { CloseIcon, HamburgerIcon, SmallAddIcon } from "@chakra-ui/icons";
 import axios from "axios";
 import "../../assets/styles.css";
 import ErrorDrawer from "../ErrorDrawer";
+import PreSurvey from "./PreSurvey";
 
 const Chat = ({
   currCourse,
@@ -44,6 +45,11 @@ const Chat = ({
     isOpen: isErrOpen,
     onOpen: onErrOpen,
     onClose: onErrClose,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenPreSurvey,
+    onOpen: onOpenPreSurvey,
+    onClose: onClosePreSurvey,
   } = useDisclosure();
   const [error, setError] = useState();
   const [disableAll, setDisableAll] = useState(false);
@@ -116,6 +122,7 @@ const Chat = ({
   };
 
   useEffect(() => {
+    onOpenPreSurvey();
     getConversations();
   }, [currCourse]);
 
@@ -344,6 +351,7 @@ const Chat = ({
           </Box>
         </Box>
       </Box>
+      <PreSurvey isOpen={isOpenPreSurvey} onClose={onClosePreSurvey} UTORid={UTORid} setDisableAll={setDisableAll}/>
       <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </>
   );
