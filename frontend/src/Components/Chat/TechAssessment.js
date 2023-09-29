@@ -28,6 +28,8 @@ const TechAssessment = ({
   updateInConvo,
   updateMessages,
   UTORid,
+  disableAll,
+  setDisableAll,
 }) => {
   const {
     isOpen: isErrOpen,
@@ -47,7 +49,7 @@ const TechAssessment = ({
   const [displayAnswer, setDisplayAnswer] = useState(false);
   const [answerFlavorText, setAnswerFlavorText] = useState("");
   const [assessement_question_id, setAssessmentQuestionID] = useState("");
-  const [disableAll, setDisableAll] = useState(false);
+  const [disableAllOption, setDisableAllOption] = useState(false);
 
   // Fetch code, questions, and answer for tech assessment
   const fetchCodeQuestion = () => {
@@ -74,7 +76,7 @@ const TechAssessment = ({
         onErrOpen();
       });
   };
-
+  
   useEffect(() => {
     fetchCodeQuestion();
   }, [UTORid]);
@@ -111,7 +113,6 @@ const TechAssessment = ({
           </ModalHeader>
           <ModalBody>
             <VStack>
-              {}
               <Box width={"100%"} m={5} p={3}>
                 <Text>{code.question}</Text>
                 <SyntaxHighlighter
@@ -135,7 +136,7 @@ const TechAssessment = ({
                         ? "correct-border"
                         : "wrong-border"
                     }
-                    isDisabled={disableAll}
+                    isDisabled={disableAllOption}
                     onClick={(e) => {
                       setStudentResponse(element.choice);
                       console.log(`Student reponse: ${element.choice}`);
@@ -144,7 +145,7 @@ const TechAssessment = ({
                       justifyContent: "left",
                     }}
                   >
-                    <Text margins={2}>{element.flavor_text}</Text>
+                    <Text margins={2}>{element.flavor_text + "   "}</Text>
                   </Button>
                 ))}
               </RadioGroup>
@@ -164,9 +165,9 @@ const TechAssessment = ({
             <Button
               isDisabled={studentResponse === null}
               onClick={() => {
-                if (!disableAll) {
+                if (!disableAllOption) {
                   //Display Flavor Text
-                  setDisableAll(true);
+                  setDisableAllOption(true);
 
                   axios
                     .post(
@@ -213,6 +214,7 @@ const TechAssessment = ({
         onOpen={onPostQOpen}
         onClose={onPostQClose}
         onOpenTechAssessment={onOpenTechAssessment}
+        setDisableAll={setDisableAll}
       />
       <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </>

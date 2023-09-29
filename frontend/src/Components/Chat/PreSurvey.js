@@ -13,7 +13,6 @@ const PreSurvey = ({ isOpen, onClose }) => {
       .then((res) => {})
       .catch((err) => {
         setError(err);
-        console.log(err);
         onErrOpen();
       });
   };

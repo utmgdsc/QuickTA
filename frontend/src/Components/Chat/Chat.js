@@ -46,7 +46,6 @@ const Chat = ({
     onClose: onErrClose,
   } = useDisclosure();
   const [error, setError] = useState();
-  const [pastConvoID, updatePastID] = useState("");
   const [disableAll, setDisableAll] = useState(false);
 
   const getConversations = async () => {
@@ -205,6 +204,7 @@ const Chat = ({
                     color="#555"
                     size="sm"
                     icon={<SmallAddIcon />}
+                    isDisabled={disableAll}
                     onClick={() => {
                       setDisableAll(false);
                       updateInConvo(false);
@@ -254,9 +254,13 @@ const Chat = ({
                         width: "100%",
                       }}
                       onClick={() => {
-                        getConversationMessages(convo.conversation_id);
-                        setDisableAll(true);
-                      }}
+                        console.log(currConvoID === convo.conversation_id);
+                        if(currConvoID !== convo.conversation_id){
+                          setDisableAll(true);
+                        }else{
+                          setDisableAll(false);
+                        }getConversationMessages(convo.conversation_id);} 
+                      }
                     >
                       <Avatar
                         name={
@@ -332,6 +336,7 @@ const Chat = ({
               waitingForResp={waitingForResp}
               setWaitForResp={setWaitForResp}
               disableAll={disableAll}
+              setDisableAll={setDisableAll}
               conversations={conversations}
               setConversations={setConversations}
               UTORid={UTORid}
