@@ -33,6 +33,7 @@ const ChatBoxFooter = ({
   userId,
   model_ID,
   disableAll,
+  setDisableAll,
   conversations,
   setConversations,
   model_id,
@@ -55,7 +56,6 @@ const ChatBoxFooter = ({
     onClose: onErrClose,
   } = useDisclosure();
   const [error, setError] = useState();
-  const [sliderVal, setSliderVal] = useState(0);
   const [text, setText] = useState("");
 
   const handleChatKeyDown = (e) => {
@@ -147,6 +147,7 @@ const ChatBoxFooter = ({
             console.log(err);
             setError(err);
             onErrOpen();
+            setWaitForResp(false);
           });
       }
     }
@@ -167,6 +168,10 @@ const ChatBoxFooter = ({
             if (inConvo && messages) {
               console.log(messages);
               onOpenTechAssessment();
+              updateMessages([]);
+              setDisableAll(true);
+              updateInConvo(false);
+              updateConvoID("");
             } else {
               console.log(
                 "Must be in a convo to leave one or please send at least one msg :>"
@@ -189,6 +194,8 @@ const ChatBoxFooter = ({
           updateInConvo={updateInConvo}
           updateMessages={updateMessages}
           UTORid={UTORid}
+          disableAll={disableAll}
+          setDisableAll={setDisableAll}
         />
 
         <Input

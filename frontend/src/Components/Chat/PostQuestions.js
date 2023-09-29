@@ -28,6 +28,7 @@ const PostQuestions = ({
   onOpenTechAssessment,
   UTORid,
   conversation_id,
+  setDisableAll,
 }) => {
   const {
     isOpen: isPromptOpen,
@@ -79,6 +80,20 @@ const PostQuestions = ({
       });
   };
 
+  const checkValidResponse = () => {
+    for (let i = 0; i < questions.length; i++) {
+      if (
+        (optionsSelected[questions[i].question_type] === "OPEN_ENDED" &&
+          optionsSelected[questions[i].open_ended_answer] === "") ||
+        (optionsSelected[questions[i].question_type] === "SCALE" &&
+          optionsSelected[questions[i].answer] <= 0)
+      ) {
+        return false;
+      }
+    }
+    return true;
+  };
+
   const submitResponse = () => {
     let allResponses = [];
     for (let i = 0; i < optionsSelected.length; i++) {
@@ -100,7 +115,10 @@ const PostQuestions = ({
 
       allResponses.push(data);
     }
-    axios
+    if(checkValidResponse() === false){
+      console.log("invalid response");
+    }else{
+      axios
       .post(
         process.env.REACT_APP_API_URL + "/survey/questions/answer",
         allResponses
@@ -112,25 +130,16 @@ const PostQuestions = ({
         setError(err);
         onErrOpen();
       });
+      setDisableAll(false);
+    }
+    
   };
 
-  const checkValidResponse = () => {
-    for (let i = 0; i < questions.length; i++) {
-      if (
-        (optionsSelected[questions[i].question_type] === "OPEN_ENDED" &&
-          optionsSelected[questions[i].open_ended_answer] === "") ||
-        (optionsSelected[questions[i].question_type] === "SCALE" &&
-          optionsSelected[questions[i].answer] <= 0)
-      ) {
-        return false;
-      }
-    }
-    return true;
-  };
+  
 
   useEffect(() => {
     fetchQuestions();
-  }, []);
+  }, [UTORid]);
 
   return (
     <>
@@ -176,7 +185,7 @@ const PostQuestions = ({
                           setOptionsSelected({
                             ...optionsSelected,
                             [question_idx + 1]: value,
-                          });
+                          });console.log(optionsSelected);
                         }}
                         value={parseInt(optionsSelected[question_idx + 1])}
                         display="grid"
@@ -258,7 +267,7 @@ const PostQuestions = ({
                   prompt: e.target.value,
                 });
               }}
-            ></Textarea>
+            >{optionsSelected.prompt}</Textarea>
           </ModalBody>
           <ModalFooter>
             <Button
