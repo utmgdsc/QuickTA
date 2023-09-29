@@ -126,7 +126,7 @@ const ChatBoxFooter = ({
           .post(process.env.REACT_APP_API_URL + "/student/conversation", {
             user_id: userId,
             course_id: course_ID,
-            model_id: model_id.length === 0 ? model_id : model_ID,
+            model_id: model_id.length === 0 ? model_ID : model_id,
           })
           .then(async (res) => {
             let data = res.data;

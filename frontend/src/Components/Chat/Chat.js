@@ -93,6 +93,7 @@ const Chat = ({
   };
 
   const createNewConversation = async () => {
+    console.log(model_id.length === 0 ?  currModel.model_id : model_id);
     axios
       .post(process.env.REACT_APP_API_URL + "/student/conversation", {
         user_id: userId,
@@ -101,6 +102,7 @@ const Chat = ({
       })
       .then(async (res) => {
         updateConvoID(res.data.conversation_id);
+        updateInConvo(true);
       })
       .catch((err) => {
         setError(err);

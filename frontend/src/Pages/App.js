@@ -41,7 +41,7 @@ const App = () => {
         setUtorID(data.utorid);
         let courses = await getAllCourses(data.courses);
         setAuth(res.data.user_role);
-        if('model_id' in data){
+        if(auth === "ST"){
           setModelId(data.model_id);
         }
         setIsLoading(false);
@@ -123,6 +123,7 @@ const App = () => {
               courses={courses}
               semester={currCourse.semester}
               userId={userId}
+              model_id={model_id}
             />
           }
         />
