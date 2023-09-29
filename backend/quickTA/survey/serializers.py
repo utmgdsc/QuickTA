@@ -67,6 +67,7 @@ class AnswerQuestionSerializer(serializers.Serializer):
             if not user.pre_survey: user.pre_survey = []
             user.pre_survey.append({'survey_id': survey_id, 'question_id': question_id, 'answer': answer, 'date': datetime.now()})
             User.objects.filter(user_id=user.user_id).update(pre_survey=user.pre_survey, new_user=False)
+
         elif survey_type == 'Post':
             if not user.post_survey: user.post_survey = []
             try: 
@@ -77,8 +78,15 @@ class AnswerQuestionSerializer(serializers.Serializer):
             if question_type == 'OPEN_ENDED':
                 answer = open_ended_answer
 
-            user.post_survey.append({'survey_id': survey_id, 'conversation_id': conversation_id, 'question_id': question_id, 'answer': answer, "date": datetime.now()})
-            User.objects.filter(user_id=user.user_id).update(post_survey=user.post_survey, new_user=False)
+            SurveyResponse(
+                survey_id=survey_id,
+                type=survey_type,
+                question_id=question_id,
+                user_id=user.user_id,
+                conversation_id=conversation_id,
+                answer=answer
+            ).save()
+            User.objects.filter(user_id=user.user_id).update(new_user=False)
         else:
             raise serializers.ValidationError("Invalid survey_type. Must be 'pre' or 'post'")
         

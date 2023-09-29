@@ -196,8 +196,8 @@ class AssessmentListView(APIView):
         """
         Acquires all assessments
         """
-        surveys = Survey.objects.all()
-        serializer = AssessmentSerializer(surveys, many=True)
+        assessment = Assessment.objects.all()
+        serializer = AssessmentSerializer(assessment, many=True)
         return JsonResponse(serializer.data, safe=False)
 
 class AnswerAsessmentQuestionView(APIView):

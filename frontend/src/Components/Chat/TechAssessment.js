@@ -97,6 +97,7 @@ const TechAssessment = ({
         isOpen={isOpenTechAssessment}
         onClose={onCloseTechAssessment}
         size={"lg"}
+        scrollBehavior="inside"
       >
         <ModalOverlay />
         <ModalContent>
@@ -174,6 +175,7 @@ const TechAssessment = ({
                       {
                         utorid: UTORid,
                         conversation_id: conversation_id,
+                        assessment_id: "8dd15ed3-da48-487b-82ac-6c2ae12f93b6",
                         assessment_question_id: assessement_question_id,
                         answer: studentResponse,
                       }

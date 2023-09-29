@@ -52,7 +52,11 @@ const AdminPage = ({ UTORID, auth }) => {
   const [currCourse, setCurrCourse] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingCourses, setIsLoadingCourses] = useState(false);
-  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const {
+    isOpen: isErrOpen,
+    onOpen: onErrOpen,
+    onClose: onErrClose,
+  } = useDisclosure();
   const [error, setError] = useState();
   const handleSubmit = () => {
     const payload = { name, utorid, user_role: userRole };
@@ -108,11 +112,19 @@ const AdminPage = ({ UTORID, auth }) => {
     }
   }, [UTORID]);
 
+  const getInstructors = (instructors) => {
+    let instructorString = "";
+    instructors.forEach((instructor) => {
+      instructorString += instructor.utorid + ", ";
+    });
+    return instructorString.slice(0, -2);
+  };
+
   if (auth !== "AM") {
     return <NotFoundPage />;
   }
 
-  return (UTORID.length !== 0 ? (
+  return UTORID.length !== 0 ? (
     <div
       style={{
         backgroundColor: "#F1F1F1",
@@ -255,7 +267,8 @@ const AdminPage = ({ UTORID, auth }) => {
                             whiteSpace: "wrap",
                           }}
                         >
-                          {obj.instructors.join(", ")}
+                          {/* {obj.instructors.join(", ")} */}
+                          {getInstructors(obj.instructors)}
                         </Td>
                         <Td>
                           <ButtonGroup>
@@ -320,10 +333,9 @@ const AdminPage = ({ UTORID, auth }) => {
           </VStack>
         )}
       </Box>
-      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
+      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </div>
-  ) : null
-  )
+  ) : null;
 };
 
 export default AdminPage;

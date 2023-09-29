@@ -7,6 +7,8 @@ import {
   TabList,
   Tabs,
   Tab,
+  Tooltip,
+  Text,
 } from "@chakra-ui/react";
 import ChatBoxTopNav from "./ChatBoxTopNav";
 import ChatBox from "./ChatBox";
@@ -31,6 +33,7 @@ const Chat = ({
   setWaitForResp,
   model_id,
   UTORid,
+  auth,
 }) => {
   const [messages, updateMessages] = useState([]);
   const [inConvo, updateInConvo] = useState(false);
@@ -92,12 +95,12 @@ const Chat = ({
   };
 
   const createNewConversation = async () => {
-    console.log(model_id.length === 0 ?  currModel.model_id : model_id);
+    console.log(model_id.length === 0 ? currModel.model_id : model_id);
     axios
       .post(process.env.REACT_APP_API_URL + "/student/conversation", {
         user_id: userId,
         course_id: currCourse.course_id,
-        model_id: model_id.length === 0 ?  currModel.model_id : model_id,
+        model_id: model_id.length === 0 ? currModel.model_id : model_id,
       })
       .then(async (res) => {
         updateConvoID(res.data.conversation_id);
@@ -116,22 +119,23 @@ const Chat = ({
   return (
     <>
       <Box ml={"10vw"} mr={"10vw"}>
-        <div style={{ width: "315px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <div style={{ width: "500px" }}>
+          <div style={{ display: "flex" }}>
             <CourseSelect
               courses={courses}
               currCourse={currCourse}
               setCurrCourse={setCurrCourse}
               inConvo={inConvo}
             />
-
-            <ModelSelect
-              models={models}
-              model={model_id}
-              currModel={currModel}
-              setCurrModel={setCurrModel}
-              inConvo={inConvo}
-            />
+            {auth !== "ST" && (
+              <ModelSelect
+                models={models}
+                model={model_id}
+                currModel={currModel}
+                setCurrModel={setCurrModel}
+                inConvo={inConvo}
+              />
+            )}
           </div>
         </div>
         <Box
@@ -168,6 +172,8 @@ const Chat = ({
                 borderBottom: "1px solid #EAEAEA",
                 alignItems: "center",
                 backgroundColor: "#F9F9F9",
+                marginRight: "10px",
+                marginLeft: "5px",
               }}
             >
               <div>
@@ -190,7 +196,7 @@ const Chat = ({
                     width: "100%",
                   }}
                 >
-                  <IconButton
+                  <Button
                     backgroundColor="#ACCDEC"
                     color="#555"
                     size="sm"
@@ -204,7 +210,19 @@ const Chat = ({
                       createNewConversation();
                       setOpenConvoHistory(false);
                     }}
-                  />
+                    overflow={"hidden"}
+                    whiteSpace={"nowrap"}
+                    textOverflow={"ellipsis"}
+                    ms={2}
+                  >
+                    <Text
+                      overflow={"hidden"}
+                      whiteSpace={"nowrap"}
+                      textOverflow={"ellipsis"}
+                    >
+                      New Conversation
+                    </Text>
+                  </Button>
                 </div>
               )}
             </div>
@@ -245,7 +263,7 @@ const Chat = ({
                         name={
                           convo.conversation_name
                             ? convo.conversation_name
-                            : "C " + index
+                            : "C " + (index + 1)
                         }
                         backgroundColor="#7CA2DE"
                         style={{

@@ -39,6 +39,7 @@ class AnswerAssessmentQuestionSerializer(serializers.Serializer):
     utorid = serializers.CharField(required=False)
     user_id = serializers.CharField(required=False)
     conversation_id = serializers.CharField()
+    assessment_id = serializers.CharField()
     assessment_question_id = serializers.CharField()
     answer = serializers.CharField()
 
@@ -46,6 +47,7 @@ class AnswerAssessmentQuestionSerializer(serializers.Serializer):
         utorid = validated_data.get('utorid')
         user_id = validated_data.get('user_id')
         conversation_id = validated_data.get('conversation_id')
+        assessment_id = validated_data.get('assessment_id')
         assessment_question_id = validated_data.get('assessment_question_id')
         answer = validated_data.get('answer')
 
@@ -61,13 +63,18 @@ class AnswerAssessmentQuestionSerializer(serializers.Serializer):
         except:
             raise serializers.ValidationError(f"Conversation does not exist")
         
-        try:
-            asmnt_question = AssessmentQuestion.objects.get(assessment_question_id=assessment_question_id)
-        except:
-            raise serializers.ValidationError(f"Assessment question does not exist")
+        # try:
+        asmnt_question = AssessmentQuestion.objects.get(assessment_question_id=assessment_question_id)
+        asmnt = Assessment.objects.get(assessment_id=assessment_id)
+        # except:
+        #     raise serializers.ValidationError(f"Assessment question does not exist")
 
-        # Add the response to the user's assessment_responses
-        if not user.assessment_responses: user.assessment_responses = []
-        user.assessment_responses.append({'conversation_id': conversation_id, 'assessment_question_id': assessment_question_id, 'answer': answer, 'time': datetime.now()})
-        User.objects.filter(user_id=user.user_id).update(assessment_responses=user.assessment_responses, new_user=False)
+        AssessmentResponse(
+            assessment_id=asmnt.assessment_id,
+            assessment_question_id=assessment_question_id,
+            user_id=user.user_id,
+            conversation_id=conversation_id,
+            answer=answer,
+            correct=(answer == asmnt_question.correct_answer)
+        ).save()
         return asmnt_question

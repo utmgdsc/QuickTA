@@ -189,12 +189,17 @@ const ChatBoxTopNav = ({
                 placeholder={
                   "Please try your best to describe the problem you encountered!"
                 }
+                minBlockSize={"300px"}
                 onChange={(e) => setReportMsg(e.target.value)}
               />
             </ModalBody>
 
             <ModalFooter>
-              <Button colorScheme={"gray"} onClick={onClose}>
+              <Button
+                style={{ marginRight: "8px" }}
+                colorScheme={"gray"}
+                onClick={onClose}
+              >
                 Close
               </Button>
               <Button

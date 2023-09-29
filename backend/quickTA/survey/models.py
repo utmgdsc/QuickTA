@@ -35,3 +35,14 @@ class Survey(models.Model):
             "type": self.type,
             "ordering": self.ordering
         }
+
+class SurveyResponse(models.Model):
+    survey_id = models.TextField()
+    type = models.TextField(choices=[('Pre', 'Pre'), ('Post', 'Post')])
+    question_id = models.TextField()
+    user_id = models.TextField()
+    conversation_id = models.TextField()
+    answer = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
+
+

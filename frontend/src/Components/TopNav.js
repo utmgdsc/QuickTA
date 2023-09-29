@@ -42,6 +42,8 @@ const TopNav = ({ UTORid, auth }) => {
         spacing="2vw"
         style={{
           marginRight: "2vw",
+          overflowX: "scroll",
+          paddingLeft: "1vw",
         }}
       >
         {["IS", "AM", "RS"].includes(auth) && (
@@ -79,30 +81,6 @@ const TopNav = ({ UTORid, auth }) => {
           {UTORid}
         </Text>
       </Text>
-      <Button onClick={onOpen}>
-        <FontAwesomeIcon icon={faArrowRightFromBracket} size={"lg"} />
-      </Button>
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Logout</ModalHeader>
-          <ModalBody>Are you sure? Unsaved chats will not be saved.</ModalBody>
-
-          <ModalFooter>
-            <Button
-              backgroundColor="#3278cd"
-              marginRight="1vw"
-              color="white"
-              colorScheme="blue"
-            >
-              Logout
-            </Button>
-            <Button onClick={onClose} backgroundColor="#EFEFEF" color="#2D2D2D">
-              Cancel
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
     </HStack>
   );
 };
