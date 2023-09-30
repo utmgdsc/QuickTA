@@ -6,6 +6,7 @@ import {
   AvatarBadge,
   useDisclosure,
   Text,
+  VStack,
 } from "@chakra-ui/react";
 import ChatBoxTopNav from "./ChatBoxTopNav";
 import ChatBox from "./ChatBox";
@@ -148,7 +149,9 @@ const Chat = ({
 
   return (
     <>
-      <Box ml={"10vw"} mr={"10vw"}>
+      <Box ml={"10vw"} mr={"10vw"} style={{
+        minHeight: "fit-content",
+      }}>
         <div style={{ width: "500px" }}>
           <div style={{ display: "flex" }}>
             <CourseSelect
@@ -168,7 +171,7 @@ const Chat = ({
             )}
           </div>
         </div>
-        <Box
+        <VStack
           as={"div"}
           bgColor={"white"}
           border={"1px solid #EAEAEA"}
@@ -179,6 +182,7 @@ const Chat = ({
             maxHeight: "75vh",
             display: "flex",
             flexDirection: "row",
+            minHeight: "fit-content",
           }}
         >
           <Box
@@ -199,6 +203,7 @@ const Chat = ({
               style={{
                 display: "flex",
                 width: "100%",
+                height: "fit-content",
                 padding: "20px 16px",
                 borderBottom: "1px solid #EAEAEA",
                 alignItems: "center",
@@ -278,7 +283,7 @@ const Chat = ({
 
             <div
               style={{
-                height: "100%",
+                height: "fit-content",
                 overflowY: "auto", // Enable vertical scrolling if needed
                 maxHeight: "calc(75vh - 100px)", // Set a maximum height
               }}
@@ -451,7 +456,7 @@ const Chat = ({
               setText={setText}
             />
           </Box>
-        </Box>
+        </VStack>
       </Box>
       <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </>

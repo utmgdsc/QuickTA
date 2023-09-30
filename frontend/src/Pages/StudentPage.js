@@ -80,13 +80,7 @@ const StudentPage = ({
   }, [currCourse]);
 
   return (
-    <div
-      style={{
-        backgroundColor: "#F1F1F1",
-        width: "100vw",
-        minHeight: "100vh",
-      }}
-    >
+    <>
       <TopNav UTORid={UTORid} auth={auth} />
       {courses.length === 0 ? (
         <Box ml={"12vw"} mr={"12vw"}>
@@ -111,7 +105,7 @@ const StudentPage = ({
         />
       )}
       <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
-    </div>
+    </>
   );
 };
 
