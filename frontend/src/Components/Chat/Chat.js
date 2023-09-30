@@ -185,6 +185,7 @@ const Chat = ({
                 ? " full-width conversation-history-bar-full-height"
                 : " hidden")
             }
+            borderBottomLeftRadius={"lg"}
             style={{
               width: openConvoHistory ? "20%" : "70px",
               height: "100%",

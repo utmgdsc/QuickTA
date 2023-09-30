@@ -8,7 +8,7 @@ const ModelSelect = ({
   model_id,
 }) => {
   return (
-    <Box minW="100px" ml={4}>
+    <Box minW="100px" maxW="235px" ml={4}>
       {model_id ? (
         <Select
           placeholder={model_id}

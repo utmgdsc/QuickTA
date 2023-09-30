@@ -112,8 +112,10 @@ const ChatBoxTopNav = ({
             maxWidth: "120px",
           }}
         >
+          {/* Download Conversation Button */}
           <Button
             variant={"ghost"}
+            disabled={currConvoID === ""}
             py={8}
             px={5}
             className="top-nav-button"
@@ -145,7 +147,13 @@ const ChatBoxTopNav = ({
               }
             }}
           >
-            <Tooltip label={"This may take a couple of minutes"}>
+            <Tooltip
+              label={
+                currConvoID !== ""
+                  ? "This may take a couple of minutes"
+                  : "Start a new conversation first!"
+              }
+            >
               <VStack>
                 <FontAwesomeIcon icon={faDownload} size={"xl"} />
                 <div className="top-nav-buttons-text">
@@ -156,9 +164,10 @@ const ChatBoxTopNav = ({
               </VStack>
             </Tooltip>
           </Button>
-
+          {/* Report Conversation Button */}
           <Button
             variant={"ghost"}
+            disabled={currConvoID === ""}
             py={8}
             px={5}
             onClick={() => {
@@ -169,7 +178,11 @@ const ChatBoxTopNav = ({
               }
             }}
           >
-            <Tooltip label={"See a bug?"}>
+            <Tooltip
+              label={
+                currConvoID ? "See a bug?" : "Start a new conversation first!"
+              }
+            >
               <VStack>
                 <FontAwesomeIcon icon={faBug} size={"xl"} />
                 <div className="top-nav-buttons-text">

@@ -27,7 +27,7 @@ const TopNav = ({ UTORid, auth }) => {
         height: "10vh",
         padding: "6vh 5vw 6vh 5vw",
         fontFamily: "Poppins",
-        marginBottom: "5vh",
+        marginBottom: "3vh",
         boxShadow: "0px 1px 2px 1px rgba(0,0,0,0.12)",
       }}
       as={"div"}
