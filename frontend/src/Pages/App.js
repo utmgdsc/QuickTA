@@ -45,7 +45,7 @@ const App = () => {
         await getAllCourses(data.courses);
 
         setAuth(res.data.user_role);
-        if (auth === "ST") {
+        if (res.data.user_role === "ST") {
           setModelId(data.model_id);
         }
         // Check if user is new

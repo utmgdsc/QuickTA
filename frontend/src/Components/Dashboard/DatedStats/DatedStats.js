@@ -209,7 +209,7 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
               callBack={() => {
                 if (courseID && isWeekly != null) {
                   axios
-                    .get(
+                    .post(
                       process.env.REACT_APP_API_URL +
                         `/researchers/feedback-csv?filter=${
                           isWeekly === 1
@@ -217,10 +217,14 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
                             : isWeekly === 0
                             ? "Monthly"
                             : "All"
-                        }&course_id=${courseID}&timezone=America/Toronto`
+                        }&course_id=${courseID}&timezone=America/Toronto`, {
+                          course_id: courseID,
+                        }
                     )
                     .then((response) => {
+                      console.log("resp headers" , response);
                       if (response.headers["content-disposition"]) {
+                        console.log("DOWNLOADING", response);
                         fileDownload(
                           response.data,
                           response.headers["content-disposition"].split('"')[1]

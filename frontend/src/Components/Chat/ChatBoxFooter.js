@@ -32,12 +32,12 @@ const ChatBoxFooter = ({
   waitingForResp,
   setWaitForResp,
   userId,
-  model_ID,
   disableAll,
   setDisableAll,
   conversations,
   setConversations,
   model_id,
+  model_ID,
   UTORid,
   isOpenTechAssessment,
   onOpenTechAssessment,
@@ -198,7 +198,7 @@ const ChatBoxFooter = ({
             waitingForResp
           }
         >
-          End chat
+          End chat {model_id}{model_ID}
         </Button>
 
         <TechAssessment

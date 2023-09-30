@@ -66,7 +66,7 @@ class FeedbackCsvView(APIView):
                 openapi.Parameter("filter", openapi.IN_QUERY, description="Filter view", type=openapi.TYPE_STRING, required=True)
             ]
         )
-        def get(self, request):
+        def post(self, request):
             """
             Acquires the average ratings for a course by either:
             
@@ -84,8 +84,13 @@ class FeedbackCsvView(APIView):
             avg_ratings = ratings.aggregate(avg_rating=Avg('rating'))['avg_rating'] 
             
             # Create the csv 
-            response = HttpResponse(content_type='text/csv')
-            response['Content-Disposition'] = 'attachment; filename="ratings.csv"'
+            response = HttpResponse(
+                content_type='text/csv',
+                headers={'Content-Disposition': 'attachment; filename="ratings.csv"'}
+            )
+            response["Access-Control-Expose-Headers"] = "Content-Type, Content-Disposition"
+            
+
             writer = csv.writer(response)
             writer.writerow([ 'Course ID', 'Conversation ID', 'User Name', 'Utorid', 'Rating', 'Feedback Message' ])
 
@@ -196,9 +201,10 @@ class ReportedConversationsCsvView(APIView):
         # Create the csv 
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="reports.csv"'
+        response["Access-Control-Expose-Headers"] = "Content-Type, Content-Disposition"
         writer = csv.writer(response)
         writer.writerow([ 'Course ID', 'Conversation ID', 'User Name', 'Utorid', 'Report Time', 'Report Status', 'Report Message' ])
-
+        
         for report in reports:
             convo = get_object_or_404(Conversation, conversation_id=report.conversation_id)
             user = get_object_or_404(User, user_id=convo.user_id)
@@ -251,6 +257,7 @@ class ReportedChatlogsCsvView(APIView):
         # Create the csv 
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="chatlogs.csv"'
+        response["Access-Control-Expose-Headers"] = "Content-Type, Content-Disposition"
         writer = csv.writer(response)
         writer.writerow([ 'Course ID', 'Conversation ID', 'Time', 'Speaker', 'Chatlog', 'Delta' ])
 
@@ -333,6 +340,7 @@ class ResponseRateCsvView(APIView):
         # Create the csv 
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="response_rate.csv"'
+        response["Access-Control-Expose-Headers"] = "Content-Type, Content-Disposition"
         writer = csv.writer(response)
         writer.writerow([ 'Course ID', 'Conversation ID', 'User Name', 'Utorid', 'Delta' ])
 
@@ -489,6 +497,7 @@ class CourseComfortabilityCsvView(APIView):
         
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="comfortability_ratings.csv"'
+        response["Access-Control-Expose-Headers"] = "Content-Type, Content-Disposition"
         writer = csv.writer(response)
         writer.writerow([ 'Course ID', 'Conversation ID', 'User Name', 'Utorid', 'Comfortability Rating' ])
 
