@@ -45,7 +45,7 @@ const ChatBox = ({ messages, waitingForResp }) => {
                 isCode={true}
               />
             );
-          } else {
+          } else if(paragraph !== ""){
             chatBubbles.push(
               <ChatBubble
                 key={`${index}-${paragraphIndex}`}
