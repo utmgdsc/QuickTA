@@ -203,14 +203,19 @@ class SurveyAllQuestionsView(APIView):
         Acquires all questions of a survey, in order.
         """
         survey_id = request.query_params.get('survey_id', '')
-        survey = get_object_or_404(Survey, survey_id=survey_id)
-        questions = SurveyQuestion.objects.filter(question_id__in=survey.ordering)
-        serializer = SurveyQuestionSerializer(questions, many=True)
-        response = {
-            "survey_id": survey_id,
-            "type": survey.type,
-            "questions": serializer.data
-        }
+        
+        cache_key = f"survey-{survey_id}"
+        response = cache.get(cache_key)
+        if response is None:
+            survey = get_object_or_404(Survey, survey_id=survey_id)
+            questions = SurveyQuestion.objects.filter(question_id__in=survey.ordering)
+            serializer = SurveyQuestionSerializer(questions, many=True)
+            response = {
+                "survey_id": survey_id,
+                "type": survey.type,
+                "questions": serializer.data
+            }
+            cache.set(cache_key, response, 60*60*24)
         return JsonResponse(response)
 
 class ActiveSurveyView(APIView):

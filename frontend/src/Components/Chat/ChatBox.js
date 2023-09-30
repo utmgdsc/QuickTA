@@ -21,7 +21,7 @@ const ChatBox = ({ messages, waitingForResp }) => {
     >
       {messages.map(({ message, dateSent, isUser }, index) => {
         // Split the message into paragraphs based on "\n\n1.", "\n\n2.", etc.
-        const paragraphs = message.split(/\n\n\d+/);
+        const paragraphs = message.split(/\n\n/);
         const codeRegex = /```(\w+)?\n([\s\S]+?)\n```/g;
         const chatBubbles = [];
 

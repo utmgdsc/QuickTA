@@ -75,7 +75,6 @@ class AnswerQuestionSerializer(serializers.Serializer):
             cache.set(cache_key, user, timeout=60*60*24*7)
 
         elif survey_type == 'Post':
-            if not user.post_survey: user.post_survey = []
             try: 
                 Conversation.objects.get(conversation_id=conversation_id)
             except:
@@ -92,7 +91,7 @@ class AnswerQuestionSerializer(serializers.Serializer):
                 conversation_id=conversation_id,
                 answer=answer
             ).save()
-            User.objects.filter(user_id=user.user_id).update(new_user=False)
+            Conversation.objects.filter(conversation_id=conversation_id).update(status="I", end_time = datetime.now())
         else:
             raise serializers.ValidationError("Invalid survey_type. Must be 'pre' or 'post'")
         

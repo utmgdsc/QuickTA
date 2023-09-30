@@ -27,6 +27,7 @@ class ConversationHistorySerializer(ModelSerializer):
             'conversation_id',
             'conversation_name',
             'model_id',
+            'status',
             'start_time',
             'end_time',
         ]

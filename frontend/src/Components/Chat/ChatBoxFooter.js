@@ -22,6 +22,7 @@ import ErrorDrawer from "../ErrorDrawer";
 
 const ChatBoxFooter = ({
   updateMessages,
+  setIsOldConvo,
   inConvo,
   currConvoID,
   updateInConvo,
@@ -38,25 +39,19 @@ const ChatBoxFooter = ({
   setConversations,
   model_id,
   UTORid,
+  isOpenTechAssessment,
+  onOpenTechAssessment,
+  onCloseTechAssessment,
+  text,
+  setText,
 }) => {
-  const {
-    isOpen: isOpenTechAssessment,
-    onOpen: onOpenTechAssessment,
-    onClose: onCloseTechAssessment,
-  } = useDisclosure();
   // after conversations ends disclosure
-  const {
-    isOpen: isOpenComfortability,
-    onOpen: onOpenComfortability,
-    onClose: onCloseComfortability,
-  } = useDisclosure();
   const {
     isOpen: isErrOpen,
     onOpen: onErrOpen,
     onClose: onErrClose,
   } = useDisclosure();
   const [error, setError] = useState();
-  const [text, setText] = useState("");
 
   const handleChatKeyDown = (e) => {
     if (e.key === "Enter" || e.keyCode === 13) {
@@ -102,12 +97,20 @@ const ChatBoxFooter = ({
           let new_conversations = [new_convo, ...currConversations.slice(1)];
           setConversations(new_conversations);
         }
+        setDisableAll((oldDisable) => ({
+          ...oldDisable,
+          oldConvoButtons: false,
+        }));
       })
       .catch((err) => {
         console.log(err);
         setError(err);
         console.log(err);
         onErrOpen();
+        setDisableAll((oldDisable) => ({
+          ...oldDisable,
+          oldConvoButtons: false,
+        }));
       });
   };
 
@@ -115,6 +118,11 @@ const ChatBoxFooter = ({
     if (inConvo) {
       if (text) {
         setWaitForResp(true);
+        console.log("Disabling old convo buttons");
+        setDisableAll((oldDisable) => ({
+          ...oldDisable,
+          oldConvoButtons: true,
+        }));
         await getResponse();
       } else {
         console.log("You must type something before asking AI for response :)");
@@ -123,6 +131,11 @@ const ChatBoxFooter = ({
       // console.log("must start a conversation to send a message to AI!");
       if (text) {
         setWaitForResp(true);
+        console.log("Disabling old convo buttons");
+        setDisableAll((oldDisable) => ({
+          ...oldDisable,
+          oldConvoButtons: true,
+        }));
         axios
           .post(process.env.REACT_APP_API_URL + "/student/conversation", {
             user_id: userId,
@@ -135,6 +148,7 @@ const ChatBoxFooter = ({
             updateInConvo(true);
             setWaitForResp(true);
             setText("");
+            setIsOldConvo(false);
 
             data["conversation_name"] = "New Conversation";
             let currConversations = [res.data, ...conversations];
@@ -170,12 +184,7 @@ const ChatBoxFooter = ({
           fontSize={"sm"}
           onClick={() => {
             if (inConvo && messages) {
-              console.log(messages);
               onOpenTechAssessment();
-              updateMessages([]);
-              setDisableAll(true);
-              updateInConvo(false);
-              updateConvoID("");
             } else {
               console.log(
                 "Must be in a convo to leave one or please send at least one msg :>"
@@ -183,7 +192,10 @@ const ChatBoxFooter = ({
             }
           }}
           isDisabled={
-            !inConvo || (inConvo && messages.length == 0) || disableAll
+            !inConvo ||
+            (inConvo && messages.length == 0) ||
+            disableAll.endChat ||
+            waitingForResp
           }
         >
           End chat
@@ -200,6 +212,8 @@ const ChatBoxFooter = ({
           UTORid={UTORid}
           disableAll={disableAll}
           setDisableAll={setDisableAll}
+          conversations={conversations}
+          setConversations={setConversations}
         />
 
         <Input
@@ -209,7 +223,7 @@ const ChatBoxFooter = ({
           onChange={(e) => {
             setText(e.target.value.slice(0, process.env.MAX_MESSAGE_LENGTH));
           }}
-          isDisabled={waitingForResp || disableAll}
+          isDisabled={waitingForResp || disableAll.inputMessage}
           onKeyDown={handleChatKeyDown}
         />
 
@@ -218,7 +232,7 @@ const ChatBoxFooter = ({
           colorScheme={"blue"}
           fontSize={"sm"}
           onClick={handleSubmit}
-          isDisabled={waitingForResp || disableAll}
+          isDisabled={waitingForResp || disableAll.sendButton}
         >
           Send
         </Button>

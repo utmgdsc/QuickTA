@@ -49,18 +49,26 @@ const Chat = ({
   const [currConvoID, updateConvoID] = useState("");
   const [openConvoHistory, setOpenConvoHistory] = useState(false);
   const [conversations, setConversations] = useState([]);
+  const [isOldConvo, setIsOldConvo] = useState(false);
+  const [text, setText] = useState("");
   const {
     isOpen: isErrOpen,
     onOpen: onErrOpen,
     onClose: onErrClose,
   } = useDisclosure();
   const {
-    isOpen: isOpenPreSurvey,
-    onOpen: onOpenPreSurvey,
-    onClose: onClosePreSurvey,
+    isOpen: isOpenTechAssessment,
+    onOpen: onOpenTechAssessment,
+    onClose: onCloseTechAssessment,
   } = useDisclosure();
   const [error, setError] = useState();
-  const [disableAll, setDisableAll] = useState(false);
+  const [disableAll, setDisableAll] = useState({
+    newConversation: false,
+    endChat: false,
+    inputMessage: false,
+    sendButton: false,
+    oldConvoButtons: false,
+  });
 
   const getConversations = async () => {
     let params = "course_id=" + currCourse.course_id + "&user_id=" + userId;
@@ -121,25 +129,24 @@ const Chat = ({
         isUser: false,
       },
     ]);
-    axios
-      .post(process.env.REACT_APP_API_URL + "/student/conversation", {
-        user_id: userId,
-        course_id: currCourse.course_id,
-        model_id: model_id.length === 0 ? currModel.model_id : model_id,
-      })
-      .then(async (res) => {
-        updateConvoID(res.data.conversation_id);
-        updateInConvo(true);
-      })
-      .catch((err) => {
-        setError(err);
-        console.log(err);
-        onErrOpen();
-      });
+    // axios
+    //   .post(process.env.REACT_APP_API_URL + "/student/conversation", {
+    //     user_id: userId,
+    //     course_id: currCourse.course_id,
+    //     model_id: model_id.length === 0 ? currModel.model_id : model_id,
+    //   })
+    //   .then(async (res) => {
+    //     updateConvoID(res.data.conversation_id);
+    //     updateInConvo(true);
+    //   })
+    //   .catch((err) => {
+    //     setError(err);
+    //     console.log(err);
+    //     onErrOpen();
+    //   });
   };
 
   useEffect(() => {
-    onOpenPreSurvey();
     getConversations();
   }, [currCourse]);
 
@@ -229,14 +236,32 @@ const Chat = ({
                     color="#555"
                     size="sm"
                     icon={<SmallAddIcon />}
-                    isDisabled={disableAll}
+                    isDisabled={
+                      disableAll.newConversation ||
+                      (!inConvo && !currConvoID && !isOldConvo)
+                    }
                     onClick={() => {
-                      setDisableAll(false);
-                      updateInConvo(false);
-                      updateConvoID("");
-                      updateMessages([]);
-                      createNewConversation();
-                      setOpenConvoHistory(false);
+                      if (
+                        (currConvoID && inConvo && !isOldConvo) ||
+                        (inConvo && isOldConvo)
+                        // active conversation, is old conversation, in a conversation
+                      ) {
+                        // open technical assessment
+                        onOpenTechAssessment();
+                      } else {
+                        setDisableAll((prevDisableAll) => ({
+                          inputMessage: false,
+                          sendButton: false,
+                          newConversation: true,
+                          endChat: false,
+                          oldConvoButtons: false,
+                        }));
+                        updateInConvo(false);
+                        updateConvoID("");
+                        setIsOldConvo(false);
+                        updateMessages([]);
+                        createNewConversation();
+                      }
                     }}
                     overflow={"hidden"}
                     whiteSpace={"nowrap"}
@@ -263,31 +288,88 @@ const Chat = ({
               }}
             >
               <div>
+                <p>currConvoID: {currConvoID}</p>
+                <p>isOldConvo {isOldConvo ? "true" : "false"}</p>
+                <p>inConvo {inConvo ? "true" : "false"}</p>
+                <p>newConvo {disableAll.newConversation ? "true" : "false"}</p>
+                <p>endChat {disableAll.endChat ? "true" : "false"}</p>
+                <p>inputMsg {disableAll.inputMessage ? "true" : "false"}</p>
+                <p>sendBtn {disableAll.sendButton ? "true" : "false"}</p>
                 {conversations.map((convo, index) => {
                   return (
                     <Box
                       key={convo.conversation_id}
                       className="conversation-history-box"
-                      style={{
-                        background: "#F1F1F1",
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                        padding: "10px",
-                        borderBottom: "1px solid #EAEAEA",
-                        cursor: "pointer",
-                        width: "100%",
-                      }}
+                      style={
+                        disableAll.oldConvoButtons
+                          ? {
+                              background: "#F1F1F1",
+                              display: "flex",
+                              flexDirection: "row",
+                              alignItems: "center",
+                              padding: "10px",
+                              borderBottom: "1px solid #EAEAEA",
+                              cursor: "not-allowed",
+                              width: "100%",
+                            }
+                          : {
+                              background: "#F1F1F1",
+                              display: "flex",
+                              flexDirection: "row",
+                              alignItems: "center",
+                              padding: "10px",
+                              borderBottom: "1px solid #EAEAEA",
+                              cursor: "pointer",
+                              width: "100%",
+                            }
+                      }
                       onClick={() => {
+                        console.log("disable all", disableAll);
+                        if (disableAll.oldConvoButtons) {
+                          console.log("disabled convo buttons");
+                          return;
+                        }
                         console.log(currConvoID === convo.conversation_id);
                         if (currConvoID !== convo.conversation_id) {
-                          setDisableAll(true);
+                          setText("");
+                          if (convo.status == "A") {
+                            // active old conversation
+                            setIsOldConvo(true);
+                            updateConvoID(convo.conversation_id);
+                            updateInConvo(true);
+                            setDisableAll((prevDisableAll) => ({
+                              inputMessage: false,
+                              sendButton: false,
+                              newConversation: false,
+                              endChat: false,
+                              oldConvoButtons: false,
+                            }));
+                          } else {
+                            // Inactive old conversation
+                            setIsOldConvo(true);
+                            updateInConvo(false);
+                            setDisableAll((prevDisableAll) => ({
+                              inputMessage: true,
+                              sendButton: true,
+                              newConversation: false,
+                              endChat: true,
+                              oldConvoButtons: false,
+                            }));
+                          }
                         } else {
-                          setDisableAll(false);
+                          // current ongoing conversation
+                          setDisableAll((prevDisableAll) => ({
+                            inputMessage: false,
+                            sendButton: false,
+                            newConversation: false,
+                            endChat: false,
+                            oldConvoButtons: false,
+                          }));
                         }
                         getConversationMessages(convo.conversation_id);
                       }}
                     >
+                      {convo.status == "A" ? "A" : "I"}
                       <Avatar
                         name={
                           convo.conversation_name
@@ -350,6 +432,7 @@ const Chat = ({
             <ChatBox messages={messages} waitingForResp={waitingForResp} />
             <ChatBoxFooter
               userId={userId}
+              setIsOldConvo={setIsOldConvo}
               updateMessages={updateMessages}
               inConvo={inConvo}
               updateInConvo={updateInConvo}
@@ -365,17 +448,16 @@ const Chat = ({
               setDisableAll={setDisableAll}
               conversations={conversations}
               setConversations={setConversations}
+              isOpenTechAssessment={isOpenTechAssessment}
+              onOpenTechAssessment={onOpenTechAssessment}
+              onCloseTechAssessment={onCloseTechAssessment}
               UTORid={UTORid}
+              text={text}
+              setText={setText}
             />
           </Box>
         </Box>
       </Box>
-      <PreSurvey
-        isOpen={isOpenPreSurvey}
-        onClose={onClosePreSurvey}
-        UTORid={UTORid}
-        setDisableAll={setDisableAll}
-      />
       <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </>
   );

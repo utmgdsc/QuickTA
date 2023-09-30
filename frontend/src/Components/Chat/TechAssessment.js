@@ -11,6 +11,7 @@ import {
   RadioGroup,
   useDisclosure,
   VStack,
+  Spinner,
   Text,
 } from "@chakra-ui/react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -24,12 +25,14 @@ const TechAssessment = ({
   onOpenTechAssessment,
   onCloseTechAssessment,
   conversation_id,
-  updateConvoID,
-  updateInConvo,
   updateMessages,
+  updateInConvo,
+  updateConvoID,
   UTORid,
   disableAll,
   setDisableAll,
+  conversations,
+  setConversations,
 }) => {
   const {
     isOpen: isErrOpen,
@@ -50,6 +53,7 @@ const TechAssessment = ({
   const [answerFlavorText, setAnswerFlavorText] = useState("");
   const [assessement_question_id, setAssessmentQuestionID] = useState("");
   const [disableAllOption, setDisableAllOption] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch code, questions, and answer for tech assessment
   const fetchCodeQuestion = () => {
@@ -76,7 +80,7 @@ const TechAssessment = ({
         onErrOpen();
       });
   };
-  
+
   useEffect(() => {
     fetchCodeQuestion();
   }, [UTORid]);
@@ -162,9 +166,22 @@ const TechAssessment = ({
                 {answerFlavorText}
               </Text>
             ) : null}
+            {isSubmitting && (
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <Spinner
+                  color="gray"
+                  size={"xs"}
+                  style={{ marginRight: "5px" }}
+                />
+                <Text color="gray" fontSize={"12px"}>
+                  Saving response...&nbsp;
+                </Text>
+              </div>
+            )}
             <Button
-              isDisabled={studentResponse === null}
+              isDisabled={studentResponse === null || isSubmitting}
               onClick={() => {
+                setIsSubmitting(true);
                 if (!disableAllOption) {
                   //Display Flavor Text
                   setDisableAllOption(true);
@@ -185,6 +202,7 @@ const TechAssessment = ({
                       let data = res.data;
                       setAnswer(data.correct_answer);
                       setAnswerFlavorText(data.correct_answer_flavor_text);
+                      setIsSubmitting(false);
                     })
                     .catch((err) => {
                       setError(err);
@@ -215,6 +233,18 @@ const TechAssessment = ({
         onClose={onPostQClose}
         onOpenTechAssessment={onOpenTechAssessment}
         setDisableAll={setDisableAll}
+        updateMessages={updateMessages}
+        updateInConvo={updateInConvo}
+        updateConvoID={updateConvoID}
+        conversations={conversations}
+        conversation_id={conversation_id}
+        setConversations={setConversations}
+        UTORid={UTORid}
+        setStudentResponse={setStudentResponse}
+        setDisableAllOption={setDisableAllOption}
+        setAnswer={setAnswer}
+        setDisplayAnswer={setDisplayAnswer}
+        setAnswerFlavorText={setAnswerFlavorText}
       />
       <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </>
