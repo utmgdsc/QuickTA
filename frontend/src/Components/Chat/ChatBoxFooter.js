@@ -159,8 +159,9 @@ const ChatBoxFooter = ({
     <>
       <HStack
         bgColor={"white"}
-        p={5}
         paddingX={"3vw"}
+        paddingTop={1}
+        paddingBottom={1}
         borderTop={"2px solid #EAEAEA"}
       >
         <Button

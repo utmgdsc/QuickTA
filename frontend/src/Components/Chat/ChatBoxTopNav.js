@@ -85,6 +85,7 @@ const ChatBoxTopNav = ({
               style={{
                 fontSize: "lg",
                 marginLeft: "0.5vw",
+                lineHeight: "1.2",
               }}
             >
               Automated teaching assistant for

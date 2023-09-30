@@ -199,8 +199,8 @@ const Chat = ({
                 borderBottom: "1px solid #EAEAEA",
                 alignItems: "center",
                 backgroundColor: "#F9F9F9",
-                marginRight: "10px",
-                marginLeft: "5px",
+                borderTopLeftRadius: "5px",
+                borderTopRightRadius: "5px",
               }}
             >
               <div>
@@ -316,7 +316,7 @@ const Chat = ({
                         >
                           {convo.conversation_name
                             ? convo.conversation_name
-                            : `Conversation ${index + 1}`}
+                            : `Conversation ${conversations.length - index}`}
                         </span>
                       )}
                     </Box>
