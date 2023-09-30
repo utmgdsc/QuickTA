@@ -39,23 +39,22 @@ const App = () => {
       .then(async (res) => {
         // User authentication
         let data = res.data;
+        setIsNewUser(data.new_user);
         setuserId(data.user_id);
         setUtorID(data.utorid);
         await getAllCourses(data.courses);
+
         setAuth(res.data.user_role);
         if (auth === "ST") {
           setModelId(data.model_id);
         }
         // Check if user is new
-        setIsNewUser(data.new_user);
-        setIsLoading(false);
         return res.data.user_id;
       })
       .catch((err) => {
         setError(err);
         console.log(err);
         onErrOpen();
-        setIsLoading(false);
       });
 
     return user;
@@ -96,14 +95,20 @@ const App = () => {
                 .course_name,
           });
         }
-        setIsLoading(false);
+        setTimeout(() => {
+          setIsLoading(false);
+          console.log("Done loading");
+        }, 2000);
       })
       .catch((err) => {
         console.log(err);
         setError(err);
-        console.log(err);
         onErrOpen();
-        setIsLoading(false);
+
+        setTimeout(() => {
+          setIsLoading(false);
+          console.log("Done loading but error");
+        }, 2000);
       });
   };
 
@@ -114,7 +119,7 @@ const App = () => {
   }, [UTORid]);
 
   return isLoading ? (
-    <CustomSpinner />
+    <LandingPage isLoading={isLoading} />
   ) : (
     <>
       <Routes>
@@ -122,7 +127,12 @@ const App = () => {
           path="/"
           element={
             isNewUser ? (
-              <LandingPage />
+              <LandingPage
+                isLoading={isLoading}
+                UTORid={UTORid}
+                isNewUser={isNewUser}
+                setIsNewUser={setIsNewUser}
+              />
             ) : (
               <StudentPage
                 UTORid={UTORid}
