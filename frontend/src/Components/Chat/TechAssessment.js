@@ -132,11 +132,11 @@ const TechAssessment = ({
                 {options.map((element) => (
                   <Button
                     className={
-                      studentResponse !== element.choice
+                      studentResponse != element.choice
                         ? "hidden-border"
                         : !answer
                         ? "selected-border"
-                        : element.choice != studentResponse
+                        : element.choice == studentResponse
                         ? "correct-border"
                         : "wrong-border"
                     }

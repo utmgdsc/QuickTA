@@ -255,6 +255,7 @@ class UserBatchAddCsvView(APIView):
 
         Skips rows missing 'utorid' and 'name' column headers.
         Optional column with header 'role' defaults to 'ST' student role.
+        Optional column with header 'model_id' to assign a default model ID to 'ST' student role.
         """
         csv_file = request.FILES['files']
         if not csv_file: return ErrorResponse("No csv uploaded", status=status.HTTP_400_BAD_REQUEST)
@@ -271,11 +272,15 @@ class UserBatchAddCsvView(APIView):
         file_data = csv_file.read().decode(encoding='utf-8-sig')
         lines = file_data.split("\n")
 
-        name_idx, utorid_idx, user_role_idx = -1, -1, -1
+        name_idx, utorid_idx, user_role_idx, model_id_idx = -1, -1, -1, -1
+        print(lines[0].split(","))
         for index, key in enumerate(lines[0].split(",")):
             if key == 'name': name_idx = index
             if key == 'utorid': utorid_idx = index
             if key == 'role': user_role_idx = index
+            if key == 'model_id': model_id_idx = index
+
+        print(name_idx, utorid_idx, user_role_idx, model_id_idx)
         
         if not (name_idx != -1 and utorid_idx != -1):
             return ErrorResponse(f'Fields not present: {"name" if name_idx == -1 else ""} {"utorid" if utorid_idx == -1 else ""}', status=status.HTTP_400_BAD_REQUEST)
@@ -290,6 +295,9 @@ class UserBatchAddCsvView(APIView):
             utorid = row[utorid_idx]
             name = row[name_idx]
             role = row[user_role_idx] if user_role_idx != -1 else user_role
+            model_id = row[model_id_idx] if model_id_idx != -1 else ""
+
+            
 
             if not (utorid and name): 
                 failed_users.append(f'Row {i+2}: missing utorid or name')
@@ -298,13 +306,13 @@ class UserBatchAddCsvView(APIView):
             if User.objects.filter(utorid=utorid):
                 user = User.objects.get(utorid=utorid)
                 if course_id not in user.courses:
-                    user.courses = user.courses + [course_id]
-                    User.objects.filter(utorid=utorid).update(courses=user.courses)
-                data = { 'utorid': utorid, 'name': name, 'user_role': role, 'courses': [course_id] }
+                    user.courses = user.courses + [str(course_id)]
+                    User.objects.filter(utorid=utorid).update(courses=user.courses, model_id=model_id)
+                data = { 'utorid': utorid, 'name': name, 'user_role': role, 'courses': [course_id], 'model_id': model_id }
                 existing_users.append(data)
                 continue
 
-            data = { 'utorid': utorid, 'name': name, 'user_role': role, 'courses': [course_id] }
+            data = { 'utorid': utorid, 'name': name, 'user_role': role, 'courses': [course_id], 'model_id': model_id }
             successful_users.append(data)
         
         serializer = UserBatchAddSerializer(data=successful_users, many=True)
@@ -314,7 +322,7 @@ class UserBatchAddCsvView(APIView):
             # Add existing users to course
             all_users = existing_users + successful_users
             for user in all_users:
-                user_id = User.objects.get(utorid=user['utorid']).user_id
+                user_id = str(User.objects.get(utorid=user['utorid']).user_id)
                 if user['user_role'] == 'ST': course.students.append(user_id) if user_id not in course.students else None
                 elif user['user_role'] == 'IS': course.instructors.append(user_id) if user_id not in course.instructors else None
                 elif user['user_role'] == 'RS': course.researchers.append(user_id) if user_id not in course.researchers else None

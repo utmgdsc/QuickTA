@@ -145,6 +145,15 @@ const ChatBoxFooter = ({
           ...oldDisable,
           oldConvoButtons: true,
         }));
+
+        const now = Temporal.Now.zonedDateTimeISO().toString();
+        const userText = {
+          message: text,
+          dateSent: now,
+          isUser: "true",
+        };
+        updateMessages((oldMessage) => [...oldMessage, userText]);
+
         axios
           .post(process.env.REACT_APP_API_URL + "/student/conversation", {
             user_id: userId,
@@ -165,7 +174,13 @@ const ChatBoxFooter = ({
 
             let conversation_id = res.data.conversation_id;
             let chatlog = text;
-            await getResponse(conversation_id, chatlog, currConversations);
+
+            await getResponse(
+              conversation_id,
+              chatlog,
+              currConversations,
+              true
+            );
           })
           .catch((err) => {
             console.log(err);

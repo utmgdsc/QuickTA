@@ -1,8 +1,11 @@
+import uuid
 import openai
 import environ
 import time
 from student.models import Conversation
 from models.models import GPTResponse
+from student.models import Chatlog
+from datetime import timedelta
 
 env = environ.Env()
 environ.Env.read_env()
@@ -28,6 +31,9 @@ def completion(conversation, settings, chatlog):
             {"role": "user", "content": f"{chatlog}"},
         ]
         conversation_name = get_conversation_name(chatlog)
+        
+        MESSAGE = "Hi! I am an AI assistant designed to support you in your Python programming learning journey. I cannot give out solutions to your assignments (python code) but I can help guide you if you get stuck. How can I help you?"
+        create_chatlog(conversation.conversation_id, MESSAGE, False, conversation.start_time, None)
     else:
         messages = conversation.conversation_log
         messages.append({"role": "user", "content": f"{chatlog}"})
@@ -84,3 +90,17 @@ def get_response(conversation, settings, chatlog):
     # else: response = "[Placeholder] Hello World"
     if not response: response = "Sorry for the invconvenience. Currently having difficulties. Please try again later."
     return response, conversation_name
+
+
+def create_chatlog(cid, chatlog, is_user, time, delta):
+        chatlog_id = uuid.uuid4()
+        chatlog = Chatlog(
+            chatlog_id=str(chatlog_id),
+            conversation_id=str(cid),
+            time=time,
+            is_user=is_user,
+            chatlog=chatlog,
+            delta=delta
+        )
+        chatlog.save()
+        return chatlog

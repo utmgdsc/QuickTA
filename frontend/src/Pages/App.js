@@ -23,7 +23,7 @@ const App = () => {
   const [model_id, setModelId] = useState("");
   const [courseName, setCourseName] = useState("");
   const [auth, setAuth] = useState("");
-  const [UTORid, setUtorID] = useState("choiman3");
+  const [UTORid, setUtorID] = useState("testuser1");
   const [isNewUser, setIsNewUser] = useState(true);
   // const [auth, setAuth] = useState("student");
   const {
@@ -47,6 +47,7 @@ const App = () => {
         setAuth(res.data.user_role);
         if (res.data.user_role === "ST") {
           setModelId(data.model_id);
+          console.log("model id", data.model_id);
         }
         // Check if user is new
         return res.data.user_id;

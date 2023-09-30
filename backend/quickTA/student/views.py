@@ -64,7 +64,7 @@ class ConversationView(APIView):
 
         
         # set previous conversation status to 'I' (Inactive), and create new conversation
-        Conversation.objects.filter(user_id=user_id).update(status='I')
+        # Conversation.objects.filter(user_id=user_id).update(status='I')
         serializer = self.create_conversation(user, course, model)
 
         if serializer.is_valid():
@@ -115,13 +115,16 @@ class ConversationHistoryCsvView(APIView):
         user = get_object_or_404(User, user_id=conversation.user_id)
         chatlogs = Chatlog.objects.filter(conversation_id=conversation_id).order_by('time')
 
+        time_now = timezone.now()
+        readable_date = time_now.strftime("%Y-%m-%d_%H-%M-%S")
         response = HttpResponse(
             content_type='text/csv',
-            headers={'Content-Disposition': 'attachment; filename="convo-report.csv"'}
+            headers={'Content-Disposition': f'attachment; filename="[{conversation.conversation_name}]_{readable_date}.csv"'}
         )
         response["Access-Control-Expose-Headers"] = "Content-Type, Content-Disposition"
 
         writer = csv.writer(response)
+        writer.writerow(['Time', 'Speaker', 'Message'])
         for chatlog in chatlogs:
             formatted_time = chatlog.time.strftime("%m/%d/%Y %H:%M:%S")
             speaker = str(user.name) if chatlog.is_user else 'QuickTA'
@@ -159,16 +162,7 @@ class ChatlogView(APIView):
         conversation_id = request.data.get('conversation_id', '')
         chatlog = request.data.get('chatlog', '')
         current_time, location = self.get_time(request)
-
-        conversation_cache_key = "chatlog_conversation_" + str(conversation_id)
-        conversation = cache.get(conversation_cache_key)
-        if not conversation:
-            conversation = get_object_or_404(Conversation, conversation_id=conversation_id)
-            cache.set(conversation_cache_key, conversation, 60*60*24)
-
-        # 0. Save initial message
-        MESSAGE = "Hi! I am an AI assistant designed to support you in your Python programming learning journey. I cannot give out solutions to your assignments (python code) but I can help guide you if you get stuck. How can I help you?"
-        self.create_chatlog(conversation_id, MESSAGE, False, conversation.start_time, None)
+        conversation = get_object_or_404(Conversation, conversation_id=conversation_id)
 
         # 1. Create user chatlog record
         last_chatlog = Chatlog.objects.filter(conversation_id=conversation_id).order_by('-time').first()

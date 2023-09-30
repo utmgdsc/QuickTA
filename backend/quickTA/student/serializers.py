@@ -80,7 +80,7 @@ class ConversationChatlogSerializer(ModelSerializer):
         ]
         
     def get_chatlogs(self, obj):
-        chatlogs = Chatlog.objects.filter(conversation_id=self.conversation_id)
+        chatlogs = Chatlog.objects.filter(conversation_id=self.conversation_id).order_by('time')
         serializer = self.Chatlogs(chatlogs, many=True)
         return serializer.data
 class FeedbackSerializer(ModelSerializer):
