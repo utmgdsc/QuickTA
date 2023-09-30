@@ -284,13 +284,6 @@ const Chat = ({
               }}
             >
               <div>
-                {/* <p>currConvoID: {currConvoID}</p>
-                <p>isOldConvo {isOldConvo ? "true" : "false"}</p>
-                <p>inConvo {inConvo ? "true" : "false"}</p>
-                <p>newConvo {disableAll.newConversation ? "true" : "false"}</p>
-                <p>endChat {disableAll.endChat ? "true" : "false"}</p>
-                <p>inputMsg {disableAll.inputMessage ? "true" : "false"}</p>
-                <p>sendBtn {disableAll.sendButton ? "true" : "false"}</p> */}
                 {conversations.map((convo, index) => {
                   return (
                     <Box
@@ -411,7 +404,10 @@ const Chat = ({
             className={
               `chat-box` + (openConvoHistory ? " hidden" : " full-width")
             }
-            style={{ minWidth: openConvoHistory ? "80%" : "calc(100% - 70px)" }}
+            style={{ 
+              minWidth: openConvoHistory ? "80%" : "calc(100% - 70px)",
+              maxHeight: "75vh",
+           }}
           >
             <div
               style={{

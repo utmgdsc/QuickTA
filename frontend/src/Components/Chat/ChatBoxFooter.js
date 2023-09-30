@@ -224,7 +224,8 @@ const ChatBoxFooter = ({
           setConversations={setConversations}
         />
 
-        <Input
+        <Textarea
+          css={{ resize: "none" }}
           variant={"filled"}
           placeholder={"Enter your message here"}
           value={text}

@@ -42,8 +42,10 @@ const ChatBubble = ({
         borderBottomLeftRadius={bottomLeftRadius}
         borderBottomRightRadius={bottomRightRadius}
         style={{
-          whiteSpace: "pre-wrap",
-          maxWidth: "800px", // Set the maximum width as needed
+          wordWrap: 'break-word',
+          overflowWrap: 'break-word',
+          maxWidth: '80%',  // Adjust as needed
+          whiteSpace: 'pre-wrap',
           fontSize: "12px",
         }}
       >
@@ -59,7 +61,10 @@ const ChatBubble = ({
             </SyntaxHighlighter>
           </div>
         ) : (
-          <span>{message}</span>
+          <span style={{
+            wordWrap: 'break-word',
+            wordBreak: 'break-word',
+          }}>{message}</span>
         )}
       </Box>
       {index === length - 1 && (
