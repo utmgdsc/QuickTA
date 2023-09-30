@@ -136,7 +136,7 @@ const TechAssessment = ({
                         ? "hidden-border"
                         : !answer
                         ? "selected-border"
-                        : element.choice == studentResponse
+                        : answer == studentResponse
                         ? "correct-border"
                         : "wrong-border"
                     }
@@ -149,7 +149,7 @@ const TechAssessment = ({
                       justifyContent: "left",
                     }}
                   >
-                    <Text margins={2}>{element.flavor_text + "   "}</Text>
+                    <Text margins={2}>{element.flavor_text}</Text>
                   </Button>
                 ))}
               </RadioGroup>

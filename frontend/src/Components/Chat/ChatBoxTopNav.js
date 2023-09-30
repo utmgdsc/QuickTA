@@ -174,7 +174,7 @@ const ChatBoxTopNav = ({
               if (currConvoID) {
                 onOpen();
               } else {
-                console.log("Must be in a chat to report a conversation!");
+                // console.log("Must be in a chat to report a conversation!");
               }
             }}
           >
