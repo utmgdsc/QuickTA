@@ -113,12 +113,17 @@ const ChatBoxFooter = ({
       })
       .catch((err) => {
         console.log(err);
-        setError(err);
-        console.log(err);
-        onErrOpen();
+        if (err.response.data.error.msg) {
+          setError(err.response.data.error.msg);
+          onErrOpen();
+        }
         setDisableAll((oldDisable) => ({
           ...oldDisable,
           oldConvoButtons: false,
+          endChat: false,
+          newConversation: false,
+          sendButton: false,
+          inputMessage: false,
         }));
       });
   };
