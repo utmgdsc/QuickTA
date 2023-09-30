@@ -24,6 +24,7 @@ def completion(conversation, settings, chatlog):
     if not conversation.conversation_log:
         messages=[
             {"role": "system", "content": f"{prompt}"},
+            {"role": "assistant", "content": "Hi! I am an AI assistant designed to support you in your Python programming learning journey. I cannot give out solutions to your assignments (python code) but I can help guide you if you get stuck. How can I help you?"},
             {"role": "user", "content": f"{chatlog}"},
         ]
         conversation_name = get_conversation_name(chatlog)

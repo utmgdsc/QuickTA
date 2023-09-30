@@ -21,6 +21,7 @@ import axios from "axios";
 import "../../assets/styles.css";
 import ErrorDrawer from "../ErrorDrawer";
 import PreSurvey from "./PreSurvey";
+import { Temporal } from "@js-temporal/polyfill";
 
 const Chat = ({
   currCourse,
@@ -36,7 +37,14 @@ const Chat = ({
   UTORid,
   auth,
 }) => {
-  const [messages, updateMessages] = useState([]);
+  const [messages, updateMessages] = useState([
+    {
+      message:
+        "Hi! I am an AI assistant designed to support you in your Python programming learning journey. I cannot give out solutions to your assignments (python code) but I can help guide you if you get stuck. How can I help you?",
+      dateSent: Temporal.Now.zonedDateTimeISO().toString(),
+      isUser: false,
+    },
+  ]);
   const [inConvo, updateInConvo] = useState(false);
   const [currConvoID, updateConvoID] = useState("");
   const [openConvoHistory, setOpenConvoHistory] = useState(false);
@@ -92,6 +100,7 @@ const Chat = ({
             };
           });
           updateMessages(msgs);
+          console.log(msgs);
         }
         setWaitForResp(false);
       })
@@ -104,6 +113,14 @@ const Chat = ({
 
   const createNewConversation = async () => {
     console.log(model_id.length === 0 ? currModel.model_id : model_id);
+    updateMessages([
+      {
+        message:
+          "Hi! I am an AI assistant designed to support you in your Python programming learning journey. I cannot give out solutions to your assignments (python code) but I can help guide you if you get stuck. How can I help you?",
+        dateSent: Temporal.Now.zonedDateTimeISO().toString(),
+        isUser: false,
+      },
+    ]);
     axios
       .post(process.env.REACT_APP_API_URL + "/student/conversation", {
         user_id: userId,
@@ -262,12 +279,13 @@ const Chat = ({
                       }}
                       onClick={() => {
                         console.log(currConvoID === convo.conversation_id);
-                        if(currConvoID !== convo.conversation_id){
+                        if (currConvoID !== convo.conversation_id) {
                           setDisableAll(true);
-                        }else{
+                        } else {
                           setDisableAll(false);
-                        }getConversationMessages(convo.conversation_id);} 
-                      }
+                        }
+                        getConversationMessages(convo.conversation_id);
+                      }}
                     >
                       <Avatar
                         name={
@@ -351,7 +369,12 @@ const Chat = ({
           </Box>
         </Box>
       </Box>
-      <PreSurvey isOpen={isOpenPreSurvey} onClose={onClosePreSurvey} UTORid={UTORid} setDisableAll={setDisableAll}/>
+      <PreSurvey
+        isOpen={isOpenPreSurvey}
+        onClose={onClosePreSurvey}
+        UTORid={UTORid}
+        setDisableAll={setDisableAll}
+      />
       <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </>
   );

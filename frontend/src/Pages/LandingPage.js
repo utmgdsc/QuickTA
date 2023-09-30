@@ -17,6 +17,13 @@ const LandingPage = ({ isLoading, UTORid, isNewUser, setIsNewUser }) => {
     '"Spaghetti code" is a term for messy and unorganized programming that\'s hard to follow, like a plate of tangled spaghetti.',
     'The "Hello, World!" program, used to teach beginners, was first created in the C programming language.',
     "Cat images and memes often find their way into code comments.",
+    "The HTTP 404 error, indicating a web page not found, was named after Room 404 at CERN, where the World Wide Web was born.",
+    'Programmers celebrate "Programmers\' Day" on the 256th day of the year, which is usually September 13th (or September 12th on leap years).',
+    "The world record for the fastest typing speed is around 217 words per minute.",
+    "Like writer's block, programmers can face \"coder's block\" when struggling to write code.",
+    "You can register domain names using emojis, like ❤️.ws.",
+    'Emoji Programming Languages: There are programming languages based entirely on emojis, like "😎++."',
+    "In the year 2000, there was widespread concern that computer systems wouldn't handle the change from '99 to '00, causing the Y2K bug.",
   ];
 
   if (!isLoading) {
@@ -73,7 +80,7 @@ const LandingPage = ({ isLoading, UTORid, isNewUser, setIsNewUser }) => {
           >
             {funFacts[Math.floor(Math.random() * funFacts.length)]}
           </Text>
-          <Progress size="xs" isIndeterminate />
+          <Progress style={{ marginTop: "10px" }} size="xs" isIndeterminate />
         </div>
       </div>
       <div></div>
