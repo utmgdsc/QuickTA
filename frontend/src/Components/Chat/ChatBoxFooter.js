@@ -10,6 +10,7 @@ import {
   Radio,
   RadioGroup,
   Text,
+  Textarea,
   VStack,
   useDisclosure,
 } from "@chakra-ui/react";
@@ -54,22 +55,29 @@ const ChatBoxFooter = ({
   const [error, setError] = useState();
 
   const handleChatKeyDown = (e) => {
-    if (e.key === "Enter" || e.keyCode === 13) {
+    if ((e.key === "Enter" || e.keyCode === 13) && !e.shiftKey) {
       if (text) {
         handleSubmit();
       }
     }
   };
 
-  const getResponse = async (conversation_id, response, currConversations) => {
+  const getResponse = async (
+    conversation_id,
+    response,
+    currConversations,
+    loadText
+  ) => {
     // Load user message on click
     const now = Temporal.Now.zonedDateTimeISO().toString();
-    const userText = {
-      message: text ? text : response,
-      dateSent: now,
-      isUser: "true",
-    };
-    updateMessages((oldMessage) => [...oldMessage, userText]);
+    if (!loadText) {
+      const userText = {
+        message: text ? text : response,
+        dateSent: now,
+        isUser: "true",
+      };
+      updateMessages((oldMessage) => [...oldMessage, userText]);
+    }
     axios
       .post(process.env.REACT_APP_API_URL + "/student/chatlog", {
         conversation_id: currConvoID ? currConvoID : conversation_id,
@@ -193,12 +201,12 @@ const ChatBoxFooter = ({
             }
           }}
           isDisabled={
-            (!inConvo && messages.length == 0) ||
+            (!inConvo && messages.length == 1) ||
             disableAll.endChat ||
             waitingForResp
           }
         >
-          End chat {model_id}{model_ID}
+          End chat
         </Button>
 
         <TechAssessment
