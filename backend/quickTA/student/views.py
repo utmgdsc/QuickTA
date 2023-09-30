@@ -2,6 +2,7 @@ import csv
 import pytz 
 import re
 import uuid
+import openai
 
 from django.utils import timezone, dateparse
 from django.shortcuts import get_object_or_404
@@ -159,39 +160,45 @@ class ChatlogView(APIView):
         """
         Creates a new chatlog from the user, as well as acquiring a response from the LLM.
         """
-        conversation_id = request.data.get('conversation_id', '')
-        chatlog = request.data.get('chatlog', '')
-        current_time, location = self.get_time(request)
-        conversation = get_object_or_404(Conversation, conversation_id=conversation_id)
+        try:
+            conversation_id = request.data.get('conversation_id', '')
+            chatlog = request.data.get('chatlog', '')
+            current_time, location = self.get_time(request)
+            conversation = get_object_or_404(Conversation, conversation_id=conversation_id)
 
-        # 1. Create user chatlog record
-        last_chatlog = Chatlog.objects.filter(conversation_id=conversation_id).order_by('-time').first()
-        delta = current_time - last_chatlog.time if last_chatlog else current_time - conversation.start_time
-        user_chatlog = self.create_chatlog(conversation.conversation_id, chatlog, True, current_time, delta)
-        # print(conversation.start_time, current_time, last_chatlog.time if last_chatlog else None, delta)
-        
-        model_cache_key = "chatlog_model_" + str(conversation.model_id)
-        model = cache.get(model_cache_key)
+            # 1. Create user chatlog record
+            last_chatlog = Chatlog.objects.filter(conversation_id=conversation_id).order_by('-time').first()
+            delta = current_time - last_chatlog.time if last_chatlog else current_time - conversation.start_time
+            user_chatlog = self.create_chatlog(conversation.conversation_id, chatlog, True, current_time, delta)
+            # print(conversation.start_time, current_time, last_chatlog.time if last_chatlog else None, delta)
+            
+            model_cache_key = "chatlog_model_" + str(conversation.model_id)
+            model = cache.get(model_cache_key)
 
-        if not model: 
-            model = get_object_or_404(GPTModel, model_id=conversation.model_id)
-            cache.set(model_cache_key, model, 60*60*24)
-        if not model.status: return ErrorResponse("Model not active", status.HTTP_406_NOT_ACCEPTABLE)
-        if model.course_id != conversation.course_id: return ErrorResponse("Model does not belong to course", status.HTTP_406_NOT_ACCEPTABLE)
-        
-        # 2. Acquire LLM chatlog response 
-        # course = get_object_or_404(Course, course_id=conversation.course_id)
-        # model_response = model.get_response(conversation_id, course.course_id, chatlog)
-        # model_response = "Hello world"
-        model_response, conversation_name = model_functions.get_response(conversation, model, chatlog)
-        model_time = timezone.now()
-        model_chatlog = self.create_chatlog(conversation.conversation_id, model_response, False, model_time, None)
+            if not model: 
+                model = get_object_or_404(GPTModel, model_id=conversation.model_id)
+                cache.set(model_cache_key, model, 60*60*24)
+            if not model.status: return ErrorResponse("Model not active", status.HTTP_406_NOT_ACCEPTABLE)
+            if model.course_id != conversation.course_id: return ErrorResponse("Model does not belong to course", status.HTTP_406_NOT_ACCEPTABLE)
+            
+            # 2. Acquire LLM chatlog response 
+            # course = get_object_or_404(Course, course_id=conversation.course_id)
+            # model_response = model.get_response(conversation_id, course.course_id, chatlog)
+            # model_response = "Hello world"
+            model_response, conversation_name = model_functions.get_response(conversation, model, chatlog)
+            model_time = timezone.now()
+            model_chatlog = self.create_chatlog(conversation.conversation_id, model_response, False, model_time, None)
 
-        model_time = model_time.astimezone(pytz.timezone(location)).isoformat() + "[" + location + "]"
-        user_time = current_time.astimezone(pytz.timezone(location)).isoformat() + "[" + location + "]"
-        response = self.get_chatlog_response(user_chatlog, model_chatlog, user_time, model_time, conversation_name)
+            model_time = model_time.astimezone(pytz.timezone(location)).isoformat() + "[" + location + "]"
+            user_time = current_time.astimezone(pytz.timezone(location)).isoformat() + "[" + location + "]"
+            response = self.get_chatlog_response(user_chatlog, model_chatlog, user_time, model_time, conversation_name)
 
-        return JsonResponse(response, status=status.HTTP_201_CREATED)
+            return JsonResponse(response, status=status.HTTP_201_CREATED)
+        except openai.error.InvalidRequestError as e:
+            print(e)
+            return ErrorResponse({"msg": "Invalid request. The maximum content length is 4000."}, status.HTTP_400_BAD_REQUEST)
+        except openai.error.RateLimitError as e:
+            return ErrorResponse({"msg": "Rate limit exceeded. Please wait for a while and try again later."}, status.HTTP_400_BAD_REQUEST)
     
     def get_time(self, request):
         
