@@ -167,7 +167,7 @@ const PostQuestions = ({
           <ModalBody>
             <VStack>
               {questions.map((question, question_idx) => (
-                <VStack style={{}}>
+                <VStack>
                   <div
                     style={{
                       fontSize: "14px",
