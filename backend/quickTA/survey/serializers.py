@@ -4,6 +4,7 @@ from survey.models import *
 from users.models import User
 from student.models import Conversation
 from datetime import datetime
+from django.core.cache import cache
 
 class SurveyQuestionSerializer(ModelSerializer):
     
@@ -67,6 +68,11 @@ class AnswerQuestionSerializer(serializers.Serializer):
             if not user.pre_survey: user.pre_survey = []
             user.pre_survey.append({'survey_id': survey_id, 'question_id': question_id, 'answer': answer, 'date': datetime.now()})
             User.objects.filter(user_id=user.user_id).update(pre_survey=user.pre_survey, new_user=False)
+            user = User.objects.get(user_id=user.user_id)
+
+            # Cache user
+            cache_key = f"{user.utorid}"
+            cache.set(cache_key, user, timeout=60*60*24*7)
 
         elif survey_type == 'Post':
             if not user.post_survey: user.post_survey = []
