@@ -22,30 +22,47 @@ const ChatBox = ({ messages, waitingForResp }) => {
       {messages.map(({ message, dateSent, isUser }, index) => {
         // Split the message into paragraphs based on "\n\n1.", "\n\n2.", etc.
         const paragraphs = message.split(/\n\n/);
-        if (index == messages.length - 1) {
-          // console.log(paragraphs);
-        }
         const chatBubbles = [];
 
+        var hasCode = false;
+        var currentMessage = "";
+        var language = "";
         paragraphs.forEach((paragraph, paragraphIndex) => {
           if (paragraph.startsWith("```")) {
             // Parse out ```
-            paragraph = paragraph.substring(3, paragraph.length - 3);
-            paragraph = paragraph.trim();
+            // find \n
 
-            chatBubbles.push(
-              <ChatBubble
-                key={`${index}-${paragraphIndex}`}
-                index={paragraphIndex}
-                length={paragraphs.length}
-                message={paragraph}
-                dateSent={dateSent}
-                isUser={isUser}
-                language={"python"}
-                isCode={true}
-              />
-            );
-          } else if(paragraph !== ""){
+            hasCode = true;
+            let newline = paragraph.indexOf("\n");
+            language = paragraph.substring(3, newline);
+            paragraph = paragraph.substring(newline + 1, paragraph.length);
+            // paragraph = paragraph.trim();
+            currentMessage += paragraph;
+          } else if (hasCode) {
+            //  check if it has backticks
+            if (paragraph.includes("```")) {
+              hasCode = false;
+              paragraph = paragraph.substring(0, paragraph.length - 3);
+              // paragraph = paragraph.trim();
+            }
+            currentMessage += "\n" + paragraph.trim();
+
+            if (!hasCode) {
+              chatBubbles.push(
+                <ChatBubble
+                  key={`${index}-${paragraphIndex}`}
+                  index={paragraphIndex}
+                  length={paragraphs.length}
+                  message={currentMessage}
+                  dateSent={dateSent}
+                  isUser={isUser}
+                  language={language}
+                  isCode={true}
+                />
+              );
+              currentMessage = "";
+            }
+          } else if (paragraph !== "") {
             chatBubbles.push(
               <ChatBubble
                 key={`${index}-${paragraphIndex}`}

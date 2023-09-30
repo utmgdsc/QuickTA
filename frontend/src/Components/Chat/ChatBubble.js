@@ -42,10 +42,10 @@ const ChatBubble = ({
         borderBottomLeftRadius={bottomLeftRadius}
         borderBottomRightRadius={bottomRightRadius}
         style={{
-          wordWrap: 'break-word',
-          overflowWrap: 'break-word',
-          maxWidth: '80%',  // Adjust as needed
-          whiteSpace: 'pre-wrap',
+          wordWrap: "break-word",
+          overflowWrap: "break-word",
+          maxWidth: "80%", // Adjust as needed
+          whiteSpace: "pre-wrap",
           fontSize: "12px",
         }}
       >
@@ -53,18 +53,31 @@ const ChatBubble = ({
           <div style={{ maxWidth: "100%", overflowX: "auto" }}>
             <SyntaxHighlighter
               showLineNumbers={true}
-              wrapLongLines={true}
+              // wrapLongLines={true}
               language={language}
-              codeTagProps={{ style: { fontSize: "12px" } }}
+              codeTagProps={{ style: { fontSize: "10px" } }}
+              customStyle={{
+                fontSize: "10px",
+                padding: "0px",
+                paddingTop: "10px",
+                paddingBottom: "10px",
+                margin: "0px",
+                lineHeight: "1.6",
+                minWidth: "600px",
+              }}
             >
               {message}
             </SyntaxHighlighter>
           </div>
         ) : (
-          <span style={{
-            wordWrap: 'break-word',
-            wordBreak: 'break-word',
-          }}>{message}</span>
+          <span
+            style={{
+              wordWrap: "break-word",
+              wordBreak: "break-word",
+            }}
+          >
+            {message}
+          </span>
         )}
       </Box>
       {index === length - 1 && (
