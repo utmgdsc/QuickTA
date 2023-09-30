@@ -37,7 +37,11 @@ const CourseCreator = ({
   const [semester, setNewSemester] = useState(
     Temporal.Now.plainDateISO().toString().substring(2, 4) + "F"
   );
-  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const {
+    isOpen: isErrOpen,
+    onOpen: onErrOpen,
+    onClose: onErrClose,
+  } = useDisclosure();
   const [error, setError] = useState();
   function updateField(e) {
     setNewCourse({
@@ -87,6 +91,7 @@ const CourseCreator = ({
       })
       .catch((err) => {
         setError(err);
+        console.log(err);
         onErrOpen();
         setIsLoading(false);
       });
@@ -228,18 +233,21 @@ const CourseCreator = ({
                               getAllCourses();
                             })
                             .catch((err) => {
-                                setError(err);
-                                onErrOpen();
+                              setError(err);
+                              console.log(err);
+                              onErrOpen();
                             });
                         })
                         .catch((err) => {
-                            setError(err);
-                            onErrOpen();
+                          setError(err);
+                          console.log(err);
+                          onErrOpen();
                         });
                     })
                     .catch((err) => {
-                        setError(err);
-                        onErrOpen();
+                      setError(err);
+                      console.log(err);
+                      onErrOpen();
                     });
                 }
                 setNewCourse({ course_code: "", course_name: "" });
@@ -267,7 +275,7 @@ const CourseCreator = ({
           </ModalFooter>
         </ModalContent>
       </Modal>
-      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
+      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </>
   );
 };

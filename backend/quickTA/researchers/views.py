@@ -237,7 +237,7 @@ class ReportedChatlogsCsvView(APIView):
             openapi.Parameter("conversation_id", openapi.IN_QUERY, description="Conversation ID", type=openapi.TYPE_STRING),
         ]
     )
-    def get(self, request):
+    def post(self, request):
         """
         Returns all of the chatlogs of a reported conversation given its ID.
 

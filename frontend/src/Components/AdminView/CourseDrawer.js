@@ -38,7 +38,11 @@ const CourseDrawer = ({ isOpen, onClose, course_id }) => {
     onOpen: onOpenStudent,
     onClose: onCloseStudent,
   } = useDisclosure();
-  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const {
+    isOpen: isErrOpen,
+    onOpen: onErrOpen,
+    onClose: onErrClose,
+  } = useDisclosure();
   const [error, setError] = useState();
   const fetchCourseList = async (course_id) => {
     let user_roles = "ST";
@@ -52,6 +56,7 @@ const CourseDrawer = ({ isOpen, onClose, course_id }) => {
       })
       .catch((err) => {
         setError(err);
+        console.log(err);
         onErrOpen();
       });
     setDisableFlag(false);
@@ -85,6 +90,7 @@ const CourseDrawer = ({ isOpen, onClose, course_id }) => {
       .then((res) => {})
       .catch((err) => {
         setError(err);
+        console.log(err);
         onErrOpen();
       });
   };
@@ -195,7 +201,7 @@ const CourseDrawer = ({ isOpen, onClose, course_id }) => {
           </DrawerBody>
         </DrawerContent>
       </Drawer>
-      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
+      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </>
   );
 };

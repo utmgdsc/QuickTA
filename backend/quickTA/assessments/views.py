@@ -196,8 +196,8 @@ class AssessmentListView(APIView):
         """
         Acquires all assessments
         """
-        surveys = Survey.objects.all()
-        serializer = AssessmentSerializer(surveys, many=True)
+        assessment = Assessment.objects.all()
+        serializer = AssessmentSerializer(assessment, many=True)
         return JsonResponse(serializer.data, safe=False)
 
 class AnswerAsessmentQuestionView(APIView):
@@ -244,5 +244,14 @@ class RandomAssessmentQuestionView(APIView):
             return ErrorResponse("Assessment question bank is empty", status=status.HTTP_400_BAD_REQUEST)
         question_id = random.choice(question_bank)
         question = get_object_or_404(AssessmentQuestion, assessment_question_id=question_id)
-        serializer = AssessmentQuestionSerializer(question)
-        return JsonResponse(serializer.data)
+        serializer = AssessmentQuestionSerializer(question).data
+        
+        response = {
+            "assessment_question_id": serializer["assessment_question_id"],
+            "type": serializer["type"],
+            "language": serializer["language"],
+            "question": serializer["question"],
+            "choices": serializer["choices"]   
+        }
+
+        return JsonResponse(response)

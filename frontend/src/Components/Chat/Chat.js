@@ -7,6 +7,8 @@ import {
   TabList,
   Tabs,
   Tab,
+  Tooltip,
+  Text,
 } from "@chakra-ui/react";
 import ChatBoxTopNav from "./ChatBoxTopNav";
 import ChatBox from "./ChatBox";
@@ -18,6 +20,7 @@ import { CloseIcon, HamburgerIcon, SmallAddIcon } from "@chakra-ui/icons";
 import axios from "axios";
 import "../../assets/styles.css";
 import ErrorDrawer from "../ErrorDrawer";
+import PreSurvey from "./PreSurvey";
 
 const Chat = ({
   currCourse,
@@ -30,6 +33,8 @@ const Chat = ({
   waitingForResp,
   setWaitForResp,
   model_id,
+  UTORid,
+  auth,
 }) => {
   const [messages, updateMessages] = useState([]);
   const [inConvo, updateInConvo] = useState(false);
@@ -41,8 +46,12 @@ const Chat = ({
     onOpen: onErrOpen,
     onClose: onErrClose,
   } = useDisclosure();
+  const {
+    isOpen: isOpenPreSurvey,
+    onOpen: onOpenPreSurvey,
+    onClose: onClosePreSurvey,
+  } = useDisclosure();
   const [error, setError] = useState();
-  const [pastConvoID, updatePastID] = useState("");
   const [disableAll, setDisableAll] = useState(false);
 
   const getConversations = async () => {
@@ -58,6 +67,7 @@ const Chat = ({
       })
       .catch((err) => {
         setError(err);
+        console.log(err);
         onErrOpen();
       });
   };
@@ -87,49 +97,55 @@ const Chat = ({
       })
       .catch((err) => {
         setError(err);
+        console.log(err);
         onErrOpen();
       });
   };
 
   const createNewConversation = async () => {
+    console.log(model_id.length === 0 ? currModel.model_id : model_id);
     axios
       .post(process.env.REACT_APP_API_URL + "/student/conversation", {
         user_id: userId,
         course_id: currCourse.course_id,
-        model_id: model_id.length === 0 ?  currModel.model_id : model_id,
+        model_id: model_id.length === 0 ? currModel.model_id : model_id,
       })
       .then(async (res) => {
         updateConvoID(res.data.conversation_id);
+        updateInConvo(true);
       })
       .catch((err) => {
         setError(err);
+        console.log(err);
         onErrOpen();
       });
   };
 
   useEffect(() => {
+    onOpenPreSurvey();
     getConversations();
   }, [currCourse]);
 
   return (
     <>
       <Box ml={"10vw"} mr={"10vw"}>
-        <div style={{ width: "315px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <div style={{ width: "500px" }}>
+          <div style={{ display: "flex" }}>
             <CourseSelect
               courses={courses}
               currCourse={currCourse}
               setCurrCourse={setCurrCourse}
               inConvo={inConvo}
             />
-
-            <ModelSelect
-              models={models}
-              model={model_id}
-              currModel={currModel}
-              setCurrModel={setCurrModel}
-              inConvo={inConvo}
-            />
+            {auth !== "ST" && (
+              <ModelSelect
+                models={models}
+                model={model_id}
+                currModel={currModel}
+                setCurrModel={setCurrModel}
+                inConvo={inConvo}
+              />
+            )}
           </div>
         </div>
         <Box
@@ -166,6 +182,8 @@ const Chat = ({
                 borderBottom: "1px solid #EAEAEA",
                 alignItems: "center",
                 backgroundColor: "#F9F9F9",
+                marginRight: "10px",
+                marginLeft: "5px",
               }}
             >
               <div>
@@ -188,11 +206,12 @@ const Chat = ({
                     width: "100%",
                   }}
                 >
-                  <IconButton
+                  <Button
                     backgroundColor="#ACCDEC"
                     color="#555"
                     size="sm"
                     icon={<SmallAddIcon />}
+                    isDisabled={disableAll}
                     onClick={() => {
                       setDisableAll(false);
                       updateInConvo(false);
@@ -201,7 +220,19 @@ const Chat = ({
                       createNewConversation();
                       setOpenConvoHistory(false);
                     }}
-                  />
+                    overflow={"hidden"}
+                    whiteSpace={"nowrap"}
+                    textOverflow={"ellipsis"}
+                    ms={2}
+                  >
+                    <Text
+                      overflow={"hidden"}
+                      whiteSpace={"nowrap"}
+                      textOverflow={"ellipsis"}
+                    >
+                      New Conversation
+                    </Text>
+                  </Button>
                 </div>
               )}
             </div>
@@ -230,15 +261,19 @@ const Chat = ({
                         width: "100%",
                       }}
                       onClick={() => {
-                        getConversationMessages(convo.conversation_id);
-                        setDisableAll(true);
-                      }}
+                        console.log(currConvoID === convo.conversation_id);
+                        if(currConvoID !== convo.conversation_id){
+                          setDisableAll(true);
+                        }else{
+                          setDisableAll(false);
+                        }getConversationMessages(convo.conversation_id);} 
+                      }
                     >
                       <Avatar
                         name={
                           convo.conversation_name
                             ? convo.conversation_name
-                            : "C " + index
+                            : "C " + (index + 1)
                         }
                         backgroundColor="#7CA2DE"
                         style={{
@@ -308,12 +343,15 @@ const Chat = ({
               waitingForResp={waitingForResp}
               setWaitForResp={setWaitForResp}
               disableAll={disableAll}
+              setDisableAll={setDisableAll}
               conversations={conversations}
               setConversations={setConversations}
+              UTORid={UTORid}
             />
           </Box>
         </Box>
       </Box>
+      <PreSurvey isOpen={isOpenPreSurvey} onClose={onClosePreSurvey} UTORid={UTORid} setDisableAll={setDisableAll}/>
       <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </>
   );

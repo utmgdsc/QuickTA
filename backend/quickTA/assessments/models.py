@@ -32,10 +32,11 @@ class AssessmentQuestion(models.Model):
             assessment_question_dict["correct_answer"] = self.correct_answer
             assessment_question_dict["correct_answer_flavor_text"] = self.correct_answer_flavor_text
 
-class AsessmentResponse(models.Model):
+class AssessmentResponse(models.Model):
     assessment_id = models.CharField(max_length=100)
     assessment_question_id = models.CharField(max_length=100)
     user_id = models.CharField(max_length=100)
+    conversation_id = models.CharField(max_length=100)
     date = models.DateTimeField(default=datetime.now)
-    response_choice = models.TextField()
+    answer = models.TextField()
     correct = models.BooleanField()

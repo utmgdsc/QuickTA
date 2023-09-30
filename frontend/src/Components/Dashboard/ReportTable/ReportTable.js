@@ -31,7 +31,7 @@ const ReportTable = ({ course_ID, isWeekly, setIsLoading }) => {
     boxShadow: "1px 2px 3px 1px rgba(0,0,0,0.12)",
     borderRadius: "15px",
     padding: "5px 15px 15px 20px",
-    maxWidth: "fit-content",
+    width: "100%",
   };
 
   const titleStyle = {
@@ -58,23 +58,15 @@ const ReportTable = ({ course_ID, isWeekly, setIsLoading }) => {
       )
       .then((res) => {
         setIsLoading(true);
-        const entries = [];
-        for (const obj in Object.keys(res.data.reported_conversations)) {
-          entries.push({
-            conversation_id:
-              res.data.reported_conversations[obj]["conversation_id"],
-            user_id: res.data.reported_conversations[obj]["user_id"],
-            time: res.data.reported_conversations[obj]["time"],
-            msg: res.data.reported_conversations[obj]["msg"],
-          });
-        }
-        console.log(entries);
-        changeReportList(entries);
+        let data = res.data;
+
+        changeReportList(data.reports);
         setIsLoading(false);
       })
       .catch((err) => {
         setIsLoading(false);
         setError(err);
+        console.log(err);
         onErrOpen();
       });
   };
@@ -88,7 +80,7 @@ const ReportTable = ({ course_ID, isWeekly, setIsLoading }) => {
 
   console.log(reportList, rowIndex);
   return (
-    <>
+    <div>
       <Box style={cardStyle} mt={6}>
         <Heading as="h2">
           <span style={titleStyle}>Reported Conversations (Detailed)</span>
@@ -139,7 +131,7 @@ const ReportTable = ({ course_ID, isWeekly, setIsLoading }) => {
         )}
       </Box>
       <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
-    </>
+    </div>
   );
 };
 

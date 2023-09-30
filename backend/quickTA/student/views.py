@@ -170,6 +170,7 @@ class ChatlogView(APIView):
             cache.set(conversation_cache_key, conversation, 60*60*24)
         last_chatlog = Chatlog.objects.filter(conversation_id=conversation_id).order_by('-time').first()
         delta = current_time - last_chatlog.time if last_chatlog else current_time - conversation.start_time
+        # print(conversation.start_time, current_time, last_chatlog.time if last_chatlog else None, delta)
         user_chatlog = self.create_chatlog(conversation.conversation_id, chatlog, True, current_time, delta)
         
         model_cache_key = "chatlog_model_" + str(conversation.model_id)
@@ -209,7 +210,7 @@ class ChatlogView(APIView):
             if location is not None: location = location.group()[1:-1]
             else: location = 'America/Toronto'
             
-            current_time = dateparse.parse_datetime(time[:idx]).replace(tzinfo=pytz.timezone("UTC"))
+            current_time = dateparse.parse_datetime(time[:idx]).astimezone(pytz.utc)
             return current_time, location
 
     def create_chatlog(self, cid, chatlog, is_user, time, delta):

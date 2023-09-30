@@ -84,7 +84,12 @@
 }
 
 .background {
-  background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(129,177,254,1) 0%, rgba(0,71,255,1) 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(2, 0, 36, 1) 0%,
+    rgba(129, 177, 254, 1) 0%,
+    rgba(0, 71, 255, 1) 100%
+  );
 }
 
 .conversation-history-box:hover {
@@ -140,4 +145,53 @@
     padding-top: 0.5rem !important;
     padding-bottom: 0.5rem !important;
   }
+}
+
+.scale-question {
+  display: flex;
+  flex-direction: column !important; /* or column if you want answers on top of the radio buttons */
+  align-items: center; /* or flex-start for top-aligned text */
+  gap: 40px !important; /* Adjust the gap between the radio button and answer text as needed */
+  position: relative;
+}
+
+.answer-option {
+  display: flex;
+  flex-direction: column; /* or row if you want answers on top of the radio buttons */
+  align-items: center; /* or flex-start for top-aligned text */
+  font-size: 12px;
+  width: 20px;
+}
+
+.answer-pretext {
+  text-align: center;
+}
+
+.answer-posttext {
+  margin-top: 5px; /* Adjust the margin as needed to control spacing between radio button and text */
+  position: absolute;
+  margin-left: -65px;
+  margin-right: -70px;
+  width: 150px;
+  text-align: center;
+}
+
+/* Colors */
+.selected-border {
+  border: 3px solid #2c5fce !important;
+  background: #7292d6 !important;
+}
+
+.wrong-border {
+  border: 3px solid #a51e1e !important;
+  background: #bd6262 !important;
+}
+
+.correct-border {
+  border: 3px solid #115511 !important;
+  background: #589758 !important;
+}
+
+.hidden-border {
+  border: 3px solid white !important;
 }

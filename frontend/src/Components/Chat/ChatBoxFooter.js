@@ -2,7 +2,15 @@ import {
   Button,
   HStack,
   Input,
-  Tooltip,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
+  Radio,
+  RadioGroup,
+  Text,
+  VStack,
   useDisclosure,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
@@ -25,9 +33,11 @@ const ChatBoxFooter = ({
   userId,
   model_ID,
   disableAll,
+  setDisableAll,
   conversations,
   setConversations,
   model_id,
+  UTORid,
 }) => {
   const {
     isOpen: isOpenTechAssessment,
@@ -46,7 +56,6 @@ const ChatBoxFooter = ({
     onClose: onErrClose,
   } = useDisclosure();
   const [error, setError] = useState();
-  const [sliderVal, setSliderVal] = useState(0);
   const [text, setText] = useState("");
 
   const handleChatKeyDown = (e) => {
@@ -97,6 +106,7 @@ const ChatBoxFooter = ({
       .catch((err) => {
         console.log(err);
         setError(err);
+        console.log(err);
         onErrOpen();
       });
   };
@@ -117,7 +127,7 @@ const ChatBoxFooter = ({
           .post(process.env.REACT_APP_API_URL + "/student/conversation", {
             user_id: userId,
             course_id: course_ID,
-            model_id: model_id.length === 0 ? model_id : model_ID,
+            model_id: model_id.length === 0 ? model_ID : model_id,
           })
           .then(async (res) => {
             let data = res.data;
@@ -137,7 +147,9 @@ const ChatBoxFooter = ({
           .catch((err) => {
             console.log(err);
             setError(err);
+            console.log(err);
             onErrOpen();
+            setWaitForResp(false);
           });
       }
     }
@@ -158,6 +170,10 @@ const ChatBoxFooter = ({
             if (inConvo && messages) {
               console.log(messages);
               onOpenTechAssessment();
+              updateMessages([]);
+              setDisableAll(true);
+              updateInConvo(false);
+              updateConvoID("");
             } else {
               console.log(
                 "Must be in a convo to leave one or please send at least one msg :>"
@@ -172,12 +188,16 @@ const ChatBoxFooter = ({
         </Button>
 
         <TechAssessment
-          isOpen={isOpenTechAssessment}
-          onClose={onCloseTechAssessment}
+          isOpenTechAssessment={isOpenTechAssessment}
+          onOpenTechAssessment={onOpenTechAssessment}
+          onCloseTechAssessment={onCloseTechAssessment}
           conversation_id={currConvoID}
           updateConvoID={updateConvoID}
           updateInConvo={updateInConvo}
           updateMessages={updateMessages}
+          UTORid={UTORid}
+          disableAll={disableAll}
+          setDisableAll={setDisableAll}
         />
 
         <Input

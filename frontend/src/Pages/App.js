@@ -8,6 +8,7 @@ import ResearcherModels from "./ResearcherModels";
 import ResearcherFilterPage from "./ResearcherFilterPage";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import LandingPage from "./LandingPage";
 import CustomSpinner from "../Components/CustomSpinner";
 import NotFoundPage from "../Components/NotFoundPage";
 import AdminPage from "./AdminPage";
@@ -23,6 +24,7 @@ const App = () => {
   const [courseName, setCourseName] = useState("");
   const [auth, setAuth] = useState("");
   const [UTORid, setUtorID] = useState("choiman3");
+  const [isNewUser, setIsNewUser] = useState(true);
   // const [auth, setAuth] = useState("student");
   const {
     isOpen: isErrOpen,
@@ -37,20 +39,22 @@ const App = () => {
       .then(async (res) => {
         // User authentication
         let data = res.data;
+        setIsNewUser(data.new_user);
         setuserId(data.user_id);
         setUtorID(data.utorid);
-        let courses = await getAllCourses(data.courses);
+        await getAllCourses(data.courses);
+
         setAuth(res.data.user_role);
-        if('model_id' in data){
+        if (auth === "ST") {
           setModelId(data.model_id);
         }
-        setIsLoading(false);
+        // Check if user is new
         return res.data.user_id;
       })
       .catch((err) => {
         setError(err);
+        console.log(err);
         onErrOpen();
-        setIsLoading(false);
       });
 
     return user;
@@ -91,13 +95,20 @@ const App = () => {
                 .course_name,
           });
         }
-        setIsLoading(false);
+        setTimeout(() => {
+          setIsLoading(false);
+          console.log("Done loading");
+        }, 2000);
       })
       .catch((err) => {
         console.log(err);
         setError(err);
         onErrOpen();
-        setIsLoading(false);
+
+        setTimeout(() => {
+          setIsLoading(false);
+          console.log("Done loading but error");
+        }, 2000);
       });
   };
 
@@ -108,22 +119,32 @@ const App = () => {
   }, [UTORid]);
 
   return isLoading ? (
-    <CustomSpinner />
+    <LandingPage isLoading={isLoading} />
   ) : (
     <>
       <Routes>
         <Route
           path="/"
           element={
-            <StudentPage
-              UTORid={UTORid}
-              auth={auth}
-              currCourse={currCourse}
-              setCurrCourse={setCurrCourse}
-              courses={courses}
-              semester={currCourse.semester}
-              userId={userId}
-            />
+            isNewUser ? (
+              <LandingPage
+                isLoading={isLoading}
+                UTORid={UTORid}
+                isNewUser={isNewUser}
+                setIsNewUser={setIsNewUser}
+              />
+            ) : (
+              <StudentPage
+                UTORid={UTORid}
+                auth={auth}
+                currCourse={currCourse}
+                setCurrCourse={setCurrCourse}
+                courses={courses}
+                semester={currCourse.semester}
+                userId={userId}
+                model_id={model_id}
+              />
+            )
           }
         />
         <Route

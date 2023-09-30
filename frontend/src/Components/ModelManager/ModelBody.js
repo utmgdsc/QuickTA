@@ -6,7 +6,8 @@ import {
   Heading,
   Text,
   Flex,
-  Button, useDisclosure,
+  Button,
+  useDisclosure,
 } from "@chakra-ui/react";
 import ModelCreator from "./ModelCreator";
 import { useEffect, useState } from "react";
@@ -19,7 +20,11 @@ const ModelBody = ({ courseid, setLoadingModel, loadingModel }) => {
   const [currentModel, setCurrentModel] = useState("");
   const [allModels, setAllModels] = useState([{}]);
   const [processing, setProcessing] = useState(false);
-  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const {
+    isOpen: isErrOpen,
+    onOpen: onErrOpen,
+    onClose: onErrClose,
+  } = useDisclosure();
   const [error, setError] = useState();
   const cardStyle = {
     backgroundColor: "white",
@@ -49,6 +54,7 @@ const ModelBody = ({ courseid, setLoadingModel, loadingModel }) => {
       })
       .catch((err) => {
         setError(err);
+        console.log(err);
         onErrOpen();
       });
   };
@@ -60,53 +66,53 @@ const ModelBody = ({ courseid, setLoadingModel, loadingModel }) => {
   }, [courseid, processing, currentModel]);
 
   return (
-      <>
-    <Box style={cardStyle} mt={5}>
-      <Heading as="h2">
-        <span style={titleStyle}>Model Information</span>
-      </Heading>
-      <Flex>
-        <Text>
-          <span style={{ fontWeight: "500" }}>Current model:</span>{" "}
-          {currentModel}
-        </Text>
-      </Flex>
-      <Flex flexWrap="wrap" mt={3} marginLeft="-5px">
-        <ModelRemover
-          deleting={processing}
-          setCurrentModel={setCurrentModel}
-          setDeleting={setProcessing}
-          courseid={courseid}
-          allModels={allModels}
-        />
-        <ModelCreator
-          creating={processing}
-          setCreating={setProcessing}
-          courseid={courseid}
-        />
-      </Flex>
-      <Flex flexDirection={"row"} flexWrap={"wrap"} py={5} gap={2}>
-        {allModels.length !== 0 ? (
-          allModels.map((obj, key) => (
-            <div key={key}>
-              <ModelCard
-                setCurrentModel={setCurrentModel}
-                courseid={courseid}
-                modelId={obj.model_id}
-                modelName={obj.model_name}
-                modelStatus={obj.status}
-                colorScheme={obj.status ? "green" : "gray"}
-                enabling={processing}
-                setEnabling={setProcessing}
-              />
-            </div>
-          ))
-        ) : (
-          <>This course has no models!</>
-        )}
-      </Flex>
-    </Box>
-        </>
+    <>
+      <Box style={cardStyle} mt={5}>
+        <Heading as="h2">
+          <span style={titleStyle}>Model Information</span>
+        </Heading>
+        {/* <Flex>
+          <Text>
+            <span style={{ fontWeight: "500" }}>Current model:</span>{" "}
+            {currentModel}
+          </Text>
+        </Flex> */}
+        <Flex flexWrap="wrap" mt={3} marginLeft="-5px">
+          <ModelRemover
+            deleting={processing}
+            setCurrentModel={setCurrentModel}
+            setDeleting={setProcessing}
+            courseid={courseid}
+            allModels={allModels}
+          />
+          <ModelCreator
+            creating={processing}
+            setCreating={setProcessing}
+            courseid={courseid}
+          />
+        </Flex>
+        <Flex flexDirection={"row"} flexWrap={"wrap"} py={5} gap={2}>
+          {allModels.length !== 0 ? (
+            allModels.map((obj, key) => (
+              <div key={key}>
+                <ModelCard
+                  setCurrentModel={setCurrentModel}
+                  courseid={courseid}
+                  modelId={obj.model_id}
+                  modelName={obj.model_name}
+                  modelStatus={obj.status}
+                  colorScheme={obj.status ? "green" : "gray"}
+                  enabling={processing}
+                  setEnabling={setProcessing}
+                />
+              </div>
+            ))
+          ) : (
+            <>This course has no models!</>
+          )}
+        </Flex>
+      </Box>
+    </>
   );
 };
 

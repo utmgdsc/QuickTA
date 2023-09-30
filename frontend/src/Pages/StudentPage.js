@@ -1,12 +1,18 @@
 import {
   Box,
   Drawer,
-  DrawerBody, DrawerCloseButton,
+  DrawerBody,
+  DrawerCloseButton,
   DrawerContent,
   DrawerHeader,
   DrawerOverlay,
-  Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay,
-  useDisclosure
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
+  useDisclosure,
 } from "@chakra-ui/react";
 import TopNav from "../Components/TopNav";
 import Chat from "../Components/Chat/Chat";
@@ -30,7 +36,11 @@ const StudentPage = ({
   const [models, setModels] = useState([]);
   const [currModel, setCurrModel] = useState({});
   const [waitingForResp, setWaitForResp] = useState(false);
-  const {isOpen: isErrOpen, onOpen: onErrOpen, onClose: onErrClose} = useDisclosure();
+  const {
+    isOpen: isErrOpen,
+    onOpen: onErrOpen,
+    onClose: onErrClose,
+  } = useDisclosure();
   const [error, setError] = useState();
 
   // Only called on users other than students
@@ -55,14 +65,16 @@ const StudentPage = ({
           console.log("No models for this course!");
         }
         setWaitForResp(false);
-      }).catch((err) => {
+      })
+      .catch((err) => {
         setError(err);
+        console.log(err);
         onErrOpen();
-    });
+      });
   };
 
   useEffect(() => {
-    if (courses && (!["ST"].includes(auth))) {
+    if (courses && !["ST"].includes(auth)) {
       getModels(currCourse);
     }
   }, [currCourse]);
@@ -82,6 +94,7 @@ const StudentPage = ({
         </Box>
       ) : (
         <Chat
+          auth={auth}
           userId={userId}
           currCourse={currCourse}
           setCurrCourse={setCurrCourse}
@@ -94,9 +107,10 @@ const StudentPage = ({
           waitingForResp={waitingForResp}
           setWaitForResp={setWaitForResp}
           style={{ position: "relative" }}
+          UTORid={UTORid}
         />
       )}
-      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose}/>
+      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </div>
   );
 };
