@@ -181,8 +181,8 @@ const TechAssessment = ({
             <Button
               isDisabled={studentResponse === null || isSubmitting}
               onClick={() => {
-                setIsSubmitting(true);
                 if (!disableAllOption) {
+                  setIsSubmitting(true);
                   //Display Flavor Text
                   setDisableAllOption(true);
 

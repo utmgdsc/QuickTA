@@ -155,8 +155,6 @@ const PostQuestions = ({
           setAnswerFlavorText("");
 
           // find current conversation
-          console.log(conversation_id);
-
           let currConvo = conversations.find(
             (convo) => convo.conversation_id === conversation_id
           );
@@ -262,10 +260,24 @@ const PostQuestions = ({
                                       className="answer-option"
                                     >
                                       <label>
-                                        <div className="answer-pretext">
+                                        <Button
+                                          value={answer.value}
+                                          className={
+                                            optionsSelected[question_idx + 1] ==
+                                            answer.value
+                                              ? "selected-border"
+                                              : "hidden-border"
+                                          }
+                                          onClick={(e) => {
+                                            setOptionsSelected({
+                                              ...optionsSelected,
+                                              [question_idx + 1]:
+                                                e.target.value,
+                                            });
+                                          }}
+                                        >
                                           {answer.value}
-                                        </div>
-                                        <Radio value={answer.value} />
+                                        </Button>
                                         <div className="answer-posttext">
                                           {answer.text}
                                         </div>

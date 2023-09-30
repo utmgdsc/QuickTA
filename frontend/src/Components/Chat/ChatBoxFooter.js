@@ -100,6 +100,7 @@ const ChatBoxFooter = ({
         setDisableAll((oldDisable) => ({
           ...oldDisable,
           oldConvoButtons: false,
+          endChat: false,
         }));
       })
       .catch((err) => {
@@ -192,8 +193,7 @@ const ChatBoxFooter = ({
             }
           }}
           isDisabled={
-            !inConvo ||
-            (inConvo && messages.length == 0) ||
+            (!inConvo && messages.length == 0) ||
             disableAll.endChat ||
             waitingForResp
           }

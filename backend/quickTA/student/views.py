@@ -160,18 +160,21 @@ class ChatlogView(APIView):
         chatlog = request.data.get('chatlog', '')
         current_time, location = self.get_time(request)
 
-
-        # 1. Create user chatlog record
         conversation_cache_key = "chatlog_conversation_" + str(conversation_id)
         conversation = cache.get(conversation_cache_key)
-
         if not conversation:
             conversation = get_object_or_404(Conversation, conversation_id=conversation_id)
             cache.set(conversation_cache_key, conversation, 60*60*24)
+
+        # 0. Save initial message
+        MESSAGE = "Hi! I am an AI assistant designed to support you in your Python programming learning journey. I cannot give out solutions to your assignments (python code) but I can help guide you if you get stuck. How can I help you?"
+        self.create_chatlog(conversation_id, MESSAGE, False, conversation.start_time, None)
+
+        # 1. Create user chatlog record
         last_chatlog = Chatlog.objects.filter(conversation_id=conversation_id).order_by('-time').first()
         delta = current_time - last_chatlog.time if last_chatlog else current_time - conversation.start_time
-        # print(conversation.start_time, current_time, last_chatlog.time if last_chatlog else None, delta)
         user_chatlog = self.create_chatlog(conversation.conversation_id, chatlog, True, current_time, delta)
+        # print(conversation.start_time, current_time, last_chatlog.time if last_chatlog else None, delta)
         
         model_cache_key = "chatlog_model_" + str(conversation.model_id)
         model = cache.get(model_cache_key)

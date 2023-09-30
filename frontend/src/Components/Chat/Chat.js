@@ -3,11 +3,8 @@ import {
   Button,
   IconButton,
   Avatar,
+  AvatarBadge,
   useDisclosure,
-  TabList,
-  Tabs,
-  Tab,
-  Tooltip,
   Text,
 } from "@chakra-ui/react";
 import ChatBoxTopNav from "./ChatBoxTopNav";
@@ -20,7 +17,6 @@ import { CloseIcon, HamburgerIcon, SmallAddIcon } from "@chakra-ui/icons";
 import axios from "axios";
 import "../../assets/styles.css";
 import ErrorDrawer from "../ErrorDrawer";
-import PreSurvey from "./PreSurvey";
 import { Temporal } from "@js-temporal/polyfill";
 
 const Chat = ({
@@ -237,14 +233,14 @@ const Chat = ({
                     size="sm"
                     icon={<SmallAddIcon />}
                     isDisabled={
-                      disableAll.newConversation ||
+                      waitingForResp ||
+                      (disableAll.newConversation && messages.length === 1) ||
                       (!inConvo && !currConvoID && !isOldConvo)
                     }
                     onClick={() => {
                       if (
                         (currConvoID && inConvo && !isOldConvo) ||
                         (inConvo && isOldConvo)
-                        // active conversation, is old conversation, in a conversation
                       ) {
                         // open technical assessment
                         onOpenTechAssessment();
@@ -288,13 +284,13 @@ const Chat = ({
               }}
             >
               <div>
-                <p>currConvoID: {currConvoID}</p>
+                {/* <p>currConvoID: {currConvoID}</p>
                 <p>isOldConvo {isOldConvo ? "true" : "false"}</p>
                 <p>inConvo {inConvo ? "true" : "false"}</p>
                 <p>newConvo {disableAll.newConversation ? "true" : "false"}</p>
                 <p>endChat {disableAll.endChat ? "true" : "false"}</p>
                 <p>inputMsg {disableAll.inputMessage ? "true" : "false"}</p>
-                <p>sendBtn {disableAll.sendButton ? "true" : "false"}</p>
+                <p>sendBtn {disableAll.sendButton ? "true" : "false"}</p> */}
                 {conversations.map((convo, index) => {
                   return (
                     <Box
@@ -324,19 +320,14 @@ const Chat = ({
                             }
                       }
                       onClick={() => {
-                        console.log("disable all", disableAll);
-                        if (disableAll.oldConvoButtons) {
-                          console.log("disabled convo buttons");
-                          return;
-                        }
-                        console.log(currConvoID === convo.conversation_id);
+                        if (disableAll.oldConvoButtons) return;
                         if (currConvoID !== convo.conversation_id) {
                           setText("");
                           if (convo.status == "A") {
                             // active old conversation
                             setIsOldConvo(true);
-                            updateConvoID(convo.conversation_id);
                             updateInConvo(true);
+                            updateConvoID(convo.conversation_id);
                             setDisableAll((prevDisableAll) => ({
                               inputMessage: false,
                               sendButton: false,
@@ -346,6 +337,7 @@ const Chat = ({
                             }));
                           } else {
                             // Inactive old conversation
+                            updateConvoID(convo.conversation_id);
                             setIsOldConvo(true);
                             updateInConvo(false);
                             setDisableAll((prevDisableAll) => ({
@@ -369,7 +361,6 @@ const Chat = ({
                         getConversationMessages(convo.conversation_id);
                       }}
                     >
-                      {convo.status == "A" ? "A" : "I"}
                       <Avatar
                         name={
                           convo.conversation_name
@@ -385,7 +376,15 @@ const Chat = ({
                           marginLeft: "5px",
                         }}
                         alt="User Avatar"
-                      />
+                      >
+                        <AvatarBadge
+                          boxSize={"16px"}
+                          borderColor={
+                            convo.status == "A" ? "green.100" : "papayawhip"
+                          }
+                          bg={convo.status == "A" ? "green.300" : "tomato"}
+                        />
+                      </Avatar>
                       {openConvoHistory && (
                         <span
                           style={{
