@@ -31,7 +31,7 @@ const ReportTable = ({ course_ID, isWeekly, setIsLoading }) => {
     boxShadow: "1px 2px 3px 1px rgba(0,0,0,0.12)",
     borderRadius: "15px",
     padding: "5px 15px 15px 20px",
-    maxWidth: "fit-content",
+    width: "100%",
   };
 
   const titleStyle = {
@@ -80,7 +80,7 @@ const ReportTable = ({ course_ID, isWeekly, setIsLoading }) => {
 
   console.log(reportList, rowIndex);
   return (
-    <>
+    <div>
       <Box style={cardStyle} mt={6}>
         <Heading as="h2">
           <span style={titleStyle}>Reported Conversations (Detailed)</span>
@@ -131,7 +131,7 @@ const ReportTable = ({ course_ID, isWeekly, setIsLoading }) => {
         )}
       </Box>
       <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
-    </>
+    </div>
   );
 };
 

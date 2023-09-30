@@ -71,12 +71,12 @@ const ModelBody = ({ courseid, setLoadingModel, loadingModel }) => {
         <Heading as="h2">
           <span style={titleStyle}>Model Information</span>
         </Heading>
-        <Flex>
+        {/* <Flex>
           <Text>
             <span style={{ fontWeight: "500" }}>Current model:</span>{" "}
             {currentModel}
           </Text>
-        </Flex>
+        </Flex> */}
         <Flex flexWrap="wrap" mt={3} marginLeft="-5px">
           <ModelRemover
             deleting={processing}

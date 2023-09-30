@@ -226,7 +226,9 @@ const AdminPage = ({ UTORID, auth }) => {
                 <Th color={"white"}>Course ID</Th>
                 <Th color={"white"}>Semester</Th>
                 <Th color={"white"}>Course Name</Th>
-                <Th color={"white"}>Instructors</Th>
+                <Th color={"white"} minWidth={"600px"}>
+                  Instructors
+                </Th>
                 <Th color={"white"}></Th>
               </Tr>
             </Thead>

@@ -8,6 +8,7 @@ import ResearcherModels from "./ResearcherModels";
 import ResearcherFilterPage from "./ResearcherFilterPage";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import LandingPage from "./LandingPage";
 import CustomSpinner from "../Components/CustomSpinner";
 import NotFoundPage from "../Components/NotFoundPage";
 import AdminPage from "./AdminPage";
@@ -23,6 +24,7 @@ const App = () => {
   const [courseName, setCourseName] = useState("");
   const [auth, setAuth] = useState("");
   const [UTORid, setUtorID] = useState("choiman3");
+  const [isNewUser, setIsNewUser] = useState(true);
   // const [auth, setAuth] = useState("student");
   const {
     isOpen: isErrOpen,
@@ -39,11 +41,13 @@ const App = () => {
         let data = res.data;
         setuserId(data.user_id);
         setUtorID(data.utorid);
-        let courses = await getAllCourses(data.courses);
+        await getAllCourses(data.courses);
         setAuth(res.data.user_role);
         if (auth === "ST") {
           setModelId(data.model_id);
         }
+        // Check if user is new
+        setIsNewUser(data.new_user);
         setIsLoading(false);
         return res.data.user_id;
       })
@@ -117,16 +121,20 @@ const App = () => {
         <Route
           path="/"
           element={
-            <StudentPage
-              UTORid={UTORid}
-              auth={auth}
-              currCourse={currCourse}
-              setCurrCourse={setCurrCourse}
-              courses={courses}
-              semester={currCourse.semester}
-              userId={userId}
-              model_id={model_id}
-            />
+            isNewUser ? (
+              <LandingPage />
+            ) : (
+              <StudentPage
+                UTORid={UTORid}
+                auth={auth}
+                currCourse={currCourse}
+                setCurrCourse={setCurrCourse}
+                courses={courses}
+                semester={currCourse.semester}
+                userId={userId}
+                model_id={model_id}
+              />
+            )
           }
         />
         <Route
