@@ -38,6 +38,25 @@ const ChatBox = ({ messages, waitingForResp }) => {
             paragraph = paragraph.substring(newline + 1, paragraph.length);
             // paragraph = paragraph.trim();
             currentMessage += paragraph;
+
+            if (paragraph.includes("```")) {
+              hasCode = false;
+              paragraph = paragraph.substring(0, paragraph.length - 3).trim();
+              currentMessage = "";
+
+              chatBubbles.push(
+                <ChatBubble
+                  key={`${index}-${paragraphIndex}`}
+                  index={paragraphIndex}
+                  length={paragraphs.length}
+                  message={paragraph}
+                  dateSent={dateSent}
+                  isUser={isUser}
+                  language={language}
+                  isCode={true}
+                />
+              );
+            }
           } else if (hasCode) {
             //  check if it has backticks
             if (paragraph.includes("```")) {
