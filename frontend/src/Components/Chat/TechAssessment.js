@@ -72,11 +72,11 @@ const TechAssessment = ({
         });
         setOptions(data.choices);
         setAssessmentQuestionID(data.assessment_question_id);
-        console.log(data.choices);
+        // console.log(data.choices);
       })
       .catch((err) => {
         setError(err);
-        console.log(err);
+        // console.log(err);
         onErrOpen();
       });
   };
@@ -143,7 +143,7 @@ const TechAssessment = ({
                     isDisabled={disableAllOption}
                     onClick={(e) => {
                       setStudentResponse(element.choice);
-                      console.log(`Student reponse: ${element.choice}`);
+                      // console.log(`Student reponse: ${element.choice}`);
                     }}
                     style={{
                       justifyContent: "left",
@@ -206,7 +206,7 @@ const TechAssessment = ({
                     })
                     .catch((err) => {
                       setError(err);
-                      console.log(err);
+                      // console.log(err);
                       onErrOpen();
                     });
                   setDisplayAnswer(true);
@@ -215,7 +215,7 @@ const TechAssessment = ({
                   //   onPostQOpen();
                   // }, 5000);
 
-                  console.log("Submitted answer");
+                  // console.log("Submitted answer");
                 } else {
                   onCloseTechAssessment();
                   onPostQOpen();

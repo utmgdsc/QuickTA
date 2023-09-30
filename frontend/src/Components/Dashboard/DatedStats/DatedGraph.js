@@ -85,7 +85,7 @@ const DatedGraph = ({ isWeekly, courseID }) => {
       })
       .catch((err) => {
         setError(err);
-        console.log(err);
+        // console.log(err);
         onErrOpen();
       });
   };

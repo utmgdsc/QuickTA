@@ -41,7 +41,7 @@ const ChatOpenSurvey = ({ conversation_id, isOpen, onClose }) => {
       })
       .catch((err) => {
         setError(err);
-        console.log(err);
+        // console.log(err);
         onErrOpen();
       });
   };

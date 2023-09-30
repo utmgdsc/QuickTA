@@ -5,7 +5,7 @@ import { Progress } from "@chakra-ui/react";
 
 const LandingPage = ({ isLoading, UTORid, isNewUser, setIsNewUser }) => {
   useEffect(() => {
-    console.log("Landing Page: ", isLoading);
+    // console.log("Landing Page: ", isLoading);
   }, [isLoading]);
 
   const funFacts = [

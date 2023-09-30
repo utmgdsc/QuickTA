@@ -47,14 +47,14 @@ const App = () => {
         setAuth(res.data.user_role);
         if (res.data.user_role === "ST") {
           setModelId(data.model_id);
-          console.log("model id", data.model_id);
+          // console.log("model id", data.model_id);
         }
         // Check if user is new
         return res.data.user_id;
       })
       .catch((err) => {
         setError(err);
-        console.log(err);
+        // console.log(err);
         onErrOpen();
       });
 
@@ -98,17 +98,17 @@ const App = () => {
         }
         setTimeout(() => {
           setIsLoading(false);
-          console.log("Done loading");
+          // console.log("Done loading");
         }, 2000);
       })
       .catch((err) => {
-        console.log(err);
+        // console.log(err);
         setError(err);
         onErrOpen();
 
         setTimeout(() => {
           setIsLoading(false);
-          console.log("Done loading but error");
+          // console.log("Done loading but error");
         }, 2000);
       });
   };

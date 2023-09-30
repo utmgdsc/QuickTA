@@ -80,13 +80,13 @@ const PostQuestions = ({
             setError("Error fetching prompt question");
             onErrOpen();
             setError(err);
-            console.log(err);
+            // console.log(err);
             onErrOpen();
           });
       })
       .catch((err) => {
         setError(err);
-        console.log(err);
+        // console.log(err);
         onErrOpen();
       });
   };
@@ -128,7 +128,7 @@ const PostQuestions = ({
     }
 
     if (checkValidResponse() === false) {
-      console.log("invalid response");
+      // console.log("invalid response");
     } else {
       // Indicate loading
       setDisableAll({
@@ -146,7 +146,7 @@ const PostQuestions = ({
         )
         .then((res) => {
           // Clear messages, response
-          console.log("Successfully submitted response!");
+          // console.log("Successfully submitted response!");
           setOptionsSelected([]);
           setStudentResponse(null);
           setDisableAllOption(false);
@@ -188,7 +188,7 @@ const PostQuestions = ({
         })
         .catch((err) => {
           setError(err);
-          console.log(err);
+          // console.log(err);
           onErrOpen();
         });
     }
@@ -245,7 +245,7 @@ const PostQuestions = ({
                                 ...optionsSelected,
                                 [question_idx + 1]: value,
                               });
-                              console.log(optionsSelected);
+                              // console.log(optionsSelected);
                             }}
                             value={parseInt(optionsSelected[question_idx + 1])}
                             display="grid"
@@ -312,7 +312,7 @@ const PostQuestions = ({
                 optionsSelected[4] === undefined
               }
               onClick={() => {
-                console.log("Submit button clicked");
+                // console.log("Submit button clicked");
                 onClose();
                 onPromptOpen();
               }}
@@ -371,7 +371,7 @@ const PostQuestions = ({
               background={optionsSelected[5] === "" ? "gray.500" : "blue.500"}
               onClick={() => {
                 if (optionsSelected[5] === "") {
-                  console.log("Please enter a response");
+                  // console.log("Please enter a response");
                 } else {
                   onPromptClose();
                   submitResponse();

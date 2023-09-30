@@ -32,7 +32,7 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser }) => {
           "/survey/details?survey_id=d18676a6-4419-4ae6-beda-97bc26377942"
       )
       .then((res) => {
-        console.log(res.data);
+        // console.log(res.data);
         setQuestions(res.data.questions);
         setSurveyID(res.data.survey_id);
       })
@@ -80,7 +80,7 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser }) => {
           allResponses
         )
         .then((res) => {
-          console.log(res.data);
+          // console.log(res.data);
           setIsNewUser(false);
           setIsSubmitting(false);
         })
@@ -189,7 +189,7 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser }) => {
                                     ...studentResponse,
                                     [currQuestion + 1]: answer.value,
                                   });
-                                  console.log(studentResponse);
+                                  // console.log(studentResponse);
                                 }}
                               >
                                 <Text>{answer.text}</Text>
@@ -251,7 +251,7 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser }) => {
                                       ...studentResponse,
                                       [currQuestion + 1]: answer.value,
                                     });
-                                    console.log(studentResponse);
+                                    // console.log(studentResponse);
                                   }}
                                 >
                                   <Text>{answer.value}</Text>

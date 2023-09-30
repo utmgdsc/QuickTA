@@ -59,11 +59,11 @@ const ModelRemover = ({ courseid, deleting, setDeleting, allModels }) => {
           `/models/gpt?course_id=${courseid}&model_name=${removeModel.id}`
       )
       .then((res) => {
-        console.log(res);
+        // console.log(res);
       })
       .catch((err) => {
         setError(err);
-        console.log(err);
+        // console.log(err);
         onErrOpen();
       });
     setDeleting(false);
@@ -79,7 +79,7 @@ const ModelRemover = ({ courseid, deleting, setDeleting, allModels }) => {
       .catch((err) => {
         setDeleting(false);
         setError(err);
-        console.log(err);
+        // console.log(err);
         onErrOpen();
       });
   };

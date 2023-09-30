@@ -27,12 +27,12 @@ const UploadCourseList = ({ courseID }) => {
       .post(process.env.REACT_APP_API_URL + "/user/batch-add/csv", formData)
       .then((res) => {
         // Handle the response
-        console.log(res);
+        // console.log(res);
       })
       .catch((err) => {
         // Handle the error
         setError(err);
-        console.log(err);
+        // console.log(err);
         onErrOpen();
       });
   };

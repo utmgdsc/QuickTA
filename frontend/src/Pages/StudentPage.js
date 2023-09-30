@@ -62,13 +62,13 @@ const StudentPage = ({
             data.models[parseInt(sessionStorage.getItem("selectedModel"))]
           );
         } else {
-          console.log("No models for this course!");
+          // console.log("No models for this course!");
         }
         setWaitForResp(false);
       })
       .catch((err) => {
         setError(err);
-        console.log(err);
+        // console.log(err);
         onErrOpen();
       });
   };

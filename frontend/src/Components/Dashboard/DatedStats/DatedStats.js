@@ -75,8 +75,8 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
         })
         .catch((err) => {
           setError(err);
-          console.log(err);
-          console.log(err);
+          // console.log(err);
+          
           onErrOpen();
         });
     }
@@ -102,8 +102,8 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
         })
         .catch((err) => {
           setError(err);
-          console.log(err);
-          console.log(err);
+          // console.log(err);
+          
           onErrOpen();
         });
     }
@@ -125,14 +125,13 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
         })
         .catch((err) => {
           setError(err);
-          console.log(err);
-          console.log(err);
+          // console.log(err);
           onErrOpen();
         });
     }
 
     if (endpoint.endsWith("reported-conversations")) {
-      console.log("need reported conversations");
+      // console.log("need reported conversations");
       return await axios
         .get(
           process.env.REACT_APP_API_URL +
@@ -146,8 +145,7 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
         })
         .catch((err) => {
           setError(err);
-          console.log(err);
-          console.log(err);
+          // console.log(err);
           onErrOpen();
         });
     }
@@ -181,8 +179,7 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
         })
         .catch((err) => {
           setError(err);
-          console.log(err);
-          console.log(err);
+          // console.log(err);
           onErrOpen();
         });
     }
@@ -222,9 +219,9 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
                         }
                     )
                     .then((response) => {
-                      console.log("resp headers" , response);
+                      // console.log("resp headers" , response);
                       if (response.headers["content-disposition"]) {
-                        console.log("DOWNLOADING", response);
+                        // console.log("DOWNLOADING", response);
                         fileDownload(
                           response.data,
                           response.headers["content-disposition"].split('"')[1]
@@ -233,8 +230,7 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
                     })
                     .catch((err) => {
                       setError(err);
-                      console.log(err);
-                      console.log(err);
+                      // console.log(err);
                       onErrOpen();
                     });
                 }
@@ -269,8 +265,7 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
                     })
                     .catch((err) => {
                       setError(err);
-                      console.log(err);
-                      console.log(err);
+                      // console.log(err);
                       onErrOpen();
                     });
                 }
@@ -305,8 +300,7 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
                     })
                     .catch((err) => {
                       setError(err);
-                      console.log(err);
-                      console.log(err);
+                      // console.log(err);
                       onErrOpen();
                     });
                 }
@@ -355,8 +349,7 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
               })
               .catch((err) => {
                 setError(err);
-                console.log(err);
-                console.log(err);
+                // console.log(err);
                 onErrOpen();
               });
           }

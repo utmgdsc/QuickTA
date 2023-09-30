@@ -72,17 +72,17 @@ const ModelCreator = ({ creating, setCreating, courseid }) => {
     for (const [key, value] of Object.entries(obj)) {
       if (["name", "model", "prompt"].includes(key)) {
         if (value.length <= 0) {
-          console.log(`Invalid length for ${key}`);
+          // console.log(`Invalid length for ${key}`);
           return false;
         }
       } else if (key === "maxTokens") {
         if (isNaN(value) || value < 0) {
-          console.log("Invalid maxTokens");
+          // console.log("Invalid maxTokens");
           return false;
         }
       } else {
         if (isNaN(value)) {
-          console.log("One of the values is NaN");
+          // console.log("One of the values is NaN");
           return false;
         }
       }
@@ -106,11 +106,11 @@ const ModelCreator = ({ creating, setCreating, courseid }) => {
       })
       .then((res) => {
         setCreating(false);
-        console.log(newModel);
+        // console.log(newModel);
       })
       .catch((err) => {
         setError(err);
-        console.log(err);
+        // console.log(err);
         onErrOpen();
       });
   };
@@ -237,7 +237,7 @@ const ModelCreator = ({ creating, setCreating, courseid }) => {
                       freq_pen: 0.0,
                     });
                   } else {
-                    console.log("Invalid Model!");
+                    // console.log("Invalid Model!");
                   }
                 }}
               >

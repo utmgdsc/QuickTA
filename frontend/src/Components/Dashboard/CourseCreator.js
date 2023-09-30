@@ -48,7 +48,7 @@ const CourseCreator = ({
       ...newCourse,
       [e.target.name]: e.target.value,
     });
-    console.log(newCourse);
+    // console.log(newCourse);
   }
 
   const getAllCourses = async () => {
@@ -91,7 +91,7 @@ const CourseCreator = ({
       })
       .catch((err) => {
         setError(err);
-        console.log(err);
+        // console.log(err);
         onErrOpen();
         setIsLoading(false);
       });
@@ -188,11 +188,11 @@ const CourseCreator = ({
                   newCourse.course_code.length > 0 &&
                   newCourse.course_name.length > 0
                 ) {
-                  console.log(
-                    newCourse.course_code,
-                    newCourse.course_name,
-                    semester
-                  );
+                  // console.log(
+                  //   newCourse.course_code,
+                  //   newCourse.course_name,
+                  //   semester
+                  // );
                   await axios
                     .post(process.env.REACT_APP_API_URL + "/course", {
                       course_code: newCourse.course_code,
@@ -220,7 +220,7 @@ const CourseCreator = ({
                         .then(async (res) => {
                           let params =
                             "&course_id=" + new_course_id + "&user_role=IS";
-                          console.log(userid);
+                          // console.log(userid);
                           if (userid) params += "&user_id=" + userid;
                           else if (utorid) params += "&utorid=" + utorid;
                           await axios
@@ -234,19 +234,19 @@ const CourseCreator = ({
                             })
                             .catch((err) => {
                               setError(err);
-                              console.log(err);
+                              // console.log(err);
                               onErrOpen();
                             });
                         })
                         .catch((err) => {
                           setError(err);
-                          console.log(err);
+                          // console.log(err);
                           onErrOpen();
                         });
                     })
                     .catch((err) => {
                       setError(err);
-                      console.log(err);
+                      // console.log(err);
                       onErrOpen();
                     });
                 }

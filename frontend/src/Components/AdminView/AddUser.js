@@ -66,10 +66,10 @@ const AddUser = ({
         setDisableAdd(false);
       })
       .catch((err) => {
-        console.log(err);
+        // console.log(err);
         setDisableAdd(false);
         setError(err);
-        console.log(err);
+        // console.log(err);
         onErrOpen();
       });
   };
@@ -142,7 +142,7 @@ const AddUser = ({
                                   // let filtered = userList.filter((e) => e.user_id !== user.user_id);
                                   let filter = toAdd;
                                   filter[index] = !filter[index];
-                                  console.log(filter);
+                                  // console.log(filter);
                                   setToAdd(filter);
                                   // setUserList(filtered);
                                 }}
@@ -164,13 +164,13 @@ const AddUser = ({
                     usersToAdd = usersToAdd
                       .filter((e, index) => toAdd[index] === true)
                       .map((userObj, i) => userObj.user_id);
-                    console.log(usersToAdd);
+                    // console.log(usersToAdd);
                     setDisableAdd(true);
-                    console.log({
-                      users: usersToAdd,
-                      course_id: course_id,
-                      type: type === "student" ? "student" : "instructor",
-                    });
+                    // console.log({
+                    //   users: usersToAdd,
+                    //   course_id: course_id,
+                    //   type: type === "student" ? "student" : "instructor",
+                    // });
                     axios
                       .post(
                         process.env.REACT_APP_API_URL +
@@ -198,7 +198,7 @@ const AddUser = ({
                           parentDisable(false);
                         });
                         setError(err);
-                        console.log(err);
+                        // console.log(err);
                         onErrOpen();
                       });
                   }}

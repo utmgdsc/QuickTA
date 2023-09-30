@@ -28,8 +28,8 @@ const ModelSelect = ({
               "selectedModel",
               parseInt(e.target.value).toString()
             );
-            console.log("selected model", models[parseInt(e.target.value)]);
-            console.log(currModel.model_id);
+            // console.log("selected model", models[parseInt(e.target.value)]);
+            // console.log(currModel.model_id);
             // Object.keys(courses[parseInt(e.target.value)]).forEach((key) => {sessionStorage.setItem(key, courses[parseInt(e.target.value)][key])});
           }}
           value={parseInt(sessionStorage.getItem("selectedModel"))}

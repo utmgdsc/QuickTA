@@ -56,7 +56,7 @@ const CourseDrawer = ({ isOpen, onClose, course_id }) => {
       })
       .catch((err) => {
         setError(err);
-        console.log(err);
+        // console.log(err);
         onErrOpen();
       });
     setDisableFlag(false);
@@ -90,13 +90,13 @@ const CourseDrawer = ({ isOpen, onClose, course_id }) => {
       .then((res) => {})
       .catch((err) => {
         setError(err);
-        console.log(err);
+        // console.log(err);
         onErrOpen();
       });
   };
 
   const deleteElement = (user_id) => {
-    console.log("delete " + user_id);
+    // console.log("delete " + user_id);
     let filtered = studentList.filter((student) => student.user_id !== user_id);
     setStudentList(filtered);
   };

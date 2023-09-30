@@ -80,7 +80,7 @@ const Chat = ({
       })
       .catch((err) => {
         setError(err);
-        console.log(err);
+        // console.log(err);
         onErrOpen();
       });
   };
@@ -105,19 +105,19 @@ const Chat = ({
             };
           });
           updateMessages(msgs);
-          console.log(msgs);
+          // console.log(msgs);
         }
         setWaitForResp(false);
       })
       .catch((err) => {
         setError(err);
-        console.log(err);
+        // console.log(err);
         onErrOpen();
       });
   };
 
   const createNewConversation = async () => {
-    console.log(model_id.length === 0 ? currModel.model_id : model_id);
+    // console.log(model_id.length === 0 ? currModel.model_id : model_id);
     updateMessages([
       {
         message:
@@ -148,10 +148,8 @@ const Chat = ({
   }, [currCourse]);
 
   return (
-    <>
-      <Box ml={"10vw"} mr={"10vw"} style={{
-        minHeight: "fit-content",
-      }}>
+
+      <Box ml={"10vw"} mr={"10vw"}>
         <div style={{ width: "500px" }}>
           <div style={{ display: "flex" }}>
             <CourseSelect
@@ -171,7 +169,7 @@ const Chat = ({
             )}
           </div>
         </div>
-        <VStack
+        <Box
           as={"div"}
           bgColor={"white"}
           border={"1px solid #EAEAEA"}
@@ -182,7 +180,6 @@ const Chat = ({
             maxHeight: "75vh",
             display: "flex",
             flexDirection: "row",
-            minHeight: "fit-content",
           }}
         >
           <Box
@@ -456,10 +453,10 @@ const Chat = ({
               setText={setText}
             />
           </Box>
-        </VStack>
+        </Box>
+        <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
       </Box>
-      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
-    </>
+      
   );
 };
 

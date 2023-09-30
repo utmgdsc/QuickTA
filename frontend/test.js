@@ -190,4 +190,4 @@ most_common.forEach((word)=>{
 //
 // console.log(most_common.map((word) => ([word[0], 1-((word[1] - min)) / (max - min)])))
 
-console.log(parseInt("2.3"))
+// console.log(parseInt("2.3"))

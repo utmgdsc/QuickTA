@@ -43,7 +43,7 @@ const ModelBody = ({ courseid, setLoadingModel, loadingModel }) => {
   // make api call to get the model id & models here
   const getAllModels = async () => {
     setLoadingModel(true);
-    console.log("Current course id:", courseid);
+    // console.log("Current course id:", courseid);
     let params = "course_id=" + courseid;
     await axios
       .get(process.env.REACT_APP_API_URL + `/models/gpt/course?${params}`)
@@ -54,7 +54,7 @@ const ModelBody = ({ courseid, setLoadingModel, loadingModel }) => {
       })
       .catch((err) => {
         setError(err);
-        console.log(err);
+        // console.log(err);
         onErrOpen();
       });
   };

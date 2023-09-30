@@ -39,7 +39,7 @@ const ConversationView = ({ isOpen, onClose, convo_id }) => {
       })
       .catch((err) => {
         setError(err);
-        console.log(err);
+        // console.log(err);
         onErrOpen();
       });
   };
@@ -195,7 +195,7 @@ const ConversationView = ({ isOpen, onClose, convo_id }) => {
                   })
                   .catch((err) => {
                     setError(err);
-                    console.log(err);
+                    // console.log(err);
                     onErrOpen();
                   });
               }}

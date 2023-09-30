@@ -67,7 +67,7 @@ const AdminPage = ({ UTORID, auth }) => {
       })
       .catch((err) => {
         setError(err);
-        console.log(err);
+        // console.log(err);
         onErrOpen();
       });
     setIsOpenCreateUser(false);
@@ -83,7 +83,7 @@ const AdminPage = ({ UTORID, auth }) => {
       })
       .catch((err) => {
         setError(err);
-        console.log(err);
+        // console.log(err);
         onErrOpen();
       });
   };
@@ -244,7 +244,7 @@ const AdminPage = ({ UTORID, auth }) => {
                         key={hashing(obj.course_id)}
                         onClick={() => {
                           setCourseIndex(index);
-                          console.log(courseList[courseIndex]);
+                          // console.log(courseList[courseIndex]);
                           onOpen();
                         }}
                         style={{

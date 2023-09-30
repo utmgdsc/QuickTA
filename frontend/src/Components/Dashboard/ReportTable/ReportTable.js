@@ -66,7 +66,7 @@ const ReportTable = ({ course_ID, isWeekly, setIsLoading }) => {
       .catch((err) => {
         setIsLoading(false);
         setError(err);
-        console.log(err);
+        // console.log(err);
         onErrOpen();
       });
   };
@@ -74,11 +74,11 @@ const ReportTable = ({ course_ID, isWeekly, setIsLoading }) => {
   useEffect(() => {
     if (course_ID.length !== 0) {
       fetchReports();
-      console.log(reportList);
+      // console.log(reportList);
     }
   }, [course_ID]);
 
-  console.log(reportList, rowIndex);
+  // console.log(reportList, rowIndex);
   return (
     <div>
       <Box style={cardStyle} mt={6}>
@@ -104,7 +104,7 @@ const ReportTable = ({ course_ID, isWeekly, setIsLoading }) => {
                     key={index}
                     onClick={() => {
                       setRowIndex(index);
-                      console.log(index, reportList);
+                      // console.log(index, reportList);
                       onOpen();
                     }}
                   >

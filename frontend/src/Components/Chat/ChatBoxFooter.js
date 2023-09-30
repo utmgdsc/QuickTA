@@ -112,7 +112,7 @@ const ChatBoxFooter = ({
         }));
       })
       .catch((err) => {
-        console.log(err);
+        // console.log(err);
         if (err.response.data.error.msg) {
           setError(err.response.data.error.msg);
           onErrOpen();
@@ -132,20 +132,20 @@ const ChatBoxFooter = ({
     if (inConvo) {
       if (text) {
         setWaitForResp(true);
-        console.log("Disabling old convo buttons");
+        // console.log("Disabling old convo buttons");
         setDisableAll((oldDisable) => ({
           ...oldDisable,
           oldConvoButtons: true,
         }));
         await getResponse();
       } else {
-        console.log("You must type something before asking AI for response :)");
+        // console.log("You must type something before asking AI for response :)");
       }
     } else {
       // console.log("must start a conversation to send a message to AI!");
       if (text) {
         setWaitForResp(true);
-        console.log("Disabling old convo buttons");
+        // console.log("Disabling old convo buttons");
         setDisableAll((oldDisable) => ({
           ...oldDisable,
           oldConvoButtons: true,
@@ -188,9 +188,9 @@ const ChatBoxFooter = ({
             );
           })
           .catch((err) => {
-            console.log(err);
+            // console.log(err);
             setError(err);
-            console.log(err);
+            // console.log(err);
             onErrOpen();
             setWaitForResp(false);
           });
@@ -215,9 +215,9 @@ const ChatBoxFooter = ({
             if (inConvo && messages) {
               onOpenTechAssessment();
             } else {
-              console.log(
-                "Must be in a convo to leave one or please send at least one msg :>"
-              );
+              // console.log(
+              //   "Must be in a convo to leave one or please send at least one msg :>"
+              // );
             }
           }}
           isDisabled={

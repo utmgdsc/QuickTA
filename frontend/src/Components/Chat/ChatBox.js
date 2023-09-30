@@ -23,7 +23,7 @@ const ChatBox = ({ messages, waitingForResp }) => {
         // Split the message into paragraphs based on "\n\n1.", "\n\n2.", etc.
         const paragraphs = message.split(/\n\n/);
         if (index == messages.length - 1) {
-          console.log(paragraphs);
+          // console.log(paragraphs);
         }
         const chatBubbles = [];
 

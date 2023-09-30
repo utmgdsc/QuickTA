@@ -137,13 +137,13 @@ const ChatBoxTopNav = ({
                   })
                   .catch((err) => {
                     setError(err);
-                    console.log(err);
+                    // console.log(err);
                     onErrOpen();
                   });
               } else {
-                console.log(
-                  "Must be in a conversation to download the chatlog!"
-                );
+                // console.log(
+                //   "Must be in a conversation to download the chatlog!"
+                // );
               }
             }}
           >
@@ -226,10 +226,12 @@ const ChatBoxTopNav = ({
                         conversation_id: currConvoID,
                         msg: reportMsg,
                       })
-                      .then((res) => console.log("Reported!"))
+                      .then((res) => {}
+                      // console.log("Reported!")
+                      )
                       .catch((err) => {
                         setError(err);
-                        console.log(err);
+                        // console.log(err);
                         onErrOpen();
                       });
                     onClose();
