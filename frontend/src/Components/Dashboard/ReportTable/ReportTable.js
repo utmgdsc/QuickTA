@@ -60,6 +60,7 @@ const ReportTable = ({ course_ID, isWeekly, setIsLoading }) => {
         setIsLoading(true);
         let data = res.data;
 
+
         changeReportList(data.reports);
         setIsLoading(false);
       })
