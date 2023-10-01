@@ -1,10 +1,10 @@
 import { Select, Box } from '@chakra-ui/react';
 import {useState} from "react";
 
-const CourseSelect = ({courses, setCurrCourse, wait, currCourse}) => {
+const CourseSelect = ({courses, setCurrCourse, inConvo, currCourse}) => {
 
     return (
-        <Box w='135px'>
+        <Box w='150px'>
             <Select 
             borderColor="white" 
             bg="white"
@@ -15,7 +15,7 @@ const CourseSelect = ({courses, setCurrCourse, wait, currCourse}) => {
                 // Object.keys(courses[parseInt(e.target.value)]).forEach((key) => {sessionStorage.setItem(key, courses[parseInt(e.target.value)][key])});
             }}
             value={parseInt(sessionStorage.getItem('selected'))}
-            isDisabled={wait}
+            isDisabled={inConvo}
             mb={5}
             >
                 {courses.map(({id, course_id, semester, course_code}, index) => (<option key={index} value={index}>{course_code}</option>))}

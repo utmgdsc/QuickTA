@@ -13,11 +13,13 @@ frontend/build
 
 # misc
 frontend/.DS_Store
+frontend/.env
 frontend/.env.local
 frontend/.env.development.local
 frontend/.env.test.local
 frontend/.env.production.local
 .idea/*
+
 
 frontend/npm-debug.log*
 frontend/yarn-debug.log*

@@ -1,34 +1,197 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap");
 .glass {
-    background: rgb(172, 171, 171);
-    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
-    backdrop-filter: blur( 4px );
-    -webkit-backdrop-filter: blur( 4px );
-    border-radius: 10px;
-    border: 1px solid rgba( 255, 255, 255, 0.18 );
+  /* From https://css.glass */
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .typing {
-    display: block;
-    width: 60px;
-    height: 40px;
-    border-radius: 20px;
-    margin: 0 1rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  display: block;
+  width: 60px;
+  height: 40px;
+  border-radius: 20px;
+  margin: 0 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .circle {
-    display: block;
-    height: 10px;
-    width: 10px;
-    border-radius: 50%;
-    background-color: #8d8d8d;
-    margin: 3px;
+  display: block;
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  background-color: #8d8d8d;
+  margin: 3px;
 }
 
-.circle .scaling{
-    animation: typing 1000ms ease-in-out infinite;
-    animation-delay: 3600ms;
+.circle .scaling {
+  animation: typing 1000ms ease-in-out infinite;
+  animation-delay: 3600ms;
+}
+
+.dot-flashing {
+  margin-bottom: 1rem;
+  position: relative;
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: #474748;
+  color: #474748;
+  animation: dot-flashing 0.8s infinite linear alternate;
+  animation-delay: 0.5s;
+}
+.dot-flashing::before,
+.dot-flashing::after {
+  content: "";
+  display: inline-block;
+  position: absolute;
+  top: 0;
+}
+.dot-flashing::before {
+  left: -15px;
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: #474748;
+  color: #474748;
+  animation: dot-flashing 0.8s infinite alternate;
+  animation-delay: 0s;
+}
+.dot-flashing::after {
+  left: 15px;
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: #474748;
+  color: #474748;
+  animation: dot-flashing 0.8s infinite alternate;
+  animation-delay: 0.8s;
+}
+
+@keyframes dot-flashing {
+  0% {
+    background-color: #474748;
+  }
+  50%,
+  100% {
+    background-color: rgba(161, 161, 162, 0.2);
+  }
+}
+
+.background {
+  background: linear-gradient(
+    90deg,
+    rgba(2, 0, 36, 1) 0%,
+    rgba(129, 177, 254, 1) 0%,
+    rgba(0, 71, 255, 1) 100%
+  );
+}
+
+.conversation-history-box:hover {
+  background: #e9e9e9 !important;
+  transition: 0.01s ease-in-out;
+}
+
+.active {
+  background: #2d54a6 !important;
+  padding: 4px !important;
+  color: white !important;
+  border-radius: 5% !important;
+}
+
+@media (min-width: 640px) {
+  .conversation-history-bar {
+    width: 100% !important;
+  }
+
+  .full-width {
+    width: 100% !important;
+  }
+  .hamburger-icon {
+    display: none; /* Hide hamburger icon */
+  }
+  .top-nav-buttons {
+    display: hidden !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .hidden {
+    display: none !important;
+  }
+
+  .full-width {
+    width: 100% !important;
+  }
+
+  .conversation-history-bar-full-height {
+    height: 70vh !important;
+  }
+  .chatbox-topnav-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
+  }
+  .top-nav-buttons-text {
+    display: none !important;
+  }
+  .top-nav-button {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+}
+
+.scale-question {
+  display: flex;
+  flex-direction: column !important; /* or column if you want answers on top of the radio buttons */
+  align-items: center; /* or flex-start for top-aligned text */
+  gap: 40px !important; /* Adjust the gap between the radio button and answer text as needed */
+  position: relative;
+}
+
+.answer-option {
+  display: flex;
+  flex-direction: column; /* or row if you want answers on top of the radio buttons */
+  align-items: center; /* or flex-start for top-aligned text */
+  font-size: 12px;
+  width: 20px;
+}
+
+.answer-pretext {
+  text-align: center;
+}
+
+.answer-posttext {
+  margin-top: 5px; /* Adjust the margin as needed to control spacing between radio button and text */
+  position: absolute;
+  margin-left: -50px;
+  margin-right: -65px;
+  width: 150px;
+  text-align: center;
+}
+
+/* Colors */
+.selected-border {
+  border: 3px solid #2c5fce !important;
+  background: #7292d6 !important;
+}
+
+.wrong-border {
+  border: 3px solid #a51e1e !important;
+  background: #bd6262 !important;
+}
+
+.correct-border {
+  border: 3px solid #115511 !important;
+  background: #589758 !important;
+}
+
+.hidden-border {
+  border: 3px solid white !important;
 }

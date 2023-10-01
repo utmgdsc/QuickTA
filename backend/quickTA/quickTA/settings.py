@@ -32,6 +32,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+APPEND_SLASH = False
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -44,8 +46,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'users',
+    'models',
+    'course',
+    'analytics',
+    'administrative',
+    'student',
     'students',
-    'researchers'
+    'researchers',
+    'survey',
+    'assessments',
 ]
 
 MIDDLEWARE = [
@@ -61,7 +71,7 @@ MIDDLEWARE = [
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
-    "https://quickta.utm.utoronto.ca",
+    # "https://quickta.utm.utoronto.ca",
      'http://localhost:3000',
 ]
 CORS_ORIGIN_WHITELIST = (
@@ -106,8 +116,12 @@ DATABASES = {
         'ENFORCE_SCHEMA': False,
         'CLIENT': {
             # 'host': 'mongodb+srv://admin:cEWQJjkyDAracCLY@quickta.dmbx3ix.mongodb.net/?retryWrites=true&w=majority'
-            'host': 'mongodb+srv://admin:admin@cluster0.qatcnyw.mongodb.net/?retryWrites=true&w=majority'
-        }  
+            'host': env('MONGODB')
+            # 'host': 'mongodb://127.0.0.1:27017'
+        },
+        'OPTIONS': {
+            'max_connections': 5000,
+        },
     }
 }
 
