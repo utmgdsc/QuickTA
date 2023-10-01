@@ -41,7 +41,7 @@ class AnswerQuestionSerializer(serializers.Serializer):
     survey_id = serializers.CharField()
     question_id = serializers.CharField()
     question_type = serializers.ChoiceField(choices=[(tag.name, tag.value) for tag in QuestionType])
-    answer = serializers.IntegerField(required=False)
+    answer = serializers.CharField(required=False)
     open_ended_answer = serializers.CharField(required=False)
     survey_type = serializers.ChoiceField(choices=[('Pre', 'Pre'), ('Post', 'Post')])
 
@@ -79,9 +79,6 @@ class AnswerQuestionSerializer(serializers.Serializer):
                 Conversation.objects.get(conversation_id=conversation_id)
             except:
                 raise serializers.ValidationError(f"Conversation with ID [{conversation_id}] does not exist")
-            
-            if question_type == 'OPEN_ENDED':
-                answer = open_ended_answer
 
             SurveyResponse(
                 survey_id=survey_id,

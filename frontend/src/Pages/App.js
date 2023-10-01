@@ -23,7 +23,7 @@ const App = () => {
   const [model_id, setModelId] = useState("");
   const [courseName, setCourseName] = useState("");
   const [auth, setAuth] = useState("");
-  const [UTORid, setUtorID] = useState("sheik324");
+  const [UTORid, setUtorID] = useState("choiman3");
   const [isNewUser, setIsNewUser] = useState(true);
   // const [auth, setAuth] = useState("student");
   const {
@@ -98,11 +98,9 @@ const App = () => {
         }
         setTimeout(() => {
           setIsLoading(false);
-          // console.log("Done loading");
         }, 2000);
       })
       .catch((err) => {
-        // console.log(err);
         setError(err);
         onErrOpen();
 

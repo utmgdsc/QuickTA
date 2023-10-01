@@ -153,7 +153,7 @@ const ChatBoxFooter = ({
 
         const now = Temporal.Now.zonedDateTimeISO().toString();
         const userText = {
-          message: text,
+          message: text.slice(0, 4000),
           dateSent: now,
           isUser: "true",
         };

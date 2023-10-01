@@ -108,15 +108,23 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser }) => {
           style={{
             display: "flex",
             alignItems: "center",
+
             // border: "1px red solid",
           }}
         >
-          <Text
-            as="h1"
-            style={{ fontFamily: "Poppins", fontWeight: 500, fontSize: "28px" }}
-          >
-            Pre-Survey
-          </Text>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <Text
+              as="h1"
+              style={{
+                fontFamily: "Poppins",
+                fontWeight: 500,
+                fontSize: "28px",
+              }}
+            >
+              Questionnaire
+            </Text>
+            <Text color={"gray.400"}>(For First-Time User Logins Only)</Text>
+          </div>
         </Box>
         {isLoading ? (
           <VStack
@@ -145,7 +153,7 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser }) => {
             >
               <div
                 style={{
-                  fontSize: "14px",
+                  fontSize: "16px",
                   height: "15vh",
                   display: "flex",
                   justifyContent: "center",

@@ -114,15 +114,15 @@ const PostQuestions = ({
         conversation_id: conversation_id,
         question_id: questions[option - 1].question_id,
         survey_type: "Post",
+        answer: optionsSelected[option],
       };
 
       if (data.question_type === "SCALE") {
-        data.answer = optionsSelected.answer;
         data.survey_id = scaleSurveyId;
       } else if (data.question_type === "OPEN_ENDED") {
-        data.open_ended_answer = optionsSelected.prompt;
         data.survey_id = open_ended_surveyId;
       }
+      console.log(optionsSelected[option], data.answer);
 
       allResponses.push(data);
     }
