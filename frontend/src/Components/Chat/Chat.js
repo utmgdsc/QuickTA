@@ -6,7 +6,6 @@ import {
   AvatarBadge,
   useDisclosure,
   Text,
-  VStack,
 } from "@chakra-ui/react";
 import ChatBoxTopNav from "./ChatBoxTopNav";
 import ChatBox from "./ChatBox";
@@ -116,8 +115,8 @@ const Chat = ({
       });
   };
 
+  // Creates a new conversation by wiping the messages and sending an initial message
   const createNewConversation = async () => {
-    // console.log(model_id.length === 0 ? currModel.model_id : model_id);
     updateMessages([
       {
         message:
@@ -126,21 +125,6 @@ const Chat = ({
         isUser: false,
       },
     ]);
-    // axios
-    //   .post(process.env.REACT_APP_API_URL + "/student/conversation", {
-    //     user_id: userId,
-    //     course_id: currCourse.course_id,
-    //     model_id: model_id.length === 0 ? currModel.model_id : model_id,
-    //   })
-    //   .then(async (res) => {
-    //     updateConvoID(res.data.conversation_id);
-    //     updateInConvo(true);
-    //   })
-    //   .catch((err) => {
-    //     setError(err);
-    //     console.log(err);
-    //     onErrOpen();
-    //   });
   };
 
   useEffect(() => {
@@ -148,8 +132,16 @@ const Chat = ({
   }, [currCourse]);
 
   return (
-    <Box ml={"10vw"} mr={"10vw"}>
-      <div style={{ width: "500px" }}>
+    <Box
+      ml={"10vw"}
+      mr={"10vw"}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      {/* Course/Model selection bars */}
+      <div style={{ maxWidth: "500px", height: "50px" }}>
         <div style={{ display: "flex" }}>
           <CourseSelect
             courses={courses}
@@ -168,6 +160,8 @@ const Chat = ({
           )}
         </div>
       </div>
+
+      {/* Main Chatbox Container */}
       <Box
         as={"div"}
         bgColor={"white"}
@@ -176,11 +170,12 @@ const Chat = ({
         borderBottomRadius={"lg"}
         boxShadow={"1px 2px 3px 1px rgba(0,0,0,0.12)"}
         style={{
-          maxHeight: "75vh",
+          height: "75vh",
           display: "flex",
           flexDirection: "row",
         }}
       >
+        {/* Conversation History Side Nav Container */}
         <Box
           className={
             `conversation-history-bar` +
@@ -193,22 +188,34 @@ const Chat = ({
             width: openConvoHistory ? "20%" : "70px",
             height: "100%",
             overflow: "hidden", // Hide the horizontal overflow
+            backgroundColor: "#f6f6f6",
+            borderRight: "1px solid #EAEAEA",
           }}
         >
           <div
             style={{
               display: "flex",
               width: "100%",
-              height: "fit-content",
+              height: "15%",
               padding: "20px 16px",
               borderBottom: "1px solid #EAEAEA",
               alignItems: "center",
-              backgroundColor: "#F9F9F9",
+              backgroundColor: "white",
               borderTopLeftRadius: "5px",
               borderTopRightRadius: "5px",
+              overflow: "hidden",
+              boxSizing: "border-box",
             }}
           >
-            <div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-start",
+                width: "100%",
+
+                boxSizing: "border-box",
+              }}
+            >
               <IconButton
                 border={"1px solid #EAEAEA"}
                 aria-label="Open Conversation History Menu"
@@ -225,7 +232,6 @@ const Chat = ({
                 style={{
                   display: "flex",
                   justifyContent: "flex-end",
-                  width: "100%",
                 }}
               >
                 <Button
@@ -238,6 +244,9 @@ const Chat = ({
                     (disableAll.newConversation && messages.length === 1) ||
                     (!inConvo && !currConvoID && !isOldConvo)
                   }
+                  style={{
+                    width: "100%",
+                  }}
                   onClick={() => {
                     if (
                       (currConvoID && inConvo && !isOldConvo) ||
@@ -293,7 +302,7 @@ const Chat = ({
                     style={
                       disableAll.oldConvoButtons
                         ? {
-                            background: "#F1F1F1",
+                            background: "#fbfbfb",
                             display: "flex",
                             flexDirection: "row",
                             alignItems: "center",
@@ -303,7 +312,7 @@ const Chat = ({
                             width: "100%",
                           }
                         : {
-                            background: "#F1F1F1",
+                            background: "#fdfdfd",
                             display: "flex",
                             flexDirection: "row",
                             alignItems: "center",
@@ -401,6 +410,8 @@ const Chat = ({
             </div>
           </div>
         </Box>
+
+        {/* Chatbox Container */}
         <Box
           className={
             `chat-box` + (openConvoHistory ? " hidden" : " full-width")
@@ -408,24 +419,21 @@ const Chat = ({
           style={{
             minWidth: openConvoHistory ? "80%" : "calc(100% - 70px)",
             maxHeight: "75vh",
+            background: "#F9F9F9",
           }}
+          borderBottomRightRadius={"8px"}
+          borderTopRightRadius={"8px"}
         >
-          <div
-            style={{
-              display: "flex",
-              borderBottom: "1px solid #EAEAEA",
-              alignItems: "center",
-              backgroundColor: "#F9F9F9",
-            }}
-          >
-            <ChatBoxTopNav
-              openConvoHistory={openConvoHistory}
-              setOpenConvoHistory={setOpenConvoHistory}
-              courseCode={currCourse.course_code}
-              currConvoID={currConvoID}
-            />
-          </div>
+          {/* Chatbox top navigation - max height: 15% */}
+          <ChatBoxTopNav
+            openConvoHistory={openConvoHistory}
+            setOpenConvoHistory={setOpenConvoHistory}
+            courseCode={currCourse.course_code}
+            currConvoID={currConvoID}
+          />
+          {/* Chatbox footer controllers - max Height: 70% */}
           <ChatBox messages={messages} waitingForResp={waitingForResp} />
+          {/* Chatbox footer controllers - max Height: 15% */}
           <ChatBoxFooter
             userId={userId}
             setIsOldConvo={setIsOldConvo}

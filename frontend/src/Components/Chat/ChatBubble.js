@@ -31,7 +31,12 @@ const ChatBubble = ({
   }
 
   return (
-    <VStack mt={7} alignItems={alignment} alignSelf={alignment} px={5}>
+    <VStack
+      mt={dateSent ? 2 : 7}
+      alignItems={alignment}
+      alignSelf={alignment}
+      px={5}
+    >
       <Box
         bg={isMe ? "#6892E8" : "#E2E2E2"}
         color={isMe ? "white" : "#212226"}
@@ -60,7 +65,9 @@ const ChatBubble = ({
                 paddingBottom: "10px",
                 margin: "0px",
                 lineHeight: "1.6",
-                minWidth: "600px",
+                borderRadius: "10px",
+                paddingLeft: "10px",
+                paddingRight: "10px",
               }}
             >
               {message}

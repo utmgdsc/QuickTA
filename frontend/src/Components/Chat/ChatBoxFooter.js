@@ -1,24 +1,8 @@
-import {
-  Button,
-  HStack,
-  Input,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  Radio,
-  RadioGroup,
-  Text,
-  Textarea,
-  VStack,
-  useDisclosure,
-} from "@chakra-ui/react";
-import { useState, useEffect } from "react";
+import { Button, HStack, Textarea, useDisclosure } from "@chakra-ui/react";
+import { useState } from "react";
 import axios from "axios";
 import { Temporal } from "@js-temporal/polyfill";
 import TechAssessment from "./TechAssessment";
-import ChatOpenSurvey from "./ChatOpenSurvey";
 import ErrorDrawer from "../ErrorDrawer";
 
 const ChatBoxFooter = ({
@@ -201,6 +185,7 @@ const ChatBoxFooter = ({
   return (
     <>
       <HStack
+        height={"15%"}
         bgColor={"white"}
         paddingX={"3vw"}
         paddingTop={"6px"}

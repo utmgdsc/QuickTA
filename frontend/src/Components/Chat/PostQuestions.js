@@ -173,7 +173,7 @@ const PostQuestions = ({
           updateMessages([
             {
               message:
-                "Hi! I am an AI assistant designed to support you in your Python programming learning journey. I cannot give out solutions to your assignments (python code) but I can help guide you if you get stuck. How can I help you?",
+                "Hi! I am an AI assistant designed to support you in your Python programming learning journey. I cannot give out solutions to your assignments (python code) but I can help guide you if you get stuck. The chat is monitored, if you continue asking for the solution here, the instructors would be made aware of it. How can I help you?",
               dateSent: Temporal.Now.zonedDateTimeISO().toString(),
               isUser: false,
             },

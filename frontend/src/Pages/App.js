@@ -2,14 +2,11 @@ import "../assets/globals.css";
 import { Route } from "react-router-dom";
 import { Routes } from "react-router";
 import StudentPage from "./StudentPage";
-import ProfessorPage from "./ProfessorPage";
 import ResearcherAnalytics from "./ResearcherAnalytics";
 import ResearcherModels from "./ResearcherModels";
-import ResearcherFilterPage from "./ResearcherFilterPage";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import LandingPage from "./LandingPage";
-import CustomSpinner from "../Components/CustomSpinner";
 import NotFoundPage from "../Components/NotFoundPage";
 import AdminPage from "./AdminPage";
 import { useDisclosure } from "@chakra-ui/react";
@@ -21,10 +18,10 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setuserId] = useState("");
   const [model_id, setModelId] = useState("");
-  const [courseName, setCourseName] = useState("");
   const [auth, setAuth] = useState("");
   const [UTORid, setUtorID] = useState("choiman3");
   const [isNewUser, setIsNewUser] = useState(true);
+  // const [courseName, setCourseName] = useState("");
   // const [auth, setAuth] = useState("student");
   const {
     isOpen: isErrOpen,

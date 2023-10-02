@@ -10,10 +10,10 @@ const ChatBox = ({ messages, waitingForResp }) => {
   }, [messages]);
 
   return (
-    <VStack
+    <div
       background={"#F9F9F9"}
       style={{
-        height: "53.5vh",
+        height: "70%",
         overflowY: "scroll",
         padding: "0vw 1.5vw 0vw 1.5vw",
         overflowWrap: "break-word",
@@ -99,12 +99,20 @@ const ChatBox = ({ messages, waitingForResp }) => {
       })}
 
       {waitingForResp ? (
-        <div className="typing">
+        <div
+          className="typing"
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+          }}
+        >
           <div className="dot-flashing"></div>
         </div>
       ) : null}
       <div ref={messagesEndRef} />
-    </VStack>
+    </div>
   );
 };
 

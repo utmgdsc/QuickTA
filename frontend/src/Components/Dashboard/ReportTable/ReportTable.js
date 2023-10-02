@@ -4,17 +4,13 @@ import {
   Table,
   Thead,
   Tbody,
-  Tfoot,
   Tr,
   Th,
   Td,
-  TableCaption,
   TableContainer,
   VStack,
   useDisclosure,
-  Divider,
   Center,
-  Spacer,
   Tooltip,
 } from "@chakra-ui/react";
 
@@ -60,7 +56,6 @@ const ReportTable = ({ course_ID, isWeekly, setIsLoading }) => {
         setIsLoading(true);
         let data = res.data;
 
-
         changeReportList(data.reports);
         setIsLoading(false);
       })
@@ -79,7 +74,6 @@ const ReportTable = ({ course_ID, isWeekly, setIsLoading }) => {
     }
   }, [course_ID]);
 
-  // console.log(reportList, rowIndex);
   return (
     <div>
       <Box style={cardStyle} mt={6}>
