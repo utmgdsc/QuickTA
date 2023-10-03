@@ -171,6 +171,7 @@ const Chat = ({
         boxShadow={"1px 2px 3px 1px rgba(0,0,0,0.12)"}
         style={{
           height: "75vh",
+          minHeight: '590px',
           display: "flex",
           flexDirection: "row",
         }}
@@ -420,6 +421,7 @@ const Chat = ({
             minWidth: openConvoHistory ? "80%" : "calc(100% - 70px)",
             maxHeight: "75vh",
             background: "#F9F9F9",
+            minHeight: '590px',
           }}
           borderBottomRightRadius={"8px"}
           borderTopRightRadius={"8px"}
