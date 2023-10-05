@@ -16,7 +16,6 @@ import {
   Tr,
   useDisclosure,
   Skeleton,
-  VStack,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import axios from "axios";

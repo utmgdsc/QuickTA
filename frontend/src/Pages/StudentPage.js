@@ -1,17 +1,5 @@
 import {
   Box,
-  Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerHeader,
-  DrawerOverlay,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
   useDisclosure,
 } from "@chakra-ui/react";
 import TopNav from "../Components/TopNav";
@@ -26,10 +14,8 @@ const StudentPage = ({
   setCurrCourse,
   semester,
   courses,
-  isLoading,
   UTORid,
   auth,
-  modelNum = null,
   userId,
   model_id,
 }) => {
@@ -68,7 +54,6 @@ const StudentPage = ({
       })
       .catch((err) => {
         setError(err);
-        // console.log(err);
         onErrOpen();
       });
   };

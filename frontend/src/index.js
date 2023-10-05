@@ -4,13 +4,12 @@ import App from "./Pages/App";
 import { ChakraProvider } from "@chakra-ui/react";
 import theme from "./assets/theme";
 import { BrowserRouter } from "react-router-dom";
-import AdminPage from "./Pages/AdminPage";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <ChakraProvider theme={theme}>
     <BrowserRouter>
-      <App UTORid={"choiman3"} />
+      <App UTORid={"banatehr"} />
     </BrowserRouter>
   </ChakraProvider>
 );

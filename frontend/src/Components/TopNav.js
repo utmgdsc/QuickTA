@@ -1,25 +1,12 @@
 import {
-  Button,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
   Spacer,
-  useDisclosure,
   HStack,
   Text,
   Heading,
 } from "@chakra-ui/react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRightFromBracket } from "@fortawesome/free-solid-svg-icons";
-import { useState } from "react";
 import { NavLink } from "react-router-dom";
 
 const TopNav = ({ UTORid, auth }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-
   return (
     <HStack
       style={{

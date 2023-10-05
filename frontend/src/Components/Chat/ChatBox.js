@@ -1,4 +1,3 @@
-import { VStack } from "@chakra-ui/react";
 import ChatBubble from "./ChatBubble";
 import { useRef, useEffect } from "react";
 
@@ -21,7 +20,13 @@ const ChatBox = ({ messages, waitingForResp }) => {
     >
       {messages.map(({ message, dateSent, isUser }, index) => {
         // Split the message into paragraphs based on "\n\n1.", "\n\n2.", etc.
-        const paragraphs = message.split(/\n\n/);
+        
+        let paragraphs = []
+        if (!isUser) {
+          paragraphs = message.split(/\n\n/);
+        } else {
+          paragraphs = [message];
+        }
         const chatBubbles = [];
 
         var hasCode = false;

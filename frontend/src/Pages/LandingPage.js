@@ -1,5 +1,5 @@
 import { Text } from "@chakra-ui/react";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import PreSurvey from "../Components/Chat/PreSurvey";
 import { Progress } from "@chakra-ui/react";
 

@@ -1,10 +1,7 @@
 import {
   Box,
-  Center,
   Divider,
-  Flex,
   HStack,
-  Spacer,
   Stat,
   StatLabel,
   Tag,
@@ -12,7 +9,6 @@ import {
   Text,
   Tooltip,
 } from "@chakra-ui/react";
-import StatCard from "./StatCard";
 
 const FrequencyCard = ({ words, callBack }) => {
   const cardStyle = {

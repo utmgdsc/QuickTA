@@ -1,6 +1,6 @@
 import TopNav from "../Components/TopNav";
 import Dashboard from "../Components/Dashboard/Dashboard";
-import { Button, Spinner } from "@chakra-ui/react";
+import { Spinner } from "@chakra-ui/react";
 import React from "react";
 import NotFoundPage from "../Components/NotFoundPage";
 
@@ -45,6 +45,7 @@ const ResearcherAnalytics = ({
         setIsLoading={setIsLoading}
         setCourses={setCourses}
       />
+      
     </div>
   );
 };

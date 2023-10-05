@@ -1,19 +1,13 @@
 import {
   Box,
-  FormControl,
-  FormLabel,
-  Switch,
   Heading,
-  Text,
   Flex,
-  Button,
   useDisclosure,
 } from "@chakra-ui/react";
 import ModelCreator from "./ModelCreator";
 import { useEffect, useState } from "react";
 import ModelCard from "./ModelCard";
 import axios from "axios";
-import CustomSpinner from "../CustomSpinner";
 import ModelRemover from "./ModelRemover";
 
 const ModelBody = ({ courseid, setLoadingModel, loadingModel }) => {

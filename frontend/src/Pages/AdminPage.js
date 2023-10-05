@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   Center,
-  Drawer,
   HStack,
   Table,
   TableContainer,
@@ -31,7 +30,7 @@ import {
 import { SearchIcon } from "@chakra-ui/icons";
 import TopNav from "../Components/TopNav";
 import axios from "axios";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import CourseDrawer from "../Components/AdminView/CourseDrawer";
 import CourseCreator from "../Components/Dashboard/CourseCreator";
 import { AiFillContainer } from "react-icons/ai";

@@ -131,6 +131,26 @@ const Chat = ({
     getConversations();
   }, [currCourse]);
 
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = "Don't leave yet!";
+      onOpenTechAssessment();
+    };
+  
+    if (inConvo) {
+      window.addEventListener("beforeunload", handleBeforeUnload);
+      console.log("added beforeunload event listener");
+  
+      // Return a cleanup function to remove the event listener when inConvo changes
+      return () => {
+        window.removeEventListener("beforeunload", handleBeforeUnload);
+        console.log("removed beforeunload event listener");
+      };
+    } 
+  }, [inConvo]);
+
   return (
     <Box
       ml={"10vw"}
@@ -295,6 +315,14 @@ const Chat = ({
             }}
           >
             <div>
+              {/* <p>InConvo: {inConvo ? "T" : "F"}</p>
+              <p>currConvoID: {currConvoID ? currConvoID : ""}</p>
+              <p>inputMessage: { disableAll.inputMessage ? "true" : "false,"}</p>
+              <p>sendButton: { disableAll.sendButton ? "T" : "F,"}</p>
+              <p>newConversation: { disableAll.newConversation ? "T" : "F,"}</p>
+              <p>endChat: { disableAll.endChat ? "T" : "F,"}</p>
+              <p>oldConvoButtons: { disableAll.oldConvoButtons ? "T" : "F,"}</p> */}
+
               {conversations.map((convo, index) => {
                 return (
                   <Box

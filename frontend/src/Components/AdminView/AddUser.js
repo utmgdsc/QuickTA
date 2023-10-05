@@ -54,11 +54,11 @@ const AddUser = ({
       )
       .then((res) => {
         if (res.data) {
-          if (type == "ST") {
+          if (type === "ST") {
             setUserList(res.data.students);
             setToAdd(Array(res.data.students.length).fill(false));
           }
-          if (type == "IS") {
+          if (type === "IS") {
             setUserList(res.data.instructors);
             setToAdd(Array(res.data.instructors.length).fill(false));
           }

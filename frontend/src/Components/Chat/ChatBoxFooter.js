@@ -1,4 +1,4 @@
-import { Button, HStack, Textarea, useDisclosure } from "@chakra-ui/react";
+import { Button, HStack, Textarea, Tooltip, useDisclosure } from "@chakra-ui/react";
 import { useState } from "react";
 import axios from "axios";
 import { Temporal } from "@js-temporal/polyfill";
@@ -193,26 +193,42 @@ const ChatBoxFooter = ({
         borderTop={"2px solid #EAEAEA"}
         borderBottomRightRadius={"8px"}
       >
-        <Button
-          colorScheme={"red"}
-          fontSize={"sm"}
-          onClick={() => {
-            if (inConvo && messages) {
-              onOpenTechAssessment();
-            } else {
-              // console.log(
-              //   "Must be in a convo to leave one or please send at least one msg :>"
-              // );
+        <Tooltip label={"Assess your understanding & ends current conversation"}>
+          <Button
+            colorScheme={"green"}
+            fontSize={"xs"}
+            height={"80%"}
+            onClick={() => {
+              if (inConvo && messages) {
+                onOpenTechAssessment();
+              } else {
+                // console.log(
+                //   "Must be in a convo to leave one or please send at least one msg :>"
+                // );
+              }
+            }}
+            isDisabled={
+              (!inConvo && messages.length == 1) ||
+              disableAll.endChat ||
+              waitingForResp
             }
-          }}
-          isDisabled={
-            (!inConvo && messages.length == 1) ||
-            disableAll.endChat ||
-            waitingForResp
-          }
-        >
-          End chat
-        </Button>
+          >
+            <div style={{ display: 'flex', flexDirection: 'column'}}>
+              <span style={{
+                  wordWrap: "normal",
+                  whiteSpace: "normal",
+              }}>
+                Assess Understanding &
+              </span>
+              <span style={{
+                  wordWrap: "normal",
+                  whiteSpace: "normal",
+              }}>
+              End Conversation
+              </span>
+            </div>
+          </Button>
+        </Tooltip>
 
         <TechAssessment
           isOpenTechAssessment={isOpenTechAssessment}

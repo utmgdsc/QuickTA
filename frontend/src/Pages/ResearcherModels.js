@@ -1,19 +1,14 @@
 import {
   Box,
-  Heading,
-  Text,
-  HStack,
-  Button,
-  ModalHeader,
 } from "@chakra-ui/react";
 import TopNav from "../Components/TopNav";
 import ModelHeader from "../Components/ModelManager/ModelHeader";
 import ModelBody from "../Components/ModelManager/ModelBody";
 import CustomSpinner from "../Components/CustomSpinner";
 import CourseSelect from "../Components/CourseSelect";
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
 import NotFoundPage from "../Components/NotFoundPage";
+import { BarChart } from '@mui/x-charts/BarChart';
 
 const ResearcherModels = ({
   UTORid,
@@ -67,6 +62,12 @@ const ResearcherModels = ({
         {/*    Redirect to Analytics*/}
         {/*  </Button>*/}
         {/*</Link>*/}
+        <BarChart
+          xAxis={[{ scaleType: 'band', data: ['group A', 'group B', 'group C'] }]}
+          series={[{ data: [4, 3, 5] }, { data: [1, 6, 3] }, { data: [2, 5, 6] }]}
+          width={500}
+          height={300}
+        />
       </Box>
     </div>
   );

@@ -1,5 +1,4 @@
 import { Select, Box } from '@chakra-ui/react';
-import {useState} from "react";
 
 const CourseSelect = ({courses, setCurrCourse, inConvo, currCourse}) => {
 
@@ -18,7 +17,7 @@ const CourseSelect = ({courses, setCurrCourse, inConvo, currCourse}) => {
             isDisabled={inConvo}
             mb={5}
             >
-                {courses.map(({id, course_id, semester, course_code}, index) => (<option key={index} value={index}>{course_code}</option>))}
+                {courses.map(({course_code}, index) => (<option key={index} value={index}>{course_code}</option>))}
             </Select>
         </Box>
     );

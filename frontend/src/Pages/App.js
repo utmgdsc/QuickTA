@@ -19,7 +19,7 @@ const App = () => {
   const [userId, setuserId] = useState("");
   const [model_id, setModelId] = useState("");
   const [auth, setAuth] = useState("");
-  const [UTORid, setUtorID] = useState("choiman3");
+  const [UTORid, setUtorID] = useState("zehrails");
   const [isNewUser, setIsNewUser] = useState(true);
   // const [courseName, setCourseName] = useState("");
   // const [auth, setAuth] = useState("student");
@@ -51,7 +51,7 @@ const App = () => {
       })
       .catch((err) => {
         setError(err);
-        // console.log(err);
+        console.log(err);
         onErrOpen();
       });
 
@@ -99,6 +99,7 @@ const App = () => {
       })
       .catch((err) => {
         setError(err);
+        console.log(err)
         onErrOpen();
 
         setTimeout(() => {

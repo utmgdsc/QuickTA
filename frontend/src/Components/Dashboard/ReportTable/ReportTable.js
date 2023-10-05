@@ -21,7 +21,6 @@ import ErrorDrawer from "../../ErrorDrawer";
 
 const ReportTable = ({ course_ID, isWeekly, setIsLoading }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [hover, setHover] = useState(false);
   const cardStyle = {
     backgroundColor: "white",
     boxShadow: "1px 2px 3px 1px rgba(0,0,0,0.12)",

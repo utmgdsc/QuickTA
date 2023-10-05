@@ -341,4 +341,152 @@ class UserBatchAddCsvView(APIView):
 
 class TestView(APIView):
     def get(self, request):
+        
+        users = User.objects.filter(user_role="ST")
+        users = [user for user in users if user.new_user == False]
+
+        # 1. Acquire number of users that have accessed the system 
+        num_students = len(users)
+        print(f"Number of students who have accessed the system: {num_students}/1241 ({round(num_students/1241*100, 2)}%)")
+
+        # 1a. Presurvey: Q1 Have you ever used large language models before?
+
+        q1_results = {}
+        q2_results = {}
+        q3_results = {}
+        q4_results = {}
+        q1_id = "a4dffcc8-1ee4-4361-99b3-6231772b0e19"
+        q2_id = "1a8ddf81-501d-4254-a0c8-4704ef081326"
+        q3_id = "5625f3ba-b627-4927-a43e-b711796ef9b1"
+        q4_id = "b1532779-eb57-4f0b-9ed0-55274921e5f4"
+        for user in users: 
+            for question in user.pre_survey:
+
+                # Question 1 
+                if question['question_id'] == q1_id:
+                    if question['answer'] not in q1_results:
+                        q1_results[question['answer']] = 1
+                    else:
+                        q1_results[question['answer']] += 1
+
+                # Question 2
+                if question['question_id'] == q2_id:
+                    if question['answer'] not in q2_results:
+                        q2_results[question['answer']] = 1
+                    else:
+                        q2_results[question['answer']] += 1
+
+                if question['question_id'] == q3_id:
+                    if question['answer'] not in q3_results:
+                        q3_results[question['answer']] = 1
+                    else:
+                        q3_results[question['answer']] += 1
+
+                if question['question_id'] == q4_id:
+                    if question['answer'] not in q4_results:
+                        q4_results[question['answer']] = 1
+                    else:
+                        q4_results[question['answer']] += 1
+
+        q1_results = {key: q1_results[key] for key in sorted(q1_results.keys())}
+        q2_results = {key: q2_results[key] for key in sorted(q2_results.keys())}
+        q3_results = {key: q3_results[key] for key in sorted(q3_results.keys())}
+        q4_results = {key: q4_results[key] for key in sorted(q4_results.keys())}
+        print("Pre-survey Q1", q1_results)
+        print("Pre-survey Q2", q2_results)
+        print("Pre-survey Q3", q3_results)
+        print("Pre-survey Q4", q4_results)
+
+        # 2. User interactions
+        from student.models import Conversation
+        conversations = Conversation.objects.all()
+        # print("Number of conversations (includes instructors and students):", len(conversations))
+
+        user_ids = [convo.user_id for convo in conversations]
+        users = list(set(user_ids))
+        # print("Number of unique user conversation:", len(users))
+
+        students = User.objects.filter(user_role="ST", user_id__in=users)
+        print("Number of distinct students who started a conversation:", len(students))
+
+        # average number of conversations performed by students
+        students_ids = [student.user_id for student in students]
+        conversations = Conversation.objects.filter(user_id__in=students_ids)
+        print("Total number of conversations performed by students:", len(conversations))
+        print("Average number of conversations performed by students:", len(conversations)/len(students))
+
+        # 3. Post session
+        from survey.models import SurveyResponse
+        responses = SurveyResponse.objects.all()
+
+        user_ids = []
+        for response in responses:
+            user_ids.append(response.user_id)
+        users = list(set(user_ids))
+
+        student_users = User.objects.filter(user_role="ST", user_id__in=users)
+        print("Number of students who did the post survey:", len(student_users))
+
+        user_ids = [user.user_id for user in student_users]
+        student_responses = SurveyResponse.objects.filter(user_id__in=user_ids)
+
+        conversation_ids = [response.conversation_id for response in student_responses]
+        print("Number of responses:", len(set(conversation_ids)))
+        q1_results = {}
+        q2_results = {}
+        q3_results = {}
+        q4_results = {}
+        q5_responses = []
+        q1_id = "63b13129-ad7b-41b0-9a9b-9304d27c8062"
+        q2_id = "a99b5e5b-e405-4295-8d73-e2efe66efa33"
+        q3_id = "12c4df67-5677-425f-aca8-0847ea470cae"
+        q4_id = "378376a0-bc65-4f02-ad94-6612a6d904b7"
+        q5_id = "4407a0f3-713a-4758-91b7-ba5ba47e9410"
+        for question in student_responses:
+
+                # Question 1 
+                if question.question_id == q1_id:
+                    if question.answer not in q1_results:
+                        q1_results[question.answer] = 1
+                    else:
+                        q1_results[question.answer] += 1
+
+                # Question 2
+                if question.question_id == q2_id:
+                    if question.answer not in q2_results:
+                        q2_results[question.answer] = 1
+                    else:
+                        q2_results[question.answer] += 1
+
+                if question.question_id == q3_id:
+                    if question.answer not in q3_results:
+                        q3_results[question.answer] = 1
+                    else:
+                        q3_results[question.answer] += 1
+
+                if question.question_id == q4_id:
+                    if question.answer not in q4_results:
+                        q4_results[question.answer] = 1
+                    else:
+                        q4_results[question.answer] += 1
+
+                if question.question_id == q5_id:
+                    q5_responses.append(question.answer)
+
+        q1_results = {key: q1_results[key] for key in sorted(q1_results.keys())}
+        q2_results = {key: q2_results[key] for key in sorted(q2_results.keys())}
+        q3_results = {key: q3_results[key] for key in sorted(q3_results.keys())}
+        q4_results = {key: q4_results[key] for key in sorted(q4_results.keys())}
+        print("Q1", q1_results)
+        print("Q2", q2_results)
+        print("Q3", q3_results)
+        print("Q4", q4_results)
+        print("Q5 responses:", q5_responses)
+
+
+
+
+
+
+
         return JsonResponse({"msg": "Test message"})

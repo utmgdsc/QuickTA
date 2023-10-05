@@ -16,7 +16,6 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import CustomSpinner from "../../CustomSpinner";
 import ErrorDrawer from "../../ErrorDrawer";
 
 const ConversationView = ({ isOpen, onClose, convo_id }) => {

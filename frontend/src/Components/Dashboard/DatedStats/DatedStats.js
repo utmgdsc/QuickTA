@@ -2,8 +2,6 @@ import {
   VStack,
   Flex,
   Spacer,
-  Button,
-  Tooltip,
   useDisclosure,
   HStack,
 } from "@chakra-ui/react";
@@ -13,7 +11,6 @@ import React, { useEffect } from "react";
 import axios from "axios";
 import { useState } from "react";
 import FrequencyCard from "./FrequencyCard";
-import fileDownload from "js-file-download";
 import ErrorDrawer from "../../ErrorDrawer";
 
 const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {

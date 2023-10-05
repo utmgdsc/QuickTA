@@ -1,10 +1,8 @@
 import {
   Box,
   Text,
-  Spacer,
   Flex,
   Button,
-  color,
   useDisclosure,
   Modal,
   ModalOverlay,
@@ -18,16 +16,11 @@ import {
   Stack,
   Input,
   ModalFooter,
-  ModalCloseButton,
   HStack,
   Divider,
-  NumberInput,
-  NumberInputField,
   Textarea,
-  VStack,
 } from "@chakra-ui/react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import ErrorDrawer from "../ErrorDrawer";
 
