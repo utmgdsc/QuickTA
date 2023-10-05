@@ -22,7 +22,7 @@ const ChatBox = ({ messages, waitingForResp }) => {
         // Split the message into paragraphs based on "\n\n1.", "\n\n2.", etc.
         
         let paragraphs = []
-        if (!isUser) {
+        if (isUser) {
           paragraphs = message.split(/\n\n/);
         } else {
           paragraphs = [message];
