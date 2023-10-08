@@ -101,7 +101,14 @@ const TechAssessment = ({
         closeOnOverlayClick={false}
         isOpen={isOpenTechAssessment}
         onClose={onCloseTechAssessment}
-        size={"lg"}
+        // size={"lg"}
+        style={{
+          width: "80%",
+          height: "80%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
         scrollBehavior="inside"
       >
         <ModalOverlay />

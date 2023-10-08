@@ -26,6 +26,7 @@ import { IconButton } from "@chakra-ui/react";
 import { HamburgerIcon } from "@chakra-ui/icons";
 import ErrorDrawer from "../ErrorDrawer";
 import { MdAccountCircle } from "react-icons/md";
+import { FormControl } from "@mui/material";
 // import { Avatar } from "@mui/material";
 
 const ChatBoxTopNav = ({
@@ -101,14 +102,15 @@ const ChatBoxTopNav = ({
                 width: "60px",
                 height: "60px",
                 borderRadius: "50%",
-                marginRight: "10px",
+                marginRight: "5px",
                 marginLeft: "5px",
             }}>
               <AvatarBadge
-                boxSize={"1em"}
+                boxSize={"1.2em"}
                 style={{ 
                   borderRadius: "60px", 
                   border: "3px solid #C6F6D4",
+                  margin: 0,
                   background: "#68D391"
                 }}
               />
@@ -118,7 +120,7 @@ const ChatBoxTopNav = ({
                 <Text
                   style={{
                     fontSize: "14px",
-                    marginLeft: "1vw",
+                    marginLeft: "4px",
                     lineHeight: "1.2",
                   }}
                 >
@@ -130,7 +132,7 @@ const ChatBoxTopNav = ({
                     color: "#012E8A",
                     fontWeight: "700",
                     fontSize: "30px",
-                    marginLeft: "1vw",
+                    marginLeft: "4px",
                     lineHeight: "0.9",
                   }}
                 >
@@ -153,11 +155,11 @@ const ChatBoxTopNav = ({
             {/* Download Conversation Button */}
             <Button
               variant={"ghost"}
-              disabled={currConvoID === ""}
-              // py={6}
-              // px={5}
+              // disabled={currConvoID === ""}
               style={{
                 padding: "8px",
+                cursor: currConvoID ? "pointer" : "not-allowed",
+                color: currConvoID ? "#012E8A" : "#aaa",
               }}
               className="top-nav-button"
               onClick={() => {
@@ -209,6 +211,7 @@ const ChatBoxTopNav = ({
                         wordWrap: "normal",
                         whiteSpace: "normal",
                         lineHeight: "1.2",
+                        fontWeight: "600",
                       }}
                     >
                       Download Conversation
@@ -221,10 +224,12 @@ const ChatBoxTopNav = ({
             <Button
              style={{
               padding: "8px",
+              fontWeight: "600",
+              cursor: currConvoID ? "pointer" : "not-allowed",
+              color: currConvoID ? "#d63a3a" : "#aaa",
              }}
               className="top-nav-button"
               variant={"ghost"}
-              disabled={currConvoID === ""}
               onClick={() => {
                 if (currConvoID) {
                   onOpen();

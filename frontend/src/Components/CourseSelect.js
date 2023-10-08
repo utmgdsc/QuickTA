@@ -8,7 +8,7 @@ const CourseSelect = ({courses, setCurrCourse, inConvo, currCourse}) => {
 
     return (
         <Box w='150px'>
-          <FormControl fullWidth size="small">
+          <FormControl fullWidth size="small" disabled={inConvo}>
             <InputLabel id="course-select-label" style={{fontFamily: 'Poppins'}}>Course</InputLabel>
             <Select 
               sx={{ '.MuiOutlinedInput-notchedOutline': { border: 0 } }}
@@ -29,7 +29,6 @@ const CourseSelect = ({courses, setCurrCourse, inConvo, currCourse}) => {
                   // Object.keys(courses[parseInt(e.target.value)]).forEach((key) => {sessionStorage.setItem(key, courses[parseInt(e.target.value)][key])});
               }}
               value={parseInt(sessionStorage.getItem('selected'))}
-              isDisabled={inConvo}
               >
                   {courses.map(({course_code}, index) => (<MenuItem paddingLeft={8} key={index} value={index} style={{ fontFamily: 'Poppins'}}>{course_code}</MenuItem>))}
               </Select>

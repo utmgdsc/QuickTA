@@ -97,6 +97,10 @@
   transition: 0.01s ease-in-out;
 }
 
+.hamburger-icon:hover {
+  background-color: #E3E8EF !important;
+}
+
 .active {
   background: #2d54a6 !important;
   padding: 4px !important;
@@ -146,11 +150,12 @@
     padding-top: 0.5rem !important;
     padding-bottom: 0.5rem !important;
   }
-  .top-nav-button {
-    background-color: #3d6bab !important;
-    color: white !important;
-    transition: 0.01s ease-in-out;
-  }
+}
+
+.top-nav-button:hover {
+  background-color: #e9e9e9 !important;
+  border-radius: 5% !important;
+  transition: 0.01s ease-in-out;
 }
 
 .scale-question {
@@ -204,22 +209,20 @@
 
 
 /* Chatbox Footer buttons */
-.send-button:hover {
-  background: #3D6BAB !important;
-  color: white !important;
-  transition: 0.01s ease-in-out;
-}
+.send-button {background: #3278cd !important;}
+.send-button:hover { background: #3D6BAB !important; color: white !important; }
+.send-button.disabled { background: #B0C9EC !important; color: white !important; cursor: not-allowed !important;}
+.send-button.disabled:hover { background: #a4c0e8 !important; color: white !important; cursor: not-allowed !important;}
 
-.end-chat-button:hover {
-  background: #48835D !important;
-  color: white !important;
-  transition: 0.01s ease-in-out;
-}
+.end-chat-button { background: #37A169 !important; color: #F8FCFA !important; }
+.end-chat-button:hover { background: #48835D !important; color: white !important; }
+.end-chat-button.disabled { background: #B4DAC3 !important; color: #F8FCFA !important; cursor: not-allowed !important;}
+.end-chat-button.disabled:hover { background: #add7be !important; color: #F8FCFA !important; cursor: not-allowed !important;}
 
-.chat-textarea:hover {
-  background: #E3E8EF !important;
-  transition: 0.01s ease-in-out;
-}
+.chat-textarea:hover {background: #E3E8EF !important; }
+.chat-textarea.disable { background: #F7FAFB !important; }
+.chat-textarea.disable:hover { background: #F4F6F9 !important; }
+.chat-textarea.disable::placeholder { color: #C6CCD5 !important }
 
 .mui-select {
   outline: none !important;

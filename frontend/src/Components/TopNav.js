@@ -19,7 +19,7 @@ const TopNav = ({ UTORid, auth }) => {
       }}
       as={"div"}
     >
-      <Heading as="h1" size="lg" fontWeight="400">
+      <Heading as="h1" size="lg" fontWeight="400" style={{ fontSize: "30px", lineHeight: '36px'}}>
         Quick<span style={{ color: "#012E8A", fontWeight: "700" }}>TA</span>
       </Heading>
 

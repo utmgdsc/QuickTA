@@ -240,7 +240,13 @@ const Chat = ({
               <IconButton
                 border={"1px solid #EAEAEA"}
                 aria-label="Open Conversation History Menu"
-                size="sm"
+                style={{
+                  padding: "8px",
+                  background: "#EDF2F6",
+                  borderRadius: "5px",
+                  fontSize: "14px",
+                }}
+                className="hamburger-icon"
                 icon={openConvoHistory ? <CloseIcon /> : <HamburgerIcon />}
                 onClick={() => {
                   setOpenConvoHistory(!openConvoHistory);
@@ -253,13 +259,13 @@ const Chat = ({
                 style={{
                   display: "flex",
                   justifyContent: "flex-end",
+                  width: "100%",
                 }}
               >
                 <Button
-                  backgroundColor="#ACCDEC"
-                  color="#555"
+                  // backgroundColor="#ACCDEC"
+                  // color="#555"
                   size="sm"
-                  icon={<SmallAddIcon />}
                   isDisabled={
                     waitingForResp ||
                     (disableAll.newConversation && messages.length === 1) ||
@@ -267,6 +273,23 @@ const Chat = ({
                   }
                   style={{
                     width: "100%",
+                    height: "100%",
+                    borderRadius: "5px",
+                    padding: "6px",
+                    paddingLeft: "12px",
+                    paddingRight: "12px",
+                    fontFamily: "Poppins",
+                    fontWeight: "600",
+                    fontSize: "14px",
+                    background: waitingForResp ||
+                    (disableAll.newConversation && messages.length === 1) ||
+                    (!inConvo && !currConvoID && !isOldConvo) ? "#DDEBF7" : "#ACCDEC",
+                    color: waitingForResp ||
+                    (disableAll.newConversation && messages.length === 1) ||
+                    (!inConvo && !currConvoID && !isOldConvo) ? "#BBB" : "#555",
+                    cursor: waitingForResp ||
+                    (disableAll.newConversation && messages.length === 1) ||
+                    (!inConvo && !currConvoID && !isOldConvo) ? "not-allowed" : "pointer",
                   }}
                   onClick={() => {
                     if (
@@ -336,16 +359,18 @@ const Chat = ({
                             flexDirection: "row",
                             alignItems: "center",
                             padding: "10px",
+                            paddingLeft: "15px",
                             borderBottom: "1px solid #EAEAEA",
                             cursor: "not-allowed",
                             width: "100%",
                           }
                         : {
-                            background: "#fdfdfd",
+                            background: convo.conversation_id == currConvoID ? "#f3f3f3" : "#fdfdfd",
                             display: "flex",
                             flexDirection: "row",
                             alignItems: "center",
                             padding: "10px",
+                            paddingLeft: "15px",
                             borderBottom: "1px solid #EAEAEA",
                             cursor: "pointer",
                             width: "100%",
@@ -401,9 +426,11 @@ const Chat = ({
                       }
                       backgroundColor="#7CA2DE"
                       style={{
+                        fontSize: "19px",
                         width: "40px",
                         height: "40px",
                         borderRadius: "50%",
+                        marginRight: "10px",
                       }}
                       alt="User Avatar"
                     >

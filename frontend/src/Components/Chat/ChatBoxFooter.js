@@ -194,31 +194,20 @@ const ChatBoxFooter = ({
         borderBottomRightRadius={"8px"}
       >
         <Button
-          background={"#37A169"}
-          color={"#FFFFFF"}
           fontWeight={"600"}
           fontSize={"xs"}
           height={"80%"}
-          className="end-chat-button"
+          className={`end-chat-button ${(!inConvo && messages.length == 1) || disableAll.endChat || waitingForResp  ? "disabled" : ""}`}
           style={{
-            width: "140 px",
-            padding: "0 12px",
+            width: "150px",
+            padding: "0 10px",
             borderRadius: "8px",
           }}
           onClick={() => {
             if (inConvo && messages) {
               onOpenTechAssessment();
-            } else {
-              // console.log(
-              //   "Must be in a convo to leave one or please send at least one msg :>"
-              // );
-            }
+            } 
           }}
-          isDisabled={
-            (!inConvo && messages.length == 1) ||
-            disableAll.endChat ||
-            waitingForResp
-          }
         >
           <div style={{ display: 'flex', flexDirection: 'column'}}>
             <span style={{
@@ -258,14 +247,17 @@ const ChatBoxFooter = ({
           variant={"filled"}
           placeholder={"Enter your message here"}
           value={text}
-          className="chat-textarea"
+          className={`chat-textarea ${waitingForResp || disableAll.inputMessage ? "disable" : ""}`}
           style={{
             width: "80%",
             height: "80%",
             borderRadius: "8px",
             padding: "8px",
-            color: "#4A5568",
-            background: "#EDF2F6"
+            paddingLeft: "16px",
+            paddingRight: "16px",
+            color: waitingForResp || disableAll.inputMessage ? "#C6CCD5" : "#4A5568",
+            background: waitingForResp || disableAll.inputMessage ? "#F4F6F9" : "#EDF2F6",
+            cursor: waitingForResp || disableAll.inputMessage ? "not-allowed" : "auto",
           }}
           onChange={(e) => {
             setText(e.target.value.slice(0, process.env.MAX_MESSAGE_LENGTH));
@@ -275,18 +267,16 @@ const ChatBoxFooter = ({
         />
 
         <Button
-          backgroundColor={"#3278cd"}
-          colorScheme={"blue"}
           style={{
             color: "white",
             fontWeight: "600",
             padding: "8px 12px",
             borderRadius: "8px",
           }}
-          className="send-button"
+          className={`send-button ${(waitingForResp || disableAll.sendButton) ? "disabled" : ""}`}
           fontSize={"sm"}
           onClick={handleSubmit}
-          isDisabled={waitingForResp || disableAll.sendButton}
+          // isDisabled={waitingForResp || disableAll.sendButton}
         >
           Send
         </Button>
