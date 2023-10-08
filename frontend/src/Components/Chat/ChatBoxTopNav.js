@@ -25,6 +25,8 @@ import { useState } from "react";
 import { IconButton } from "@chakra-ui/react";
 import { HamburgerIcon } from "@chakra-ui/icons";
 import ErrorDrawer from "../ErrorDrawer";
+import { MdAccountCircle } from "react-icons/md";
+// import { Avatar } from "@mui/material";
 
 const ChatBoxTopNav = ({
   courseCode,
@@ -41,11 +43,12 @@ const ChatBoxTopNav = ({
     onClose: onErrClose,
   } = useDisclosure();
   const [error, setError] = useState();
+
   return (
     <>
       <div
         style={{
-          // padding: "12px 12px",
+          // padding: "12px 12px",,
           display: "flex",
           borderBottom: "1px solid #EAEAEA",
           alignItems: "center",
@@ -69,6 +72,7 @@ const ChatBoxTopNav = ({
         >
           <div
             style={{
+              height: "100%",
               display: "flex",
               flexDirection: "row",
               alignItems: "center",
@@ -91,8 +95,23 @@ const ChatBoxTopNav = ({
                 />
               </div>
             )}
-            <Avatar>
-              <AvatarBadge boxSize={"1em"} bg={"green.300"} />
+            <Avatar 
+              style={{ 
+                background: "#A0AEBF",
+                width: "60px",
+                height: "60px",
+                borderRadius: "50%",
+                marginRight: "10px",
+                marginLeft: "5px",
+            }}>
+              <AvatarBadge
+                boxSize={"1em"}
+                style={{ 
+                  borderRadius: "60px", 
+                  border: "3px solid #C6F6D4",
+                  background: "#68D391"
+                }}
+              />
             </Avatar>
             <div>
               <Text>
@@ -107,9 +126,10 @@ const ChatBoxTopNav = ({
                 </Text>
                 <Heading
                   as="h2"
-                  size="lg"
                   style={{
                     color: "#012E8A",
+                    fontWeight: "700",
+                    fontSize: "30px",
                     marginLeft: "1vw",
                     lineHeight: "0.9",
                   }}
@@ -124,8 +144,9 @@ const ChatBoxTopNav = ({
             className={`chatbox-topnav-buttons`}
             style={{
               display: "flex",
+              // flexDirection: "row",
               alignItems: "center",
-              maxWidth: "120px",
+              maxWidth: "140px",
               height: "100%",
             }}
           >
@@ -133,8 +154,11 @@ const ChatBoxTopNav = ({
             <Button
               variant={"ghost"}
               disabled={currConvoID === ""}
-              py={6}
-              px={5}
+              // py={6}
+              // px={5}
+              style={{
+                padding: "8px",
+              }}
               className="top-nav-button"
               onClick={() => {
                 if (currConvoID) {
@@ -165,6 +189,11 @@ const ChatBoxTopNav = ({
               }}
             >
               <Tooltip
+                background={"#2F3747"}
+                color={"white"}
+                paddingX={2}
+                borderRadius={8}
+                fontSize={"sm"}
                 label={
                   currConvoID !== ""
                     ? "This may take a couple of minutes"
@@ -179,6 +208,7 @@ const ChatBoxTopNav = ({
                       style={{
                         wordWrap: "normal",
                         whiteSpace: "normal",
+                        lineHeight: "1.2",
                       }}
                     >
                       Download Conversation
@@ -189,10 +219,12 @@ const ChatBoxTopNav = ({
             </Button>
             {/* Report Conversation Button */}
             <Button
+             style={{
+              padding: "8px",
+             }}
+              className="top-nav-button"
               variant={"ghost"}
               disabled={currConvoID === ""}
-              py={6}
-              px={5}
               onClick={() => {
                 if (currConvoID) {
                   onOpen();
@@ -202,6 +234,11 @@ const ChatBoxTopNav = ({
               }}
             >
               <Tooltip
+                background={"#2F3747"}
+                color={"white"}
+                paddingX={2}
+                borderRadius={8}
+                fontSize={"sm"}  
                 label={
                   currConvoID ? "See a bug?" : "Start a new conversation first!"
                 }

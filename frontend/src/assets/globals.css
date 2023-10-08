@@ -134,16 +134,22 @@
   }
   .chatbox-topnav-buttons {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     flex-direction: column;
   }
+
   .top-nav-buttons-text {
     display: none !important;
   }
   .top-nav-button {
     padding-top: 0.5rem !important;
     padding-bottom: 0.5rem !important;
+  }
+  .top-nav-button {
+    background-color: #3d6bab !important;
+    color: white !important;
+    transition: 0.01s ease-in-out;
   }
 }
 
@@ -194,4 +200,30 @@
 
 .hidden-border {
   border: 3px solid white !important;
+}
+
+
+/* Chatbox Footer buttons */
+.send-button:hover {
+  background: #3D6BAB !important;
+  color: white !important;
+  transition: 0.01s ease-in-out;
+}
+
+.end-chat-button:hover {
+  background: #48835D !important;
+  color: white !important;
+  transition: 0.01s ease-in-out;
+}
+
+.chat-textarea:hover {
+  background: #E3E8EF !important;
+  transition: 0.01s ease-in-out;
+}
+
+.mui-select {
+  outline: none !important;
+}
+.MuiSelect-root.MuiSelect-select.MuiSelect-selectMenu.MuiInputBase-input.MuiInput-input {
+  outline: none !important;
 }

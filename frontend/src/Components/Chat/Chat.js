@@ -404,17 +404,16 @@ const Chat = ({
                         width: "40px",
                         height: "40px",
                         borderRadius: "50%",
-                        marginRight: "10px",
-                        marginLeft: "5px",
                       }}
                       alt="User Avatar"
                     >
                       <AvatarBadge
                         boxSize={"16px"}
-                        borderColor={
-                          convo.status == "A" ? "green.100" : "papayawhip"
-                        }
-                        bg={convo.status == "A" ? "green.300" : "tomato"}
+                        style={{ 
+                          borderRadius: "60px", 
+                          border: `3px solid ${convo.status == "A" ? "#C6F6D4" : "#FEEFD5"}`,
+                          background: convo.status == "A" ? "#68D391" : "#FF6247"
+                        }}
                       />
                     </Avatar>
                     {openConvoHistory && (

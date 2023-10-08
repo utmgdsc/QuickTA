@@ -193,42 +193,50 @@ const ChatBoxFooter = ({
         borderTop={"2px solid #EAEAEA"}
         borderBottomRightRadius={"8px"}
       >
-        <Tooltip label={"Assess your understanding & ends current conversation"}>
-          <Button
-            colorScheme={"green"}
-            fontSize={"xs"}
-            height={"80%"}
-            onClick={() => {
-              if (inConvo && messages) {
-                onOpenTechAssessment();
-              } else {
-                // console.log(
-                //   "Must be in a convo to leave one or please send at least one msg :>"
-                // );
-              }
-            }}
-            isDisabled={
-              (!inConvo && messages.length == 1) ||
-              disableAll.endChat ||
-              waitingForResp
+        <Button
+          background={"#37A169"}
+          color={"#FFFFFF"}
+          fontWeight={"600"}
+          fontSize={"xs"}
+          height={"80%"}
+          className="end-chat-button"
+          style={{
+            width: "140 px",
+            padding: "0 12px",
+            borderRadius: "8px",
+          }}
+          onClick={() => {
+            if (inConvo && messages) {
+              onOpenTechAssessment();
+            } else {
+              // console.log(
+              //   "Must be in a convo to leave one or please send at least one msg :>"
+              // );
             }
-          >
-            <div style={{ display: 'flex', flexDirection: 'column'}}>
-              <span style={{
-                  wordWrap: "normal",
-                  whiteSpace: "normal",
-              }}>
-                Assess Understanding &
-              </span>
-              <span style={{
-                  wordWrap: "normal",
-                  whiteSpace: "normal",
-              }}>
-              End Conversation
-              </span>
-            </div>
-          </Button>
-        </Tooltip>
+          }}
+          isDisabled={
+            (!inConvo && messages.length == 1) ||
+            disableAll.endChat ||
+            waitingForResp
+          }
+        >
+          <div style={{ display: 'flex', flexDirection: 'column'}}>
+            <span style={{
+                wordWrap: "normal",
+                whiteSpace: "normal",
+                lineHeight: "1.2",
+            }}>
+              Assess Understanding &
+            </span>
+            <span style={{
+                wordWrap: "normal",
+                whiteSpace: "normal",
+                lineHeight: "1.2",
+            }}>
+            End Conversation
+            </span>
+          </div>
+        </Button>
 
         <TechAssessment
           isOpenTechAssessment={isOpenTechAssessment}
@@ -250,6 +258,15 @@ const ChatBoxFooter = ({
           variant={"filled"}
           placeholder={"Enter your message here"}
           value={text}
+          className="chat-textarea"
+          style={{
+            width: "80%",
+            height: "80%",
+            borderRadius: "8px",
+            padding: "8px",
+            color: "#4A5568",
+            background: "#EDF2F6"
+          }}
           onChange={(e) => {
             setText(e.target.value.slice(0, process.env.MAX_MESSAGE_LENGTH));
           }}
@@ -260,6 +277,13 @@ const ChatBoxFooter = ({
         <Button
           backgroundColor={"#3278cd"}
           colorScheme={"blue"}
+          style={{
+            color: "white",
+            fontWeight: "600",
+            padding: "8px 12px",
+            borderRadius: "8px",
+          }}
+          className="send-button"
           fontSize={"sm"}
           onClick={handleSubmit}
           isDisabled={waitingForResp || disableAll.sendButton}
