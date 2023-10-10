@@ -130,7 +130,7 @@ const AdminPage = ({ UTORID, auth }) => {
       style={{
         backgroundColor: "#F1F1F1",
         width: "100vw",
-        height: "100vw",
+        minHeight: "100vw", 
       }}
     >
       <TopNav UTORid={UTORID} auth={auth} />
