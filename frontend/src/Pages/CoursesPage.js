@@ -31,7 +31,6 @@ const fetchAllCourses = () => {
       .then((res) => {
         if (res.data) {
           setCourseTable(res.data);
-          setStudentTable(res.data);
         }
       })
       .catch((err) => {
@@ -41,6 +40,36 @@ const fetchAllCourses = () => {
       });
 };
 
+const fetchTypeUsers = (index, type) => {
+    axios.get(process.env.REACT_APP_API_URL + `/course/users?course_id=${courseRows[index].course_id}&course_code=${courseRows[index].course_code}&semester=${courseRows[index].semester}&user_roles=${type}`)
+    .then((res) => {
+           if (res.data) {
+                let col =  [
+                        {field: 'id', width: 20, headerName: ""},
+                        {field: 'user_id', width: 150, headerName: 'User ID'},
+                        {field: 'name', width: 100, headerName: 'Name'},
+                        {field: 'utorid', width: 150, headerName: 'UTORid'},
+                        {field: 'user_role', width: 150, headerName: 'Role'},
+                        {field: 'model_id', width: 150, headerName: 'Model ID'},
+                        {field: 'new_user', width: 150, headerName: 'New User'},
+                    ];
+
+                if (type === "IS") {
+                    setInstructorRows(res.data.instructors.map((instructor, index) => ({...instructor, id: index})));
+                    setInstructorColumn(col);
+                }
+                if (type === "ST") {
+                    setStudentRows(res.data.students.map((student, index) => ({...student, id: index})));
+                    setStudentColumn(col);
+                }
+            }
+    })
+    .catch((err) => {
+        setError(err);
+        // console.log(err);
+        onErrOpen();
+    });
+}
 const getUserRole = (role) => {
     switch (role) {
       case "AM": return "Admin";
@@ -58,6 +87,7 @@ const setCourseTable =  (data) => {
       rows.push({
         id: i,
         course_code: course.course_code,
+        course_id: course.course_id,
         semester: course.semester,
         course_name: course.course_name,
         start_date: course.start_date.substring(0, 10),
@@ -156,8 +186,17 @@ return UTORID.length !== 0 ? (
                 rows={courseRows}
                 columns={courseColumn}
                 onRowSelectionModelChange={(newRowSelected) => {
-                    // newRow will be index, fetch userlist from here
+                    fetchTypeUsers(newRowSelected, "IS");
+                    fetchTypeUsers(newRowSelected, "ST");
                 }}
+            />
+        </Box>
+    </Box>
+    <Box overflow={"hidden"} ml={"12vw"} mr={"12vw"} pb={"20px"}>
+        <Box>
+            <StyledDataGrid
+                rows={instructorRows}
+                columns={instructColumn}
             />
         </Box>
     </Box>
@@ -166,10 +205,6 @@ return UTORID.length !== 0 ? (
             <StyledDataGrid
                 rows={studentRows}
                 columns={studentColumn}
-                onRowSelectionModelChange={(newRowSelected) => {
-                    setSelectCourse(newRowSelected);
-                    console.log(newRowSelected);
-                }}
             />
         </Box>
     </Box>
