@@ -53,6 +53,11 @@ const TopNav = ({ UTORid, auth }) => {
             Settings
           </NavLink>
         )}
+        {["IS", "AM", "RS"].includes(auth) && (
+            <NavLink to="/courses" activeClassName="active-link">
+                Courses
+            </NavLink>
+        )}
       </HStack>
 
       <Text textAlign="right">

@@ -13,6 +13,7 @@ import { useDisclosure } from "@chakra-ui/react";
 import ErrorDrawer from "../Components/ErrorDrawer";
 import SettingPage from "./SettingPage";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import CoursesPage from "./CoursesPage";
 // import { red } from "@mui/material/colors";
 
 
@@ -23,7 +24,7 @@ const App = () => {
   const [userId, setuserId] = useState("");
   const [model_id, setModelId] = useState("");
   const [auth, setAuth] = useState("");
-  const [UTORid, setUtorID] = useState("choiman3");
+  const [UTORid, setUtorID] = useState("sheik324");
   const [isNewUser, setIsNewUser] = useState(true);
   // const [courseName, setCourseName] = useState("");
   // const [auth, setAuth] = useState("student");
@@ -201,7 +202,10 @@ const App = () => {
             path="/settings"
             element={<SettingPage UTORID={UTORid} auth={auth} />}
           />
-
+          <Route
+            path="/courses"
+            element={<CoursesPage UTORID={UTORid} auth={auth}/>}
+          />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
         <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
