@@ -253,6 +253,7 @@ const ChatBoxFooter = ({
             width: "80%",
             height: "80%",
             borderRadius: "8px",
+            fontSize: "14px",
             padding: "8px",
             paddingLeft: "16px",
             paddingRight: "16px",

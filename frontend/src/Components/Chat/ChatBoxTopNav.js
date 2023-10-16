@@ -66,8 +66,10 @@ const ChatBoxTopNav = ({
           >
             {/* Hamburger icon for smaller screens */}
             {!openConvoHistory && (
-              <div className="hamburger-icon">
+              <div className="hamburger-icon-div">
                 <IconButton
+                  bgColor={"white"}
+                  className="hamburger-icon"
                   border={"1px solid #EAEAEA"}
                   aria-label="Open Conversation History Menu"
                   size="sm"
@@ -77,6 +79,10 @@ const ChatBoxTopNav = ({
                   }}
                   style={{
                     marginRight: "12px",
+                    marginLeft: "4px",
+                    marginBottom: "6px",
+                    padding: "8px",
+                    borderRadius: "8px",
                   }}
                 />
               </div>

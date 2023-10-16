@@ -97,6 +97,10 @@
   transition: 0.01s ease-in-out;
 }
 
+.hamburger-icon {
+  background-color: #EDF2F6 !important;
+}
+
 .hamburger-icon:hover {
   background-color: #E3E8EF !important;
 }
@@ -116,7 +120,7 @@
   .full-width {
     width: 100% !important;
   }
-  .hamburger-icon {
+  .hamburger-icon-div {
     display: none; /* Hide hamburger icon */
   }
   .top-nav-buttons {

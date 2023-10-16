@@ -12,7 +12,7 @@ const ModelSelect = ({
   model_id,
 }) => {
   return (
-    <Box minW="100px" maxW="235px" ml={4}>
+    <Box minW="235px" maxW="235px" ml={4}>
     <FormControl fullWidth size="small" disabled={inConvo}>
       <InputLabel id="model-select-label" style={{fontFamily: 'Poppins'}}>Model</InputLabel>
       {model_id ? (
