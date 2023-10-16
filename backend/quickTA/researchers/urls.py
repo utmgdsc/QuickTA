@@ -20,4 +20,7 @@ urlpatterns = [
     path('/avg-comfortability', AverageCourseComfortabilityView.as_view(), name='avg_comfortability_rating'),
     path('/avg-comfortability-csv', CourseComfortabilityCsvView.as_view(), name='avg_comfortability_rating_csv'),
     path('/interaction-frequency', InteractionFrequencyView.as_view(), name='interaction_frequency'),
+
+    # new filter endpoints
+    path('/v2/interaction-frequency', DailyInteractions.as_view(), name='get_filtered_chatlogs_new'),
 ]

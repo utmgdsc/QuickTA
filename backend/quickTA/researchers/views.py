@@ -22,6 +22,17 @@ from researchers.helpers import *
 from researchers.functions.time_utils import *
 from researchers.functions.common_topics import generate_wordcloud, get_wordcloud_image
 
+import pymongo
+from researchers.queries import *
+from utils.time_utils import *
+
+# import uri from settings
+from django.conf import settings
+MONGO_URI = settings.DATABASES['default']['CLIENT']['host']
+client = pymongo.MongoClient(MONGO_URI)
+db = client['quickTA']
+
+
 # Create your views here.
 class AverageRatingsView(APIView):
     
@@ -563,3 +574,43 @@ class FilteredChatlogsView(APIView):
             conversations_list.append(convo_dict)
 
         return JsonResponse({"conversations": conversations_list})   
+
+class DailyInteractions(APIView):
+                
+    @swagger_auto_schema(
+        operation_summary="Get daily interactions for a course",
+        responses={200: "Success", 404: "Course not found"},
+        manual_parameters=[
+            openapi.Parameter("course_code", openapi.IN_QUERY, description="Course code", type=openapi.TYPE_STRING),
+            openapi.Parameter("semester", openapi.IN_QUERY, description="Semester ", type=openapi.TYPE_STRING),
+            openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("start_date", openapi.IN_QUERY, description="Start date", type=openapi.TYPE_STRING, required=True),
+            openapi.Parameter("end_date", openapi.IN_QUERY, description="End date", type=openapi.TYPE_STRING, required=True),
+        ]
+    )
+    def get(self, request):
+        """
+        Acquires the daily interactions for a course.
+        """
+        params = request.query_params
+        course = get_course(params)
+        start_date = params.get('start_date', '')
+        end_date = params.get('end_date', '')
+        if (start_date == '' or end_date == ''):
+            return JsonResponse({"msg": "Please provide a start date and end date."}, status=status.HTTP_400_BAD_REQUEST)
+              
+        start_date, end_date = convert_start_end_date(start_date, end_date)
+        collection = db["student_conversation"]
+        query = daily_interactions_query_pipeline(str(course.course_id), start_date, end_date)
+        result = list(collection.aggregate(query))
+
+        date_range = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
+
+        for date in date_range:
+            date = date.strftime("%Y-%m-%d")
+            if (date not in [item['day'] for item in result]):
+                result.append({ "day": date, "count": 0 })
+        result = sorted(result, key=lambda k: k['day'])
+    
+        response = { "interactions": result }
+        return JsonResponse(response)
