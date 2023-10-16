@@ -1,13 +1,5 @@
 import {
-  Box,
   Button,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Radio,
   RadioGroup,
   useDisclosure,
   VStack,
@@ -19,11 +11,12 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import ErrorDrawer from "../ErrorDrawer";
 import PostQuestions from "./PostQuestions";
+import Modal from '@mui/material/Modal';
+import Box from '@mui/material/Box';
 
 const TechAssessment = ({
   isOpenTechAssessment,
-  onOpenTechAssessment,
-  onCloseTechAssessment,
+  setIsOpenTechAssessment,
   conversation_id,
   updateMessages,
   updateInConvo,
@@ -39,11 +32,7 @@ const TechAssessment = ({
     onOpen: onErrOpen,
     onClose: onErrClose,
   } = useDisclosure();
-  const {
-    isOpen: isPostQOpen,
-    onOpen: onPostQOpen,
-    onClose: onPostQClose,
-  } = useDisclosure();
+  const [isPostQOpen, setIsPostQOpen] = useState(false);
   const [error, setError] = useState();
   const [code, setCode] = useState({ question: "", language: "" });
   const [options, setOptions] = useState([]);
@@ -98,74 +87,93 @@ const TechAssessment = ({
   return (
     <>
       <Modal
-        closeOnOverlayClick={false}
-        isOpen={isOpenTechAssessment}
-        onClose={onCloseTechAssessment}
-        // size={"lg"}
-        style={{
-          width: "80%",
-          height: "80%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-        scrollBehavior="inside"
+        open={isOpenTechAssessment}
       >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>
-            <span
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '40%',
+          bgcolor: 'background.paper',
+          boxShadow: 10,
+          pt: 2,
+          px: 4,
+          pb: 3,
+          borderRadius: '8px',
+          minWidth: '450px',
+          }}>
+         <Box>
+            <p style={{ fontWeight: '600', fontStyle: 'Poppins', fontSize: '20px', lineHeight: '30px' }}>Technical Assessment</p>
+          </Box>
+          <Box mt={4} mb={4}>
+            {/* Code Blob */}
+            <Box width={"100%"} >
+              <Text>{code.question}</Text>
+              <SyntaxHighlighter
+                showLineNumbers={true}
+                wrapLongLines={true}
+                language={"python"}
+                codeTagProps={{ style: { fontSize: "12px" } }}
+              >
+                {code.code}
+              </SyntaxHighlighter>
+            </Box>
+            {/* MC choices */}
+            <RadioGroup display="grid" gridGap={4} mt={10}
               style={{
-                fontFamily: "Poppins",
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
               }}
             >
-              Technical Assessment
-            </span>
-          </ModalHeader>
-          <ModalBody>
-            <VStack>
-              <Box width={"100%"} m={5} p={3}>
-                <Text>{code.question}</Text>
-                <SyntaxHighlighter
-                  showLineNumbers={true}
-                  wrapLongLines={true}
-                  language={"python"}
-                  codeTagProps={{ style: { fontSize: "12px" } }}
-                >
-                  {code.code}
-                </SyntaxHighlighter>
-              </Box>
-              <RadioGroup display="grid" gridGap={4}>
-                {options.map((element) => (
-                  <Button
-                    className={
-                      studentResponse != element.choice
-                        ? "hidden-border"
-                        : !answer
-                        ? "selected-border"
-                        : answer == studentResponse
-                        ? "correct-border"
-                        : "wrong-border"
+              {options.map((element) => (
+                <Button
+                  className={`
+                    ${studentResponse != element.choice
+                      ? "hidden-border"
+                      : !answer
+                      ? "selected-border"
+                      : answer == studentResponse
+                      ? "correct-border"
+                      : "wrong-border"
+                      // + 
                     }
-                    isDisabled={disableAllOption}
-                    onClick={(e) => {
-                      setStudentResponse(element.choice);
-                      // console.log(`Student reponse: ${element.choice}`);
-                    }}
-                    style={{
-                      justifyContent: "left",
-                    }}
-                  >
-                    <Text margins={2}>{element.flavor_text}</Text>
-                  </Button>
-                ))}
-              </RadioGroup>
-            </VStack>
-          </ModalBody>
+                    ${disableAllOption ? 
+                    "disabled-choice" : ""}
+                  `
+                  }
 
-          <ModalFooter
+                  onClick={(e) => { if (!disableAllOption) setStudentResponse(element.choice); }}
+                  style={{
+                    justifyContent: "left",
+                    padding: "5px 20px",
+                    borderRadius: "8px",
+                    marginTop: "5px",
+                    fontWeight: "500",
+                    width: "85%",
+                    cursor: disableAllOption ? "not-allowed": "pointer",
+                  }}
+                >
+                  <Text margins={2} style={{
+                    fontWeight: "500",
+                    textAlign: "left",
+                    warp: "break-word",
+                    fontSize: "14px",
+                  }}>{element.flavor_text}</Text>
+                </Button>
+              ))}
+            </RadioGroup>
+          </Box>
+
+          {/* Next Button */}
+          <Box
             style={{
               display: "flex",
+              flexDirection: "row",
+              justifyContent: "flex-end",
+              alignItems: "center",
             }}
           >
             {displayAnswer ? (
@@ -186,8 +194,15 @@ const TechAssessment = ({
               </div>
             )}
             <Button
+              className={`grey-button ${
+                (studentResponse === null || isSubmitting)
+                  ? "disabled-choice"
+                  : ""
+              }`}
+              style={{ margin: 0 }}
               isDisabled={studentResponse === null || isSubmitting}
               onClick={() => {
+                if (studentResponse === null || isSubmitting) return;
                 if (!disableAllOption) {
                   setIsSubmitting(true);
                   //Display Flavor Text
@@ -217,28 +232,21 @@ const TechAssessment = ({
                       onErrOpen();
                     });
                   setDisplayAnswer(true);
-                  // setTimeout(() => {
-                  //   onCloseTechAssessment();
-                  //   onPostQOpen();
-                  // }, 5000);
-
-                  // console.log("Submitted answer");
                 } else {
-                  onCloseTechAssessment();
-                  onPostQOpen();
+                  setIsOpenTechAssessment(false);
+                  setIsPostQOpen(true);
                 }
               }}
             >
               Next
             </Button>
-          </ModalFooter>
-        </ModalContent>
+          </Box>
+        </Box>
       </Modal>
       <PostQuestions
-        isOpen={isPostQOpen}
-        onOpen={onPostQOpen}
-        onClose={onPostQClose}
-        onOpenTechAssessment={onOpenTechAssessment}
+        isPostQOpen={isPostQOpen}
+        setIsPostQOpen={setIsPostQOpen}
+        setIsOpenTechAssessment={setIsOpenTechAssessment}
         setDisableAll={setDisableAll}
         updateMessages={updateMessages}
         updateInConvo={updateInConvo}
@@ -253,7 +261,7 @@ const TechAssessment = ({
         setDisplayAnswer={setDisplayAnswer}
         setAnswerFlavorText={setAnswerFlavorText}
       />
-      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
+      {/* <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} /> */}
     </>
   );
 };

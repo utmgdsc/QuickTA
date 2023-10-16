@@ -34,6 +34,7 @@ const ChatBubble = ({
       mt={dateSent ? 2 : 7}
       alignItems={alignment}
       alignSelf={alignment}
+      mx={2}
       px={5}
     >
       <Box

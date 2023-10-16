@@ -2,53 +2,39 @@ import {
   Button,
   Spacer,
   HStack,
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalOverlay,
   RadioGroup,
   Textarea,
   VStack,
   useDisclosure,
   Radio,
   Text,
-  ModalContent,
-  ModalHeader,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import ErrorDrawer from "../ErrorDrawer";
 import { Temporal } from "@js-temporal/polyfill";
+import Modal from '@mui/material/Modal';
+import Box from '@mui/material/Box';
+
 
 const PostQuestions = ({
-  isOpen,
-  onOpen,
-  onClose,
-  onOpenTechAssessment,
-  UTORid,
-  conversation_id,
+  isPostQOpen,
+  setIsPostQOpen,
+  setIsOpenTechAssessment,
   setDisableAll,
   updateMessages,
   updateInConvo,
   updateConvoID,
   conversations,
+  conversation_id,
   setConversations,
+  UTORid,
   setStudentResponse,
   setDisableAllOption,
   setAnswer,
   setDisplayAnswer,
-  setAnswerFlavorText,
+  setAnswerFlavorText
 }) => {
-  const {
-    isOpen: isPromptOpen,
-    onOpen: onPromptOpen,
-    onClose: onPromptClose,
-  } = useDisclosure();
-  const {
-    isOpen: isErrOpen,
-    onOpen: onErrOpen,
-    onClose: onErrClose,
-  } = useDisclosure();
+  const [showModalIndex, setShowModalIndex] = useState(0);
   const [error, setError] = useState();
   const [questions, setQuestions] = useState([{}]);
   const [optionsSelected, setOptionsSelected] = useState([]);
@@ -78,16 +64,13 @@ const PostQuestions = ({
           })
           .catch((err) => {
             setError("Error fetching prompt question");
-            onErrOpen();
             setError(err);
             // console.log(err);
-            onErrOpen();
           });
       })
       .catch((err) => {
         setError(err);
         // console.log(err);
-        onErrOpen();
       });
   };
 
@@ -189,7 +172,6 @@ const PostQuestions = ({
         .catch((err) => {
           setError(err);
           // console.log(err);
-          onErrOpen();
         });
     }
   };
@@ -201,29 +183,37 @@ const PostQuestions = ({
   return (
     <>
       <Modal
-        closeOnOverlayClick={false}
-        isOpen={isOpen}
-        onClose={onClose}
-        scrollBehavior="inside"
-        size={"3xl"}
+        open={isPostQOpen}
+        // onClose={() => setIsPostQOpen(false)}
       >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>
-            <span
-              style={{
-                fontFamily: "Poppins",
-              }}
-            >
-              Post Questions
-            </span>
-          </ModalHeader>
-          <ModalBody>
-            <VStack>
-              {questions.map((question, question_idx) => {
-                if (question_idx < 4)
-                  return (
-                    <VStack>
+      <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '75%',
+          bgcolor: 'background.paper',
+          boxShadow: 10,
+          pt: 2,
+          px: 4,
+          pb: 3,
+          borderRadius: '8px',
+          minWidth: '450px',
+          }}>
+        {showModalIndex == 0 && <Box>
+            <Box>
+            <p style={{ fontWeight: '600', fontStyle: 'Poppins', fontSize: '20px', lineHeight: '30px' }}>Post Questions</p>
+            </Box>
+            <Box style={{
+                  overflowY: "scroll",
+                  overflowX: "scroll",
+                  width: "100%",
+                }}>
+              <div>
+                {questions.map((question, question_idx) => {
+                  if (question_idx < 4)
+                    return (
+                    <VStack py={2}>
                       <div
                         style={{
                           fontSize: "14px",
@@ -251,139 +241,149 @@ const PostQuestions = ({
                             display="grid"
                             gridGap={4}
                           >
-                            <HStack direction="row" spacing={20}>
-                              {question.answers &&
-                                question.answers.map((answer, answer_idx) => {
-                                  return (
-                                    <div
-                                      key={answer_idx}
-                                      className="answer-option"
-                                    >
-                                      <label>
-                                        <Button
-                                          value={answer.value}
-                                          className={
-                                            optionsSelected[question_idx + 1] ==
-                                            answer.value
-                                              ? "selected-border"
-                                              : "hidden-border"
-                                          }
-                                          onClick={(e) => {
-                                            setOptionsSelected({
-                                              ...optionsSelected,
-                                              [question_idx + 1]:
-                                                e.target.value,
-                                            });
-                                          }}
-                                        >
-                                          {answer.value}
-                                        </Button>
-                                        <div className="answer-posttext">
-                                          {answer.text}
-                                        </div>
-                                      </label>
-                                    </div>
-                                  );
-                                })}
-                            </HStack>
-                          </RadioGroup>
+                              <HStack direction="row" spacing={10}>
+                                {question.answers &&
+                                  question.answers.map((answer, answer_idx) => {
+                                    return (
+                                      <div
+                                        key={answer_idx}
+                                        className="answer-option"
+                                      >
+                                        <label>
+                                          <Button
+                                            value={answer.value}
+                                            className={`
+                                            grey-button  
+                                            ${optionsSelected[question_idx + 1] ==
+                                              answer.value
+                                                ? "selected-border"
+                                                : "hidden-border"}
+                                            `
+                                            }
+                                            onClick={(e) => {
+                                              setOptionsSelected({
+                                                ...optionsSelected,
+                                                [question_idx + 1]:
+                                                  e.target.value,
+                                              });
+                                            }}
+                                          >
+                                            {answer.value}
+                                          </Button>
+                                          <div className="answer-posttext">
+                                            {answer.text}
+                                          </div>
+                                        </label>
+                                      </div>
+                                    );
+                                  })}
+                              </HStack>
+                            </RadioGroup>
+                          </div>
                         </div>
-                      </div>
-                    </VStack>
-                  );
-              })}
-            </VStack>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              onClick={() => {
-                onClose();
-                onOpenTechAssessment();
-              }}
-            >
-              Back
-            </Button>
-            <Spacer />
-            <Button
-              disabled={
-                optionsSelected[1] === undefined ||
-                optionsSelected[2] === undefined ||
-                optionsSelected[3] === undefined ||
-                optionsSelected[4] === undefined
-              }
-              onClick={() => {
-                // console.log("Submit button clicked");
-                onClose();
-                onPromptOpen();
-              }}
-            >
-              Next
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+                      </VStack>
+                    );
+                })}
+              </div>
+            </Box>
+            <HStack>
+              <Button
+                className="grey-button"
+                onClick={() => {
+                  setIsPostQOpen(false);
+                  setIsOpenTechAssessment(true);
+                }}
+              >
+                Back
+              </Button>
+              <Spacer />
+              <Button
+              className={`grey-button ${
+                 (optionsSelected[1] === undefined ||
+                  optionsSelected[2] === undefined ||
+                  optionsSelected[3] === undefined ||
+                  optionsSelected[4] === undefined) ?
+                  "disabled-choice" : ""
+              }`}
+                onClick={() => {
+                  if (!(optionsSelected[1] === undefined ||
+                    optionsSelected[2] === undefined ||
+                    optionsSelected[3] === undefined ||
+                    optionsSelected[4] === undefined)) {
+                      setShowModalIndex(1);
+                      // console.log("Submit button clicked");
+                    }
+                }}
+              >
+                Next
+              </Button>
+            </HStack>
+          </Box>}
+          {showModalIndex == 1 &&  
+          <Box>
+          <Box>
+            <p style={{ fontWeight: '600', fontStyle: 'Poppins', fontSize: '20px', lineHeight: '30px' }}>Open-Ended Response</p>
+          </Box>
+            <Box>
+              <div style={{ paddingBottom: "40px" }}>
+                <Text style={{ fontFamily: "Poppins" }}>
+                  {openEndedQuestions[0].question}
+                </Text>
+              </div>
+              <Textarea
+                name={"prompt"}
+                style={{
+                  width: "100%",
+                  height: "200px",
+                  borderRadius: "8px",
+                  padding: "8px",
+                  paddingLeft: "16px",
+                  paddingRight: "16px",
+                  color: "#4A5568",
+                  background: "#EDF2F6",
+                }}
+                placeholder={"Enter your response here"}
+                onChange={(e) => {
+                  setOptionsSelected({
+                    ...optionsSelected,
+                    5: e.target.value,
+                  });
+                }}
+              >
+                {optionsSelected[5]}
+              </Textarea>
+            </Box>
+            <HStack>
+              <Button
+                className="grey-button"
+                onClick={() => { setShowModalIndex(0); }}>
+                Back
+              </Button>
+              <Spacer />
+              <Button
+                className={`grey-button ${
+                  optionsSelected[5] === "" ? "disabled-choice" : ""
+                }`}
+                color={"white"}
+                background={optionsSelected[5] === "" ? "gray.500" : "blue.500"}
+                onClick={() => {
+                  if (optionsSelected[5] === "") {
+                    // console.log("Please enter a response");
+                  } else {
+                    setShowModalIndex(0);
+                    setIsPostQOpen(false);
+                    submitResponse();
+                  }
+                }}
+              >
+                Submit
+              </Button>
 
-      {/* <Modal isOpen={isPromptOpen} onClose={onPromptClose}> */}
-      <Modal
-        closeOnOverlayClick={false}
-        isOpen={isPromptOpen}
-        onClose={onPromptClose}
-        size={"3xl"}
-        scrollBehavior="inside"
-      >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>
-            <span style={{ fontFamily: "Poppins" }}>Open Ended Response</span>
-          </ModalHeader>
-          <ModalBody>
-            <div style={{ paddingBottom: "40px" }}>
-              <Text style={{ fontFamily: "Poppins" }}>
-                {openEndedQuestions[0].question}
-              </Text>
-            </div>
-            <Textarea
-              name={"prompt"}
-              placeholder={"Enter your response here"}
-              onChange={(e) => {
-                setOptionsSelected({
-                  ...optionsSelected,
-                  5: e.target.value,
-                });
-              }}
-            >
-              {optionsSelected[5]}
-            </Textarea>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              onClick={() => {
-                onPromptClose();
-                onOpen();
-              }}
-            >
-              Back
-            </Button>
-            <Spacer />
-            <Button
-              disabled={optionsSelected[5] === ""}
-              color={"white"}
-              background={optionsSelected[5] === "" ? "gray.500" : "blue.500"}
-              onClick={() => {
-                if (optionsSelected[5] === "") {
-                  // console.log("Please enter a response");
-                } else {
-                  onPromptClose();
-                  submitResponse();
-                }
-              }}
-            >
-              Submit
-            </Button>
-          </ModalFooter>
-        </ModalContent>
+            </HStack>
+          </Box>}
+        </Box>
+
       </Modal>
-      <ErrorDrawer isOpen={isErrOpen} onClose={onErrClose} error={error} />
     </>
   );
 };

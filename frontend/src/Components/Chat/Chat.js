@@ -52,11 +52,7 @@ const Chat = ({
     onOpen: onErrOpen,
     onClose: onErrClose,
   } = useDisclosure();
-  const {
-    isOpen: isOpenTechAssessment,
-    onOpen: onOpenTechAssessment,
-    onClose: onCloseTechAssessment,
-  } = useDisclosure();
+  const [isOpenTechAssessment, setIsOpenTechAssessment] = useState(false);
   const [error, setError] = useState();
   const [disableAll, setDisableAll] = useState({
     newConversation: false,
@@ -136,7 +132,7 @@ const Chat = ({
     const handleBeforeUnload = (e) => {
       e.preventDefault();
       e.returnValue = "Don't leave yet!";
-      onOpenTechAssessment();
+      setIsOpenTechAssessment(true);
     };
   
     if (inConvo) {
@@ -297,7 +293,7 @@ const Chat = ({
                       (inConvo && isOldConvo)
                     ) {
                       // open technical assessment
-                      onOpenTechAssessment();
+                      setIsOpenTechAssessment(true);
                     } else {
                       setDisableAll((prevDisableAll) => ({
                         inputMessage: false,
@@ -489,6 +485,7 @@ const Chat = ({
           />
           {/* Chatbox footer controllers - max Height: 70% */}
           <ChatBox messages={messages} waitingForResp={waitingForResp} />
+
           {/* Chatbox footer controllers - max Height: 15% */}
           <ChatBoxFooter
             userId={userId}
@@ -509,8 +506,7 @@ const Chat = ({
             conversations={conversations}
             setConversations={setConversations}
             isOpenTechAssessment={isOpenTechAssessment}
-            onOpenTechAssessment={onOpenTechAssessment}
-            onCloseTechAssessment={onCloseTechAssessment}
+            setIsOpenTechAssessment={setIsOpenTechAssessment}
             UTORid={UTORid}
             text={text}
             setText={setText}

@@ -25,8 +25,7 @@ const ChatBoxFooter = ({
   model_ID,
   UTORid,
   isOpenTechAssessment,
-  onOpenTechAssessment,
-  onCloseTechAssessment,
+  setIsOpenTechAssessment,
   text,
   setText,
 }) => {
@@ -37,6 +36,7 @@ const ChatBoxFooter = ({
     onClose: onErrClose,
   } = useDisclosure();
   const [error, setError] = useState();
+  const [promptUser, setPromptUser] = useState(true);
 
   const handleChatKeyDown = (e) => {
     if ((e.key === "Enter" || e.keyCode === 13) && !e.shiftKey) {
@@ -192,7 +192,8 @@ const ChatBoxFooter = ({
         paddingBottom={"4px"}
         borderTop={"2px solid #EAEAEA"}
         borderBottomRightRadius={"8px"}
-      >
+      > 
+        {/* End Conversation Button */}
         <Button
           fontWeight={"600"}
           fontSize={"xs"}
@@ -205,7 +206,8 @@ const ChatBoxFooter = ({
           }}
           onClick={() => {
             if (inConvo && messages) {
-              onOpenTechAssessment();
+              console.log("Ending conversation");
+              setIsOpenTechAssessment(true);
             } 
           }}
         >
@@ -229,8 +231,7 @@ const ChatBoxFooter = ({
 
         <TechAssessment
           isOpenTechAssessment={isOpenTechAssessment}
-          onOpenTechAssessment={onOpenTechAssessment}
-          onCloseTechAssessment={onCloseTechAssessment}
+          setIsOpenTechAssessment={setIsOpenTechAssessment}
           conversation_id={currConvoID}
           updateConvoID={updateConvoID}
           updateInConvo={updateInConvo}

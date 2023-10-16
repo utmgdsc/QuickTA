@@ -1,7 +1,7 @@
 import { Text } from "@chakra-ui/react";
 import { useEffect } from "react";
 import PreSurvey from "../Components/Chat/PreSurvey";
-import { Progress } from "@chakra-ui/react";
+import { LinearProgress } from "@mui/material";
 
 const LandingPage = ({ isLoading, UTORid, isNewUser, setIsNewUser }) => {
   useEffect(() => {
@@ -80,7 +80,8 @@ const LandingPage = ({ isLoading, UTORid, isNewUser, setIsNewUser }) => {
           >
             {funFacts[Math.floor(Math.random() * funFacts.length)]}
           </Text>
-          <Progress style={{ marginTop: "10px" }} size="xs" isIndeterminate />
+          {/* <Progress style={{ marginTop: "10px" }} size="xs" isIndeterminate /> */}
+          <LinearProgress style={{ marginTop: "10px" }} />
         </div>
       </div>
       <div></div>

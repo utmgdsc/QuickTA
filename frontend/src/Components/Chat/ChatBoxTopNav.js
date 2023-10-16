@@ -3,19 +3,10 @@ import {
   AvatarBadge,
   Button,
   HStack,
-  Spacer,
   Text,
   VStack,
   Heading,
-  Modal,
-  useDisclosure,
-  ModalOverlay,
-  ModalContent,
-  ModalCloseButton,
   Textarea,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
   Tooltip,
 } from "@chakra-ui/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -24,10 +15,8 @@ import axios from "axios";
 import { useState } from "react";
 import { IconButton } from "@chakra-ui/react";
 import { HamburgerIcon } from "@chakra-ui/icons";
-import ErrorDrawer from "../ErrorDrawer";
-import { MdAccountCircle } from "react-icons/md";
-import { FormControl } from "@mui/material";
-// import { Avatar } from "@mui/material";
+import Modal from '@mui/material/Modal';
+import Box from '@mui/material/Box';
 
 const ChatBoxTopNav = ({
   courseCode,
@@ -35,14 +24,10 @@ const ChatBoxTopNav = ({
   openConvoHistory,
   setOpenConvoHistory,
 }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  // const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
   const fileDownload = require("js-file-download");
   const [reportMsg, setReportMsg] = useState("");
-  const {
-    isOpen: isErrOpen,
-    onOpen: onErrOpen,
-    onClose: onErrClose,
-  } = useDisclosure();
   const [error, setError] = useState();
 
   return (
@@ -181,7 +166,6 @@ const ChatBoxTopNav = ({
                     .catch((err) => {
                       setError(err);
                       // console.log(err);
-                      onErrOpen();
                     });
                 } else {
                   // console.log(
@@ -230,13 +214,7 @@ const ChatBoxTopNav = ({
              }}
               className="top-nav-button"
               variant={"ghost"}
-              onClick={() => {
-                if (currConvoID) {
-                  onOpen();
-                } else {
-                  // console.log("Must be in a chat to report a conversation!");
-                }
-              }}
+              onClick={() => { if (currConvoID) { setIsOpen(true); } }}
             >
               <Tooltip
                 background={"#2F3747"}
@@ -266,63 +244,86 @@ const ChatBoxTopNav = ({
             </Button>
           </div>
 
-          <Modal isOpen={isOpen} onClose={onClose}>
-            <ModalOverlay />
-            <ModalContent>
-              <ModalHeader>Report Bug</ModalHeader>
-              <ModalCloseButton />
-
-              <ModalBody>
+          <Modal 
+            open={isOpen}
+            onClose={() => setIsOpen(false)}
+          >
+            <Box sx={{
+              position: 'absolute',
+              top: '30%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '40%',
+              bgcolor: 'background.paper',
+              boxShadow: 10,
+              pt: 2,
+              px: 4,
+              pb: 3,
+              borderRadius: '8px',
+              minWidth: '450px',
+            }}>
+              <Box>
+                <Box>
+                  <p style={{ fontWeight: '600', fontStyle: 'Poppins', fontSize: '20px', lineHeight: '30px' }}>Report Bug</p>
+                </Box>
                 <Textarea
+                  css={{ resize: "none" }}
+                  style={{ 
+                    marginTop: '10px',
+                    marginBottom: '10px',
+                    borderRadius: '8px',
+                    border: '1px solid #EAEAEA',
+                    padding: '10px',
+                  }}
                   placeholder={
                     "Please try your best to describe the problem you encountered!"
                   }
+                  width={"100%"}
                   minBlockSize={"300px"}
                   onChange={(e) => setReportMsg(e.target.value)}
                 />
-              </ModalBody>
-
-              <ModalFooter>
-                <Button
-                  style={{ marginRight: "8px" }}
-                  colorScheme={"gray"}
-                  onClick={onClose}
-                >
-                  Close
-                </Button>
-                <Button
-                  colorScheme={"red"}
-                  onClick={() => {
-                    if (reportMsg) {
-                      axios
-                        .post(
-                          process.env.REACT_APP_API_URL + "/student/report",
-                          {
-                            conversation_id: currConvoID,
-                            msg: reportMsg,
-                          }
-                        )
-                        .then(
-                          (res) => {}
-                          // console.log("Reported!")
-                        )
-                        .catch((err) => {
-                          setError(err);
-                          // console.log(err);
-                          onErrOpen();
-                        });
-                      onClose();
-                    }
-                  }}
-                >
-                  Report
-                </Button>
-              </ModalFooter>
-            </ModalContent>
+                <Box>
+                  <Button
+                    className="grey-button"
+                    style={{ marginRight: "8px" }}
+                    onClick={() => { setIsOpen(false); }}
+                  >
+                    Close
+                  </Button>
+                  <Button
+                    className="red-button"
+                    onClick={() => {
+                      if (reportMsg) {
+                        axios
+                          .post(
+                            process.env.REACT_APP_API_URL + "/student/report",
+                            {
+                              conversation_id: currConvoID,
+                              msg: reportMsg,
+                            }
+                          )
+                          .then(
+                            (res) => {}
+                            // console.log("Reported!")
+                          )
+                          .catch((err) => {
+                            setError(err);
+                            // console.log(err);
+                            // onErrOpen();
+                          });
+                        setIsOpen(false);
+                      }
+                    }}
+                  >
+                    Report
+                  </Button>
+                </Box>
+              </Box>
+            </Box>
           </Modal>
         </HStack>
       </div>
-      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
+      {/* <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} /> */}
     </>
   );
 };
