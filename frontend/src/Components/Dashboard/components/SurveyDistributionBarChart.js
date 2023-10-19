@@ -1,17 +1,39 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { BarChart } from '@mui/x-charts/BarChart';
-import { FormControl, InputLabel, Box, MenuItem, Select } from "@mui/material";
+import { PieChart, pieArcLabelClasses } from '@mui/x-charts/PieChart';
+import { ButtonGroup, FormControl, InputLabel, Box, MenuItem, Select, IconButton, Button } from "@mui/material";
+import PieChartIcon from '@mui/icons-material/PieChart';
+import BarChartIcon from '@mui/icons-material/BarChart';
 
 
 
 const SurveyDistributionBarChart = ({ title, height, questionIds }) => {
 
+    // BarChart Data
     const [questionId, setQuestionId] = useState(questionIds[0]);
     const [questionText, setQuestionText] = useState("");
     const [questionType, setQuestionType] = useState("");
     const [data, setData] = useState([2, 3, 4]);
     const [labels, setLabels] = useState(['a', 'b', 'c']);
+    const [chartStyle, setChartStyle] = useState("BarChart");
+
+    // PieChart Data
+    const [pieChartData, setPieChartData] = useState([])
+    const [pieChartColors, setPieChartColors] = useState([
+        "#8EAAE1",
+        // "#7E9EDD",
+        "#6E91D8",
+        // "#5E85D4",
+        "#4E79D0",
+        // "#3E6DCC",
+        "#3363C1",
+        // "#2F5BB1",
+        "#2B52A1",
+        "#224281",
+        "#1A3161"
+
+    ])
 
     // Style Definition 
     const titleStyle = {
@@ -65,12 +87,15 @@ const SurveyDistributionBarChart = ({ title, height, questionIds }) => {
             setQuestionText(data.question);
             setQuestionType(type)
             setData(data.distribution.map((item) => item.count));
+            console.log(data.distribution.map((item, index) => ({ id: index, label: item.answer, value: item.count })))
             switch (type) {
                 case "Multiple Choice":
                     setLabels(data.distribution.map((item) => item.label));
+                    setPieChartData(data.distribution.map((item, index) => ({ id: index, label: item.label, value: item.count })));
                     break;
                 case "Scale":
                     setLabels(data.distribution.map((item) => (item.answer))); 
+                    setPieChartData(data.distribution.map((item, index) => ({ id: index, label: item.answer, value: item.count })));
                     break;
             }
         })
@@ -83,6 +108,12 @@ const SurveyDistributionBarChart = ({ title, height, questionIds }) => {
         setQuestionId(event.target.value);
     }
 
+    const getArcLabel = (params) => {
+        let total = pieChartData.reduce((acc, cur) => acc + cur.value, 1);
+        const percent = params.value / total;
+        return `${(percent * 100).toFixed(0)}%`;
+      };
+
     useEffect(() => {
         getSurveyQuestionDistribution();
     }, [questionId]);
@@ -90,7 +121,27 @@ const SurveyDistributionBarChart = ({ title, height, questionIds }) => {
     return (
         <Box style={{ padding: '20px'}}> 
             <Box className="d-flex flex-col w-100">
-                <span style={titleStyle}>{title}</span>
+                <Box className="d-flex w-100 justify-content-between ">
+                    <span style={titleStyle}>{title}</span>
+
+                    <ButtonGroup
+                        size="small"
+                        disableElevation
+                        variant="contained"
+                        aria-label="Disabled elevation buttons"
+                        >
+                        <Button style={{ backgroundColor: chartStyle === 'PieChart' ? "#CCC" : "#2C54A6" }}
+                            onClick={() => setChartStyle("BarChart")}
+                        >
+                            <BarChartIcon />
+                        </Button>
+                        <Button style={{ backgroundColor: chartStyle === 'BarChart' ? "#CCC" : "#2C54A6" }}
+                            onClick={() => setChartStyle("PieChart")}
+                        >
+                            <PieChartIcon />
+                        </Button>
+                    </ButtonGroup>
+                </Box>
 
                 {/* Question Selection */}
                 <FormControl style={{ marginTop: "15px" }}>
@@ -115,13 +166,37 @@ const SurveyDistributionBarChart = ({ title, height, questionIds }) => {
                 </Box>  
             </Box>
             <Box>
-                <BarChart
-                    height={height}
-                    series={[{ data: data, label: "Number of Students Response", id: "count", color: "#5E85D4" }]}
-                    xAxis={[{ data: labels, scaleType: "band" }]}
-                    slotProps={{ legend: { offset: { x: -70 } } }}
-                    sx={barChartStyle}  
-                />
+                {/* Pie Chart */}
+                {chartStyle === "PieChart" &&
+                    <PieChart 
+                        height={height}
+                        colors={pieChartColors}
+                        series={
+                            [{ 
+                                data: pieChartData,
+                                outerRadius: 120,
+                                arcLabel: getArcLabel,
+                            
+                            }]
+                        }
+                        slotProps={{ legend: { offset: { x: -40} } }}
+                        sx={{ 
+                            "& .MuiChartsLegend-label": { fontSize: "10px", fontWeight: "500" },
+                           [`& .${pieArcLabelClasses.root}`]: { fill: 'white', fontSize: 14 }
+                        }}
+                    />
+                }
+
+                {/* Bar Chart */}
+                {chartStyle === "BarChart" &&
+                    <BarChart
+                        height={height}
+                        series={[{ data: data, label: "Number of Students Response", id: "count", color: "#5E85D4" }]}
+                        xAxis={[{ data: labels, scaleType: "band" }]}
+                        slotProps={{ legend: { offset: { x: -70 } } }}
+                        sx={barChartStyle}  
+                    />
+                }
             </Box>
         </Box>
     )
