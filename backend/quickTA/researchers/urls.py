@@ -23,4 +23,5 @@ urlpatterns = [
 
     # new filter endpoints
     path('/v2/interaction-frequency', DailyInteractions.as_view(), name='get_filtered_chatlogs_new'),
+    path('/v2/unique-users', UniqueUsersView.as_view(), name='unique_users'),
 ]

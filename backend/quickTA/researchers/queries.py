@@ -9,3 +9,12 @@ def daily_interactions_query_pipeline(course_id, start_date, end_date):
         { "$project": { "day": "$_id", "count": 1, "_id": 0 } },  
         { "$sort": { "day": 1 } }
     ]
+
+def unique_users_query_pipeline(user_ids):
+
+    return {
+            "$or": [
+                { "user_id": { "$in": user_ids } },
+                { "new_user": False }
+            ]
+        }

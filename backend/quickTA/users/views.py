@@ -1,6 +1,6 @@
 import os
 import uuid
-from datetime import datetime
+# from datetime import datetime
 from rest_framework.parsers import MultiPartParser
 from rest_framework.decorators import action
 from rest_framework.views import APIView
@@ -340,71 +340,258 @@ class UserBatchAddCsvView(APIView):
             return JsonResponse({"msg": f"Users created.{' Modified existing users (utorid: name): ' + (', '.join(existing_users) if existing_users else '') + '.'}{' Failed to add users: ' + (', '.join(failed_users) if failed_users else '') + '.'}"}, status=status.HTTP_201_CREATED)
         return ErrorResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class UserRolesView(APIView):
+    
+    @swagger_auto_schema(operation_summary="Get list of user roles",)
+    def get(self, request):
+
+        response = { "roles": [] }
+        for role in ROLE_MAP.keys():
+            response["roles"].append({ "id": role, "name": ROLE_MAP[role].capitalize() })
+        return JsonResponse(response)
 class TestView(APIView):
     def get(self, request):
 
         # ==========================================================================================
         # ACQUIRE STUDENT PYTHON CODE
         # ==========================================================================================
+        # from student.models import Conversation
+        # import os, re
+
+        # def get_code_blocks(all_responses):
+        #     # Acquires all python code from th
+        #     # all_responses = list(GPTResponse.objects.all())
+        #     # all_bot_responses = [res.choices[0]['message']['content'] for res in all_responses]
+        #     all_python_code = []
+        #     pattern = r'```python(.*?)```'
+        #     for response in all_responses:
+        #         for log in response.conversation_log:
+        #             if log["role"] == 'assistant':
+        #                 code_matches = re.findall(pattern, log["content"], re.DOTALL)
+        #                 all_python_code.extend([match.strip() for match in code_matches])
+        
+        #     # print(all_python_code)
+        #     set_all_python_code = list(set(all_python_code))
+        #     return set_all_python_code
+        
+        # conversations = Conversation.objects.all()
+        # convos = [convo for convo in conversations]
+        # students = [user for user in User.objects.filter(user_role="ST")]
+        # students_id = [(user.utorid, user.user_id) for user in students]
+        
+        # # create buckets for each student
+        # __student_buckets = {}
+        # _student_buckets = {}
+        # student_code_blocks = {}
+        # for convo in convos: 
+        #     if convo.user_id not in __student_buckets:
+        #         __student_buckets[("",convo.user_id)] = []
+        #     __student_buckets[("",convo.user_id)].append(convo)
+
+        # # assign utorid to each bucket's tuple key
+        # # print(__student_buckets)
+        # for student in __student_buckets:  # student is a tuple (utorid='', user_id)
+        #     for student_id in students_id: # student_id is a tuple (utorid, user_id)
+        #         if student[1] == str(student_id[1]):
+        #             _student_buckets[student_id[0]] = __student_buckets[student]
+        #             break
+        
+        # for i, student in enumerate(_student_buckets):
+        #     print(f"Acquiring code block [{i}] from student [{student}]",)
+        #     temp = get_code_blocks(_student_buckets[student])
+        #     if len(temp) > 0:
+        #         student_code_blocks[student] = temp
+
+        # # print(student_code_blocks)
+        # # make directory under python_code for each utorid
+        # if not os.path.exists(os.path.join(os.getcwd(), 'python_code')):
+        #     os.mkdir(os.path.join(os.getcwd(), 'python_code'))
+
+        # for utorid in student_code_blocks:
+        #     if not os.path.exists(os.path.join(os.getcwd(), 'python_code', utorid)):
+        #         os.mkdir(os.path.join(os.getcwd(), 'python_code', utorid))
+
+        #     f = open(os.path.join(os.getcwd(), 'python_code', utorid, 'utorid_lab4_quickta.py'), 'w')
+        #     for code in student_code_blocks[utorid]:
+        #         f.write(code + '\n\n')
+        #     f.close()
+
+        # return JsonResponse({"msg": "Test message"})
+
+        # ==========================================================================================
+        # ACQUIRE STUDENT STATISTICS
+        # ==========================================================================================
+        users = User.objects.filter(user_role="ST")
+        users = [user for user in users if user.new_user == False]
+
+        # 1. Acquire number of users that have accessed the system 
+        num_students = len(users)
+        print(f"Number of students who have accessed the system: {num_students}/1241 ({round(num_students/1241*100, 2)}%)")
+
+        # 1a. Presurvey: Q1 Have you ever used large language models before?
+
+        # q1_results = {}
+        # q2_results = {}
+        # q3_results = {}
+        # q4_results = {}
+        # q1_id = "a4dffcc8-1ee4-4361-99b3-6231772b0e19"
+        # q2_id = "1a8ddf81-501d-4254-a0c8-4704ef081326"
+        # q3_id = "5625f3ba-b627-4927-a43e-b711796ef9b1"
+        # q4_id = "b1532779-eb57-4f0b-9ed0-55274921e5f4"
+        # for user in users: 
+        #     for question in user.pre_survey:
+
+        #         # Question 1 
+        #         if question['question_id'] == q1_id:
+        #             if question['answer'] not in q1_results:
+        #                 q1_results[question['answer']] = 1
+        #             else:
+        #                 q1_results[question['answer']] += 1
+
+        #         # Question 2
+        #         if question['question_id'] == q2_id:
+        #             if question['answer'] not in q2_results:
+        #                 q2_results[question['answer']] = 1
+        #             else:
+        #                 q2_results[question['answer']] += 1
+
+        #         if question['question_id'] == q3_id:
+        #             if question['answer'] not in q3_results:
+        #                 q3_results[question['answer']] = 1
+        #             else:
+        #                 q3_results[question['answer']] += 1
+
+        #         if question['question_id'] == q4_id:
+        #             if question['answer'] not in q4_results:
+        #                 q4_results[question['answer']] = 1
+        #             else:
+        #                 q4_results[question['answer']] += 1
+
+        # q1_results = {key: q1_results[key] for key in sorted(q1_results.keys())}
+        # q2_results = {key: q2_results[key] for key in sorted(q2_results.keys())}
+        # q3_results = {key: q3_results[key] for key in sorted(q3_results.keys())}
+        # q4_results = {key: q4_results[key] for key in sorted(q4_results.keys())}
+        # print("Pre-survey Q1", q1_results)
+        # print("Pre-survey Q2", q2_results)
+        # print("Pre-survey Q3", q3_results)
+        # print("Pre-survey Q4", q4_results)
+
+        # 2. User interactions
         from student.models import Conversation
-        import os, re
-
-        def get_code_blocks(all_responses):
-            # Acquires all python code from th
-            # all_responses = list(GPTResponse.objects.all())
-            # all_bot_responses = [res.choices[0]['message']['content'] for res in all_responses]
-            all_python_code = []
-            pattern = r'```python(.*?)```'
-            for response in all_responses:
-                for log in response.conversation_log:
-                    if log["role"] == 'assistant':
-                        code_matches = re.findall(pattern, log["content"], re.DOTALL)
-                        all_python_code.extend([match.strip() for match in code_matches])
-        
-            # print(all_python_code)
-            set_all_python_code = list(set(all_python_code))
-            return set_all_python_code
-        
         conversations = Conversation.objects.all()
-        convos = [convo for convo in conversations]
-        students = [user for user in User.objects.filter(user_role="ST")]
-        students_id = [(user.utorid, user.user_id) for user in students]
+        # print("Number of conversations (includes instructors and students):", len(conversations))
+
+        user_ids = [convo.user_id for convo in conversations]
+        users = list(set(user_ids))
+
+        print("Number of unique user conversation:", len(users))
+
+        students = User.objects.filter(user_role="ST", user_id__in=users)
+        print("Number of distinct students who started a conversation:", len(students))
+
+        # # average number of conversations performed by students
+        students_ids = [student.user_id for student in students]
+        conversations = Conversation.objects.filter(user_id__in=students_ids)
+
+        # ===========================================================================================
+        # find students with more than one conversation
+        students_with_more_than_one_conversation = []
+        for student in students:
+            conversations = Conversation.objects.filter(user_id=student.user_id)
+            if len(conversations) > 1:
+                students_with_more_than_one_conversation.append(student.user_id)
         
-        # create buckets for each student
-        __student_buckets = {}
-        _student_buckets = {}
-        student_code_blocks = {}
-        for convo in convos: 
-            if convo.user_id not in __student_buckets:
-                __student_buckets[("",convo.user_id)] = []
-            __student_buckets[("",convo.user_id)].append(convo)
+        # print("Number of students with more than one conversation:", len(students_with_more_than_one_conversation))
 
-        # assign utorid to each bucket's tuple key
-        # print(__student_buckets)
-        for student in __student_buckets:  # student is a tuple (utorid='', user_id)
-            for student_id in students_id: # student_id is a tuple (utorid, user_id)
-                if student[1] == str(student_id[1]):
-                    _student_buckets[student_id[0]] = __student_buckets[student]
-                    break
+        # Get all conversations from students with more than one conversation
+        conversations = Conversation.objects.filter(user_id__in=students_with_more_than_one_conversation)
+        conversation_ids = [convo.conversation_id for convo in conversations]
         
-        for i, student in enumerate(_student_buckets):
-            print(f"Acquiring code block [{i}] from student [{student}]",)
-            temp = get_code_blocks(_student_buckets[student])
-            if len(temp) > 0:
-                student_code_blocks[student] = temp
+        # Acquire average delta time between conversations$
+        # ===========================================================================================
+        # from student.models import Conversation, Chatlog, Feedback, Report
+        # import datetime
 
-        # print(student_code_blocks)
-        # make directory under python_code for each utorid
-        if not os.path.exists(os.path.join(os.getcwd(), 'python_code')):
-            os.mkdir(os.path.join(os.getcwd(), 'python_code'))
+        # chatlogs = Chatlog.objects.filter(conversation_id__in=conversation_ids)
 
-        for utorid in student_code_blocks:
-            if not os.path.exists(os.path.join(os.getcwd(), 'python_code', utorid)):
-                os.mkdir(os.path.join(os.getcwd(), 'python_code', utorid))
+        # deltas = [chatlog.delta for chatlog in chatlogs if chatlog.is_user]
+        # average_delta = str(sum(deltas, datetime.timedelta()) / len(deltas))
+        # deltas = [str(delta) for delta in deltas]
+        
+        # response = { "avg_response_rate": average_delta, "all_response_rates": deltas }
+        # return JsonResponse(response)
+        
+        
 
-            f = open(os.path.join(os.getcwd(), 'python_code', utorid, 'utorid_lab4_quickta.py'), 'w')
-            for code in student_code_blocks[utorid]:
-                f.write(code + '\n\n')
-            f.close()
+        # print("Total number of conversations performed by students:", len(conversations))
+        # print("Average number of conversations performed by students:", len(conversations)/len(students))
+
+        # # 3. Post session
+        # from survey.models import SurveyResponse
+        # responses = SurveyResponse.objects.all()
+
+        # user_ids = []
+        # for response in responses:
+        #     user_ids.append(response.user_id)
+        # users = list(set(user_ids))
+
+        # student_users = User.objects.filter(user_role="ST", user_id__in=users)
+        # print("Number of students who did the post survey:", len(student_users))
+
+        # user_ids = [user.user_id for user in student_users]
+        # student_responses = SurveyResponse.objects.filter(user_id__in=user_ids)
+
+        # conversation_ids = [response.conversation_id for response in student_responses]
+        # print("Number of responses:", len(set(conversation_ids)))
+        # q1_results = {}
+        # q2_results = {}
+        # q3_results = {}
+        # q4_results = {}
+        # q5_responses = []
+        # q1_id = "63b13129-ad7b-41b0-9a9b-9304d27c8062"
+        # q2_id = "a99b5e5b-e405-4295-8d73-e2efe66efa33"
+        # q3_id = "12c4df67-5677-425f-aca8-0847ea470cae"
+        # q4_id = "378376a0-bc65-4f02-ad94-6612a6d904b7"
+        # q5_id = "4407a0f3-713a-4758-91b7-ba5ba47e9410"
+        # for question in student_responses:
+
+        #         # Question 1 
+        #         if question.question_id == q1_id:
+        #             if question.answer not in q1_results:
+        #                 q1_results[question.answer] = 1
+        #             else:
+        #                 q1_results[question.answer] += 1
+
+        #         # Question 2
+        #         if question.question_id == q2_id:
+        #             if question.answer not in q2_results:
+        #                 q2_results[question.answer] = 1
+        #             else:
+        #                 q2_results[question.answer] += 1
+
+        #         if question.question_id == q3_id:
+        #             if question.answer not in q3_results:
+        #                 q3_results[question.answer] = 1
+        #             else:
+        #                 q3_results[question.answer] += 1
+
+        #         if question.question_id == q4_id:
+        #             if question.answer not in q4_results:
+        #                 q4_results[question.answer] = 1
+        #             else:
+        #                 q4_results[question.answer] += 1
+
+        #         if question.question_id == q5_id:
+        #             q5_responses.append(question.answer)
+
+        # q1_results = {key: q1_results[key] for key in sorted(q1_results.keys())}
+        # q2_results = {key: q2_results[key] for key in sorted(q2_results.keys())}
+        # q3_results = {key: q3_results[key] for key in sorted(q3_results.keys())}
+        # q4_results = {key: q4_results[key] for key in sorted(q4_results.keys())}
+        # print("Q1", q1_results)
+        # print("Q2", q2_results)
+        # print("Q3", q3_results)
+        # print("Q4", q4_results)
+        # print("Q5 responses:", q5_responses)
 
         return JsonResponse({"msg": "Test message"})

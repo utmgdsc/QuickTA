@@ -614,3 +614,36 @@ class DailyInteractions(APIView):
     
         response = { "interactions": result }
         return JsonResponse(response)
+    
+class UniqueUsersView(APIView):
+
+    @swagger_auto_schema(
+        operation_summary="Get unique amount of users logins for a course [Defaulted to Students (ST) only]",
+        responses={200: "Success", 404: "Course not found"},
+        manual_parameters=[
+            openapi.Parameter("course_code", openapi.IN_QUERY, description="Course code", type=openapi.TYPE_STRING),
+            openapi.Parameter("semester", openapi.IN_QUERY, description="Semester ", type=openapi.TYPE_STRING),
+            openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
+        ]
+    )
+    def get(self, request):
+        """
+        Acquires the unique users for a course.
+        """
+        params = request.query_params
+        course = get_course(params)
+
+        collection = db["users_user"]
+        query = unique_users_query_pipeline(course.students)
+        result = collection.find(query)
+
+        unique_users = len(list(result))
+        total_students = len(course.students)
+        
+        response = {
+            "unique_users": unique_users,
+            "unique_users_percentage": round((unique_users / total_students) * 100, 2),
+            "total_users": total_students,
+        }
+
+        return JsonResponse(response)

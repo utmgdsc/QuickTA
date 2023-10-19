@@ -1,4 +1,26 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap");
+
+/* Defaut */
+dl { width: 100% }
+
+/* Standard */
+/* .border { border: 1px solid red; } */
+.w-100 { width: 100% }
+.d-flex { display: flex }
+.flex-row { flex-direction: row; }
+.flex-col { flex-direction: column; }
+
+.justify-content-start { justify-content: flex-start; }
+.justify-content-center { justify-content: center; } 
+.justify-content-end { justify-content: flex-end; }
+.justify-content-between { justify-content: space-between; }
+.justify-content-around { justify-content: space-around; }
+
+.align-items-center { align-items: center; }
+.align-items-end { align-items: last baseline;}
+
+/* QuickTA */
+
 .glass {
   /* From https://css.glass */
   background: rgba(255, 255, 255, 0.2);

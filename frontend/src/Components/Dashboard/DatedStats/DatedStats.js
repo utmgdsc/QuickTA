@@ -5,23 +5,25 @@ import {
   useDisclosure,
   HStack,
 } from "@chakra-ui/react";
-import StatCard from "./StatCard";
-import DatedGraph from "./DatedGraph";
+import StatCard from "../components/StatCard";
 import React, { useEffect } from "react";
 import axios from "axios";
 import { useState } from "react";
 import FrequencyCard from "./FrequencyCard";
-import ErrorDrawer from "../../ErrorDrawer";
+import AnalyticsCard from "../components/AnalyticsCard";
+import DatedLineChart from "../components/DatedLineChart";
+import { Grid } from "@mui/material";
+import UniqueUsersCard from "./UniqueUsersCard";
+import ChatlogResponseRateCard from "./ChatlogResponseRateCard";
+import ReportedConversationCard from "./ReportedConversationsCard";
+
 
 const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
   const [avgRating, setAvgRating] = useState({
     avgRating: 0,
     avgRatingDelta: 0,
   });
-  const [avgRespTime, setAvgRespTime] = useState({
-    avgRespTime: 0,
-    avgRespTimeDelta: 0,
-  });
+  
   const [avgComfort, setAvgComfort] = useState({
     avgComfort: 0,
     avgComfortDelta: 0,
@@ -31,11 +33,6 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
 
   // Fetch file loader for headers
   const fileDownload = require("js-file-download");
-  const {
-    isOpen: isErrOpen,
-    onOpen: onErrOpen,
-    onClose: onErrClose,
-  } = useDisclosure();
   const [error, setError] = useState();
   function computePrevAvg(data, currAvg) {
     // we need to look at avg of indices 0, .. , data-2
@@ -51,101 +48,8 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
     }
   }
 
+  
   const fetchData = async (endpoint) => {
-    if (endpoint.endsWith("average-ratings")) {
-      return await axios
-        .get(
-          process.env.REACT_APP_API_URL +
-            endpoint +
-            `?filter=${
-              isWeekly === 1 ? "Weekly" : isWeekly === 0 ? "Monthly" : "All"
-            }&course_id=${courseID}&timezone=America/Toronto`
-        )
-        .then((res) => {
-          setAvgRating({
-            avgRating: Math.round(res.data.avg_rating * 100) / 100,
-            avgRatingDelta: computePrevAvg(
-              res.data.all_ratings,
-              res.data.avg_rating
-            ),
-          });
-        })
-        .catch((err) => {
-          setError(err);
-          // console.log(err);
-          
-          onErrOpen();
-        });
-    }
-
-    if (endpoint.endsWith("avg-comfortability")) {
-      return await axios
-        .get(
-          process.env.REACT_APP_API_URL +
-            endpoint +
-            `?filter=${
-              isWeekly === 1 ? "Weekly" : isWeekly === 0 ? "Monthly" : "All"
-            }&course_id=${courseID}&timezone=America/Toronto`
-        )
-        .then((res) => {
-          setAvgComfort({
-            avgComfort:
-              Math.round(res.data.avg_comfortability_rating * 100) / 100,
-            avgComfortDelta: computePrevAvg(
-              res.data.comfortability_ratings,
-              res.data.avg_comfortability_rating
-            ),
-          });
-        })
-        .catch((err) => {
-          setError(err);
-          // console.log(err);
-          
-          onErrOpen();
-        });
-    }
-
-    if (endpoint.endsWith("avg-response-rate")) {
-      return await axios
-        .get(
-          process.env.REACT_APP_API_URL +
-            endpoint +
-            `?filter=${
-              isWeekly === 1 ? "Weekly" : isWeekly === 0 ? "Monthly" : "All"
-            }&course_id=${courseID}&timezone=America/Toronto`
-        )
-        .then((res) => {
-          setAvgRespTime({
-            avgRespTime: res.data.avg_response_rate,
-            // avgRespTimeDelta: "-",
-          });
-        })
-        .catch((err) => {
-          setError(err);
-          // console.log(err);
-          onErrOpen();
-        });
-    }
-
-    if (endpoint.endsWith("reported-conversations")) {
-      // console.log("need reported conversations");
-      return await axios
-        .get(
-          process.env.REACT_APP_API_URL +
-            endpoint +
-            `?filter=${
-              isWeekly === 1 ? "Weekly" : isWeekly === 0 ? "Monthly" : "All"
-            }&course_id=${courseID}&timezone=America/Toronto`
-        )
-        .then((res) => {
-          setNumReport({ numReport: res.data.total_reported });
-        })
-        .catch((err) => {
-          setError(err);
-          // console.log(err);
-          onErrOpen();
-        });
-    }
 
     if (endpoint.endsWith("most-common-words")) {
       return await axios
@@ -177,7 +81,6 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
         .catch((err) => {
           setError(err);
           // console.log(err);
-          onErrOpen();
         });
     }
   };
@@ -185,10 +88,6 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
   useEffect(() => {
     if (courseID) {
       setIsLoading(true);
-      // fetchData("/researchers/avg-comfortability");
-      fetchData("/researchers/average-ratings");
-      fetchData("/researchers/avg-response-rate");
-      fetchData("/researchers/reported-conversations");
       fetchData("/researchers/most-common-words");
       setIsLoading(false);
     }
@@ -196,123 +95,44 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
 
   return (
     <>
-      <Flex flexWrap="wrap" mt={5} mb={5}>
-        <HStack>
-          <VStack minWidth="320px" w="22vw" spacing="20px">
-            <StatCard
-              callBack={() => {
-                if (courseID && isWeekly != null) {
-                  axios
-                    .post(
-                      process.env.REACT_APP_API_URL +
-                        `/researchers/feedback-csv?filter=${
-                          isWeekly === 1
-                            ? "Weekly"
-                            : isWeekly === 0
-                            ? "Monthly"
-                            : "All"
-                        }&course_id=${courseID}&timezone=America/Toronto`, {
-                          course_id: courseID,
-                        }
-                    )
-                    .then((response) => {
-                      // console.log("resp headers" , response);
-                      if (response.headers["content-disposition"]) {
-                        // console.log("DOWNLOADING", response);
-                        fileDownload(
-                          response.data,
-                          response.headers["content-disposition"].split('"')[1]
-                        );
-                      }
-                    })
-                    .catch((err) => {
-                      setError(err);
-                      // console.log(err);
-                      onErrOpen();
-                    });
-                }
-              }}
-              title={"Average Rating"}
-              num={avgRating.avgRating}
-              delta={avgRating.avgRatingDelta}
-              unit={"☆"}
+      <Grid container columnSpacing={{ xs: 1, md: 2}} rowSpacing={{ xs: 1, md: 2 }}>
+        <Grid item xs={6} md={3} className="border">
+          <UniqueUsersCard courseID={courseID} />
+        </Grid>
+        <Grid item xs={6} md={3} className="border">
+          <ChatlogResponseRateCard courseID={courseID} />
+        </Grid>
+        <Grid item xs={6} md={3} className="border">
+          <ChatlogResponseRateCard courseID={courseID} />
+        </Grid>
+        <Grid item xs={6} md={3} className="border">
+          <ReportedConversationCard courseID={courseID} />
+        </Grid>
+        <Grid item xs={12} md={6} className="border">
+          <AnalyticsCard>
+            <DatedLineChart 
+              title={"Interaction Frequency"} 
+              courseID={courseID}
+              height={385}
             />
+          </AnalyticsCard>
+        </Grid>
+        <Grid item xs={12} md={6} className="border">
+          <AnalyticsCard>
+            <div>
+              Test
+            </div>
+          </AnalyticsCard>
+          </Grid>
+      </Grid>
 
-            <StatCard
-              callBack={() => {
-                if (courseID && isWeekly != null) {
-                  axios
-                    .get(
-                      process.env.REACT_APP_API_URL +
-                        `/researchers/avg-response-rate-csv?filter=${
-                          isWeekly === 1
-                            ? "Weekly"
-                            : isWeekly === 0
-                            ? "Monthly"
-                            : "All"
-                        }&course_id=${courseID}&timezone=America/Toronto`
-                    )
-                    .then((response) => {
-                      if (response.headers["content-disposition"]) {
-                        fileDownload(
-                          response.data,
-                          response.headers["content-disposition"].split('"')[1]
-                        );
-                      }
-                    })
-                    .catch((err) => {
-                      setError(err);
-                      // console.log(err);
-                      onErrOpen();
-                    });
-                }
-              }}
-              title={"Average Response Rate"}
-              num={avgRespTime.avgRespTime}
-              delta={avgRespTime.avgRespTimeDelta}
-              unit={"s"}
-            />
 
-            <StatCard
-              callBack={() => {
-                if (courseID && isWeekly != null) {
-                  axios
-                    .get(
-                      process.env.REACT_APP_API_URL +
-                        `/researchers/reported-conversations-csv?filter=${
-                          isWeekly === 1
-                            ? "Weekly"
-                            : isWeekly === 0
-                            ? "Monthly"
-                            : "All"
-                        }&course_id=${courseID}&timezone=America/Toronto`
-                    )
-                    .then((response) => {
-                      if (response.headers["content-disposition"]) {
-                        fileDownload(
-                          response.data,
-                          response.headers["content-disposition"].split('"')[1]
-                        );
-                      }
-                    })
-                    .catch((err) => {
-                      setError(err);
-                      // console.log(err);
-                      onErrOpen();
-                    });
-                }
-              }}
-              title={"Reported Conversations"}
-              num={numReport.numReport}
-              delta={0}
-              unit={""}
-            />
-          </VStack>
-          <Spacer />
-          <DatedGraph isWeekly={isWeekly} courseID={courseID} />
-        </HStack>
-      </Flex>
-      <FrequencyCard
+          
+
+         
+         
+
+      {/* <FrequencyCard
         words={commonWords}
         callBack={() => {
           if (courseID && isWeekly != null) {
@@ -352,8 +172,8 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
           }
         }}
         m={4}
-      />
-      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
+      /> */}
+      {/* <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} /> */}
     </>
   );
 };

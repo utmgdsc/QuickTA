@@ -4,11 +4,12 @@ import axios from "axios";
 import React, { useState, useEffect } from "react";
 import Chart from "react-apexcharts";
 import ErrorDrawer from "../../ErrorDrawer";
+import { LineChart } from '@mui/x-charts/LineChart';
 
 const DatedGraph = ({ isWeekly, courseID }) => {
   // console.log(isWeekly);
-  const [category, setCategory] = useState([]);
-  const [data, setData] = useState([]);
+  const [dates, setDates] = useState([]);
+  const [counts, setCounts] = useState([]);
   const cardStyle = {
     backgroundColor: "white",
     boxShadow: "1px 2px 3px 1px rgba(0,0,0,0.12)",
@@ -28,65 +29,36 @@ const DatedGraph = ({ isWeekly, courseID }) => {
   } = useDisclosure();
   const [error, setError] = useState();
   const fetchGraphData = async () => {
+    let startDate = '2023-09-01';
+    let endDate = '2023-12-31';
     return await axios
       .get(
         process.env.REACT_APP_API_URL +
-          `/researchers/interaction-frequency?course_id=${courseID}&filter=${
-            isWeekly === 1 ? "Weekly" : "Monthly"
-          }&timezone=America/Toronto`
+          `/researchers/v2/interaction-frequency?course_id=${courseID}&start_date=${startDate}&end_date=${endDate}`
       )
       .then((res) => {
-        // console.log(isWeekly, "Call");
-        if (isWeekly === 1) {
-          let x = {
-            day: [],
-            dayData: [],
-          };
+        let data = res.data.interactions 
+        let _dates = [];
+        let _counts = [];
+        data.forEach((element) => {
+          let year = element.day.substring(0, 4);
+          let month = element.day.substring(5, 7);
+          let day = element.day.substring(8, 10);
+          let date = new Date(year, month, day);
+          _dates.push(date);
+          _counts.push(element.count);
+        });
 
-          const { day, dayData } = res.data.interactions.reduce(
-            (obj, currDay) => {
-              obj.day.push(currDay[1]);
-              obj.dayData.push(currDay[2]);
-              return obj;
-            },
-            x
-          );
-          setCategory(day);
-          setData(dayData);
-          // console.log(day);
-          // console.log(dayData);
-        } else {
-          // console.log("rendering monthly data");
-          const currDate = Temporal.Now.plainDateISO().toString();
-          const currDay = currDate.substring(currDate.length - 2);
-          let x = {
-            date: [],
-            dateData: [],
-          };
+        console.log(_dates);
+        console.log(_counts);
 
-          const { date, dateData } = res.data.interactions.reduce(
-            (obj, currData) => {
-              // console.log(currData);
-              obj.date.push(currData[0]);
-              if (currDay < currData[0].substring(currData[0].length - 2)) {
-                obj.dateData.push(null);
-              } else {
-                obj.dateData.push(currData[2]);
-              }
-              return obj;
-            },
-            x
-          );
-          setData(dateData);
-          setCategory(date);
-          // console.log(dateData);
-          // console.log(date);
-        }
+        setDates(_dates);
+        setCounts(_counts);
       })
       .catch((err) => {
         setError(err);
         // console.log(err);
-        onErrOpen();
+        // onErrOpen();
       });
   };
 
@@ -102,35 +74,29 @@ const DatedGraph = ({ isWeekly, courseID }) => {
         <Heading as="h2">
           <span style={titleStyle}>Total Interactions</span>
         </Heading>
-
-        <Chart
-          options={{
-            chart: {
-              id: "Total Interactions",
-            },
-            xaxis: {
-              categories: category,
-            },
-            noData: {
-              text: "Loading...",
-              align: "center",
-              verticalAlign: "middle",
-              offsetX: 0,
-              offsetY: 0,
-              style: {
-                color: "black",
-                fontSize: "50px",
-                fontFamily: "Arial",
-              },
-            },
-          }}
+        {/* {data} */}
+        <LineChart 
+          fontFamily="Poppins"
+          xAxis={[
+            {
+              id: 'Dates',
+              data: dates,
+              scaleType: 'time',
+              valueFormatter: (date) => { 
+                return date.toLocaleDateString("en-US", { month: 'short', day: 'numeric' })
+              }
+            }
+          ]}
           series={[
             {
-              name: "Interactions",
-              data: data,
-            },
+              id: 'Interaction Count',
+              label: 'Number of Interactions',
+              data: counts,
+            }
           ]}
-          type="line"
+          // dataset={data}
+          width={600}
+          height={400}
         />
       </Box>
       <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />

@@ -120,7 +120,11 @@ const App = () => {
     }
   }, [UTORid]);
 
-  const MuiTheme = createTheme({});
+  const MuiTheme = createTheme({
+    typography: {
+      fontFamily: 'Poppins'
+    }
+  });
   
    
   
