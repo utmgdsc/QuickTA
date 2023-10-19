@@ -704,9 +704,41 @@ class AverageConversationResponseRateView(APIView):
         params = request.query_params
         course = get_course(params)
 
-        collection = db["student_conversation"]
-        query = average_conversation_response_rate_query_pipeline(course.students)
-        result = list(collection.aggregate(query))
+        # Find all users with more than one conversation
+        conversations_db = db["student_conversation"]
+        query = users_with_multiple_query_pipeline()
+        user_ids = [ user['_id'] for user in list(conversations_db.aggregate(query))]
+
+        # Find all students from this list of user_ids
+        students = User.objects.filter(user_id__in=user_ids, user_role='ST')
+        student_user_ids = [student.user_id for student in students]
+
+        # Find all conversations from these students
+        conversations = Conversation.objects.filter(user_id__in=student_user_ids)
+
+        # Create buckets for each user_id with their conversations
+        buckets = {}
+        for convo in conversations:
+            if convo.user_id not in buckets:
+                buckets[convo.user_id] = []
+            buckets[convo.user_id].append(convo)
+
+        # Sort each bucket by start_time
+        for user_id in buckets:
+            buckets[user_id] = sorted(buckets[user_id], key=lambda k: k.start_time)
+
+        deltas = []
+
+        # Find the deltas between every two successive conversations, where first conversation has status 'I'. The delta is the time between the second conversation's start_time and first conversation's end_time
+        for user_id in buckets:
+            for i in range(len(buckets[user_id]) - 1):
+                if buckets[user_id][i].status == 'I':
+                    delta = buckets[user_id][i + 1].start_time - buckets[user_id][i].end_time
+                    deltas.append(delta)
+        
+        # Find the average delta
+        average_delta = sum(deltas, dt.timedelta()) / len(deltas)
+        result = str(average_delta)
 
         response = { "average_response_rate": result }
         return JsonResponse(response)

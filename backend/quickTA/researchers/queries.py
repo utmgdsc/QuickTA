@@ -29,22 +29,33 @@ def pre_survey_distribution_query_pipeline(question_id, user_role):
         { '$sort': { 'answer': 1 } }
     ]
 
-def average_conversation_response_rate_query_pipeline(course_id):
+def users_with_multiple_query_pipeline():
+    # return [
+    #     { '$match': { 'course_id': course_id } },
+    #     { '$sort': { 'user_id': 1, 'start_time': 1 } },
+    #     { '$group': { '_id': '$user_id', 'conversations': { '$push': { 'start_time': '$start_time', 'end_time': '$end_time', 'status': '$status' } } } },
+    #     { '$unwind': { 'path': '$conversations', 'includeArrayIndex': 'index' } },
+    #     { '$project': { 'user_id': '$_id', 'conversation': '$conversations', 'nextConversation': { '$arrayElemAt': ['$conversations', {'$add': ['$index', 1]}] } } },
+    #     { '$match': {'conversation.status': 'I', 'nextConversation': {'$ne': None}, 
+    #                  '$expr': { '$gte': [ {'$subtract': ['$nextConversation.start_time', '$conversation.end_time']}, 0 ] }}
+    #     },
+    #     { '$group': { '_id': '$user_id', 
+    #                   'totalDelta': { '$sum': { '$subtract': ['$nextConversation.start_time', '$conversation.end_time'] } }, 
+    #                   'count': {'$sum': 1}
+    #                 }
+    #     },
+    #     { '$project': { '_id': 0, 'user_id': '$_id', 
+    #                    'averageResponseRate': { '$divide': ['$totalDelta', '$count'] } }
+    #     }
+    # ]
+    return [ 
+        { '$group': { '_id': '$user_id', 'count': {'$sum': 1} } },
+        { '$match': { 'count': {'$gt': 1} } },
+        { '$project': { '_id': 1 } }  # Select the user_id with more than one conversation }
+    ]
+
+def user_ids_match_user_role(user_ids, user_role):
     return [
-        { '$match': { 'course_id': course_id } },
-        { '$sort': { 'user_id': 1, 'start_time': 1 } },
-        { '$group': { '_id': '$user_id', 'conversations': { '$push': { 'start_time': '$start_time', 'end_time': '$end_time', 'status': '$status' } } } },
-        { '$unwind': { 'path': '$conversations', 'includeArrayIndex': 'index' } },
-        { '$project': { 'user_id': '$_id', 'conversation': '$conversations', 'nextConversation': { '$arrayElemAt': ['$conversations', {'$add': ['$index', 1]}] } } },
-        { '$match': {'conversation.status': 'I', 'nextConversation': {'$ne': None}, 
-                     '$expr': { '$gte': [ {'$subtract': ['$nextConversation.start_time', '$conversation.end_time']}, 0 ] }}
-        },
-        { '$group': { '_id': '$user_id', 
-                      'totalDelta': { '$sum': { '$subtract': ['$nextConversation.start_time', '$conversation.end_time'] } }, 
-                      'count': {'$sum': 1}
-                    }
-        },
-        { '$project': { '_id': 0, 'user_id': '$_id', 
-                       'averageResponseRate': { '$divide': ['$totalDelta', '$count'] } }
-        }
+        { '$match': { 'user_id': { '$in': user_ids }, 'user_role': user_role } },
+        { '$project': { 'user_id': 1 } }
     ]

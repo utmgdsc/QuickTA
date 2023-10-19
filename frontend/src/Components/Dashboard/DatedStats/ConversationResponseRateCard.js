@@ -5,10 +5,7 @@ import StatCard from "../components/StatCard";
 
 const ConversationResponseRateCard = ({ courseID }) => {
 
-    const [avgRespTime, setAvgRespTime] = useState({
-        avgRespTime: 0,
-        avgRespTimeDelta: 0,
-      });
+    const [avgRespTime, setAvgRespTime] = useState("");
 
     /**
      * Turns a time delta string into a more readable format
@@ -24,7 +21,10 @@ const ConversationResponseRateCard = ({ courseID }) => {
                 let timeArr = timeDeltaArr[i].split(":");
                 timeArr[2] = timeArr[2].split(".")[0];
                 if (timeArr[0] !== "0") { timeDeltaStr += `${timeArr[0]}h `; }
-                if (timeArr[1] !== "00") { timeDeltaStr += `${timeArr[1]}m `; }
+                if (timeArr[1] !== "00") { 
+                  if (timeArr[1][0] === "0") { timeArr[1] = timeArr[1].substring(1); }
+                  timeDeltaStr += `${timeArr[1]}m `; 
+                }
                 if (timeArr[2][0] === "0") { timeArr[2] = timeArr[2].substring(1); }
                 timeDeltaStr += `${timeArr[2]}s`;
             } else {
@@ -64,11 +64,11 @@ const ConversationResponseRateCard = ({ courseID }) => {
     const getAverageChatlogResponseRate = async () => {
         await axios
           .get(
-            process.env.REACT_APP_API_URL +
-              `/researchers/avg-response-rate?filter=${"Weekly"}&course_id=${courseID}&timezone=America/Toronto`
+            process.env.REACT_APP_API_URL + `/researchers/v2/avg-conversation-response-rate`,
+              { params: { course_id: courseID } }
           )
           .then((res) => {
-            setAvgRespTime({avgRespTime: parseTimeDelta(res.data.avg_response_rate)});
+            setAvgRespTime(parseTimeDelta(res.data.average_response_rate));
           })
           .catch((err) => { console.log(err) });
       }
@@ -82,8 +82,8 @@ const ConversationResponseRateCard = ({ courseID }) => {
     return (
         <StatCard
         callBack={downloadChatlogResponseRates}
-        title={"Average Message Response Rate"}
-        label={avgRespTime.avgRespTime}
+        title={"Average Conversation Response Rate"}
+        label={avgRespTime}
         helpText={"The time between ending a conversation and starting a new one"}
       />
     );

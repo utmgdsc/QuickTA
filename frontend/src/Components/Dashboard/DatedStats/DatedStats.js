@@ -15,6 +15,7 @@ import DatedLineChart from "../components/DatedLineChart";
 import { Grid } from "@mui/material";
 import UniqueUsersCard from "./UniqueUsersCard";
 import ChatlogResponseRateCard from "./ChatlogResponseRateCard";
+import ConversationResponseRateCard from "./ConversationResponseRateCard";
 import ReportedConversationCard from "./ReportedConversationsCard";
 import SurveyDistributionBarChart from "../components/SurveyDistributionBarChart";
 
@@ -104,7 +105,7 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
           <ChatlogResponseRateCard courseID={courseID} />
         </Grid>
         <Grid item xs={6} md={3} className="border">
-          <ChatlogResponseRateCard courseID={courseID} />
+          <ConversationResponseRateCard courseID={courseID} />
         </Grid>
         <Grid item xs={6} md={3} className="border">
           <ReportedConversationCard courseID={courseID} />
