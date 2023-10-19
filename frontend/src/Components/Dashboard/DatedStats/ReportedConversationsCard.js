@@ -13,7 +13,7 @@ const ReportedConversationCard = ({courseID}) => {
         await axios
         .get(
           process.env.REACT_APP_API_URL +
-            `/researchers/reported-conversations?filter=${"Weekly"}&course_id=${courseID}&timezone=America/Toronto`
+            `/researchers/reported-conversations?filter=${"All"}&course_id=${courseID}&timezone=America/Toronto`
         )
         .then((res) => { setNumReport({ numReport: res.data.total_reported }); })
         .catch((err) => { console.log(err); });
@@ -25,7 +25,7 @@ const ReportedConversationCard = ({courseID}) => {
     const downloadReportedConversations = async () => {
         if (courseID) {
             axios
-                .get(process.env.REACT_APP_API_URL + `/researchers/reported-conversations-csv?filter=${"Weekly"}&course_id=${courseID}&timezone=America/Toronto`)
+                .get(process.env.REACT_APP_API_URL + `/researchers/reported-conversations-csv?filter=${"All"}&course_id=${courseID}&timezone=America/Toronto`)
                 .then((res) => {
                     if (res.headers["content-disposition"]) {
                     fileDownload(
@@ -45,7 +45,7 @@ const ReportedConversationCard = ({courseID}) => {
     return (<StatCard
         callBack={downloadReportedConversations}
         title={"Reported Conversations"}
-        label={numReport.numReport}
+        label={String(numReport.numReport)}
         helpText={"number of conversations reported by students"}
       />);
 }

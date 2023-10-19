@@ -64,16 +64,12 @@ const UserScopeSelect = ({userScope, setUserScope}) => {
         setUserRoleList(roles.data.roles)
     }
 
-    const selectedUserScopes = useMemo(() => {
-        return userScope.map((selectedScope) => selectedScope.name);
-    })
-
     useEffect(() => {
         getUserRoles()
     }, [])
 
     return (
-        <Box w='500px'>
+        <Box maxW='500px' minW='400px'>
           <FormControl fullWidth size="small">
             <Autocomplete
                 id="user-scope-multiselect"

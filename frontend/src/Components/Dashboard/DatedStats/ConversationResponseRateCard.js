@@ -3,7 +3,7 @@ import axios from "axios";
 import fileDownload from "js-file-download";
 import StatCard from "../components/StatCard";
 
-const ChatlogResponseRateCard = ({ courseID }) => {
+const ConversationResponseRateCard = ({ courseID }) => {
 
     const [avgRespTime, setAvgRespTime] = useState({
         avgRespTime: 0,
@@ -84,9 +84,9 @@ const ChatlogResponseRateCard = ({ courseID }) => {
         callBack={downloadChatlogResponseRates}
         title={"Average Message Response Rate"}
         label={avgRespTime.avgRespTime}
-        helpText={"The time between a user message and last bot response"}
+        helpText={"The time between ending a conversation and starting a new one"}
       />
     );
 }
 
-export default ChatlogResponseRateCard;
+export default ConversationResponseRateCard;

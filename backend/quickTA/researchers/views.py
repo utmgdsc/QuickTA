@@ -25,6 +25,7 @@ from researchers.functions.common_topics import generate_wordcloud, get_wordclou
 import pymongo
 from researchers.queries import *
 from utils.time_utils import *
+from survey.models import *
 
 # import uri from settings
 from django.conf import settings
@@ -646,4 +647,66 @@ class UniqueUsersView(APIView):
             "total_users": total_students,
         }
 
+        return JsonResponse(response)
+
+class SurveyQuestionDistributionView(APIView):
+
+    @swagger_auto_schema(
+        operation_summary="Get survey questions for a course",
+        responses={200: "Success", 404: "Course not found"},
+        manual_parameters=[
+            openapi.Parameter("course_code", openapi.IN_QUERY, description="Course code", type=openapi.TYPE_STRING),
+            openapi.Parameter("semester", openapi.IN_QUERY, description="Semester ", type=openapi.TYPE_STRING),
+            openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("question_id", openapi.IN_QUERY, description="Question ID", type=openapi.TYPE_STRING),
+        ]
+    )
+    def get(self, request):
+        """
+        Acquires the survey questions for a course.
+        """
+        params = request.query_params
+        question_id = params.get('question_id', '')
+        question = get_object_or_404(SurveyQuestion, question_id=question_id)
+
+        if question.type == 'Pre':
+            collection = db["users_user"]
+            query = pre_survey_distribution_query_pipeline(question_id, "ST")
+            result = list(collection.aggregate(query))
+
+            # Get survey question answer flavor text labels
+            answers = {} 
+            for ans in question.answers:
+                answers[ans["value"]] = ans["text"]
+            for ans in result:
+                ans['label'] = answers.get(int(ans['answer']), '')
+
+            response = { "question": question.question, "type": question.question_type, "distribution": result }
+            return JsonResponse(response)
+        
+        return JsonResponse({})
+    
+class AverageConversationResponseRateView(APIView):
+
+    @swagger_auto_schema(
+        operation_summary="Get average response rate for a course's conversation",
+        responses={200: "Success", 404: "Conversation not found"},
+        manual_parameters=[
+            openapi.Parameter("course_code", openapi.IN_QUERY, description="Course code", type=openapi.TYPE_STRING),
+            openapi.Parameter("semester", openapi.IN_QUERY, description="Semester ", type=openapi.TYPE_STRING),
+            openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING)
+        ]
+    )
+    def get(self, request):
+        """
+        Acquires the average response rate for a course's conversation.
+        """
+        params = request.query_params
+        course = get_course(params)
+
+        collection = db["student_conversation"]
+        query = average_conversation_response_rate_query_pipeline(course.students)
+        result = list(collection.aggregate(query))
+
+        response = { "average_response_rate": result }
         return JsonResponse(response)

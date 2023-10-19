@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { LineChart } from '@mui/x-charts/LineChart';
-import { CircularProgress } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 import DateRange from "./DateRange";
 
 const DatedLineChart = ({
@@ -19,6 +19,20 @@ const [minDate, setMinDate] = useState(0);
 const [maxDate, setMaxDate] = useState(0);
 const [startDate, setStartDate] = useState(null);
 const [endDate, setEndDate] = useState(null);
+
+// Style Definition
+const lineChartStyle = {
+    "& .MuiChartsAxis-directionX": {
+        "& .MuiChartsAxis-tickLabel": {
+            rotate: "-0deg",
+            fontSize: "10px"
+        },
+    },
+    "& .MuiChartsLegend-label": {
+        fontSize: "14px",
+        fontWeight: "500"
+    }
+}
 
 
 const fetchGraphData = async () => {
@@ -112,71 +126,68 @@ useEffect(() => {
     }
 }, [startDate, endDate]);
 
-return <div style={{ padding: '20px'}}>
-        <h2 style={{ fontWeight: '700' }}>{title}</h2> 
-        {/* Time Range Picker */}
-        <DateRange 
-            startDate={startDate} 
-            setStartDate={setStartDate}
-            endDate={endDate} 
-            setEndDate={setEndDate}
-        />
-    {isLoading 
-        ? <div className="d-flex justify-content-center align-items-center" style={{height: "385px"}}> <CircularProgress /> </div>
-        : dates.length > 0 && counts.length > 0 &&
-            <LineChart 
-                height={height}
-                xAxis={[
-                {
-                    id: 'Dates',
-                    label: 'Date',
-                    data: dates,
-                    scaleType: 'integer',
-                    valueFormatter: (idx) => { return dateLabels[idx] },
-                    min: minDate,
-                    max: maxDate,
-                    tickMinStep: 1,
-                }
-                ]}
-                series={[
-                    {
-                        id: 'Accumulated Interaction Count',
-                        label: 'Accumulated Number of Interactions',
-                        data: accCounts,
-                        // showMark: ({ index }) => index % 2 === 0,
-                        area: true,
-                        curve: "catmullRom"
-                    },
-                    {
-                        id: 'Interaction Count',
-                        label: 'Number of Interactions',
-                        data: counts,
-                        area: true,
-                        curve: "catmullRom"
-                    },
-                ]}
-                slotProps={{
-                    legend: {
-                        direction: 'column',
-                        offset: { x: -70 }
-                    }
-                }}
-        
-                sx={{
-                    "& .MuiChartsAxis-directionX": {
-                        "& .MuiChartsAxis-tickLabel": {
-                            rotate: "-0deg",
-                            fontSize: "10px"
-                        },
-                    },
-                    "& .MuiChartsLegend-label": {
-                        fontSize: "14px",
-                        fontWeight: "500"
-                    }
-                }}  
-            /> 
+return (
+    <Box className="d-flex flex-col justify-content-between h-100" style={{ padding: '20px'}}>
+        <Box>
+            <h2 style={{ fontWeight: '700' }}>{title}</h2> 
+            {/* Time Range Picker */}
+            <DateRange 
+                startDate={startDate} 
+                setStartDate={setStartDate}
+                endDate={endDate} 
+                setEndDate={setEndDate}
+            />
+        </Box>
+        <Box>
+            {isLoading 
+                ? <div className="d-flex justify-content-center align-items-center" style={{height: "385px"}}> <CircularProgress /> </div>
+                : dates.length > 0 && counts.length > 0 &&
+                    <LineChart 
+                        height={height}
+                        xAxis={[
+                        {
+                            id: 'Dates',
+                            label: 'Date',
+                            data: dates,
+                            scaleType: 'integer',
+                            valueFormatter: (idx) => { return dateLabels[idx] },
+                            min: minDate,
+                            max: maxDate,
+                            tickMinStep: 1,
+                        }
+                        ]}
+                        series={[
+                            {
+                                id: 'Accumulated Interaction Count',
+                                label: 'Accumulated Number of Interactions',
+                                data: accCounts,
+                                area: true,
+                                curve: "catmullRom",
+                                color: "#5E85D4",
+                            },
+                            {
+                                id: 'Interaction Count',
+                                label: 'Number of Interactions',
+                                data: counts,
+                                area: true,
+                                curve: "catmullRom",
+                                color: '#4E79D0',
+                            },
+                        ]}
+                        slotProps={{
+                            legend: {
+                                direction: 'column',
+                                offset: { x: -70 }
+                            }
+                        }}
+                
+                        sx={lineChartStyle}  
+                    /> 
             }    
-    </div>;
+
+        </Box>
+    </Box>
+    );
 };
 
 export default DatedLineChart;

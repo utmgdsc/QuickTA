@@ -430,82 +430,82 @@ class TestView(APIView):
 
         # 1a. Presurvey: Q1 Have you ever used large language models before?
 
-        # q1_results = {}
-        # q2_results = {}
-        # q3_results = {}
-        # q4_results = {}
-        # q1_id = "a4dffcc8-1ee4-4361-99b3-6231772b0e19"
-        # q2_id = "1a8ddf81-501d-4254-a0c8-4704ef081326"
-        # q3_id = "5625f3ba-b627-4927-a43e-b711796ef9b1"
-        # q4_id = "b1532779-eb57-4f0b-9ed0-55274921e5f4"
-        # for user in users: 
-        #     for question in user.pre_survey:
+        q1_results = {}
+        q2_results = {}
+        q3_results = {}
+        q4_results = {}
+        q1_id = "a4dffcc8-1ee4-4361-99b3-6231772b0e19"
+        q2_id = "1a8ddf81-501d-4254-a0c8-4704ef081326"
+        q3_id = "5625f3ba-b627-4927-a43e-b711796ef9b1"
+        q4_id = "b1532779-eb57-4f0b-9ed0-55274921e5f4"
+        for user in users: 
+            for question in user.pre_survey:
 
-        #         # Question 1 
-        #         if question['question_id'] == q1_id:
-        #             if question['answer'] not in q1_results:
-        #                 q1_results[question['answer']] = 1
-        #             else:
-        #                 q1_results[question['answer']] += 1
+                # Question 1 
+                if question['question_id'] == q1_id:
+                    if question['answer'] not in q1_results:
+                        q1_results[question['answer']] = 1
+                    else:
+                        q1_results[question['answer']] += 1
 
-        #         # Question 2
-        #         if question['question_id'] == q2_id:
-        #             if question['answer'] not in q2_results:
-        #                 q2_results[question['answer']] = 1
-        #             else:
-        #                 q2_results[question['answer']] += 1
+                # Question 2
+                if question['question_id'] == q2_id:
+                    if question['answer'] not in q2_results:
+                        q2_results[question['answer']] = 1
+                    else:
+                        q2_results[question['answer']] += 1
 
-        #         if question['question_id'] == q3_id:
-        #             if question['answer'] not in q3_results:
-        #                 q3_results[question['answer']] = 1
-        #             else:
-        #                 q3_results[question['answer']] += 1
+                if question['question_id'] == q3_id:
+                    if question['answer'] not in q3_results:
+                        q3_results[question['answer']] = 1
+                    else:
+                        q3_results[question['answer']] += 1
 
-        #         if question['question_id'] == q4_id:
-        #             if question['answer'] not in q4_results:
-        #                 q4_results[question['answer']] = 1
-        #             else:
-        #                 q4_results[question['answer']] += 1
+                if question['question_id'] == q4_id:
+                    if question['answer'] not in q4_results:
+                        q4_results[question['answer']] = 1
+                    else:
+                        q4_results[question['answer']] += 1
 
-        # q1_results = {key: q1_results[key] for key in sorted(q1_results.keys())}
-        # q2_results = {key: q2_results[key] for key in sorted(q2_results.keys())}
-        # q3_results = {key: q3_results[key] for key in sorted(q3_results.keys())}
-        # q4_results = {key: q4_results[key] for key in sorted(q4_results.keys())}
-        # print("Pre-survey Q1", q1_results)
-        # print("Pre-survey Q2", q2_results)
-        # print("Pre-survey Q3", q3_results)
-        # print("Pre-survey Q4", q4_results)
+        q1_results = {key: q1_results[key] for key in sorted(q1_results.keys())}
+        q2_results = {key: q2_results[key] for key in sorted(q2_results.keys())}
+        q3_results = {key: q3_results[key] for key in sorted(q3_results.keys())}
+        q4_results = {key: q4_results[key] for key in sorted(q4_results.keys())}
+        print("Pre-survey Q1", q1_results)
+        print("Pre-survey Q2", q2_results)
+        print("Pre-survey Q3", q3_results)
+        print("Pre-survey Q4", q4_results)
 
         # 2. User interactions
-        from student.models import Conversation
-        conversations = Conversation.objects.all()
-        # print("Number of conversations (includes instructors and students):", len(conversations))
+        # from student.models import Conversation
+        # conversations = Conversation.objects.all()
+        # # print("Number of conversations (includes instructors and students):", len(conversations))
 
-        user_ids = [convo.user_id for convo in conversations]
-        users = list(set(user_ids))
+        # user_ids = [convo.user_id for convo in conversations]
+        # users = list(set(user_ids))
 
-        print("Number of unique user conversation:", len(users))
+        # print("Number of unique user conversation:", len(users))
 
-        students = User.objects.filter(user_role="ST", user_id__in=users)
-        print("Number of distinct students who started a conversation:", len(students))
+        # students = User.objects.filter(user_role="ST", user_id__in=users)
+        # print("Number of distinct students who started a conversation:", len(students))
 
-        # # average number of conversations performed by students
-        students_ids = [student.user_id for student in students]
-        conversations = Conversation.objects.filter(user_id__in=students_ids)
+        # # # average number of conversations performed by students
+        # students_ids = [student.user_id for student in students]
+        # conversations = Conversation.objects.filter(user_id__in=students_ids)
 
-        # ===========================================================================================
-        # find students with more than one conversation
-        students_with_more_than_one_conversation = []
-        for student in students:
-            conversations = Conversation.objects.filter(user_id=student.user_id)
-            if len(conversations) > 1:
-                students_with_more_than_one_conversation.append(student.user_id)
+        # # ===========================================================================================
+        # # find students with more than one conversation
+        # students_with_more_than_one_conversation = []
+        # for student in students:
+        #     conversations = Conversation.objects.filter(user_id=student.user_id)
+        #     if len(conversations) > 1:
+        #         students_with_more_than_one_conversation.append(student.user_id)
         
-        # print("Number of students with more than one conversation:", len(students_with_more_than_one_conversation))
+        # # print("Number of students with more than one conversation:", len(students_with_more_than_one_conversation))
 
-        # Get all conversations from students with more than one conversation
-        conversations = Conversation.objects.filter(user_id__in=students_with_more_than_one_conversation)
-        conversation_ids = [convo.conversation_id for convo in conversations]
+        # # Get all conversations from students with more than one conversation
+        # conversations = Conversation.objects.filter(user_id__in=students_with_more_than_one_conversation)
+        # conversation_ids = [convo.conversation_id for convo in conversations]
         
         # Acquire average delta time between conversations$
         # ===========================================================================================

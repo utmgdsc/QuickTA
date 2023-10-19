@@ -13,12 +13,14 @@ const DashboardHeader = ({courseCode, courseName, currCourse, courses, setCurrCo
   // semester: "2022F"
   return (
         <Box mt={3}>
+          {/* Filter Selectors */}
           <Box className="d-flex">
             <CourseSelect currCourse={currCourse} courses={courses} setCurrCourse={setCurrCourse} courseName={courseName} inConvo={false}/>
             <Box ml={3}>
               <UserScopeSelect userScope={userScope} setUserScope={setUserScope} />
             </Box>
           </Box>
+          {/* Header */}
           <Box mt={3}>
             <p style={{ color: '#2C54A7', lineHeight:'27px', fontSize: '30px', fontWeight: 700, fontFamily: "Poppins" }} mt={5}>{courseCode}: {courseName}</p>
             <Text size='lg'>Analytics</Text>

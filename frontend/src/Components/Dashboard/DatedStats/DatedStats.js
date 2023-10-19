@@ -16,6 +16,7 @@ import { Grid } from "@mui/material";
 import UniqueUsersCard from "./UniqueUsersCard";
 import ChatlogResponseRateCard from "./ChatlogResponseRateCard";
 import ReportedConversationCard from "./ReportedConversationsCard";
+import SurveyDistributionBarChart from "../components/SurveyDistributionBarChart";
 
 
 const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
@@ -119,11 +120,18 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
         </Grid>
         <Grid item xs={12} md={6} className="border">
           <AnalyticsCard>
-            <div>
-              Test
-            </div>
+            <SurveyDistributionBarChart 
+              title={"Pre-Survey Question Distribution"}
+              height={342}
+              questionIds={[
+                "a4dffcc8-1ee4-4361-99b3-6231772b0e19",
+                "1a8ddf81-501d-4254-a0c8-4704ef081326",
+                "5625f3ba-b627-4927-a43e-b711796ef9b1",
+                "b1532779-eb57-4f0b-9ed0-55274921e5f4"
+              ]}
+            />
           </AnalyticsCard>
-          </Grid>
+        </Grid>
       </Grid>
 
 

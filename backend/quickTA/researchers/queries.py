@@ -18,3 +18,33 @@ def unique_users_query_pipeline(user_ids):
                 { "new_user": False }
             ]
         }
+
+def pre_survey_distribution_query_pipeline(question_id, user_role):
+    return [
+        { '$match': { 'user_role': user_role, 'pre_survey.question_id': question_id } },
+        { '$unwind': '$pre_survey' },
+        { '$match': { 'pre_survey.question_id': question_id } },
+        { '$group': { '_id': '$pre_survey.answer', 'count': {'$sum': 1} } },
+        { '$project': { 'answer': '$_id', 'count': 1, '_id': 0 } },
+        { '$sort': { 'answer': 1 } }
+    ]
+
+def average_conversation_response_rate_query_pipeline(course_id):
+    return [
+        { '$match': { 'course_id': course_id } },
+        { '$sort': { 'user_id': 1, 'start_time': 1 } },
+        { '$group': { '_id': '$user_id', 'conversations': { '$push': { 'start_time': '$start_time', 'end_time': '$end_time', 'status': '$status' } } } },
+        { '$unwind': { 'path': '$conversations', 'includeArrayIndex': 'index' } },
+        { '$project': { 'user_id': '$_id', 'conversation': '$conversations', 'nextConversation': { '$arrayElemAt': ['$conversations', {'$add': ['$index', 1]}] } } },
+        { '$match': {'conversation.status': 'I', 'nextConversation': {'$ne': None}, 
+                     '$expr': { '$gte': [ {'$subtract': ['$nextConversation.start_time', '$conversation.end_time']}, 0 ] }}
+        },
+        { '$group': { '_id': '$user_id', 
+                      'totalDelta': { '$sum': { '$subtract': ['$nextConversation.start_time', '$conversation.end_time'] } }, 
+                      'count': {'$sum': 1}
+                    }
+        },
+        { '$project': { '_id': 0, 'user_id': '$_id', 
+                       'averageResponseRate': { '$divide': ['$totalDelta', '$count'] } }
+        }
+    ]
