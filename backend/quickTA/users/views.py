@@ -20,6 +20,10 @@ from course.models import Course
 from utils.handlers import ErrorResponse
 from utils.constants import ROLE_MAP_ENUM, ROLE_MAP
 
+from datetime import datetime
+from django.db.models import Q
+from course.serializers import CourseSerializer 
+
 
 # Create your views here.
 class UserView(APIView):
@@ -349,6 +353,30 @@ class UserRolesView(APIView):
         for role in ROLE_MAP.keys():
             response["roles"].append({ "id": role, "name": ROLE_MAP[role].capitalize() })
         return JsonResponse(response)
+
+class UserUnenrolledCoursesView(APIView): 
+     
+    @swagger_auto_schema(
+        operation_summary="Get unenrolled courses",
+        manual_parameters=[
+            openapi.Parameter("user_id", openapi.IN_QUERY, description="User ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("utorid", openapi.IN_QUERY, description="Utorid", type=openapi.TYPE_STRING),
+        ],
+    )
+    def get(self, request):
+        """
+        Gets unenrolled courses
+        """
+        user_id = request.query_params.get('user_id', '')
+        utorid = request.query_params.get('utorid', '')
+
+        if user_id: user = get_object_or_404(User, user_id=user_id)
+        else: user = get_object_or_404(User, utorid=utorid)
+
+        courses = Course.objects.filter(~Q(course_id__in=user.courses))
+        serializer = CourseSerializer(courses, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
 class TestView(APIView):
     def get(self, request):
         return JsonResponse({"msg": "Test message"})
