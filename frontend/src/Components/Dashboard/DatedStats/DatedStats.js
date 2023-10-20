@@ -31,7 +31,6 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
     avgComfortDelta: 0,
   });
   const [numReport, setNumReport] = useState({ numReport: 0 });
-  const [commonWords, setCommonWords] = useState([]);
 
   // Fetch file loader for headers
   const fileDownload = require("js-file-download");
@@ -50,67 +49,24 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
     }
   }
 
-  
-  const fetchData = async (endpoint) => {
-
-    if (endpoint.endsWith("most-common-words")) {
-      return await axios
-        .get(
-          process.env.REACT_APP_API_URL +
-            endpoint +
-            `?filter=${
-              isWeekly === 1 ? "Weekly" : isWeekly === 0 ? "Monthly" : "All"
-            }&course_id=${courseID}&timezone=America/Toronto`
-        )
-        .then((res) => {
-          let max = 0.0;
-          let min = 0.0;
-          res.data.most_common_words.forEach((word) => {
-            if (word[1] > max) {
-              max = word[1];
-            }
-            if (word[1] < min) {
-              min = word[1];
-            }
-          });
-          setCommonWords(
-            res.data.most_common_words.map((word) => [
-              word[0],
-              1 - (word[1] - min) / (max - min),
-            ])
-          );
-        })
-        .catch((err) => {
-          setError(err);
-          // console.log(err);
-        });
-    }
-  };
-
-  useEffect(() => {
-    if (courseID) {
-      setIsLoading(true);
-      fetchData("/researchers/most-common-words");
-      setIsLoading(false);
-    }
-  }, [courseID]);
-
   return (
     <>
       <Grid container columnSpacing={{ xs: 1, md: 2}} rowSpacing={{ xs: 1, md: 2 }}>
-        <Grid item xs={6} md={3} className="border">
+        {/* Row 1 */}
+        <Grid item xs={6} md={3}>
           <UniqueUsersCard courseID={courseID} />
         </Grid>
-        <Grid item xs={6} md={3} className="border">
+        <Grid item xs={6} md={3}>
           <ChatlogResponseRateCard courseID={courseID} />
         </Grid>
-        <Grid item xs={6} md={3} className="border">
+        <Grid item xs={6} md={3}>
           <ConversationResponseRateCard courseID={courseID} />
         </Grid>
-        <Grid item xs={6} md={3} className="border">
+        <Grid item xs={6} md={3}>
           <ReportedConversationCard courseID={courseID} />
         </Grid>
-        <Grid item xs={12} md={6} className="border">
+        {/* Row 2 */}
+        <Grid item xs={12} md={6}>
           <AnalyticsCard>
             <DatedLineChart 
               title={"Interaction Frequency"} 
@@ -119,7 +75,7 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
             />
           </AnalyticsCard>
         </Grid>
-        <Grid item xs={12} md={6} className="border">
+        <Grid item xs={12} md={6}>
           <AnalyticsCard>
             <SurveyDistributionBarChart 
               title={"Pre-Survey Question Distribution"}
@@ -133,6 +89,11 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
             />
           </AnalyticsCard>
         </Grid>
+        {/* Row 3 */}
+        <Grid item xs={12} md={6}>
+          <FrequencyCard courseID={courseID} m={4} />
+        </Grid>
+        
       </Grid>
 
 
@@ -141,47 +102,7 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
          
          
 
-      {/* <FrequencyCard
-        words={commonWords}
-        callBack={() => {
-          if (courseID && isWeekly != null) {
-            axios
-              .get(
-                process.env.REACT_APP_API_URL +
-                  "/researchers/most-common-words-wordcloud",
-                {
-                  params: {
-                    filter:
-                      isWeekly === 1
-                        ? "Weekly"
-                        : isWeekly === 0
-                        ? "Monthly"
-                        : "All",
-                    course_id: courseID,
-                    timezone: "America/Toronto",
-                  },
-                  responseType: "arraybuffer",
-                }
-              )
-              .then((response) => {
-                const imageData = new Uint8Array(response.data);
-                const imageBlob = new Blob([imageData], { type: "image/png" });
-                const imageUrl = URL.createObjectURL(imageBlob);
-                const link = document.createElement("a");
-                link.href = imageUrl;
-                link.download = "image.png";
-                document.body.appendChild(link);
-                link.click();
-              })
-              .catch((err) => {
-                setError(err);
-                // console.log(err);
-                onErrOpen();
-              });
-          }
-        }}
-        m={4}
-      /> */}
+
       {/* <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} /> */}
     </>
   );

@@ -11,7 +11,7 @@ import { Box } from "@mui/system";
 import { IconButton } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 
-const StatCard = ({ title, label, miniLabel, helpText, callBack }) => {
+const StatCard = ({ title, label, miniLabel, helpText, downloadable, callBack }) => {
   const cardStyle = {
     backgroundColor: "white",
     boxShadow: "1px 2px 3px 1px rgba(0,0,0,0.12)",
@@ -52,7 +52,7 @@ const StatCard = ({ title, label, miniLabel, helpText, callBack }) => {
   const miniNumberStyle = {
     fontSize: "12px",
     fontWeight: "400",
-    lineHeight: "12px",
+    lineHeight: "28px",
     color: "#718096",
   }
 
@@ -69,19 +69,20 @@ const StatCard = ({ title, label, miniLabel, helpText, callBack }) => {
   }
 
   return (
-      <Stat style={cardStyle} onClick={callBack}>
-        
+      <Stat style={cardStyle}>
         {/* Stat Header / Title */}
-        <Box className="d-flex align-items-center">
+        <Box className="d-flex align-items-start">
           <StatLabel>
             <span style={titleStyle}>{title}</span>
           </StatLabel>
           <Spacer />
-          <Tooltip title={`Click on me for ${title} csv report`}>
-            <IconButton onClick={callBack} size={"small"} style={downloadButtonStyle}>
-              <DownloadIcon />
-            </IconButton>
-          </Tooltip>
+          { downloadable &&
+            <Tooltip title={`Click on me for ${title} csv report`}>
+              <IconButton onClick={callBack} size={"small"} style={downloadButtonStyle}>
+                <DownloadIcon />
+              </IconButton>
+            </Tooltip>
+          }
         </Box>
 
         {/* Stat Figure / Content */}

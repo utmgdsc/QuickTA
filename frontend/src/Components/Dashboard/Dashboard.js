@@ -13,7 +13,8 @@ const Dashboard = ({
   userid,
   setCourses,
 }) => {
-  const [userScope, setUserScope] = useState([]); // ["student", "instructor", "TA", "all"
+  const [userScope, setUserScope] = useState([]); 
+  const [deploymentFilter, setDeploymentFilter] = useState([]);
   return (
     <>
       <Box ml={"5vw"} mr={"5vw"}>
@@ -28,6 +29,8 @@ const Dashboard = ({
           setCourses={setCourses}
           userScope={userScope}
           setUserScope={setUserScope}
+          deploymentFilter={deploymentFilter}
+          setDeploymentFilter={setDeploymentFilter}
         />
         <DashboardBody
           courseID={currCourse.course_id}

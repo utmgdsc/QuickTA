@@ -30,11 +30,12 @@ const ReportTable = ({ course_ID, isWeekly, setIsLoading }) => {
   };
 
   const titleStyle = {
-    fontSize: "20px",
-    lineHeight: "25px",
+    fontSize: "16x",
+    lineHeight: "24px",
+    fontWeight: "700",
   };
 
-  const [reportList, changeReportList] = useState([{}]);
+  const [reportList, changeReportList] = useState([]);
   const [rowIndex, setRowIndex] = useState(0);
   const {
     isOpen: isErrOpen,
@@ -47,9 +48,7 @@ const ReportTable = ({ course_ID, isWeekly, setIsLoading }) => {
     return await axios
       .get(
         process.env.REACT_APP_API_URL +
-          `/researchers/reported-conversations?course_id=${course_ID}&filter=${
-            isWeekly === 1 ? "Weekly" : isWeekly === 0 ? "Monthly" : "All"
-          }&timezone=America/Toronto`
+          `/researchers/reported-conversations?course_id=${course_ID}&filter=${"All"}&timezone=America/Toronto`
       )
       .then((res) => {
         setIsLoading(true);
@@ -69,28 +68,27 @@ const ReportTable = ({ course_ID, isWeekly, setIsLoading }) => {
   useEffect(() => {
     if (course_ID.length !== 0) {
       fetchReports();
-      // console.log(reportList);
     }
   }, [course_ID]);
 
   return (
-    <div>
-      <Box style={cardStyle} mt={6}>
-        <Heading as="h2">
+    <div className="mt-3">
+      <Box style={cardStyle}>
+        <Box className="mt-3">
           <span style={titleStyle}>Reported Conversations (Detailed)</span>
-        </Heading>
-        <TableContainer>
+        </Box>
+        <TableContainer className="mb-2">
           <Table variant="unstyled" overflowX={"scroll"}>
             <Thead>
               <Tr>
-                <Th>Conversation ID</Th>
-                <Th>User ID</Th>
-                <Th>Report Time</Th>
-                <Th>Report Message</Th>
+                <Th className="reported-conversation-th" style={{ width: '5%'}}>Conversation ID</Th>
+                <Th className="reported-conversation-th" style={{ width: '5%'}}>User ID</Th>
+                <Th className="reported-conversation-th" style={{ width: '10%'}}>Report Time</Th>
+                <Th className="reported-conversation-th" style={{ width: "70%"}}>Report Message</Th>
               </Tr>
             </Thead>
             <Tbody>
-              {reportList.map((obj, index) => (
+              {reportList && reportList.map((obj, index) => (
                 // create a new entry in the table by unwrapping the corresponding fields
                 // If any table row is clicked on open a modal showing a detailed view of convo
                 <Tooltip label={"Click an entry for more info"}>
@@ -102,10 +100,10 @@ const ReportTable = ({ course_ID, isWeekly, setIsLoading }) => {
                       onOpen();
                     }}
                   >
-                    <Td>{obj.conversation_id}</Td>
-                    <Td>{obj.user_id}</Td>
-                    <Td>{obj.time}</Td>
-                    <Td>{obj.msg}</Td>
+                    <Td className="border px-2">{obj.conversation_id.slice(0,8)}-*** </Td>
+                    <Td className="border px-2">{obj.user_id.slice(0,8)}-***</Td>
+                    <Td className="border px-2">{obj.time}</Td>
+                    <Td className="border px-2">{obj.msg}</Td>
                   </Tr>
                 </Tooltip>
               ))}

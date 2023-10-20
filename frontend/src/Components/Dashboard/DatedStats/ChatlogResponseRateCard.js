@@ -84,7 +84,8 @@ const ChatlogResponseRateCard = ({ courseID }) => {
         callBack={downloadChatlogResponseRates}
         title={"Average Message Response Rate"}
         label={avgRespTime.avgRespTime}
-        helpText={"The time between a user message and last bot response"}
+        downloadable={true}
+        helpText={"the time between a user message and last bot response"}
       />
     );
 }

@@ -84,7 +84,7 @@ const ConversationResponseRateCard = ({ courseID }) => {
         callBack={downloadChatlogResponseRates}
         title={"Average Conversation Response Rate"}
         label={avgRespTime}
-        helpText={"The time between ending a conversation and starting a new one"}
+        helpText={"the time between ending a conversation and starting a new one"}
       />
     );
 }

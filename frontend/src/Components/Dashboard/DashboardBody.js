@@ -10,7 +10,7 @@ const DashboardBody = ({ courseID, setIsLoading }) => {
     padding: "sm",
   };
   return (
-    <Box style={{ marginTop: "6px" }}>
+    <Box className="pb-5" style={{ marginTop: "6px" }}>
         <DatedStats
           isWeekly={1}
           courseID={courseID}

@@ -65,6 +65,7 @@ const UniqueUsersCard = ({ courseID }) => {
             callBack={DownloadUniqueUsers}
             title={"Unique Users"}
             label={data.unique_users || "-"}
+            downloadable={false}
             miniLabel={`/${data.total_users || "-"} (${data.unique_users_percentage || "-"}%)`}
             helpText={"registered users logged in"}
           />          

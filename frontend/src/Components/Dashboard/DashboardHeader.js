@@ -5,8 +5,23 @@ import {
 import CourseSelect from "../CourseSelect";
 import React from "react";
 import UserScopeSelect from "../UserScopeSelect";
+import DeploymentSelect from "../DeploymentSelect";
 
-const DashboardHeader = ({courseCode, courseName, currCourse, courses, setCurrCourse, userid, setCourses, setIsLoading, userScope, setUserScope}) => {
+const DashboardHeader = (props) => {
+  const {
+    courseCode, 
+    courseName, 
+    currCourse, 
+    courses, 
+    setCurrCourse, 
+    userid, 
+    setCourses, 
+    setIsLoading, 
+    userScope, 
+    setUserScope, 
+    deploymentFilter,
+    setDeploymentFilter,
+  } = props;
   // console.log(currCourse)
   // course_code: "CSC311H5"
   // course_id: "b8aaff99-8649-4620-97c0-05272fea47b8"
@@ -14,10 +29,15 @@ const DashboardHeader = ({courseCode, courseName, currCourse, courses, setCurrCo
   return (
         <Box mt={3}>
           {/* Filter Selectors */}
-          <Box className="d-flex">
-            <CourseSelect currCourse={currCourse} courses={courses} setCurrCourse={setCurrCourse} courseName={courseName} inConvo={false}/>
-            <Box ml={3}>
+          <Box className="d-flex flex-col flex-sm-row">
+            <Box>
+              <CourseSelect currCourse={currCourse} courses={courses} setCurrCourse={setCurrCourse} courseName={courseName} inConvo={false}/>
+            </Box>
+            <Box className="mt-2 mt-sm-0 ms-sm-2">
               <UserScopeSelect userScope={userScope} setUserScope={setUserScope} />
+            </Box>
+            <Box className="mt-2 mt-sm-0 ms-sm-2">
+              <DeploymentSelect courseID={currCourse.course_id} deploymentFilter={deploymentFilter} setDeploymentFilter={setDeploymentFilter}/>
             </Box>
           </Box>
           {/* Header */}

@@ -45,6 +45,7 @@ const ReportedConversationCard = ({courseID}) => {
     return (<StatCard
         callBack={downloadReportedConversations}
         title={"Reported Conversations"}
+        downloadable={true}
         label={String(numReport.numReport)}
         helpText={"number of conversations reported by students"}
       />);

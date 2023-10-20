@@ -1,8 +1,5 @@
 import { Box } from '@chakra-ui/react';
 import { Autocomplete, FormControl } from '@mui/material';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import InputLabel from '@mui/material/InputLabel';
 import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import TextField from '@mui/material/TextField';
@@ -15,9 +12,9 @@ import Chip from '@mui/material/Chip';
  * @param {state handler} setUserScope setter for userScope
  * @returns 
  */
-const UserScopeSelect = ({userScope, setUserScope}) => {
+const DeploymentSelect = ({courseID, deploymentFilter, setDeploymentFilter}) => {
 
-    const [userRoleList, setUserRoleList] = useState([])
+    const [deploymentList, setDeploymentList] = useState([]);
 
     const multiselectStyle = {
         background: "white",
@@ -55,13 +52,17 @@ const UserScopeSelect = ({userScope, setUserScope}) => {
         marginRight: '5px',
     }
 
-    const getUserRoles = async () => {
-        const roles = await axios.get(process.env.REACT_APP_API_URL + '/user/user-roles')
-        setUserRoleList(roles.data.roles)
+    const getCourseDeployments = async () => {
+        // const roles = await axios.get(process.env.REACT_APP_API_URL + `/course/deployments?course_id=${courseID}`)
+        let data = { deployments: [
+            {"deployment_id": 1, "name": "Lab 4 - Loops"},
+            {"deployment_id": 2, "name": "Lab 6 - Nested Loops"},
+        ]}
+        setDeploymentList(data.deployments);
     }
 
     useEffect(() => {
-        getUserRoles()
+        getCourseDeployments()
     }, [])
 
     return (
@@ -72,14 +73,16 @@ const UserScopeSelect = ({userScope, setUserScope}) => {
                 size='small'
                 multiple
                 filterSelectedOptions
-                options={userRoleList}
+                options={deploymentList}
                 getOptionLabel={(option) => option.name}
-                isOptionEqualToValue={(option, value) => option.id == value.id}
-                value={userScope}
+                isOptionEqualToValue={(option, value) => option.deployment_id == value.deployment_id}
+                value={deploymentFilter}
                 onChange={(event, value) => {
-                    setUserScope(value)
+                    setDeploymentFilter(value)
                 }}
-                renderInput={(params) => ( <TextField {...params}  label="User Scope Filter" /> )}
+                renderInput={(params) => (
+                    <TextField {...params}  label="Course Deployment Filter" />
+                )}
                 renderTags={(value, getTagProps) => {
                     return value.map((option, index) => (
                         <Chip
@@ -98,4 +101,4 @@ const UserScopeSelect = ({userScope, setUserScope}) => {
     );
 }
 
-export default UserScopeSelect;
+export default DeploymentSelect;
