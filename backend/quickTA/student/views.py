@@ -453,15 +453,23 @@ class ConversationHistoryView(APIView):
         manual_parameters=[
             openapi.Parameter("user_id", openapi.IN_QUERY, description="User ID", type=openapi.TYPE_STRING),
             openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("model_ids", openapi.IN_QUERY, description="Model IDs (Comma-separated)", type=openapi.TYPE_STRING)
         ],
         responses={200: ConversationSerializer}
     )
     def get(self, request):
         """
-        Gets all conversations of a user from that course
+        Gets all conversations of a user from that course.
+        Pass in comma-separated model_ids to filter by model.
         """
         user_id = request.query_params.get('user_id', '')
         course_id = request.query_params.get('course_id', '')
-        conversations = Conversation.objects.filter(user_id=user_id, course_id=course_id).order_by('-start_time')
+        model_ids = request.query_params.get('model_ids', '').split(',')
+        if (model_ids == ['']): model_ids = []
+        
+        if (model_ids):
+            conversations = Conversation.objects.filter(user_id=user_id, course_id=course_id, model_id__in=model_ids).order_by('-start_time')
+        else:
+            conversations = Conversation.objects.filter(user_id=user_id, course_id=course_id).order_by('-start_time')
         serializer = ConversationHistorySerializer(conversations, many=True)
         return JsonResponse({"conversations": serializer.data})
