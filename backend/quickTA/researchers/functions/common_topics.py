@@ -8,7 +8,7 @@ def generate_wordcloud(data):
     text = "\n".join(sentence for sentence in data)
 
     # Parameter specification
-    numOfKeywords = 25
+    numOfKeywords = 30
     max_ngram_size = 3
     
 

@@ -26,4 +26,5 @@ urlpatterns = [
     path('/v2/unique-users', UniqueUsersView.as_view(), name='unique_users'),
     path('/v2/pre-survey-distribution', SurveyQuestionDistributionView.as_view(), name='survey_distribution'),
     path('/v2/avg-conversation-response-rate', AverageConversationResponseRateView.as_view(), name='avg_conversation_response_rate'),
+    path('/v2/conversation-per-user-distribution', ConversationPerUserDistributionView.as_view(), name='avg_conversation_response_rate_csv'),
 ]

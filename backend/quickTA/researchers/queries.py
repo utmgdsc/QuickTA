@@ -59,3 +59,12 @@ def user_ids_match_user_role(user_ids, user_role):
         { '$match': { 'user_id': { '$in': user_ids }, 'user_role': user_role } },
         { '$project': { 'user_id': 1 } }
     ]
+
+def conversations_per_user_query_pipeline(course_id, start_date, end_date):
+    return [
+        { '$match': { 'course_id': course_id, 'start_time': {'$gte': start_date, '$lte': end_date} } },
+        { '$group': { '_id': '$user_id', 'conversation_count': {'$sum': 1} } },
+        { '$group': { '_id': '$conversation_count', 'user_count': {'$sum': 1} } },
+        { '$project': { '_id': 0, 'conversation_count': '$_id', 'user_count': 1 } },
+        { '$sort': { 'conversation_count': 1 } }
+    ]

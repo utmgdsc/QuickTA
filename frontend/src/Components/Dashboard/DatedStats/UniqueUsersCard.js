@@ -67,7 +67,7 @@ const UniqueUsersCard = ({ courseID }) => {
             label={data.unique_users || "-"}
             downloadable={false}
             miniLabel={`/${data.total_users || "-"} (${data.unique_users_percentage || "-"}%)`}
-            helpText={"registered users logged in"}
+            helpText={"registered users logged in and accessed the system"}
           />          
     );
 }  

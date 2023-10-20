@@ -742,3 +742,42 @@ class AverageConversationResponseRateView(APIView):
 
         response = { "average_response_rate": result }
         return JsonResponse(response)
+
+class ConversationPerUserDistributionView(APIView):
+
+    @swagger_auto_schema(
+        operation_summary="Get conversation per user distribution for a course",
+        responses={200: "Success", 404: "Conversation not found"},
+        manual_parameters=[
+            openapi.Parameter("course_code", openapi.IN_QUERY, description="Course code", type=openapi.TYPE_STRING),
+            openapi.Parameter("semester", openapi.IN_QUERY, description="Semester ", type=openapi.TYPE_STRING),
+            openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("start_date", openapi.IN_QUERY, description="Start date", type=openapi.TYPE_STRING, required=True),
+            openapi.Parameter("end_date", openapi.IN_QUERY, description="End date", type=openapi.TYPE_STRING, required=True),
+        ]
+    )
+    def get(self, request):
+        query_params = request.query_params
+        course = get_course(query_params)
+        start_date = query_params.get('start_date', '')
+        end_date = query_params.get('end_date', '')
+        start_date, end_date = convert_start_end_date(start_date, end_date)
+
+        conversations_db = db["student_conversation"]
+        query = conversations_per_user_query_pipeline(str(course.course_id), start_date, end_date)
+        result = list(conversations_db.aggregate(query))
+
+        # Get Min and Max conversation_count
+        min_conversation_count = min([item['conversation_count'] for item in result])
+        max_conversation_count = max([item['conversation_count'] for item in result])
+
+        # Fill in missing conversation counts
+        for i in range(min_conversation_count, max_conversation_count + 1):
+            if i not in [item['conversation_count'] for item in result]:
+                result.append({ "conversation_count": i, "user_count": 0 })
+        
+        # Sort by conversation_count
+        result = sorted(result, key=lambda k: k['conversation_count'])
+
+        response = { "distribution": result }
+        return JsonResponse(response)

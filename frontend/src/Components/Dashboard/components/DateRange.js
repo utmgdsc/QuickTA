@@ -20,6 +20,7 @@ const DateRange = ({
                     <DatePicker
                         label="Start Date"
                         value={startDate}
+                        maxDate={endDate}
                         onChange={(newValue) => setStartDate(newValue)}
                         sx={datePickerStyle}
                     />

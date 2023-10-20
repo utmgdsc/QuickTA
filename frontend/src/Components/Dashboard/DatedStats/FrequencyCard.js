@@ -91,55 +91,55 @@ const FrequencyCard = ({ courseID }) => {
   }, [courseID]);
 
   return (
-    <Stat style={cardStyle} width={"100%"} >
-      <StatLabel>
+    <Box className="d-flex flex-col h-100" style={{ padding: '20px' }}>
+      
+      <Box>
         <span style={titleStyle}>Most Common Words</span>
-      </StatLabel>
-      {/* <Divider my={3} /> */}
-      <HStack>
-        <Text>Less Frequent</Text>
+      </Box>
+      <Box className="d-flex flex-col justify-content-around h-100 py-5 py-md-2">
+        <Divider my={3} />
+            <Box className="d-flex justify-content align-items-center mx-3">
+              <Text className="me-2">Less Frequent</Text>
+              <Box
+                bgGradient={"linear(to-r, #FFFFFF, rgb(93,133,212))"}
+                w={"100%"}
+                h={"10px"}
+                borderRadius={"lg"}
+              />
+              <Text className="ms-2">More Frequent</Text>
+            </Box>
+          <Divider my={3} />
         <Box
-          bgGradient={"linear(to-r, #FFFFFF, rgb(93,133,212))"}
-          w={"100%"}
-          h={"10px"}
-          borderRadius={"lg"}
-        />
-        <Text>More Frequent</Text>
-      </HStack>
-      <Divider my={3} />
-      <HStack
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "center",
-          gap: "8px",
-        }}
-        // spacing={3}
-      >
-        {isLoading ? 
-          <Box className="d-flex justify-content-center align-items-center">
-            <CircularProgress />
-          </Box>
-        : words.length === 0 ? (
-          <div style={{ width: "100%", textAlign: "center", }} >
-            No Common Words
-          </div>
-        ) : (
-          words.map((word, index) => (
-            <Tag key={index}
-              style={{ 
-                backgroundColor: `rgba(93,133,212, ${(word[1])})`,
-                padding: "5px 10px",
-                borderRadius: "10px",
-                margin: 0,
-              }} 
-            >
-              <TagLabel style={{ fontSize: "14px" }}>{word[0]}</TagLabel>
-            </Tag>
-          ))
-        )}
-      </HStack>
-    </Stat>
+          className="d-flex flex-wrap justify-content-center align-items-center"
+          style={{ gap: "8px" }}
+        >
+          {isLoading ? 
+            <Box className="h-100 d-flex justify-content-center align-items-center">
+              <CircularProgress />
+            </Box>
+          : words.length === 0 ? (
+            <div 
+              className="d-flex justify-content-center align-items-center" 
+              style={{ width: "100%", textAlign: "center", }} >
+              No Common Words
+            </div>
+          ) : (
+            words.map((word, index) => (
+              <Tag key={index}
+                style={{ 
+                  backgroundColor: `rgba(93,133,212, ${(word[1])})`,
+                  padding: "5px 10px",
+                  borderRadius: "10px",
+                  margin: 0,
+                }} 
+              >
+                <TagLabel style={{ fontSize: "14px" }}>{word[0]}</TagLabel>
+              </Tag>
+            ))
+          )}
+        </Box>
+      </Box>
+    </Box>
   ) 
 };
 

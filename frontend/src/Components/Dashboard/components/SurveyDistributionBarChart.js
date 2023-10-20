@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { BarChart } from '@mui/x-charts/BarChart';
 import { PieChart, pieArcLabelClasses } from '@mui/x-charts/PieChart';
-import { ButtonGroup, FormControl, InputLabel, Box, MenuItem, Select, IconButton, Button } from "@mui/material";
+import { ButtonGroup, FormControl, InputLabel, Box, MenuItem, Select, IconButton, Button, CircularProgress } from "@mui/material";
 import PieChartIcon from '@mui/icons-material/PieChart';
 import BarChartIcon from '@mui/icons-material/BarChart';
 
@@ -11,6 +11,7 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 const SurveyDistributionBarChart = ({ title, height, questionIds }) => {
 
     // BarChart Data
+    const [isLoading, setIsLoading] = useState(true);
     const [questionId, setQuestionId] = useState(questionIds[0]);
     const [questionText, setQuestionText] = useState("");
     const [questionType, setQuestionType] = useState("");
@@ -77,6 +78,7 @@ const SurveyDistributionBarChart = ({ title, height, questionIds }) => {
 
 
     const getSurveyQuestionDistribution = () => {
+        setIsLoading(true);
         axios.get(process.env.REACT_APP_API_URL + '/researchers/v2/pre-survey-distribution', {
             params: {
                 question_id: questionId
@@ -98,9 +100,11 @@ const SurveyDistributionBarChart = ({ title, height, questionIds }) => {
                     setPieChartData(data.distribution.map((item, index) => ({ id: index, label: item.answer, value: item.count })));
                     break;
             }
+            setIsLoading(false);
         })
         .catch((error) => {
             console.log(error);
+            setIsLoading(false);
         })
     }
 
@@ -165,39 +169,47 @@ const SurveyDistributionBarChart = ({ title, height, questionIds }) => {
                     <span style={questionTextStyle}>{questionText}</span>
                 </Box>  
             </Box>
-            <Box>
-                {/* Pie Chart */}
-                {chartStyle === "PieChart" &&
-                    <PieChart 
-                        height={height}
-                        colors={pieChartColors}
-                        series={
-                            [{ 
-                                data: pieChartData,
-                                outerRadius: 120,
-                                arcLabel: getArcLabel,
-                            
-                            }]
-                        }
-                        slotProps={{ legend: { offset: { x: -40} } }}
-                        sx={{ 
-                            "& .MuiChartsLegend-label": { fontSize: "10px", fontWeight: "500" },
-                           [`& .${pieArcLabelClasses.root}`]: { fill: 'white', fontSize: 14 }
-                        }}
-                    />
-                }
+            {isLoading ? 
+                    <div className="w-100 h-100 d-flex justify-content-center align-items-center"
+                        style={{ minHeight: height }}
+                    >
+                        <CircularProgress />
+                    </div>
+                : data.length > 0 && labels.length > 0 && 
+                <Box>
+                    {/* Pie Chart */}
+                    {chartStyle === "PieChart" &&
+                        <PieChart 
+                            height={height}
+                            colors={pieChartColors}
+                            series={
+                                [{ 
+                                    data: pieChartData,
+                                    outerRadius: 120,
+                                    arcLabel: getArcLabel,
+                                
+                                }]
+                            }
+                            slotProps={{ legend: { offset: { x: -40} } }}
+                            sx={{ 
+                                "& .MuiChartsLegend-label": { fontSize: "10px", fontWeight: "500" },
+                            [`& .${pieArcLabelClasses.root}`]: { fill: 'white', fontSize: 14 }
+                            }}
+                        />
+                    }
 
-                {/* Bar Chart */}
-                {chartStyle === "BarChart" &&
-                    <BarChart
-                        height={height}
-                        series={[{ data: data, label: "Number of Students Response", id: "count", color: "#5E85D4" }]}
-                        xAxis={[{ data: labels, scaleType: "band" }]}
-                        slotProps={{ legend: { offset: { x: -70 } } }}
-                        sx={barChartStyle}  
-                    />
-                }
-            </Box>
+                    {/* Bar Chart */}
+                    {chartStyle === "BarChart" &&
+                        <BarChart
+                            height={height}
+                            series={[{ data: data, label: "Number of Students Response", id: "count", color: "#5E85D4" }]}
+                            xAxis={[{ data: labels, scaleType: "band" }]}
+                            slotProps={{ legend: { offset: { x: -70 } } }}
+                            sx={barChartStyle}  
+                        />
+                    }
+                </Box>
+            }
         </Box>
     )
 }

@@ -114,8 +114,8 @@ useEffect(() => {
         let today = new Date();
         setEndDate(dayjs(getDateString(today)));
         
-        // get last week info - 7 days before end date
-        today.setDate(today.getDate() - 7);
+        // get start of month
+        today.setDate(1);
         setStartDate(dayjs(getDateString(today)));
     }
 }, []);
@@ -127,7 +127,7 @@ useEffect(() => {
 }, [startDate, endDate]);
 
 return (
-    <Box className="d-flex flex-col justify-content-between h-100" style={{ padding: '20px'}}>
+    <Box className="d-flex flex-col h-100" style={{ padding: '20px'}}>
         <Box>
             <h2 style={{ fontWeight: '700' }}>{title}</h2> 
             {/* Time Range Picker */}
