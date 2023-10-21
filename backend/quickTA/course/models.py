@@ -26,3 +26,17 @@ class Course(models.Model):
             models.Index(fields=['course_name'], name='course_name'),
             models.Index(fields=['semester'], name='semester'),
         ]
+
+class CourseDeployment(models.Model):
+    deployment_id = models.CharField(default=uuid.uuid4(), max_length=50, editable=False, unique=True)
+    deployment_name = models.TextField(max_length=1000)
+    course_id = models.CharField(max_length=50)
+    status = models.CharField(default="A", max_length=1) # A or I - Active or Inactive
+
+    def to_dict(self):
+        return {
+            'deployment_id': self.deployment_id,
+            'deployment_name': self.deployment_name,
+            'course_id': self.course_id,
+            'status': self.status
+        }

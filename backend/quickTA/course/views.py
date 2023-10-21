@@ -514,3 +514,75 @@ class CourseMultipleEnrollment(APIView):
         
         Course.objects.filter(course_id=course.course_id).update(students=course.students, instructors=course.instructors, researchers=course.researchers, admins=course.admins)
         return JsonResponse({"msg": "Students unenrolled", "Failed to unenroll": failed_unenroll})
+
+class CourseDeploymentView(APIView):
+
+    @swagger_auto_schema(
+        operation_summary="Get course deployment(s)",
+        manual_parameters=[
+            openapi.Parameter("deployment_ids", openapi.IN_QUERY, description="List of deployment IDs (Comma-Separated)", type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING)),
+        ],
+    )
+    def get(self, request):
+        """
+        Acquires course deployment(s). Specify deployment IDs to get specific deployments. Defaults to get all deployments.
+        
+        - deployment_ids: List of deployment IDs (Comma separated)
+        """
+        deployment_id = request.query_params.get('deployment_ids', [])
+        if deployment_id: deployment_ids = deployment_id.split(',')
+
+        if deployment_id: deployments = CourseDeployment.objects.filter(deployment_id__in=deployment_ids)
+        else: deployments = CourseDeployment.objects.all()
+        return JsonResponse({ "deployments": [deployment.to_dict() for deployment in deployments]})
+
+    @swagger_auto_schema(
+        operation_summary="Create a course deployment",
+        request_body=CourseDeploymentSerializer,
+        responses={201: "Course deployment created", 400: "Bad Request"}
+    )
+    def post(self, request):
+        """
+        Creates a course deployment
+        """
+        serializer = CourseDeploymentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse({"msg": "Course deployment created"}, status=status.HTTP_201_CREATED)
+        return ErrorResponse(serializer.errors, status.HTTP_400_BAD_REQUEST)
+    
+    @swagger_auto_schema(
+        operation_summary="Update a course deployment",
+        manual_parameters=[
+            openapi.Parameter("deployment_id", openapi.IN_QUERY, description="Deployment ID", type=openapi.TYPE_STRING),
+        ],
+        request_body=CourseDeploymentSerializer,
+        responses={200: "Course deployment updated", 400: "Bad Request", 404: "Course deployment not found"}
+    )
+    def patch(self, request):
+        """
+        Updates a course deployment
+        """
+        deployment_id = request.query_params.get('deployment_id', '')
+        deployment = get_object_or_404(CourseDeployment, deployment_id=deployment_id)
+        serializer = CourseDeploymentSerializer(deployment, data=request.data, partial=True)
+        if serializer.is_valid():
+            CourseDeployment.objects.filter(deployment_id=deployment.deployment_id).update(**serializer.validated_data)
+            return JsonResponse({"msg": "Course deployment updated"})
+        return ErrorResponse(serializer.errors, status.HTTP_400_BAD_REQUEST)
+    
+    @swagger_auto_schema(
+        operation_summary="Delete a course deployment",
+        manual_parameters=[
+            openapi.Parameter("deployment_id", openapi.IN_QUERY, description="Deployment ID", type=openapi.TYPE_STRING),
+        ],
+        responses={200: "Course deployment deleted", 404: "Course deployment not found"}
+    )
+    def delete(self, request):
+        """
+        Deletes a course deployment
+        """
+        deployment_id = request.query_params.get('deployment_id', '')
+        deployment = get_object_or_404(CourseDeployment, deployment_id=deployment_id)
+        deployment.delete()
+        return JsonResponse({"msg": "Course deployment deleted"})
