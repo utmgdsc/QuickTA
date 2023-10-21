@@ -71,7 +71,7 @@ const DatedGraph = ({ isWeekly, courseID }) => {
   return (
     <>
       <Box style={cardStyle}>
-        <Heading as="h2">
+        <Heading>
           <span style={titleStyle}>Total Interactions</span>
         </Heading>
         {/* {data} */}

@@ -130,6 +130,7 @@ const TechAssessment = ({
             >
               {options.map((element) => (
                 <Button
+                  key={element.choice + element.flavor_text}
                   className={`
                     ${studentResponse != element.choice
                       ? "hidden-border"

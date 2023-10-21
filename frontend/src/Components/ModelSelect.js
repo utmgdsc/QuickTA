@@ -48,7 +48,7 @@ const ModelSelect = ({
           }}
           mb={5}
           value={parseInt(sessionStorage.getItem("selectedModel"))}
-          isDisabled={inConvo}
+          // isDisabled={inConvo}
         >
           {models.map(({ model_name }, index) => (
             <MenuItem key={index} value={index} style={{

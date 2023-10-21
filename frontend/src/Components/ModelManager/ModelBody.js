@@ -62,7 +62,7 @@ const ModelBody = ({ courseid, setLoadingModel, loadingModel }) => {
   return (
     <>
       <Box style={cardStyle} mt={5}>
-        <Heading as="h2">
+        <Heading>
           <span style={titleStyle}>Model Information</span>
         </Heading>
         {/* <Flex>

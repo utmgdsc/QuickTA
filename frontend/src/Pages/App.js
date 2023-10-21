@@ -4,7 +4,7 @@ import { Routes } from "react-router";
 import StudentPage from "./StudentPage";
 import ResearcherAnalytics from "./ResearcherAnalytics";
 import ResearcherModels from "./ResearcherModels";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext, createContext } from "react";
 import axios from "axios";
 import LandingPage from "./LandingPage";
 import NotFoundPage from "../Components/NotFoundPage";
@@ -14,7 +14,6 @@ import ErrorDrawer from "../Components/ErrorDrawer";
 import SettingPage from "./SettingPage";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CoursesPage from "./CoursesPage";
-// import { red } from "@mui/material/colors";
 
 
 const App = () => {
@@ -27,13 +26,13 @@ const App = () => {
   const [UTORid, setUtorID] = useState("choiman3");
   const [isNewUser, setIsNewUser] = useState(true);
   // const [courseName, setCourseName] = useState("");
-  // const [auth, setAuth] = useState("student");
   const {
     isOpen: isErrOpen,
     onOpen: onErrOpen,
     onClose: onErrClose,
   } = useDisclosure();
   const [error, setError] = useState();
+
   const getUserId = async () => {
     setIsLoading(true);
     const user = await axios
@@ -47,10 +46,8 @@ const App = () => {
         await getAllCourses(data.courses);
 
         setAuth(res.data.user_role);
-        if (res.data.user_role === "ST") {
-          setModelId(data.model_id);
-          // console.log("model id", data.model_id);
-        }
+        if (res.data.user_role === "ST") { setModelId(data.model_id); }
+        
         // Check if user is new
         return res.data.user_id;
       })
@@ -63,9 +60,11 @@ const App = () => {
     return user;
   };
 
+  /**
+   * Loads all the courses a student is enrolled in
+   * @param {List of String} courses List of Course IDs 
+   */
   const getAllCourses = async (courses) => {
-    // Gets all the courses a student is enrolled in
-    // Pass getUserId return
     let params = "course_ids=" + courses.join(",");
     await axios
       .get(process.env.REACT_APP_API_URL + `/course/list?${params}`)
@@ -98,26 +97,19 @@ const App = () => {
                 .course_name,
           });
         }
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 2000);
+        setTimeout(() => { setIsLoading(false); }, 2000);
       })
       .catch((err) => {
         setError(err);
         console.log(err)
         onErrOpen();
 
-        setTimeout(() => {
-          setIsLoading(false);
-          // console.log("Done loading but error");
-        }, 2000);
+        setTimeout(() => { setIsLoading(false); }, 2000);
       });
   };
 
   useEffect(() => {
-    if (UTORid) {
-      getUserId();
-    }
+    if (UTORid) { getUserId(); }
   }, [UTORid]);
 
   const MuiTheme = createTheme({
@@ -125,11 +117,6 @@ const App = () => {
       fontFamily: 'Poppins'
     }
   });
-  
-   
-  
-  
-  
   
 
   return <ThemeProvider theme={MuiTheme}>

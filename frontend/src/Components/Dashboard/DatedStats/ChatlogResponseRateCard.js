@@ -43,7 +43,7 @@ const ChatlogResponseRateCard = ({ courseID }) => {
           axios
             .get(
               process.env.REACT_APP_API_URL +
-                `/researchers/avg-response-rate-csv?filter=${"Weekly"}&course_id=${courseID}&timezone=America/Toronto`
+                `/researchers/avg-response-rate-csv?filter=${"All"}&course_id=${courseID}&timezone=America/Toronto`
             )
             .then((response) => {
               if (response.headers["content-disposition"]) {
@@ -65,7 +65,7 @@ const ChatlogResponseRateCard = ({ courseID }) => {
         await axios
           .get(
             process.env.REACT_APP_API_URL +
-              `/researchers/avg-response-rate?filter=${"Weekly"}&course_id=${courseID}&timezone=America/Toronto`
+              `/researchers/avg-response-rate?filter=${"All"}&course_id=${courseID}&timezone=America/Toronto`
           )
           .then((res) => {
             setAvgRespTime({avgRespTime: parseTimeDelta(res.data.avg_response_rate)});
