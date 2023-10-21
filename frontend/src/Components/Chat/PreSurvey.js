@@ -91,6 +91,7 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser }) => {
         });
     }
   };
+
   useEffect(() => {
     setIsLoading(true);
     fetchPreSurvey();
@@ -98,29 +99,20 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser }) => {
   }, []);
 
   if (!isNewUser) {
-    return <div></div>;
+    return ( 
+      <Box className="d-flex flex-col align-items-center justify-content-center" style={{ width: '100vw', height: '100vh' }}>
+        <Text as="h1" style={{ fontFamily: "Poppins", fontWeight: 500, fontSize: "28px", }}>
+          Not authorized
+        </Text>
+      </Box>);
   }
 
   return (
     <div>
       <Box ml={"12vw"} mr={"12vw"} mt={10}>
-        <Box
-          style={{
-            display: "flex",
-            alignItems: "center",
-
-            // border: "1px red solid",
-          }}
-        >
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <Text
-              as="h1"
-              style={{
-                fontFamily: "Poppins",
-                fontWeight: 500,
-                fontSize: "28px",
-              }}
-            >
+        <Box className="d-flex align-items-center">
+          <div className="d-flex flex-col">
+            <Text as="h1" style={{ fontFamily: "Poppins", fontWeight: 500, fontSize: "28px", }}>
               Questionnaire
             </Text>
             <Text color={"gray.400"}>(For First-Time User Logins Only)</Text>
@@ -128,13 +120,8 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser }) => {
         </Box>
         {isLoading ? (
           <VStack
-            style={{
-              fontSize: "14px",
-              height: "80vh",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
+            className="d-flex justify-content-center align-items-center"
+            style={{ fontSize: "14px", height: "80vh" }}
           >
             <Flex>
               <Spinner size={"md"} />
@@ -143,53 +130,29 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser }) => {
           </VStack>
         ) : (
           <div>
-            <VStack
-              style={{
-                display: "flex",
-                alignItems: "center",
-                // border: "1px red solid",
-                minHeight: "80vh",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "16px",
-                  height: "15vh",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
+            <VStack className="d-flex align-items-center" style={{ minHeight: "80vh" }}>
+              <div className="d-flex justify-content-center align-items-center"
+                style={{ fontSize: "16px", height: "15vh" }}
               >
                 {questions[currQuestion].question}
               </div>
               <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  // border: "1px blue solid",
-                  width: "100%",
-                  minHeight: "65vh",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
+                className="d-flex justify-content-center align-items-center flex-row w-100"
+                style={{ minHeight: "65vh" }}
               >
                 {/* Question Type: MULTIPLE CHOICE  */}
-                {questions[currQuestion] &&
-                  questions[currQuestion].question_type ==
-                    "MULTIPLE_CHOICE" && (
+                {questions[currQuestion] && questions[currQuestion].question_type == "MULTIPLE_CHOICE" && (
                     <div>
                       <RadioGroup display="grid" gridGap={4}>
                         {questions[currQuestion].answers.map(
                           (answer, answer_idx) => {
                             return (
-                              <Button
-                                style={{
-                                  fontWeight: "normal",
-                                }}
+                              <Button style={{ fontWeight: "normal", borderRadius: "5px" }}
                                 className={
-                                  studentResponse[currQuestion + 1] !==
-                                  answer.value
-                                    ? "hidden-border"
+                                  studentResponse[currQuestion + 1] === "" ?
+                                  "normal-border"
+                                  : studentResponse[currQuestion + 1] !== answer.value
+                                    ? "normal-border"
                                     : "selected-border"
                                 }
                                 onClick={(e) => {
@@ -197,10 +160,9 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser }) => {
                                     ...studentResponse,
                                     [currQuestion + 1]: answer.value,
                                   });
-                                  // console.log(studentResponse);
                                 }}
                               >
-                                <Text>{answer.text}</Text>
+                                <Text className="m-2">{answer.text}</Text>
                               </Button>
                             );
                           }
@@ -214,7 +176,7 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser }) => {
                   questions[currQuestion].question_type == "SCALE" && (
                     <RadioGroup display="grid" gridGap={4}>
                       <HStack
-                        spacing={12}
+                        spacing={10}
                         style={{
                           display: "flex",
                           flexDirection: "row",
@@ -235,7 +197,6 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser }) => {
                                     fontSize: "14px",
                                     width: "100px",
                                     minHeight: "50px",
-                                    // border: "1px red solid",
                                     textAlign: "center",
                                     display: "flex",
                                     justifyContent: "center",
@@ -247,11 +208,14 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser }) => {
                                 <Button
                                   style={{
                                     fontWeight: "normal",
+                                    borderRadius: "5px",
+                                    padding: "10px 15px",
                                   }}
                                   className={
-                                    studentResponse[currQuestion + 1] !==
-                                    answer.value
-                                      ? "hidden-border"
+                                    studentResponse[currQuestion + 1] === "" ?
+                                    "normal-border"
+                                    : studentResponse[currQuestion + 1] !== answer.value
+                                      ? "normal-border"
                                       : "selected-border"
                                   }
                                   onClick={(e) => {
@@ -259,7 +223,6 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser }) => {
                                       ...studentResponse,
                                       [currQuestion + 1]: answer.value,
                                     });
-                                    // console.log(studentResponse);
                                   }}
                                 >
                                   <Text>{answer.value}</Text>
@@ -271,42 +234,6 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser }) => {
                       </HStack>
                     </RadioGroup>
                   )}
-
-                {/* <div className="scale-question">
-              <RadioGroup
-                onChange={(value) => {
-                  setStudentResponse({
-                    ...studentResponse,
-                    [currQuestion + 1]: value,
-                  });
-                  console.log(studentResponse);
-                }}
-                value={parseInt(studentResponse[currQuestion + 1])}
-                display="grid"
-                gridGap={4}
-              >
-                <HStack direction="row" spacing={20}>
-                  {questions[currQuestion].answers &&
-                    questions[currQuestion].answers.map(
-                      (answer, answer_idx) => {
-                        return (
-                          <div key={answer_idx} className="answer-option">
-                            <label>
-                              <div className="answer-pretext">
-                                {answer.value}
-                              </div>
-                              <Radio value={answer.value} />
-                              <div className="answer-posttext">
-                                {answer.text}
-                              </div>
-                            </label>
-                          </div>
-                        );
-                      }
-                    )}
-                </HStack>
-              </RadioGroup>
-            </div> */}
               </div>
             </VStack>
 
@@ -316,19 +243,19 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser }) => {
                 <Flex>
                   {currQuestion != 0 && (
                     <Button
-                      onClick={() => {
-                        setCurrQuestion(currQuestion - 1);
-                      }}
+                      className="normal-border p-2"
+                      style={{ borderRadius: "5px" }}
+                      onClick={() => { setCurrQuestion(currQuestion - 1); }}
                     >
                       Previous
                     </Button>
                   )}
                   <Spacer />
                   <Button
+                    className={studentResponse[currQuestion + 1] ?  " normal-border" : " disabled-border"}
+                    style={{ borderRadius: "5px", padding: "10px 15px"}}
                     disabled={!studentResponse[currQuestion + 1]}
-                    onClick={() => {
-                      setCurrQuestion(currQuestion + 1);
-                    }}
+                    onClick={() => { setCurrQuestion(currQuestion + 1); }}
                   >
                     Next
                   </Button>
@@ -340,6 +267,8 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser }) => {
                   }}
                 >
                   <Button
+                   className="normal-border p-2"
+                   style={{ borderRadius: "5px" }}
                     onClick={() => {
                       setCurrQuestion(currQuestion - 1);
                     }}
@@ -349,28 +278,16 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser }) => {
                   <Spacer />
                   {isSubmitting && (
                     <div style={{ display: "flex", alignItems: "center" }}>
-                      <Spinner
-                        color="gray"
-                        size={"xs"}
-                        style={{ marginRight: "5px" }}
-                      />
-                      <Text color="gray" fontSize={"12px"}>
-                        Saving response...&nbsp;
-                      </Text>
+                      <Spinner color="gray" size={"xs"} style={{ marginRight: "5px" }} />
+                      <Text color="gray" fontSize={"12px"}> Saving response...&nbsp; </Text>
                     </div>
                   )}
                   <Button
-                    disabled={
-                      !studentResponse[currQuestion + 1] || isSubmitting
-                    }
-                    style={
-                      !studentResponse[currQuestion + 1] || isSubmitting
-                        ? { cursor: "not-allowed", background: "#E2E8F0" }
-                        : { background: "#012E8A", color: "white" }
-                    }
-                    onClick={() => {
-                      submitResponse();
-                    }}
+                    className={"p-2 " 
+                    + ((studentResponse[currQuestion + 1] && !isSubmitting) ? "done-button" : "disabled-border")
+                  }
+                    disabled={ !studentResponse[currQuestion + 1] || isSubmitting }
+                    onClick={() => { submitResponse(); }}
                   >
                     Done
                   </Button>

@@ -220,6 +220,11 @@ dl { width: 100% }
   background: #7292d6 !important;
 }
 
+.selected-border:hover {
+  border: 3px solid #1c50c2 !important;
+  background: #5f82ce !important;
+}
+
 .wrong-border {
   border: 3px solid #a51e1e !important;
   background: #bd6262 !important;
@@ -230,10 +235,15 @@ dl { width: 100% }
   background: #589758 !important;
 }
 
-.hidden-border {
+.normal-border {
   border: 3px solid #EEF2F6 !important;
   background: #EEF2F6 !important;
+  color: black !important;
+}
 
+.normal-border:hover {
+  border: 3px solid #E3E8EF !important;
+  background: #E3E8EF !important;
 }
 
 .wrong-border.disabled-choice {
@@ -248,12 +258,15 @@ dl { width: 100% }
   border: 3px solid #3e7a3ebb !important;
 }
 
-.hidden-border {
+.hidden-border, .disabled-border {
   border: 3px solid #EEF2F6bb !important;
   background: #eef2f6bc !important;
   color: #00000067 !important;
 }
 
+.disabled-border {
+  cursor: not-allowed !important;
+}
 
 
 /* Chatbox Footer buttons */
@@ -307,6 +320,20 @@ dl { width: 100% }
 
 .red-button:hover {
   background: #B53D37
+}
+
+.done-button {
+  background: #2464b2;
+  color: white;
+  /* padding: 16px 16px;  */
+  font-style: Poppins;
+  border-radius: 5px;
+  border: 3px solid #2464b2;
+}
+
+.done-button:hover {
+  background: #2a5898;
+  border: 3px solid #2a5898;
 }
 
 .grey-button {

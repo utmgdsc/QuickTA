@@ -27,6 +27,7 @@ const LandingPage = ({ isLoading, UTORid, isNewUser, setIsNewUser }) => {
   ];
 
   if (!isLoading) {
+    console.log("Landing Page: ", isLoading);
     return (
       <PreSurvey
         UTORid={UTORid}
