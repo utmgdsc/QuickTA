@@ -193,6 +193,7 @@ const Chat = ({
 
   return (
     <Box
+    className="chat-master-container"
       ml={"10vw"}
       mr={"10vw"}
       style={{

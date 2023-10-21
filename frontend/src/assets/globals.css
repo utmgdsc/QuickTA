@@ -369,3 +369,18 @@ dl { width: 100% }
   font-weight: 600;
   padding: 4px 10px;
 }
+
+@media screen and (max-width: 768px) {
+  .chat-master-container {
+    margin-left: 8vw !important;
+    margin-right: 8vw !important;
+  } 
+}
+
+@media screen and (max-width: 576px) {
+  .chat-master-container {
+    margin-left: 12px !important;
+    margin-right: 12px !important;
+  }
+}
+
