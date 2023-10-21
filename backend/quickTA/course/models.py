@@ -31,6 +31,7 @@ class CourseDeployment(models.Model):
     deployment_id = models.CharField(default=uuid.uuid4(), max_length=50, editable=False, unique=True)
     deployment_name = models.TextField(max_length=1000)
     course_id = models.CharField(max_length=50)
+    priority = models.IntegerField(default=0)
     status = models.CharField(default="A", max_length=1) # A or I - Active or Inactive
 
     def to_dict(self):
@@ -38,5 +39,6 @@ class CourseDeployment(models.Model):
             'deployment_id': self.deployment_id,
             'deployment_name': self.deployment_name,
             'course_id': self.course_id,
+            'priority': self.priority,
             'status': self.status
         }

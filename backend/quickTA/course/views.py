@@ -1,4 +1,5 @@
 import uuid
+from uuid import uuid1
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.db.models import Q
@@ -9,6 +10,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from course.models import Course
 from course.serializers import *
+from course.helpers import get_course 
 from models.serializers import GPTModelSerializer
 from users.models import User
 from users.serializers import UserSerializer
@@ -51,7 +53,7 @@ class CourseView(APIView):
         if course_id: course = get_object_or_404(Course, course_id=course_id)
         elif course_code and course_semester: course = get_object_or_404(Course, course_code=course_code, semester=course_semester)
 
-        serializer = CourseSerializer(course, show_users=show_users)
+        serializer = CourseSerializer(course, show_users=show_users, show_active_deployments=True)
         if show_users.lower() == 'true': 
             return JsonResponse(serializer.data)
         
@@ -520,16 +522,32 @@ class CourseDeploymentView(APIView):
     @swagger_auto_schema(
         operation_summary="Get course deployment(s)",
         manual_parameters=[
-            openapi.Parameter("deployment_ids", openapi.IN_QUERY, description="List of deployment IDs (Comma-Separated)", type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING)),
+            openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("course_code", openapi.IN_QUERY, description="Course Code", type=openapi.TYPE_STRING),
+            openapi.Parameter("semester", openapi.IN_QUERY, description="Semester", type=openapi.TYPE_STRING),
+            openapi.Parameter("deployment_ids", openapi.IN_QUERY, description="List of deployment IDs (Comma-Separated)", type=openapi.TYPE_STRING),
         ],
     )
     def get(self, request):
         """
-        Acquires course deployment(s). Specify deployment IDs to get specific deployments. Defaults to get all deployments.
+        Acquires course deployment(s). Defaults to get all deployments.
+        Specify deployment IDs to get specific deployments.
+        Specify course ID / course code and semester to get all deployments for a course.
         
         - deployment_ids: List of deployment IDs (Comma separated)
+        - course_id: Course ID
+        - course_code: Course code
+        - semester: Semester
         """
         deployment_id = request.query_params.get('deployment_ids', [])
+        query_params = request.query_params
+        course = get_course(query_params)
+
+        # Get all deployments for a course
+        if course: 
+            deployment_ids = CourseDeployment.objects.filter(course_id=str(course.course_id))
+            return JsonResponse({ "deployments": [deployment.to_dict() for deployment in deployment_ids]})
+        
         if deployment_id: deployment_ids = deployment_id.split(',')
 
         if deployment_id: deployments = CourseDeployment.objects.filter(deployment_id__in=deployment_ids)
@@ -545,6 +563,7 @@ class CourseDeploymentView(APIView):
         """
         Creates a course deployment
         """
+        request.data['deployment_id'] = uuid1()
         serializer = CourseDeploymentSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()

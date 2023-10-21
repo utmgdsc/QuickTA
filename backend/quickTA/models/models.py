@@ -8,6 +8,7 @@ class GPTModel(models.Model):
     model_name = models.TextField(max_length=100)
     model_description = models.TextField(max_length=2000, default="")
     course_id = models.CharField(max_length=100)
+    deployment_id = models.CharField(max_length=100, default="")
     status = models.BooleanField(default=True)
 
     # OpenAI Completion Parameters

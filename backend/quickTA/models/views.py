@@ -28,7 +28,7 @@ class GPTModelView(APIView):
     )
     def get(self, request):
         """
-        Returns a GPT model given the model_id and course_id.
+        Returns a GPT model given the model_id.
         """
         model_id = request.query_params.get('model_id', '')
         gpt_model = get_object_or_404(GPTModel, model_id=model_id)
@@ -42,6 +42,7 @@ class GPTModelView(APIView):
             properties={
                 'model_name': openapi.Schema(type=openapi.TYPE_STRING),
                 'course_id': openapi.Schema(type=openapi.TYPE_STRING),
+                'deployment_id': openapi.Schema(type=openapi.TYPE_STRING),
                 'status': openapi.Schema(type=openapi.TYPE_BOOLEAN),
                 'model': openapi.Schema(type=openapi.TYPE_STRING),
                 'prompt': openapi.Schema(type=openapi.TYPE_STRING),
@@ -76,6 +77,7 @@ class GPTModelView(APIView):
             type=openapi.TYPE_OBJECT,
             properties={
                 'model_name': openapi.Schema(type=openapi.TYPE_STRING),
+                'deployment_id': openapi.Schema(type=openapi.TYPE_STRING),
                 'course_id': openapi.Schema(type=openapi.TYPE_STRING),
                 'status': openapi.Schema(type=openapi.TYPE_BOOLEAN),
                 'model': openapi.Schema(type=openapi.TYPE_STRING),

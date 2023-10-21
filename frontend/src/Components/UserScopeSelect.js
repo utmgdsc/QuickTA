@@ -58,6 +58,14 @@ const UserScopeSelect = ({userScope, setUserScope}) => {
     const getUserRoles = async () => {
         const roles = await axios.get(process.env.REACT_APP_API_URL + '/user/user-roles')
         setUserRoleList(roles.data.roles)
+
+        let cache = localStorage.getItem('qta_userScopeFilter')
+        if (cache) { setUserScope(JSON.parse(cache)) }
+    }
+
+    const handleUserScopeFilterChange = (event, value) => {
+        localStorage.setItem('qta_userScopeFilter', JSON.stringify(value))
+        setUserScope(value)
     }
 
     useEffect(() => {
@@ -76,9 +84,7 @@ const UserScopeSelect = ({userScope, setUserScope}) => {
                 getOptionLabel={(option) => option.name}
                 isOptionEqualToValue={(option, value) => option.id == value.id}
                 value={userScope}
-                onChange={(event, value) => {
-                    setUserScope(value)
-                }}
+                onChange={(event, value) => {handleUserScopeFilterChange(event, value)}}
                 renderInput={(params) => ( <TextField {...params}  label="User Scope Filter" /> )}
                 renderTags={(value, getTagProps) => {
                     return value.map((option, index) => (

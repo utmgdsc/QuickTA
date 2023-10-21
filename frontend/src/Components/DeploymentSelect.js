@@ -54,11 +54,19 @@ const DeploymentSelect = ({courseID, deploymentFilter, setDeploymentFilter}) => 
 
     const getCourseDeployments = async () => {
         // const roles = await axios.get(process.env.REACT_APP_API_URL + `/course/deployments?course_id=${courseID}`)
-        let data = { deployments: [
-            {"deployment_id": 1, "name": "Lab 4 - Loops"},
-            {"deployment_id": 2, "name": "Lab 6 - Nested Loops"},
-        ]}
-        setDeploymentList(data.deployments);
+        await axios.get(process.env.REACT_APP_API_URL + `/course/deployment?course_id=${courseID}`)
+            .then((res) => {
+                let data = res.data;
+                setDeploymentList(data.deployments);
+
+                let cache = localStorage.getItem('qta_deploymentFilter')
+                if (cache) { setDeploymentFilter(JSON.parse(cache)) }
+            })
+    }
+
+    const handleDeploymentFilterChange = (event, value) => {
+        localStorage.setItem('qta_deploymentFilter', JSON.stringify(value))
+        setDeploymentFilter(value)
     }
 
     useEffect(() => {
@@ -74,12 +82,10 @@ const DeploymentSelect = ({courseID, deploymentFilter, setDeploymentFilter}) => 
                 multiple
                 filterSelectedOptions
                 options={deploymentList}
-                getOptionLabel={(option) => option.name}
+                getOptionLabel={(option) => option.deployment_name}
                 isOptionEqualToValue={(option, value) => option.deployment_id == value.deployment_id}
                 value={deploymentFilter}
-                onChange={(event, value) => {
-                    setDeploymentFilter(value)
-                }}
+                onChange={(event, value) => {handleDeploymentFilterChange(event, value)}}
                 renderInput={(params) => (
                     <TextField {...params}  label="Course Deployment Filter" />
                 )}
@@ -88,7 +94,7 @@ const DeploymentSelect = ({courseID, deploymentFilter, setDeploymentFilter}) => 
                         <Chip
                             size="small"
                             variant="filled"
-                            label={option.name}
+                            label={option.deployment_name}
                             sx={chipStyle}
                             {...getTagProps({ index })} 
                         />
