@@ -18,6 +18,7 @@ import axios from "axios";
 import "../../assets/styles.css";
 import ErrorDrawer from "../ErrorDrawer";
 import { Temporal } from "@js-temporal/polyfill";
+import { Alert, Modal } from "@mui/material";
 
 const Chat = ({
   currCourse,
@@ -62,6 +63,7 @@ const Chat = ({
     sendButton: false,
     oldConvoButtons: false,
   });
+  const [showNotActiveConversation, setShowNotActiveConversation] = useState(false);
 
   const getConversations = async () => {
     let params = "course_id=" + currCourse.course_id + "&user_id=" + userId;
@@ -336,7 +338,14 @@ const Chat = ({
                       (!inConvo && !currConvoID && !isOldConvo))
                     ) {
                       // open technical assessment
-                      setIsOpenTechAssessment(true);
+                      if (inConvo) {
+                        setIsOpenTechAssessment(true);
+                      } else {
+                        setShowNotActiveConversation(true);
+                        setTimeout(() => {
+                          setShowNotActiveConversation(false);
+                        }, 5000);
+                      }
                     } else {
                       setDisableAll((prevDisableAll) => ({
                         inputMessage: false,
@@ -377,14 +386,6 @@ const Chat = ({
             }}
           >
             <div>
-              {/* <p>InConvo: {inConvo ? "T" : "F"}</p>
-              <p>currConvoID: {currConvoID ? currConvoID : ""}</p>
-              <p>inputMessage: { disableAll.inputMessage ? "true" : "false,"}</p>
-              <p>sendButton: { disableAll.sendButton ? "T" : "F,"}</p>
-              <p>newConversation: { disableAll.newConversation ? "T" : "F,"}</p>
-              <p>endChat: { disableAll.endChat ? "T" : "F,"}</p>
-              <p>oldConvoButtons: { disableAll.oldConvoButtons ? "T" : "F,"}</p> */}
-
               {conversations.map((convo, index) => {
                 return (
                   <Box
@@ -556,6 +557,22 @@ const Chat = ({
           />
         </Box>
       </Box>
+      {showNotActiveConversation &&
+        <Alert severity="warning"
+          style={{
+            position: "absolute",
+            top: "10vh",
+            left: "10vw",
+            width: "80vw",
+            zIndex: 100,
+            border: "1px solid #EAEAEA",
+            borderShadow: "1px 2px 3px 1px rgba(0,0,0,0.12)",
+            borderRadius: "8px",
+          }}
+        >
+            Active conversations found! Please end your current active conversations first!
+        </Alert>
+      }
       <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </Box>
   );
