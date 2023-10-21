@@ -18,8 +18,9 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import ConversationView from "./ConversationView";
 import ErrorDrawer from "../../ErrorDrawer";
+import { CircularProgress } from "@mui/material";
 
-const ReportTable = ({ course_ID, isWeekly, setIsLoading }) => {
+const ReportTable = ({ course_ID }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cardStyle = {
     backgroundColor: "white",
@@ -37,12 +38,14 @@ const ReportTable = ({ course_ID, isWeekly, setIsLoading }) => {
 
   const [reportList, changeReportList] = useState([]);
   const [rowIndex, setRowIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const {
     isOpen: isErrOpen,
     onOpen: onErrOpen,
     onClose: onErrClose,
   } = useDisclosure();
   const [error, setError] = useState();
+
 
   const fetchReports = async () => {
     return await axios
@@ -63,6 +66,12 @@ const ReportTable = ({ course_ID, isWeekly, setIsLoading }) => {
         // console.log(err);
         onErrOpen();
       });
+  };
+
+  const parseTime = (time) => {
+    let date = new Date(time);
+    let parsedDate = date.toLocaleString().replace(",", "");
+    return parsedDate;
   };
 
   useEffect(() => {
@@ -91,26 +100,31 @@ const ReportTable = ({ course_ID, isWeekly, setIsLoading }) => {
               {reportList && reportList.map((obj, index) => (
                 // create a new entry in the table by unwrapping the corresponding fields
                 // If any table row is clicked on open a modal showing a detailed view of convo
-                <Tooltip label={"Click an entry for more info"}>
+                // <Tooltip label={"Click an entry for more info"}>
                   <Tr
                     key={index}
+                    className="reported-conversation-tr"
                     onClick={() => {
                       setRowIndex(index);
                       // console.log(index, reportList);
                       onOpen();
                     }}
                   >
-                    <Td className="border px-2">{obj.conversation_id.slice(0,8)}-*** </Td>
+                   <Td className="border px-2">{obj.conversation_id.slice(0,8)}-*** </Td>
                     <Td className="border px-2">{obj.user_id.slice(0,8)}-***</Td>
-                    <Td className="border px-2">{obj.time}</Td>
+                    <Td className="border px-2">{parseTime(obj.time)}</Td>
                     <Td className="border px-2">{obj.msg}</Td>
                   </Tr>
-                </Tooltip>
+                // </Tooltip>
               ))}
             </Tbody>
           </Table>
         </TableContainer>
-        {reportList.length !== 0 ? (
+        {isLoading ? 
+          <VStack className="h-100">
+            <Center> <CircularProgress /> </Center>
+          </VStack>
+        : reportList.length !== 0 ? (
           <ConversationView
             isOpen={isOpen}
             onClose={onClose}

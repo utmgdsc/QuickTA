@@ -7,39 +7,13 @@ import { Grid } from "@mui/material";
 import UniqueUsersCard from "./UniqueUsersCard";
 import ChatlogResponseRateCard from "./ChatlogResponseRateCard";
 import ConversationResponseRateCard from "./ConversationResponseRateCard";
+import TotalConversationCountCard from "./TotalConversationCountCard";
 import ReportedConversationCard from "./ReportedConversationsCard";
 import SurveyDistributionBarChart from "../components/SurveyDistributionBarChart";
 import ConversationCountDistributionBarChart from "../components/ConversationCountDistributionBarChart";
 
 
-const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
-  const [avgRating, setAvgRating] = useState({
-    avgRating: 0,
-    avgRatingDelta: 0,
-  });
-  
-  const [avgComfort, setAvgComfort] = useState({
-    avgComfort: 0,
-    avgComfortDelta: 0,
-  });
-  const [numReport, setNumReport] = useState({ numReport: 0 });
-
-  // Fetch file loader for headers
-  const fileDownload = require("js-file-download");
-  const [error, setError] = useState();
-  function computePrevAvg(data, currAvg) {
-    // we need to look at avg of indices 0, .. , data-2
-    if (data.length <= 1) {
-      return 0;
-    }
-    let x = currAvg * data.length;
-    x -= data[data.length - 1];
-    if (data.length === 1) {
-      return Math.round((currAvg - x / 1) * 100) / 100;
-    } else {
-      return Math.round((currAvg - x / (data.length - 1)) * 100) / 100;
-    }
-  }
+const DatedStats = ({ courseID}) => {
 
   return (
     <>
@@ -49,13 +23,14 @@ const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
           <UniqueUsersCard courseID={courseID} />
         </Grid>
         <Grid item xs={6} md={3}>
+          {/* <ReportedConversationCard courseID={courseID} /> */}
+          <TotalConversationCountCard courseID={courseID} />
+        </Grid>
+        <Grid item xs={6} md={3}>
           <ChatlogResponseRateCard courseID={courseID} />
         </Grid>
         <Grid item xs={6} md={3}>
           <ConversationResponseRateCard courseID={courseID} />
-        </Grid>
-        <Grid item xs={6} md={3}>
-          <ReportedConversationCard courseID={courseID} />
         </Grid>
         {/* Row 2 */}
         <Grid item xs={12} md={6} xl={3}>

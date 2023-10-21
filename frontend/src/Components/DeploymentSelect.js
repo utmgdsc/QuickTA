@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import TextField from '@mui/material/TextField';
 import Chip from '@mui/material/Chip';
+import { useDeploymentFilter } from '../contexts/DeploymentFilterContext';
 
 
 /**
@@ -12,9 +13,10 @@ import Chip from '@mui/material/Chip';
  * @param {state handler} setUserScope setter for userScope
  * @returns 
  */
-const DeploymentSelect = ({courseID, deploymentFilter, setDeploymentFilter}) => {
+const DeploymentSelect = ({courseID}) => {
 
     const [deploymentList, setDeploymentList] = useState([]);
+    const { deploymentFilter, setDeploymentFilter } = useDeploymentFilter();
 
     const multiselectStyle = {
         background: "white",

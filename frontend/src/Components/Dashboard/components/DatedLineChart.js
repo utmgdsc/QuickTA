@@ -5,11 +5,15 @@ import { LineChart } from '@mui/x-charts/LineChart';
 import { Box, CircularProgress } from "@mui/material";
 import DateRange from "./DateRange";
 
+// import { useUserScope } from '../../../contexts/UserScopeContext';
+
 const DatedLineChart = ({
     title,
     courseID,
     height
 }) => {
+
+// const { userScope } = useUserScope();
 const [isLoading, setIsLoading] = useState(true);
 const [dates, setDates] = useState([]);
 const [counts, setCounts] = useState([]);

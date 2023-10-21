@@ -1,8 +1,6 @@
 import { Box, Heading, useDisclosure } from "@chakra-ui/react";
-import { Temporal } from "@js-temporal/polyfill";
 import axios from "axios";
 import React, { useState, useEffect } from "react";
-import Chart from "react-apexcharts";
 import ErrorDrawer from "../../ErrorDrawer";
 import { LineChart } from '@mui/x-charts/LineChart';
 

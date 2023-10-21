@@ -20,6 +20,9 @@ dl { width: 100% }
 .align-items-center { align-items: center; }
 .align-items-end { align-items: last baseline;}
 
+/* Primary styles */
+.bg-primary { background-color: #2C54A6 !important; }
+
 /* QuickTA */
 
 .glass {
@@ -322,6 +325,21 @@ dl { width: 100% }
   background: #B53D37
 }
 
+.blue-button {
+  background: #2464b2;
+  color: white;
+  font-size: 16px; 
+  line-height: 19px; 
+  padding: 10px 16px; 
+  font-weight: 600;
+  font-style: Poppins;
+  border-radius: 8px;
+}
+
+.blue-button:hover {
+  background: #2a5898;
+}
+
 .done-button {
   background: #2464b2;
   color: white;
@@ -368,6 +386,18 @@ dl { width: 100% }
   font-size: 16px;
   font-weight: 600;
   padding: 4px 10px;
+}
+
+.reported-conversation-tr {
+  background-color: #EEF2F6;
+  color: black;
+  font-size: 16px;
+  padding: 4px 10px;
+}
+
+.reported-conversation-tr:hover {
+  background-color: #E3E8EF;
+  cursor: pointer;
 }
 
 @media screen and (max-width: 768px) {

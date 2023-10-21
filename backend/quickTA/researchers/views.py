@@ -26,6 +26,7 @@ import pymongo
 from researchers.queries import *
 from utils.time_utils import *
 from survey.models import *
+from models.models import * 
 
 # import uri from settings
 from django.conf import settings
@@ -382,7 +383,9 @@ class MostCommonWordsView(APIView):
                 openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
                 openapi.Parameter("course_code", openapi.IN_QUERY, description="Course code", type=openapi.TYPE_STRING),
                 openapi.Parameter("semester", openapi.IN_QUERY, description="Semester", type=openapi.TYPE_STRING),
-                openapi.Parameter("filter", openapi.IN_QUERY, description="Filter view", type=openapi.TYPE_STRING, required=True)
+                openapi.Parameter("filter", openapi.IN_QUERY, description="Filter view", type=openapi.TYPE_STRING, required=True),
+                openapi.Parameter("num_words", openapi.IN_QUERY, description="Number of words", type=openapi.TYPE_STRING),
+                openapi.Parameter("max_ngram_size", openapi.IN_QUERY, description="Maximum ngram size", type=openapi.TYPE_STRING)
             ]
         )
         def get(self, request):
@@ -398,11 +401,13 @@ class MostCommonWordsView(APIView):
             params = request.query_params
             course = get_course(params)
             filter = params.get('filter', '')
+            num_words = params.get('num_words', 30)
+            max_ngram_size = params.get('max_ngram_size', 3)
             conversations = get_filtered_convos(course.course_id, filter, timezone='America/Toronto')
             
             conversation_ids = [convo.conversation_id for convo in conversations]
             sentences = [chatlog.chatlog for chatlog in Chatlog.objects.filter(conversation_id__in=conversation_ids) if chatlog.is_user]
-            most_common_words = generate_wordcloud(sentences)
+            most_common_words = generate_wordcloud(sentences, int(num_words), int(max_ngram_size))
 
             response = { "most_common_words": most_common_words }
             return JsonResponse(response)
@@ -780,4 +785,44 @@ class ConversationPerUserDistributionView(APIView):
         result = sorted(result, key=lambda k: k['conversation_count'])
 
         response = { "distribution": result }
+        return JsonResponse(response)
+
+class TotalConversationCountView(APIView):
+
+    @swagger_auto_schema(
+        operation_summary="Get total conversation count for a course",
+        responses={200: "Success", 404: "Conversation not found"},
+        manual_parameters=[
+            openapi.Parameter("deployment_ids", openapi.IN_QUERY, description="Deployment IDs (Comma-separated)", type=openapi.TYPE_STRING),
+            openapi.Parameter("user_roles", openapi.IN_QUERY, description="User roles (Comma-separated)", type=openapi.TYPE_STRING),
+        ]
+    )
+    def get(self, request):
+        query_params = request.query_params
+        deployment_ids = query_params.get('deployment_ids', '')
+        user_roles = query_params.get('user_roles', '')
+        deployment_ids = deployment_ids.split(',')
+        user_roles = user_roles.split(',')
+
+        # conversations_db = db["student_conversation"]
+        # query = total_conversation_count_query_pipeline(deployment_ids, user_roles)
+        # result = list(conversations_db.aggregate(query))
+
+        if deployment_ids == ['']: models = GPTModel.objects.all()
+        else: models = GPTModel.objects.filter(deployment_id__in=deployment_ids)
+        model_ids = [str(model.model_id) for model in models]
+
+        if user_roles == ['']: users = User.objects.all()
+        else: users = User.objects.filter(user_role__in=user_roles)
+        user_user_ids = [str(user.user_id) for user in users]
+
+        conversations = Conversation.objects.filter(model_id__in=model_ids)
+        conversation_user_ids = [str(convo.user_id) for convo in conversations]
+
+        count = 0
+        for user_id in conversation_user_ids:
+            if user_id in user_user_ids:
+                count += 1
+
+        response = { "total_conversation_count": count}
         return JsonResponse(response)

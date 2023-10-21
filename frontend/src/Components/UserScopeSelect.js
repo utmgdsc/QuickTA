@@ -1,13 +1,10 @@
 import { Box } from '@chakra-ui/react';
 import { Autocomplete, FormControl } from '@mui/material';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import InputLabel from '@mui/material/InputLabel';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import TextField from '@mui/material/TextField';
 import Chip from '@mui/material/Chip';
-
+import { useUserScope } from '../contexts/UserScopeContext';
 
 /**
  * Allows users to select the scope of users to include given a list of userScope.
@@ -15,9 +12,10 @@ import Chip from '@mui/material/Chip';
  * @param {state handler} setUserScope setter for userScope
  * @returns 
  */
-const UserScopeSelect = ({userScope, setUserScope}) => {
+const UserScopeSelect = () => {
 
-    const [userRoleList, setUserRoleList] = useState([])
+    const { userScope, setUserScope } = useUserScope();
+    const [userRoleList, setUserRoleList] = useState([]);
 
     const multiselectStyle = {
         background: "white",
