@@ -114,9 +114,10 @@ const ChatBox = ({ messages, waitingForResp }) => {
             justifyContent: "center",
             alignItems: "center",
             width: "100%",
+            height: messages.length === 0 ? "100%" : ""
           }}
         >
-          <div className="dot-flashing"></div>
+          <div className="dot-flashing"></div> 
         </div>
       ) : null}
       <div ref={messagesEndRef} />

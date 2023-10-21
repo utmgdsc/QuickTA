@@ -304,8 +304,6 @@ const Chat = ({
                 }}
               >
                 <Button
-                  // backgroundColor="#ACCDEC"
-                  // color="#555"
                   size="sm"
                   // isDisabled={
                   //   waitingForResp ||
