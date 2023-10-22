@@ -11,7 +11,13 @@ import TotalConversationCountCard from "./TotalConversationCountCard";
 import ReportedConversationCard from "./ReportedConversationsCard";
 import SurveyDistributionBarChart from "../components/SurveyDistributionBarChart";
 import ConversationCountDistributionBarChart from "../components/ConversationCountDistributionBarChart";
-
+import TotalChatlogCountCard from "./TotalChatlogCountCard";
+import TotalPostSurveyResponseCard from "./TotalPostSurveyResponseCard";
+import MinMaxChatlogCountCard from "./MinMaxChatlogCountCard";
+import AvgChatlogCountCard from "./AvgChatlogCountCard";
+import DistinctPostSurveyResponseCountCard from "./DistinctPostSurveyResponseCountCard";
+import CorrectAssessmentCountCard from "./CorrectAssessmentCountCard";
+import ChatlogLengthCountCard from "./ChatlogLengthCountCard";
 
 const DatedStats = ({ courseID}) => {
 
@@ -19,19 +25,46 @@ const DatedStats = ({ courseID}) => {
     <>
       <Grid container columnSpacing={{ xs: 1, md: 2}} rowSpacing={{ xs: 1, md: 2 }}>
         {/* Row 1 */}
-        <Grid item xs={6} md={3}>
+        <Grid item xs={6} md={3} lg={2}>
           <UniqueUsersCard courseID={courseID} />
         </Grid>
-        <Grid item xs={6} md={3}>
-          {/* <ReportedConversationCard courseID={courseID} /> */}
+        <Grid item xs={6} md={3} lg={2}>
+          <TotalChatlogCountCard courseID={courseID} />
+        </Grid>
+        <Grid item xs={6} md={3} lg={2}>
+          <MinMaxChatlogCountCard courseID={courseID} />
+        </Grid>
+        <Grid item xs={6} md={3} lg={2}>
+          <AvgChatlogCountCard courseID={courseID} />
+        </Grid>
+        <Grid item xs={6} md={3} lg={2}>
           <TotalConversationCountCard courseID={courseID} />
         </Grid>
-        <Grid item xs={6} md={3}>
-          <ChatlogResponseRateCard courseID={courseID} />
+        <Grid item xs={6} md={3} lg={2}>
+          <TotalPostSurveyResponseCard courseID={courseID} />
         </Grid>
-        <Grid item xs={6} md={3}>
+        <Grid item xs={6} md={3} lg={2}>
+          <DistinctPostSurveyResponseCountCard courseID={courseID} />
+        </Grid>
+        <Grid item xs={6} md={3} lg={2}>
+          <CorrectAssessmentCountCard courseID={courseID} />
+        </Grid>
+
+        <Grid item xs={6} md={3} lg={2}>
           <ConversationResponseRateCard courseID={courseID} />
         </Grid>
+        <Grid item xs={6} md={3} lg={2}>
+          <ChatlogResponseRateCard courseID={courseID} />
+        </Grid>
+        <Grid item xs={6} md={3} lg={2}>
+          <ChatlogLengthCountCard courseID={courseID} />
+        </Grid>
+        <Grid item xs={6} md={3} lg={2}>
+          <ReportedConversationCard courseID={courseID} />
+        </Grid>
+
+       
+        
         {/* Row 2 */}
         <Grid item xs={12} md={6} xl={3}>
           <AnalyticsCard>

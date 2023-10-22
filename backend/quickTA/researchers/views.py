@@ -27,6 +27,8 @@ from researchers.queries import *
 from utils.time_utils import *
 from survey.models import *
 from models.models import * 
+from survey.models import *
+from assessments.models import *
 
 # import uri from settings
 from django.conf import settings
@@ -816,13 +818,292 @@ class TotalConversationCountView(APIView):
         else: users = User.objects.filter(user_role__in=user_roles)
         user_user_ids = [str(user.user_id) for user in users]
 
-        conversations = Conversation.objects.filter(model_id__in=model_ids)
-        conversation_user_ids = [str(convo.user_id) for convo in conversations]
-
-        count = 0
-        for user_id in conversation_user_ids:
-            if user_id in user_user_ids:
-                count += 1
+        conversations = Conversation.objects.filter(model_id__in=model_ids, user_id__in=user_user_ids)
+        count = len(conversations)
 
         response = { "total_conversation_count": count}
+        return JsonResponse(response)
+
+class TotalChatlogCountView(APIView):
+
+    @swagger_auto_schema(
+        operation_summary="Get total conversation count for a course",
+        responses={200: "Success", 404: "Conversation not found"},
+        manual_parameters=[
+            openapi.Parameter("deployment_ids", openapi.IN_QUERY, description="Deployment IDs (Comma-separated)", type=openapi.TYPE_STRING),
+            openapi.Parameter("user_roles", openapi.IN_QUERY, description="User roles (Comma-separated)", type=openapi.TYPE_STRING),
+        ]
+    )
+    def get(self, request):
+        query_params = request.query_params
+        deployment_ids = query_params.get('deployment_ids', '')
+        user_roles = query_params.get('user_roles', '')
+        deployment_ids = deployment_ids.split(',')
+        user_roles = user_roles.split(',')
+
+        # conversations_db = db["student_conversation"]
+        # query = total_conversation_count_query_pipeline(deployment_ids, user_roles)
+        # result = list(conversations_db.aggregate(query))
+
+        if deployment_ids == ['']: models = GPTModel.objects.all()
+        else: models = GPTModel.objects.filter(deployment_id__in=deployment_ids)
+        model_ids = [str(model.model_id) for model in models]
+
+        if user_roles == ['']: users = User.objects.all()
+        else: users = User.objects.filter(user_role__in=user_roles)
+        user_user_ids = [str(user.user_id) for user in users]
+
+        conversations = Conversation.objects.filter(model_id__in=model_ids, user_id__in=user_user_ids)
+        conversation_ids = [str(convo.conversation_id) for convo in conversations]
+
+        chatlog = Chatlog.objects.filter(conversation_id__in=conversation_ids)
+        count = 0
+        for c in chatlog:
+            if c.is_user:
+                count += 1
+
+        response = { "total_chatlog_count": count}
+        return JsonResponse(response)
+
+
+class TotalPostSurveyResponseView(APIView):
+
+    @swagger_auto_schema(
+        operation_summary="Get total conversation count for a course",
+        responses={200: "Success", 404: "Conversation not found"},
+        manual_parameters=[
+            openapi.Parameter("deployment_ids", openapi.IN_QUERY, description="Deployment IDs (Comma-separated)", type=openapi.TYPE_STRING),
+            openapi.Parameter("user_roles", openapi.IN_QUERY, description="User roles (Comma-separated)", type=openapi.TYPE_STRING),
+        ]
+    )
+    def get(self, request):
+        query_params = request.query_params
+        deployment_ids = query_params.get('deployment_ids', '')
+        user_roles = query_params.get('user_roles', '')
+        deployment_ids = deployment_ids.split(',')
+        user_roles = user_roles.split(',')
+
+        # conversations_db = db["student_conversation"]
+        # query = total_conversation_count_query_pipeline(deployment_ids, user_roles)
+        # result = list(conversations_db.aggregate(query))
+
+        if deployment_ids == ['']: models = GPTModel.objects.all()
+        else: models = GPTModel.objects.filter(deployment_id__in=deployment_ids)
+        model_ids = [str(model.model_id) for model in models]
+
+        if user_roles == ['']: users = User.objects.all()
+        else: users = User.objects.filter(user_role__in=user_roles)
+        user_user_ids = [str(user.user_id) for user in users]
+
+        conversations = Conversation.objects.filter(model_id__in=model_ids, user_id__in=user_user_ids)
+        conversation_ids = [str(convo.conversation_id) for convo in conversations]
+
+        survey_response = SurveyResponse.objects.filter(conversation_id__in=conversation_ids)
+        
+        count = 0
+        # Get distinct number of conversation_id in survey_responses
+        conversation_ids = []
+        for s in survey_response:
+            if s.conversation_id not in conversation_ids:
+                count += 1
+                conversation_ids.append(s.conversation_id)
+
+        response = { "total_responses": count}
+        return JsonResponse(response)
+
+class MinMaxChatlogCountView(APIView):
+
+    @swagger_auto_schema(
+        operation_summary="Get total conversation count for a course",
+        responses={200: "Success", 404: "Conversation not found"},
+        manual_parameters=[
+            openapi.Parameter("deployment_ids", openapi.IN_QUERY, description="Deployment IDs (Comma-separated)", type=openapi.TYPE_STRING),
+            openapi.Parameter("user_roles", openapi.IN_QUERY, description="User roles (Comma-separated)", type=openapi.TYPE_STRING),
+        ]
+    )
+    def get(self, request):
+        query_params = request.query_params
+        deployment_ids = query_params.get('deployment_ids', '')
+        user_roles = query_params.get('user_roles', '')
+        deployment_ids = deployment_ids.split(',')
+        user_roles = user_roles.split(',')
+
+        if deployment_ids == ['']: models = GPTModel.objects.all()
+        else: models = GPTModel.objects.filter(deployment_id__in=deployment_ids)
+        model_ids = [str(model.model_id) for model in models]
+
+        if user_roles == ['']: users = User.objects.all()
+        else: users = User.objects.filter(user_role__in=user_roles)
+        user_user_ids = [str(user.user_id) for user in users]
+
+        conversations = Conversation.objects.filter(model_id__in=model_ids, user_id__in=user_user_ids)
+        
+        min, max = 0, 0
+        for c in conversations:
+            chatlog_count = len(c.conversation_log) // 2
+            if chatlog_count < min: min = chatlog_count
+            if chatlog_count > max: max = chatlog_count
+
+
+        response = { "min_chatlog_count": min, "max_chatlog_count": max}
+        return JsonResponse(response)
+    
+# Average amount of chatlogs 
+class AverageChatlogCountView(APIView):
+
+    @swagger_auto_schema(
+        operation_summary="Get total conversation count for a course",
+        responses={200: "Success", 404: "Conversation not found"},
+        manual_parameters=[
+            openapi.Parameter("deployment_ids", openapi.IN_QUERY, description="Deployment IDs (Comma-separated)", type=openapi.TYPE_STRING),
+            openapi.Parameter("user_roles", openapi.IN_QUERY, description="User roles (Comma-separated)", type=openapi.TYPE_STRING),
+            ]
+    )
+    def get(self, request):
+        query_params = request.query_params
+        deployment_ids = query_params.get('deployment_ids', '')
+        user_roles = query_params.get('user_roles', '')
+        deployment_ids = deployment_ids.split(',')
+        user_roles = user_roles.split(',')
+
+        if deployment_ids == ['']: models = GPTModel.objects.all()
+        else: models = GPTModel.objects.filter(deployment_id__in=deployment_ids)
+        model_ids = [str(model.model_id) for model in models]
+
+        if user_roles == ['']: users = User.objects.all()
+        else: users = User.objects.filter(user_role__in=user_roles)
+        user_user_ids = [str(user.user_id) for user in users]
+
+        conversations = Conversation.objects.filter(model_id__in=model_ids, user_id__in=user_user_ids)
+        
+        sum_chatlog = 0
+        sum_conversation = len(conversations)
+        for c in conversations:
+            sum_chatlog += len(c.conversation_log) // 2
+
+
+        response = { "avg_chatlog_count": round(sum_chatlog / sum_conversation, 2) }
+        return JsonResponse(response)
+    
+class DistinctUserPostSurveyQuestionCountView(APIView):
+    
+    @swagger_auto_schema(
+        operation_summary="Get total conversation count for a course",
+        responses={200: "Success", 404: "Conversation not found"},
+        manual_parameters=[
+            openapi.Parameter("deployment_ids", openapi.IN_QUERY, description="Deployment IDs (Comma-separated)", type=openapi.TYPE_STRING),
+            openapi.Parameter("user_roles", openapi.IN_QUERY, description="User roles (Comma-separated)", type=openapi.TYPE_STRING),
+        ]
+    )
+    def get(self, request):
+        query_params = request.query_params
+        deployment_ids = query_params.get('deployment_ids', '')
+        user_roles = query_params.get('user_roles', '')
+        deployment_ids = deployment_ids.split(',')
+        user_roles = user_roles.split(',')
+
+        if deployment_ids == ['']: models = GPTModel.objects.all()
+        else: models = GPTModel.objects.filter(deployment_id__in=deployment_ids)
+        model_ids = [str(model.model_id) for model in models]
+
+        if user_roles == ['']: users = User.objects.all()
+        else: users = User.objects.filter(user_role__in=user_roles)
+        user_user_ids = [str(user.user_id) for user in users]
+
+        conversations = Conversation.objects.filter(model_id__in=model_ids, user_id__in=user_user_ids)
+        conversation_ids = [str(convo.conversation_id) for convo in conversations]
+        
+        survey_response = SurveyResponse.objects.filter(conversation_id__in=conversation_ids)
+        
+        count = 0
+        user_ids = []
+        for s in survey_response:
+            if s.user_id not in user_ids:
+                count += 1
+                user_ids.append(s.user_id)
+
+
+        response = { "total": count }
+        return JsonResponse(response)
+class CorrectAssessmentCountView(APIView):
+    
+    @swagger_auto_schema(
+        operation_summary="Get total conversation count for a course",
+        responses={200: "Success", 404: "Conversation not found"},
+        manual_parameters=[
+            openapi.Parameter("deployment_ids", openapi.IN_QUERY, description="Deployment IDs (Comma-separated)", type=openapi.TYPE_STRING),
+            openapi.Parameter("user_roles", openapi.IN_QUERY, description="User roles (Comma-separated)", type=openapi.TYPE_STRING),
+        ]
+    )
+    def get(self, request):
+        query_params = request.query_params
+        deployment_ids = query_params.get('deployment_ids', '')
+        user_roles = query_params.get('user_roles', '')
+        deployment_ids = deployment_ids.split(',')
+        user_roles = user_roles.split(',')
+
+        if deployment_ids == ['']: models = GPTModel.objects.all()
+        else: models = GPTModel.objects.filter(deployment_id__in=deployment_ids)
+        model_ids = [str(model.model_id) for model in models]
+
+        if user_roles == ['']: users = User.objects.all()
+        else: users = User.objects.filter(user_role__in=user_roles)
+        user_user_ids = [str(user.user_id) for user in users]
+
+        conversations = Conversation.objects.filter(model_id__in=model_ids, user_id__in=user_user_ids)
+        conversation_ids = [str(convo.conversation_id) for convo in conversations]
+        
+        assessment_responses = AssessmentResponse.objects.filter(conversation_id__in=conversation_ids)
+        
+        total = len(assessment_responses)
+        count = 0
+        for s in assessment_responses:
+            if s.correct:
+                count += 1
+
+        response = { "total": total, "count": count, "percentage": round((count / total) * 100, 2) }
+        return JsonResponse(response)
+
+class ChatlogLengthView(APIView):
+    
+    @swagger_auto_schema(
+        operation_summary="Get total conversation count for a course",
+        responses={200: "Success", 404: "Conversation not found"},
+        manual_parameters=[
+            openapi.Parameter("deployment_ids", openapi.IN_QUERY, description="Deployment IDs (Comma-separated)", type=openapi.TYPE_STRING),
+            openapi.Parameter("user_roles", openapi.IN_QUERY, description="User roles (Comma-separated)", type=openapi.TYPE_STRING),
+        ]
+    )
+    def get(self, request):
+        query_params = request.query_params
+        deployment_ids = query_params.get('deployment_ids', '')
+        user_roles = query_params.get('user_roles', '')
+        deployment_ids = deployment_ids.split(',')
+        user_roles = user_roles.split(',')
+
+        if deployment_ids == ['']: models = GPTModel.objects.all()
+        else: models = GPTModel.objects.filter(deployment_id__in=deployment_ids)
+        model_ids = [str(model.model_id) for model in models]
+
+        if user_roles == ['']: users = User.objects.all()
+        else: users = User.objects.filter(user_role__in=user_roles)
+        user_user_ids = [str(user.user_id) for user in users]
+
+        conversations = Conversation.objects.filter(model_id__in=model_ids, user_id__in=user_user_ids)
+        conversation_ids = [str(convo.conversation_id) for convo in conversations]
+        
+        chatlog = Chatlog.objects.filter(conversation_id__in=conversation_ids)
+        
+        min, max = 0, 0
+        total_chatlogs = 0 
+        total_length = 0
+        for c in chatlog:
+            if c.is_user:
+                chatlog_count = len(c.chatlog)
+                if chatlog_count < min: min = chatlog_count
+                if chatlog_count > max: max = chatlog_count
+                total_chatlogs += 1
+                total_length += chatlog_count
+
+        response = { "min": min, "max": max, "avg": round(total_length / total_chatlogs, 2), "total": total_length }
         return JsonResponse(response)

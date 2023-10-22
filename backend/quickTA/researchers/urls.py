@@ -28,4 +28,13 @@ urlpatterns = [
     path('/v2/avg-conversation-response-rate', AverageConversationResponseRateView.as_view(), name='avg_conversation_response_rate'),
     path('/v2/conversation-per-user-distribution', ConversationPerUserDistributionView.as_view(), name='avg_conversation_response_rate_csv'),
     path('/v2/total-conversation-count', TotalConversationCountView.as_view(), name='total_conversation_count'),
+    path('/v2/total-chatlog-count', TotalChatlogCountView.as_view(), name='total_chatlog_count'),
+    path('/v2/total-post-survey-count', TotalPostSurveyResponseView.as_view(), name='total_user_count'),
+
+    path('/v2/min-max-chatlog-count', MinMaxChatlogCountView.as_view(), name='min_max_chatlog_count'),
+    path('/v2/avg-chatlog-count', AverageChatlogCountView.as_view(), name='avg_chatlog_count'),
+    path('/v2/distinct-post-survey-count', DistinctUserPostSurveyQuestionCountView.as_view(), name='distinct_post_survey_count'),
+    path('/v2/correct-assessment-count', CorrectAssessmentCountView.as_view(), name='correct_assessment_count'),
+    path('/v2/chatlog-length-count', ChatlogLengthView.as_view(), name='avg_chatlog_length'),
+
 ]
