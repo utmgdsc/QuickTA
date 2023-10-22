@@ -14,6 +14,8 @@ from models.serializers import GPTModelSerializer
 from django.shortcuts import get_object_or_404
 from django.core.cache import cache
 
+from student.models import Conversation
+
 
 # Create your views here.
 
@@ -101,7 +103,6 @@ class GPTModelView(APIView):
         data = request.data
         serializer = self.update_gptmodel(data, model_id)
         if serializer.is_valid():
-            serializer.save()
             return JsonResponse(serializer.data)
         return ErrorResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -116,14 +117,17 @@ class GPTModelView(APIView):
     )
     def delete(self, request):
         """
-        Deletes a GPT Model given the model_id and course_id.
+        Deletes a GPT Model given the model_id
         """
-        course_id = request.query_params.get('course_id', '')
         model_id = request.query_params.get('model_id', '')
         model_name = request.query_params.get('model_name', '')
+    
+        if Conversation.objects.filter(model_id=model_id):
+            return ErrorResponse({'msg': 'Cannot delete model with existing conversations.'}, 
+                                    status=status.HTTP_400_BAD_REQUEST)
         
-        if model_id: GPTModel.objects.filter(course_id=course_id, model_id=model_id).delete()
-        else: GPTModel.objects.filter(course_id=course_id, model_name=model_name).delete()
+        if model_id: GPTModel.objects.filter(model_id=model_id).delete()
+        else: GPTModel.objects.filter(model_name=model_name).delete()
 
         return JsonResponse({'msg': 'GPT Model deleted successfully.'})
 
@@ -155,16 +159,16 @@ class GPTModelCourseListView(APIView):
         course_code = request.query_params.get('course_code', '')
         semester = request.query_params.get('semester', '')
 
-        cache_key = f'gptmodel_course_list_{course_id}_{course_code}_{semester}'
-        models = cache.get(cache_key)
+        # cache_key = f'gptmodel_course_list_{course_id}_{course_code}_{semester}'
+        # models = cache.get(cache_key)
 
-        if not models:
-            if course_id: course = get_object_or_404(Course, course_id=course_id)
-            else: course = get_object_or_404(Course, course_code=course_code, semester=semester)
+        # if not models:
+        if course_id: course = get_object_or_404(Course, course_id=course_id)
+        else: course = get_object_or_404(Course, course_code=course_code, semester=semester)
 
-            models = GPTModel.objects.filter(course_id=course.course_id)
-            models = [model.to_dict() for model in models]
-        cache.set(cache_key, models, 60*60*24*7)
+        models = GPTModel.objects.filter(course_id=course.course_id)
+        models = [model.to_dict() for model in models]
+        # cache.set(cache_key, models, 60*60*24*7)
 
         return JsonResponse({'models': models})
 

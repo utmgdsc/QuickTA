@@ -7,8 +7,11 @@ import {
 const ModelHeader = ({courseCode, courseName}) => {
     return (
         <Box>
-            <Heading as='h1' size="lg" color='#2C54A7' lineHeight='0.9'>{courseCode}: {courseName}</Heading>
-            <Text size='lg'>Model Manager</Text>
+            {/* Header */}
+            <Box mt={3}>
+                <p style={{ color: '#2C54A7', lineHeight:'27px', fontSize: '30px', fontWeight: 700, fontFamily: "Poppins" }} mt={5}>{courseCode}: {courseName}</p>
+                <Text size='lg'>Model Manager</Text>
+            </Box>
         </Box>
     );
 }

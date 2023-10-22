@@ -29,14 +29,14 @@ const DashboardHeader = (props) => {
   return (
         <Box mt={3}>
           {/* Filter Selectors */}
-          <Box className="d-flex flex-col flex-sm-row">
+          <Box className="d-flex flex-col flex-md-row">
             <Box>
               <CourseSelect currCourse={currCourse} courses={courses} setCurrCourse={setCurrCourse} courseName={courseName} inConvo={false}/>
             </Box>
-            <Box className="mt-2 mt-sm-0 ms-sm-2">
+            <Box className="mt-2 mt-md-0 ms-md-2">
               <UserScopeSelect userScope={userScope} setUserScope={setUserScope} />
             </Box>
-            <Box className="mt-2 mt-sm-0 ms-sm-2">
+            <Box className="mt-2 mt-md-0 ms-md-2">
               <DeploymentSelect courseID={currCourse.course_id} deploymentFilter={deploymentFilter} setDeploymentFilter={setDeploymentFilter}/>
             </Box>
           </Box>

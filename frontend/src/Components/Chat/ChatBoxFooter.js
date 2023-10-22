@@ -278,7 +278,6 @@ const ChatBoxFooter = ({
           className={`send-button ${(waitingForResp || disableAll.sendButton) ? "disabled" : ""}`}
           fontSize={"sm"}
           onClick={handleSubmit}
-          // isDisabled={waitingForResp || disableAll.sendButton}
         >
           Send
         </Button>

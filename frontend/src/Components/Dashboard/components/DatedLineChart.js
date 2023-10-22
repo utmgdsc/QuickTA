@@ -5,7 +5,7 @@ import { LineChart } from '@mui/x-charts/LineChart';
 import { Box, CircularProgress } from "@mui/material";
 import DateRange from "./DateRange";
 
-// import { useUserScope } from '../../../contexts/UserScopeContext';
+// import { useUserScope } from '../../../Contexts/UserScopeContext';
 
 const DatedLineChart = ({
     title,

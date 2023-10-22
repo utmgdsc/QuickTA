@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import TextField from '@mui/material/TextField';
 import Chip from '@mui/material/Chip';
-import { useDeploymentFilter } from '../contexts/DeploymentFilterContext';
+import { useDeploymentFilter } from '../Contexts/DeploymentFilterContext';
 
 
 /**

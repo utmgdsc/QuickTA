@@ -4,7 +4,7 @@ import App from "./Pages/App";
 import { ChakraProvider } from "@chakra-ui/react";
 import theme from "./assets/theme";
 import { BrowserRouter } from "react-router-dom";
-import { QuickTaProvider } from "./contexts/_QuickTaContext";
+import { QuickTaProvider } from "./Contexts/_QuickTaContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
