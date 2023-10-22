@@ -36,7 +36,7 @@ const ResearcherModels = ({
       }}
     >
       <TopNav UTORid={UTORid} auth={auth} />
-      <Box ml={"5vw"} mr={"5vw"} className="border">
+      <Box ml={"5vw"} mr={"5vw"}>
         <CourseSelect
           currCourse={currCourse}
           courses={courses}
