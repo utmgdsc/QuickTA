@@ -8,6 +8,7 @@ import ErrorDrawer from "../Components/ErrorDrawer";
 import { DataGrid } from "@mui/x-data-grid";
 import { styled } from "@mui/material/styles";
 import {red} from "@mui/material/colors";
+import CourseInfo from "../Components/CourseInfo";
 
 const CoursesPage = ({ UTORID, auth }) => {
 const {
@@ -15,14 +16,16 @@ const {
     onOpen: onErrOpen,
     onClose: onErrClose,
 } = useDisclosure();
+const {
+    isOpen: isCourseOpen,
+    onOpen: onCourseOpen,
+    onClose: onCourseClose,
+} = useDisclosure();
 const [error, setError] = useState();
 const [selectCourse, setSelectCourse] = useState([]);
 const [courseRows, setCourseRows] = useState([]);
 const [courseColumn, setCourseColumn] = useState([]);
-const [studentRows, setStudentRows] = useState([]);
-const [studentColumn, setStudentColumn] = useState([]);
-const [instructorRows, setInstructorRows] = useState([]);
-const [instructColumn, setInstructorColumn] = useState([]);
+
 
 
 const fetchAllCourses = () => {
@@ -40,36 +43,7 @@ const fetchAllCourses = () => {
       });
 };
 
-const fetchTypeUsers = (index, type) => {
-    axios.get(process.env.REACT_APP_API_URL + `/course/users?course_id=${courseRows[index].course_id}&course_code=${courseRows[index].course_code}&semester=${courseRows[index].semester}&user_roles=${type}`)
-    .then((res) => {
-           if (res.data) {
-                let col =  [
-                        {field: 'id', width: 20, headerName: ""},
-                        {field: 'user_id', width: 150, headerName: 'User ID'},
-                        {field: 'name', width: 100, headerName: 'Name'},
-                        {field: 'utorid', width: 150, headerName: 'UTORid'},
-                        {field: 'user_role', width: 150, headerName: 'Role'},
-                        {field: 'model_id', width: 150, headerName: 'Model ID'},
-                        {field: 'new_user', width: 150, headerName: 'New User'},
-                    ];
 
-                if (type === "IS") {
-                    setInstructorRows(res.data.instructors.map((instructor, index) => ({...instructor, id: index})));
-                    setInstructorColumn(col);
-                }
-                if (type === "ST") {
-                    setStudentRows(res.data.students.map((student, index) => ({...student, id: index})));
-                    setStudentColumn(col);
-                }
-            }
-    })
-    .catch((err) => {
-        setError(err);
-        // console.log(err);
-        onErrOpen();
-    });
-}
 const getUserRole = (role) => {
     switch (role) {
       case "AM": return "Admin";
@@ -79,7 +53,7 @@ const getUserRole = (role) => {
       case "ST": return "Student";
       default: return "";
     }
-    }
+}
 const setCourseTable =  (data) => {
     const rows = [];
     for (let i = 0; i < data.length; i++) {
@@ -107,37 +81,37 @@ const setCourseTable =  (data) => {
     setCourseColumn(courseCols);
     };
 
-const setStudentTable =  (data) => {
-        const rows = [];
-        for (let i = 0; i < data.length; i++) {
-          let students = data[i].students;
-          for (let j = 0; j < students.length; j++) {
-            let student = students[j];
-            rows.push({
-            id: j,
-            user_id: student.user_id,
-            name: student.name,
-            utorid: student.utorid,
-            user_role: 'Student',
-            model_id: student.model_id,
-            new_user: student.new_user,
-            });
-          }
-        }
-        console.log(rows);
-        setStudentRows(rows);
-
-        let studentCol = [
-            {field: 'id', width: 20, headerName: ""},
-            {field: 'user_id', width: 150, headerName: 'User ID'},
-            {field: 'name', width: 100, headerName: 'Name'},
-            {field: 'utorid', width: 150, headerName: 'UTORid'},
-            {field: 'user_role', width: 150, headerName: 'Role'},
-            {field: 'model_id', width: 150, headerName: 'Model ID'},
-            {field: 'new_user', width: 150, headerName: 'New User'},
-        ];
-        setStudentColumn(studentCol);
-    };
+// const setStudentTable =  (data) => {
+//         const rows = [];
+//         for (let i = 0; i < data.length; i++) {
+//           let students = data[i].students;
+//           for (let j = 0; j < students.length; j++) {
+//             let student = students[j];
+//             rows.push({
+//             id: j,
+//             user_id: student.user_id,
+//             name: student.name,
+//             utorid: student.utorid,
+//             user_role: 'Student',
+//             model_id: student.model_id,
+//             new_user: student.new_user,
+//             });
+//           }
+//         }
+//         console.log(rows);
+//         setStudentRows(rows);
+//
+//         let studentCol = [
+//             {field: 'id', width: 20, headerName: ""},
+//             {field: 'user_id', width: 150, headerName: 'User ID'},
+//             {field: 'name', width: 100, headerName: 'Name'},
+//             {field: 'utorid', width: 150, headerName: 'UTORid'},
+//             {field: 'user_role', width: 150, headerName: 'Role'},
+//             {field: 'model_id', width: 150, headerName: 'Model ID'},
+//             {field: 'new_user', width: 150, headerName: 'New User'},
+//         ];
+//         setStudentColumn(studentCol);
+//     };
 
 
   useEffect(() => {
@@ -186,28 +160,20 @@ return UTORID.length !== 0 ? (
                 rows={courseRows}
                 columns={courseColumn}
                 onRowSelectionModelChange={(newRowSelected) => {
-                    fetchTypeUsers(newRowSelected, "IS");
-                    fetchTypeUsers(newRowSelected, "ST");
+                    setSelectCourse(newRowSelected);
+                    onCourseOpen();
                 }}
             />
         </Box>
     </Box>
-    <Box overflow={"hidden"} ml={"12vw"} mr={"12vw"} pb={"20px"}>
-        <Box>
-            <StyledDataGrid
-                rows={instructorRows}
-                columns={instructColumn}
-            />
-        </Box>
-    </Box>
-    <Box overflow={"hidden"} ml={"12vw"} mr={"12vw"} pb={"20px"}>
-        <Box>
-            <StyledDataGrid
-                rows={studentRows}
-                columns={studentColumn}
-            />
-        </Box>
-    </Box>
+    <CourseInfo
+        course_code={courseRows[selectCourse].course_code}
+        semester={courseRows[selectCourse].semester}
+        course_id={courseRows[selectCourse].course_id}
+        auth={auth}
+        isOpen={isCourseOpen}
+        onClose={onCourseClose}
+    />
     <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </div>
 ) : null;
