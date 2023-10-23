@@ -22,7 +22,7 @@ const {
     onClose: onCourseClose,
 } = useDisclosure();
 const [error, setError] = useState();
-const [selectCourse, setSelectCourse] = useState([]);
+const [selectCourse, setSelectCourse] = useState(0);
 const [courseRows, setCourseRows] = useState([]);
 const [courseColumn, setCourseColumn] = useState([]);
 
@@ -113,10 +113,10 @@ const setCourseTable =  (data) => {
 //         setStudentColumn(studentCol);
 //     };
 
-
   useEffect(() => {
     fetchAllCourses();
   }, [UTORID]);
+
 
 const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
     // '& .MuiDataGrid-cell': {
@@ -159,13 +159,15 @@ return UTORID.length !== 0 ? (
             <StyledDataGrid
                 rows={courseRows}
                 columns={courseColumn}
-                onRowSelectionModelChange={(newRowSelected) => {
-                    setSelectCourse(newRowSelected);
+                onRowClick={(e) => {
+                    // console.log(courseRows[e.id].course_code)
+                    setSelectCourse(e.id);
                     onCourseOpen();
                 }}
             />
         </Box>
     </Box>
+    {courseRows.length === 0 ? null :
     <CourseInfo
         course_code={courseRows[selectCourse].course_code}
         semester={courseRows[selectCourse].semester}
@@ -173,7 +175,8 @@ return UTORID.length !== 0 ? (
         auth={auth}
         isOpen={isCourseOpen}
         onClose={onCourseClose}
-    />
+    />}
+
     <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </div>
 ) : null;

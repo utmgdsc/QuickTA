@@ -11,6 +11,7 @@ import {
     ModalOverlay,
     Box,
     ModalFooter, Text,
+    Button, ModalCloseButton,
 } from "@chakra-ui/react";
 import ErrorDrawer from "./ErrorDrawer";
 import { useEffect, useState } from "react";
@@ -25,6 +26,7 @@ const {
     onOpen: onErrOpen,
     onClose: onErrClose,
 } = useDisclosure();
+const { isOpen: tisopen, onOpen: tnopen, onClose: tclose } = useDisclosure()
 const [error, setError] = useState();
 const [studentRows, setStudentRows] = useState([]);
 const [studentColumn, setStudentColumn] = useState([]);
@@ -103,72 +105,24 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
 
 return (
     <>
-      <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose}>
+      <Button onClick={tnopen}>Open Modal</Button>SS
+
+      <Modal isOpen={tisopen} onClose={tclose}>
         <ModalOverlay />
         <ModalContent>
-          
-          <ModalHeader>
-            <Text>Course Details</Text>
-          </ModalHeader>
-
+          <ModalHeader>Modal Title</ModalHeader>
+          <ModalCloseButton />
           <ModalBody>
-            <HStack>
-                <VStack>
-                    <Text>Course Code: 
-                        {<Input
-                            onChange={updateField}
-                            value={editField.course_code}
-                            name={"course_code"}
-                            isDisabled={editing}/>}</Text>
-                    <Text>Semester: 
-                        {<Input
-                            onChange={updateField}
-                            value={editField.semester}
-                            name={"semester"}
-                            isDisabled={editing}/>}</Text>
-                </VStack>
-                <HStack>
-                    {/* <Button onClick={() => {
-                        setEditing(true);
-                    }}
-                    isDisabled={auth==="AM"}>Edit</Button>
-                    <Button onClick={() => {
-                        setEditing(false);
-                        axios.
-                    }}></Button> */}
-                </HStack>
-                
-            </HStack>
-            
-            <Box overflow={"hidden"} ml={"12vw"} mr={"12vw"} pb={"20px"}>
-                <Box>
-                    <StyledDataGrid
-                        rows={instructorRows}
-                        columns={instructColumn}
-                    />
-                </Box>
-            </Box>
-            <Box overflow={"hidden"} ml={"12vw"} mr={"12vw"} pb={"20px"}>
-                <Box>
-                    <StyledDataGrid
-                        rows={studentRows}
-                        columns={studentColumn}
-                    />
-                </Box>
-            </Box>
           </ModalBody>
 
           <ModalFooter>
-            <CloseButton onClick={() => {
-                onClose();
-                setStudentRows([]);
-                setInstructorRows([]);
-            }}>Close</CloseButton>
+            <Button colorScheme='blue' mr={3} onClick={onClose}>
+              Close
+            </Button>
+            <Button variant='ghost'>Secondary Action</Button>
           </ModalFooter>
-        
         </ModalContent>
       </Modal>
-      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </>
 );
 }
