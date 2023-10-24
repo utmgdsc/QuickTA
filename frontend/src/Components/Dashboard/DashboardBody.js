@@ -2,7 +2,14 @@ import { Box, Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 import DatedStats from "./DatedStats/DatedStats";
 import ReportTable from "./ReportTable/ReportTable";
 
-const DashboardBody = ({ courseID, setIsLoading }) => {
+const DashboardBody = ({ 
+  courseID, 
+  setIsLoading,
+  userScope,
+  setUserScope,
+  deploymentFilter,
+  setDeploymentFilter
+}) => {
   const tabStyle = {
     borderRadius: "lg",
     color: "white",
@@ -15,6 +22,8 @@ const DashboardBody = ({ courseID, setIsLoading }) => {
           isWeekly={1}
           courseID={courseID}
           setIsLoading={setIsLoading}
+          userScope={userScope}
+          deploymentFilter={deploymentFilter}
         />
         <ReportTable
           course_ID={courseID}

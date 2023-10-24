@@ -118,7 +118,6 @@ const ChatBoxTopNav = ({
                   Automated teaching assistant for
                 </Text>
                 <Heading
-                  as="h2"
                   style={{
                     color: "#012E8A",
                     fontWeight: "700",
@@ -270,7 +269,7 @@ const ChatBoxTopNav = ({
             }}>
               <Box>
                 <Box>
-                  <p style={{ fontWeight: '600', fontStyle: 'Poppins', fontSize: '20px', lineHeight: '30px' }}>Report Bug</p>
+                  <span style={{ fontWeight: '600', fontStyle: 'Poppins', fontSize: '20px', lineHeight: '30px' }}>Report Bug</span>
                 </Box>
                 <Textarea
                   css={{ resize: "none" }}

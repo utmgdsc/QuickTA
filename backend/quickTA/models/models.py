@@ -2,12 +2,15 @@ import uuid
 from django.db import models
 import djongo.models as djmodels
 
+from course.models import Course, CourseDeployment
+
 # Create your models here.
 class GPTModel(models.Model):
     model_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     model_name = models.TextField(max_length=100)
     model_description = models.TextField(max_length=2000, default="")
     course_id = models.CharField(max_length=100)
+    deployment_id = models.CharField(max_length=100, default="")
     status = models.BooleanField(default=True)
 
     # OpenAI Completion Parameters
@@ -32,6 +35,9 @@ class GPTModel(models.Model):
         return str(self.model_id)
     
     def to_dict(self):
+        
+        deployment = CourseDeployment.objects.get(course_id=self.course_id, deployment_id=self.deployment_id)
+
         return {
             "model_id": str(self.model_id),
             "model_name": self.model_name,
@@ -49,6 +55,8 @@ class GPTModel(models.Model):
             "frequency_penalty": self.frequency_penalty,
             "functions": self.functions,
             "function_call": self.function_call,
+            "deployment_id": self.deployment_id,
+            "deployment": deployment.to_dict(),
         }
     
     def to_student_dict(self):

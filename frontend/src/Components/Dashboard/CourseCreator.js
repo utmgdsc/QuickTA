@@ -48,7 +48,6 @@ const CourseCreator = ({
       ...newCourse,
       [e.target.name]: e.target.value,
     });
-    // console.log(newCourse);
   }
 
   const getAllCourses = async () => {

@@ -8,21 +8,29 @@ class CourseSerializer(ModelSerializer):
 
     def __init__(self, *args, **kwargs):
         self.show_users = kwargs.pop('show_users', False)
+        self.show_active_deployments = kwargs.pop('show_active_deployments', False)
         super().__init__(*args, **kwargs)
     
     students = serializers.SerializerMethodField()
     instructors = serializers.SerializerMethodField()
     researchers = serializers.SerializerMethodField()
     admins = serializers.SerializerMethodField()
+    deployments = serializers.SerializerMethodField()
 
     class Meta:
         model = Course
-        fields = [ 'course_id', 'course_code', 'semester', 'course_name', 'start_date', 'end_date', 'students', 'instructors', 'researchers', 'admins' ]
+        fields = [ 'course_id', 'course_code', 'semester', 'course_name', 'start_date', 'end_date', 'students', 'instructors', 'researchers', 'admins', 'deployments' ]
 
     def get_students(self, obj): return [str(student) for student in obj.students] if obj.students and self.show_users else []
     def get_instructors(self, obj): return [str(instructor) for instructor in obj.instructors] if obj.instructors and self.show_users else []
     def get_researchers(self, obj): return [str(researcher) for researcher in obj.researchers] if obj.researchers and self.show_users else []
     def get_admins(self, obj): return [str(admin) for admin in obj.admins] if obj.admins and self.show_users else []
+    def get_deployments(self, obj): 
+        deployments = CourseDeployment.objects.filter(course_id=str(obj.course_id))
+        if self.show_active_deployments:
+            return [deployment.to_dict() for deployment in deployments if deployment.status == 'A']
+        return [deployment.to_dict() for deployment in deployments]
+
 
 class CourseMultipleSerializer(ModelSerializer):
 
@@ -62,4 +70,7 @@ class CourseModelSerializer(ModelSerializer):
         return [model.to_student_dict() for model in models if model.status] 
 
 
-
+class CourseDeploymentSerializer(ModelSerializer):
+    class Meta:
+        model = CourseDeployment
+        fields = ['deployment_id', 'deployment_name', 'course_id', 'priority', 'status']

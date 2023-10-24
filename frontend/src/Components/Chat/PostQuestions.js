@@ -213,7 +213,7 @@ const PostQuestions = ({
                 {questions.map((question, question_idx) => {
                   if (question_idx < 4)
                     return (
-                    <VStack py={2}>
+                    <VStack py={2} key={question_idx}>
                       <div
                         style={{
                           fontSize: "14px",

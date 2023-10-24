@@ -264,7 +264,7 @@ const ChatBoxFooter = ({
           onChange={(e) => {
             setText(e.target.value.slice(0, process.env.MAX_MESSAGE_LENGTH));
           }}
-          isDisabled={waitingForResp || disableAll.inputMessage}
+          // isDisabled={waitingForResp || disableAll.inputMessage}
           onKeyDown={handleChatKeyDown}
         />
 
@@ -278,7 +278,6 @@ const ChatBoxFooter = ({
           className={`send-button ${(waitingForResp || disableAll.sendButton) ? "disabled" : ""}`}
           fontSize={"sm"}
           onClick={handleSubmit}
-          // isDisabled={waitingForResp || disableAll.sendButton}
         >
           Send
         </Button>

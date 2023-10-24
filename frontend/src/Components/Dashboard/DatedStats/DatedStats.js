@@ -7,56 +7,64 @@ import { Grid } from "@mui/material";
 import UniqueUsersCard from "./UniqueUsersCard";
 import ChatlogResponseRateCard from "./ChatlogResponseRateCard";
 import ConversationResponseRateCard from "./ConversationResponseRateCard";
+import TotalConversationCountCard from "./TotalConversationCountCard";
 import ReportedConversationCard from "./ReportedConversationsCard";
 import SurveyDistributionBarChart from "../components/SurveyDistributionBarChart";
 import ConversationCountDistributionBarChart from "../components/ConversationCountDistributionBarChart";
+import TotalChatlogCountCard from "./TotalChatlogCountCard";
+import TotalPostSurveyResponseCard from "./TotalPostSurveyResponseCard";
+import MinMaxChatlogCountCard from "./MinMaxChatlogCountCard";
+import AvgChatlogCountCard from "./AvgChatlogCountCard";
+import DistinctPostSurveyResponseCountCard from "./DistinctPostSurveyResponseCountCard";
+import CorrectAssessmentCountCard from "./CorrectAssessmentCountCard";
+import ChatlogLengthCountCard from "./ChatlogLengthCountCard";
 
-
-const DatedStats = ({ isWeekly, courseID, setIsLoading }) => {
-  const [avgRating, setAvgRating] = useState({
-    avgRating: 0,
-    avgRatingDelta: 0,
-  });
-  
-  const [avgComfort, setAvgComfort] = useState({
-    avgComfort: 0,
-    avgComfortDelta: 0,
-  });
-  const [numReport, setNumReport] = useState({ numReport: 0 });
-
-  // Fetch file loader for headers
-  const fileDownload = require("js-file-download");
-  const [error, setError] = useState();
-  function computePrevAvg(data, currAvg) {
-    // we need to look at avg of indices 0, .. , data-2
-    if (data.length <= 1) {
-      return 0;
-    }
-    let x = currAvg * data.length;
-    x -= data[data.length - 1];
-    if (data.length === 1) {
-      return Math.round((currAvg - x / 1) * 100) / 100;
-    } else {
-      return Math.round((currAvg - x / (data.length - 1)) * 100) / 100;
-    }
-  }
+const DatedStats = ({ courseID}) => {
 
   return (
     <>
       <Grid container columnSpacing={{ xs: 1, md: 2}} rowSpacing={{ xs: 1, md: 2 }}>
         {/* Row 1 */}
-        <Grid item xs={6} md={3}>
+        <Grid item xs={6} md={3} lg={2}>
           <UniqueUsersCard courseID={courseID} />
         </Grid>
-        <Grid item xs={6} md={3}>
-          <ChatlogResponseRateCard courseID={courseID} />
+        <Grid item xs={6} md={3} lg={2}>
+          <TotalChatlogCountCard courseID={courseID} />
         </Grid>
-        <Grid item xs={6} md={3}>
+        <Grid item xs={6} md={3} lg={2}>
+          <MinMaxChatlogCountCard courseID={courseID} />
+        </Grid>
+        <Grid item xs={6} md={3} lg={2}>
+          <AvgChatlogCountCard courseID={courseID} />
+        </Grid>
+        <Grid item xs={6} md={3} lg={2}>
+          <TotalConversationCountCard courseID={courseID} />
+        </Grid>
+        <Grid item xs={6} md={3} lg={2}>
+          <TotalPostSurveyResponseCard courseID={courseID} />
+        </Grid>
+        <Grid item xs={6} md={3} lg={2}>
+          <DistinctPostSurveyResponseCountCard courseID={courseID} />
+        </Grid>
+        <Grid item xs={6} md={3} lg={2}>
+          <CorrectAssessmentCountCard courseID={courseID} />
+        </Grid>
+
+        <Grid item xs={6} md={3} lg={2}>
           <ConversationResponseRateCard courseID={courseID} />
         </Grid>
-        <Grid item xs={6} md={3}>
+        <Grid item xs={6} md={3} lg={2}>
+          <ChatlogResponseRateCard courseID={courseID} />
+        </Grid>
+        <Grid item xs={6} md={3} lg={2}>
+          <ChatlogLengthCountCard courseID={courseID} />
+        </Grid>
+        <Grid item xs={6} md={3} lg={2}>
           <ReportedConversationCard courseID={courseID} />
         </Grid>
+
+       
+        
         {/* Row 2 */}
         <Grid item xs={12} md={6} xl={3}>
           <AnalyticsCard>

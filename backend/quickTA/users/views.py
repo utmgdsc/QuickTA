@@ -379,4 +379,10 @@ class UserUnenrolledCoursesView(APIView):
 
 class TestView(APIView):
     def get(self, request):
+
+        from models.models import GPTModel
+
+        GPTModel.objects.filter(temperature=0).update(deployment_id="7ffb83cd-3dbe-453f-96fc-b93c626c821b")
+
+
         return JsonResponse({"msg": "Test message"})

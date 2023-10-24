@@ -20,6 +20,12 @@ dl { width: 100% }
 .align-items-center { align-items: center; }
 .align-items-end { align-items: last baseline;}
 
+.slide-in { transform: translateX(0) }
+.slide-out { transform: translateX(100%); }
+
+/* Primary styles */
+.bg-primary { background-color: #2C54A6 !important; }
+
 /* QuickTA */
 
 .glass {
@@ -220,6 +226,11 @@ dl { width: 100% }
   background: #7292d6 !important;
 }
 
+.selected-border:hover {
+  border: 3px solid #1c50c2 !important;
+  background: #5f82ce !important;
+}
+
 .wrong-border {
   border: 3px solid #a51e1e !important;
   background: #bd6262 !important;
@@ -230,10 +241,15 @@ dl { width: 100% }
   background: #589758 !important;
 }
 
-.hidden-border {
+.normal-border {
   border: 3px solid #EEF2F6 !important;
   background: #EEF2F6 !important;
+  color: black !important;
+}
 
+.normal-border:hover {
+  border: 3px solid #E3E8EF !important;
+  background: #E3E8EF !important;
 }
 
 .wrong-border.disabled-choice {
@@ -248,12 +264,15 @@ dl { width: 100% }
   border: 3px solid #3e7a3ebb !important;
 }
 
-.hidden-border {
+.hidden-border, .disabled-border {
   border: 3px solid #EEF2F6bb !important;
   background: #eef2f6bc !important;
   color: #00000067 !important;
 }
 
+.disabled-border {
+  cursor: not-allowed !important;
+}
 
 
 /* Chatbox Footer buttons */
@@ -303,10 +322,57 @@ dl { width: 100% }
   font-weight: 600;
   font-style: Poppins;
   border-radius: 8px;
+  cursor: pointer;
 }
 
 .red-button:hover {
   background: #B53D37
+}
+
+.blue-button {
+  background: #2464b2;
+  color: white;
+  font-size: 16px; 
+  line-height: 19px; 
+  padding: 10px 16px; 
+  font-weight: 600;
+  font-style: Poppins;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.blue-button:hover {
+  background: #2a5898;
+}
+
+.green-button {
+  background: #37A169;
+  color: white;
+  font-size: 16px; 
+  line-height: 19px; 
+  padding: 10px 16px; 
+  font-weight: 600;
+  font-style: Poppins;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.green-button:hover {
+  background: #48835D;
+}
+
+.done-button {
+  background: #2464b2;
+  color: white;
+  /* padding: 16px 16px;  */
+  font-style: Poppins;
+  border-radius: 5px;
+  border: 3px solid #2464b2;
+}
+
+.done-button:hover {
+  background: #2a5898;
+  border: 3px solid #2a5898;
 }
 
 .grey-button {
@@ -341,4 +407,38 @@ dl { width: 100% }
   font-size: 16px;
   font-weight: 600;
   padding: 4px 10px;
+}
+
+.reported-conversation-tr {
+  background-color: #EEF2F6;
+  color: black;
+  font-size: 16px;
+  padding: 4px 10px;
+}
+
+.reported-conversation-tr:hover {
+  background-color: #E3E8EF;
+  cursor: pointer;
+}
+
+@media screen and (max-width: 768px) {
+  .chat-master-container {
+    margin-left: 8vw !important;
+    margin-right: 8vw !important;
+  } 
+}
+
+@media screen and (max-width: 576px) {
+  .chat-master-container {
+    margin-left: 12px !important;
+    margin-right: 12px !important;
+  }
+}
+
+.models-active-row {
+  background: #b5cbfa;
+}
+
+.models-copy-row {
+  background: #b1bcd3;
 }

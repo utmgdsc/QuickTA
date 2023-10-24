@@ -4,7 +4,7 @@ import fileDownload from "js-file-download";
 import StatCard from "../components/StatCard";
 
 const ReportedConversationCard = ({courseID}) => {
-    const [numReport, setNumReport] = useState({ numReport: 0 });
+    const [numReport, setNumReport] = useState(null);
 
     /**
      * Get the reported conversations
@@ -15,7 +15,7 @@ const ReportedConversationCard = ({courseID}) => {
           process.env.REACT_APP_API_URL +
             `/researchers/reported-conversations?filter=${"All"}&course_id=${courseID}&timezone=America/Toronto`
         )
-        .then((res) => { setNumReport({ numReport: res.data.total_reported }); })
+        .then((res) => { setNumReport(res.data.total_reported); })
         .catch((err) => { console.log(err); });
     }
 
@@ -46,7 +46,7 @@ const ReportedConversationCard = ({courseID}) => {
         callBack={downloadReportedConversations}
         title={"Reported Conversations"}
         downloadable={true}
-        label={String(numReport.numReport)}
+        label={numReport ? numReport : "-"}
         helpText={"number of conversations reported by students"}
       />);
 }

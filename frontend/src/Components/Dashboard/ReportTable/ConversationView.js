@@ -1,12 +1,5 @@
 import {
   Button,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
   Table,
   Tbody,
   Td,
@@ -17,6 +10,8 @@ import {
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import ErrorDrawer from "../../ErrorDrawer";
+import Box from '@mui/material/Box';
+import Modal from '@mui/material/Modal';
 
 const ConversationView = ({ isOpen, onClose, convo_id }) => {
   const [convo, setConvo] = useState([]);
@@ -131,6 +126,27 @@ const ConversationView = ({ isOpen, onClose, convo_id }) => {
     return delta;
   }
 
+  const downloadConversation = async () => {
+    await axios
+      .post(
+        process.env.REACT_APP_API_URL +
+          `/researchers/reported-chatlogs-csv?conversation_id=${convo_id}`
+      )
+      .then((res) => {
+        if (res.headers["content-disposition"]) {
+          fileDownload(
+            res.data,
+            res.headers["content-disposition"].split('"')[1]
+          );
+        }
+      })
+      .catch((err) => {
+        setError(err);
+        // console.log(err);
+        onErrOpen();
+      });
+  };
+
   useEffect(() => {
     if (convo_id) {
       fetchConversation(convo_id);
@@ -140,70 +156,73 @@ const ConversationView = ({ isOpen, onClose, convo_id }) => {
   return (
     <>
       <Modal
-        isOpen={isOpen}
+        open={isOpen}
         onClose={onClose}
-        scrollBehavior={"inside"}
         size="5xl"
+        disableAutoFocus={true}
       >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader
-            style={{
-              fontFamily: "Poppins",
-            }}
+        <Box sx={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          zIndex: '100',
+          transform: 'translate(-50%, -50%)',
+          width: '40%',
+          bgcolor: 'background.paper',
+          boxShadow: 10,
+          pt: 2,
+          px: 4,
+          pb: 3,
+          borderRadius: '8px',
+          width: '85vw',
+          height: '85vh',
+          overflowY: "scroll"
+          }}
+          className="overflow-y-scroll"
           >
-            Conversation View
-          </ModalHeader>
-          <ModalBody>
-            <Table>
-              <Thead>
-                <Tr>
-                  <Td>From</Td>
-                  <Td>Message</Td>
-                  <Td>Time</Td>
-                  <Td>Delta</Td>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {convo.map(({ speaker, chatlog, time, delta }, index) => (
-                  <Tr key={index}>
-                    <Td>{speaker}</Td>
-                    <Td>{chatlog}</Td>
-                    <Td>{parseTime(time)}</Td>
-                    <Td>{parseDelta(delta)}</Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              onClick={async () => {
-                await axios
-                  .post(
-                    process.env.REACT_APP_API_URL +
-                      `/researchers/reported-chatlogs-csv?conversation_id=${convo_id}`
-                  )
-                  .then((res) => {
-                    if (res.headers["content-disposition"]) {
-                      fileDownload(
-                        res.data,
-                        res.headers["content-disposition"].split('"')[1]
-                      );
-                    }
-                  })
-                  .catch((err) => {
-                    setError(err);
-                    // console.log(err);
-                    onErrOpen();
-                  });
-              }}
+            <span style={{
+              fontWeight: 'bold',
+              fontSize: '20px',
+              color: '#000000',
+              textAlign: 'center',
+              display: 'block',
+            }}>
+              Conversation View
+            </span>
+            <Box className="d-flex my-4 overflow-y-scroll px-4"
+             sx={{ height: "85%" }}
             >
-              Download
-            </Button>
-            <ModalCloseButton>Close</ModalCloseButton>
-          </ModalFooter>
-        </ModalContent>
+              <Table> 
+                <Thead style={{ position: 'sticky', top: 0, backgroundColor: '#007bff' }}>
+                  <Tr> 
+                    <Td className="bg-primary p-2 text-light position-sticky">From</Td> 
+                    <Td className="bg-primary p-2 text-light position-sticky">Message</Td> 
+                    <Td className="bg-primary p-2 text-light position-sticky">Time</Td> 
+                    <Td className="bg-primary p-2 text-light position-sticky">Delta</Td> 
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {convo.map(({ speaker, chatlog, time, delta }, index) => (
+                    <Tr key={index}>
+                      <Td className="border p-2"> <span style={{ lineHeight: "14px", fontSize: "14px"}}>{speaker}</span> </Td> 
+                      <Td className="border p-2"> 
+                        {chatlog.split("\n").map((line, index) => (
+                          <p key={index} style={{ lineHeight: "16px", fontSize: "14px"}}>{line}</p>
+                        ))}
+                      </Td> 
+                      <Td className="border p-2" style={{ width: "180px"}}> <span style={{ lineHeight: "14px", fontSize: "14px"}}>{parseTime(time)}</span> </Td> 
+                      <Td className="border p-2"> <span style={{ lineHeight: "14px", fontSize: "14px"}}>{parseDelta(delta)}</span> </Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+          </Box>
+          <Box className="d-flex justify-content-between w-100">
+            <Button className="blue-button" onClick={downloadConversation}> Download </Button>
+            <Button className="red-button" onClick={onClose}>Close</Button>
+          </Box>
+
+        </Box>
       </Modal>
       <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </>

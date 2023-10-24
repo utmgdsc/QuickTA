@@ -18,6 +18,7 @@ import axios from "axios";
 import "../../assets/styles.css";
 import ErrorDrawer from "../ErrorDrawer";
 import { Temporal } from "@js-temporal/polyfill";
+import { Alert, Modal } from "@mui/material";
 
 const Chat = ({
   currCourse,
@@ -33,14 +34,15 @@ const Chat = ({
   UTORid,
   auth,
 }) => {
-  const [messages, updateMessages] = useState([
+  const defaultMessages = [
     {
       message:
         "Hi! I am an AI assistant designed to support you in your Python programming learning journey. I cannot give out solutions to your assignments (python code) but I can help guide you if you get stuck. The chat is monitored, if you continue asking for the solution here, the instructors would be made aware of it. How can I help you?",
       dateSent: Temporal.Now.zonedDateTimeISO().toString(),
       isUser: false,
     },
-  ]);
+  ]
+  const [messages, updateMessages] = useState([]);
   const [inConvo, updateInConvo] = useState(false);
   const [currConvoID, updateConvoID] = useState("");
   const [openConvoHistory, setOpenConvoHistory] = useState(false);
@@ -61,6 +63,7 @@ const Chat = ({
     sendButton: false,
     oldConvoButtons: false,
   });
+  const [showNotActiveConversation, setShowNotActiveConversation] = useState(false);
 
   const getConversations = async () => {
     let params = "course_id=" + currCourse.course_id + "&user_id=" + userId;
@@ -72,13 +75,54 @@ const Chat = ({
       .then((res) => {
         let data = res.data;
         if (data.conversations) setConversations(data.conversations);
+
+        // If there are no conversations, create a new one
+        if (data.conversations.length === 0) {
+          setDisableAll((prevDisableAll) => ({
+            inputMessage: false,
+            sendButton: false,
+            newConversation: true,
+            endChat: false,
+            oldConvoButtons: false,
+          }));
+          updateInConvo(false);
+          updateConvoID("");
+          setIsOldConvo(false);
+          updateMessages([]);
+          createNewConversation();
+        } else {
+          // If there are conversations, check if there is an active one
+          let activeConvo = data.conversations.find(
+            (convo) => convo.status === "A"
+            );
+          if (activeConvo) {
+            // If there is an active conversation, load the messages
+            updateConvoID(activeConvo.conversation_id);
+            updateInConvo(true);
+            setIsOldConvo(false);
+            getConversationMessages(activeConvo.conversation_id);
+          } else {
+            setDisableAll((prevDisableAll) => ({
+              inputMessage: false,
+              sendButton: false,
+              newConversation: true,
+              endChat: false,
+              oldConvoButtons: false,
+            }));
+            updateInConvo(false);
+            updateConvoID("");
+            setIsOldConvo(false);
+            updateMessages([]);
+            createNewConversation();
+            setWaitForResp(false);
+          }
+        }
       })
       .catch((err) => {
-        setError(err);
-        // console.log(err);
-        onErrOpen();
+        console.log(err);
       });
   };
+
 
   const getConversationMessages = async (convoID) => {
     updateMessages([]);
@@ -100,7 +144,6 @@ const Chat = ({
             };
           });
           updateMessages(msgs);
-          // console.log(msgs);
         }
         setWaitForResp(false);
       })
@@ -121,6 +164,7 @@ const Chat = ({
         isUser: false,
       },
     ]);
+    setWaitForResp(false);
   };
 
   useEffect(() => {
@@ -149,6 +193,7 @@ const Chat = ({
 
   return (
     <Box
+    className="chat-master-container"
       ml={"10vw"}
       mr={"10vw"}
       style={{
@@ -259,14 +304,12 @@ const Chat = ({
                 }}
               >
                 <Button
-                  // backgroundColor="#ACCDEC"
-                  // color="#555"
                   size="sm"
-                  isDisabled={
-                    waitingForResp ||
-                    (disableAll.newConversation && messages.length === 1) ||
-                    (!inConvo && !currConvoID && !isOldConvo)
-                  }
+                  // isDisabled={
+                  //   waitingForResp ||
+                  //   (disableAll.newConversation && messages.length === 1) ||
+                  //   (!inConvo && !currConvoID && !isOldConvo)
+                  // }
                   style={{
                     width: "100%",
                     height: "100%",
@@ -289,12 +332,41 @@ const Chat = ({
                   }}
                   onClick={() => {
                     if (
-                      (currConvoID && inConvo && !isOldConvo) ||
-                      (inConvo && isOldConvo)
+                      !(waitingForResp || 
+                      (disableAll.newConversation && messages.length === 1) || 
+                      (!inConvo && !currConvoID && !isOldConvo))
                     ) {
                       // open technical assessment
-                      setIsOpenTechAssessment(true);
+                      if (inConvo) {
+                        setIsOpenTechAssessment(true);
+                      } else {
+                        
+                        // Check if there are no active conversations 
+                        let noActiveConversations = conversations.every((convo) => convo.status !== "A" );
+                        if (currConvoID && isOldConvo && noActiveConversations ) {
+                          // Create a new conversation
+                          setDisableAll((prevDisableAll) => ({
+                            inputMessage: false,
+                            sendButton: false,
+                            newConversation: true,
+                            endChat: false,
+                            oldConvoButtons: false,
+                          }));
+                          updateInConvo(false);
+                          updateConvoID("");
+                          setIsOldConvo(false);
+                          updateMessages([]);
+                          createNewConversation();
+
+                        } else {
+                          setShowNotActiveConversation(true);
+                          setTimeout(() => {
+                            setShowNotActiveConversation(false);
+                          }, 5000);
+                        }
+                      }
                     } else {
+                      // Create a new conversation
                       setDisableAll((prevDisableAll) => ({
                         inputMessage: false,
                         sendButton: false,
@@ -334,14 +406,11 @@ const Chat = ({
             }}
           >
             <div>
-              {/* <p>InConvo: {inConvo ? "T" : "F"}</p>
-              <p>currConvoID: {currConvoID ? currConvoID : ""}</p>
-              <p>inputMessage: { disableAll.inputMessage ? "true" : "false,"}</p>
-              <p>sendButton: { disableAll.sendButton ? "T" : "F,"}</p>
-              <p>newConversation: { disableAll.newConversation ? "T" : "F,"}</p>
-              <p>endChat: { disableAll.endChat ? "T" : "F,"}</p>
-              <p>oldConvoButtons: { disableAll.oldConvoButtons ? "T" : "F,"}</p> */}
-
+              {/* <p>InConvo {inConvo ? ": T" : ": F"}</p>
+              <p>New Conversation: {disableAll.newConversation ? "T" : "F"}</p>
+              <p>currConvoID: {currConvoID}</p>
+              <p>isOldConvo: {isOldConvo ? "T" : "F"} </p> */}
+              <p></p>
               {conversations.map((convo, index) => {
                 return (
                   <Box
@@ -483,7 +552,7 @@ const Chat = ({
             courseCode={currCourse.course_code}
             currConvoID={currConvoID}
           />
-          {/* Chatbox footer controllers - max Height: 70% */}
+          {/* Chatbox main chat box - max Height: 70% */}
           <ChatBox messages={messages} waitingForResp={waitingForResp} />
 
           {/* Chatbox footer controllers - max Height: 15% */}
@@ -513,6 +582,22 @@ const Chat = ({
           />
         </Box>
       </Box>
+      {showNotActiveConversation &&
+        <Alert severity="warning"
+          style={{
+            position: "absolute",
+            top: "10vh",
+            left: "10vw",
+            width: "80vw",
+            zIndex: 100,
+            border: "1px solid #EAEAEA",
+            borderShadow: "1px 2px 3px 1px rgba(0,0,0,0.12)",
+            borderRadius: "8px",
+          }}
+        >
+            Active conversations found! Please end your current active conversations first!
+        </Alert>
+      }
       <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </Box>
   );

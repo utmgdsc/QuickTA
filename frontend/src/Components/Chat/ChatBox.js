@@ -1,12 +1,15 @@
 import ChatBubble from "./ChatBubble";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
 const ChatBox = ({ messages, waitingForResp }) => {
   const messagesEndRef = useRef(null);
-
+  const [initialWait, setInitialWait] = useState(true);
+  
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => { if (waitingForResp) { setInitialWait(false); }}, [waitingForResp]);
 
   return (
     <div
@@ -103,7 +106,7 @@ const ChatBox = ({ messages, waitingForResp }) => {
         return chatBubbles;
       })}
 
-      {waitingForResp ? (
+      {waitingForResp || initialWait ? (
         <div
           className="typing"
           style={{
@@ -111,9 +114,10 @@ const ChatBox = ({ messages, waitingForResp }) => {
             justifyContent: "center",
             alignItems: "center",
             width: "100%",
+            height: messages.length === 0 ? "100%" : ""
           }}
         >
-          <div className="dot-flashing"></div>
+          <div className="dot-flashing"></div> 
         </div>
       ) : null}
       <div ref={messagesEndRef} />

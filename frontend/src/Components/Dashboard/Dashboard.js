@@ -37,6 +37,8 @@ const Dashboard = ({
           setIsLoading={setIsLoading}
           userScope={userScope}
           setUserScope={setUserScope}
+          deploymentFilter={deploymentFilter}
+          setDeploymentFilter={setDeploymentFilter}
         />
       </Box>
     </>

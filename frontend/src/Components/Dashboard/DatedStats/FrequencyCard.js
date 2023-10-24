@@ -11,12 +11,14 @@ import {
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, FormControl, InputLabel, TextField } from "@mui/material";
 
 const FrequencyCard = ({ courseID }) => {
 
   const [words, setCommonWords] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [numWords, setNumWords] = useState(30);
+  const [gramSize, setGramSize] = useState(3);
 
   const cardStyle = {
     backgroundColor: "white",
@@ -67,7 +69,16 @@ const FrequencyCard = ({ courseID }) => {
   const getMostCommonTopics = async () => {
     return await axios
       .get(
-        process.env.REACT_APP_API_URL + "/researchers/most-common-words" + `?filter=${"All"}&course_id=${courseID}&timezone=America/Toronto`
+        process.env.REACT_APP_API_URL + "/researchers/most-common-words",
+        {
+          params: {
+            filter: "All",
+            course_id: courseID,
+            timezone: "America/Toronto",
+            num_words: numWords,
+            max_ngram_size: gramSize,
+          },
+        }
       )
       .then((res) => {
         let data = res.data;
@@ -85,19 +96,49 @@ const FrequencyCard = ({ courseID }) => {
         setIsLoading(false);
       });
   };
+  
 
   useEffect(() => {
-    getMostCommonTopics();
-  }, [courseID]);
+    if (numWords && gramSize) {
+      setIsLoading(true);
+      getMostCommonTopics();
+    }
+  }, [courseID, numWords, gramSize]);
 
   return (
     <Box className="d-flex flex-col h-100" style={{ padding: '20px' }}>
-      
       <Box>
         <span style={titleStyle}>Most Common Words</span>
       </Box>
-      <Box className="d-flex flex-col justify-content-around h-100 py-5 py-md-2">
-        <Divider my={3} />
+      {/* Result */}
+      <Box className="d-flex flex-col justify-content-start h-100 py-3 py-md-2">
+        <Box>
+           {/* Settings controller */}
+            <Box className="m-3 mt-1">
+              <FormControl fullWidth size="small">
+                <HStack spacing={3} mt={3}>
+                    <TextField
+                      size="small"
+                      type="number"
+                      variant="outlined"
+                      label="Number of Words"
+                      value={numWords}
+                      onChange={(e) => setNumWords(e.target.value)}
+                    />
+                  <Box>
+                    <TextField
+                      size="small"
+                      type="number"
+                      variant="outlined"
+                      value={gramSize}
+                      label="N-Gram Size"
+                      onChange={(e) => setGramSize(e.target.value)}
+                    />
+                  </Box>
+                </HStack>
+              </FormControl>
+            </Box>
+
             <Box className="d-flex justify-content align-items-center mx-3">
               <Text className="me-2">Less Frequent</Text>
               <Box
@@ -109,18 +150,21 @@ const FrequencyCard = ({ courseID }) => {
               <Text className="ms-2">More Frequent</Text>
             </Box>
           <Divider my={3} />
+        </Box>
         <Box
           className="d-flex flex-wrap justify-content-center align-items-center"
           style={{ gap: "8px" }}
         >
           {isLoading ? 
-            <Box className="h-100 d-flex justify-content-center align-items-center">
+            <Box className="h-100 d-flex justify-content-center align-items-center"
+              style={{ minHeight: "300px" }}
+            >
               <CircularProgress />
             </Box>
           : words.length === 0 ? (
             <div 
               className="d-flex justify-content-center align-items-center" 
-              style={{ width: "100%", textAlign: "center", }} >
+              style={{ minHeight: "300px", width: "100%", textAlign: "center", }} >
               No Common Words
             </div>
           ) : (

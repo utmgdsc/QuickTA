@@ -5,11 +5,15 @@ import { LineChart } from '@mui/x-charts/LineChart';
 import { Box, CircularProgress } from "@mui/material";
 import DateRange from "./DateRange";
 
+// import { useUserScope } from '../../../Contexts/UserScopeContext';
+
 const DatedLineChart = ({
     title,
     courseID,
     height
 }) => {
+
+// const { userScope } = useUserScope();
 const [isLoading, setIsLoading] = useState(true);
 const [dates, setDates] = useState([]);
 const [counts, setCounts] = useState([]);
@@ -129,7 +133,7 @@ useEffect(() => {
 return (
     <Box className="d-flex flex-col h-100" style={{ padding: '20px'}}>
         <Box>
-            <h2 style={{ fontWeight: '700' }}>{title}</h2> 
+            <p style={{ fontWeight: '700' }}>{title}</p> 
             {/* Time Range Picker */}
             <DateRange 
                 startDate={startDate} 

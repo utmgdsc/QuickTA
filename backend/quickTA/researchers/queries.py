@@ -68,3 +68,24 @@ def conversations_per_user_query_pipeline(course_id, start_date, end_date):
         { '$project': { '_id': 0, 'conversation_count': '$_id', 'user_count': 1 } },
         { '$sort': { 'conversation_count': 1 } }
     ]
+
+def total_conversation_count_query_pipeline(deployment_ids, user_roles):
+    return [
+        { '$lookup': {
+                'from': 'models_gptmodel',  # Collection name to join with
+                'localField': 'model_id',
+                'foreignField': 'model_id',
+                'as': 'model_data' }   # Alias for the joined model data
+        },
+        { '$unwind': '$model_data' },  # Unwind the model_data array (if present)
+        { '$match': { 'model_data.deployment_id': {'$in': deployment_ids} } },
+        # {  '$lookup': {
+        #         'from': 'users_user',  # Collection name to join with
+        #         'localField': 'user_id',
+        #         'foreignField': 'user_id',
+        #         'as': 'user_data' }  # Alias for the joined user data
+        # },
+        # { '$unwind': '$user_data' },  # Unwind the user_data array (if present)
+        # { '$match': { 'user_data.user_role': {'$in': user_roles} } },
+        # { '$group': { '_id': '$user_data.user_role', 'conversation_count': {'$sum': 1} } }
+    ]

@@ -21,7 +21,7 @@ const StudentPage = ({
 }) => {
   const [models, setModels] = useState([]);
   const [currModel, setCurrModel] = useState({});
-  const [waitingForResp, setWaitForResp] = useState(false);
+  const [waitingForResp, setWaitForResp] = useState(true);
   const {
     isOpen: isErrOpen,
     onOpen: onErrOpen,
@@ -36,7 +36,7 @@ const StudentPage = ({
       .get(process.env.REACT_APP_API_URL + `/course/models?${params}`)
       .then((res) => {
         let data = res.data;
-        setWaitForResp(true);
+        // setWaitForResp(true);
         if (data.models) {
           setModels(data.models);
 
@@ -50,7 +50,7 @@ const StudentPage = ({
         } else {
           // console.log("No models for this course!");
         }
-        setWaitForResp(false);
+        // setWaitForResp(false);
       })
       .catch((err) => {
         setError(err);

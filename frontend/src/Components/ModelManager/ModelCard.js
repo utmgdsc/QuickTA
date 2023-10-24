@@ -1,306 +1,453 @@
 import {
   Box,
-  Text,
-  Flex,
-  Button,
-  useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
   FormLabel,
-  Switch,
-  FormControl,
   Heading,
   Stack,
   Input,
-  ModalFooter,
   HStack,
   Divider,
-  Textarea,
+  FormControl,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import ErrorDrawer from "../ErrorDrawer";
+import { CircularProgress, Grid, IconButton, InputLabel, MenuItem, Select, Switch, TextField, TextareaAutosize, Tooltip } from "@mui/material";
+import { create } from "@mui/material/styles/createTransitions";
+import { Form } from "react-router-dom";
+import { ClearIcon } from "@mui/x-date-pickers";
 
 const ModelCard = ({
-  modelName,
-  colorScheme,
   modelId,
   courseid,
-  modelStatus,
   setCurrentModel,
-  setEnabling,
-  enabling,
+  currentModel,
+  selectedModel,
+  setSelectedModel,
+  createModel,
+  setCreateModel,
+  getAllModels,
+  allModels,
+  setAllModels
 }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [newModelSettings, setModelSettings] = useState({
-    name: "",
+  const defaultModelTemplate = {
+    deployment_id: "",
+    model_name: "",
     model: "",
     prompt: "",
-    maxTokens: 0,
-    topP: 0.0,
-    presence_pen: 0.0,
-    freq_pen: 0.0,
-  });
-  const {
-    isOpen: isErrOpen,
-    onOpen: onErrOpen,
-    onClose: onErrClose,
-  } = useDisclosure();
-  const [error, setError] = useState();
-  function updateField(e) {
-    setModelSettings({
-      ...newModelSettings,
-      [e.target.name]: e.target.value,
-    });
+    max_tokens: 0,
+    top_p: 0.0,
+    presence_penalty: 0.0,
+    frequency_penalty: 0.0,
+    temperature: 0.0,
+    status: true,
   }
+  const [newModel, setNewModel] = useState(defaultModelTemplate);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deploymentList, setDeploymentList] = useState([]);
 
+  const updateField = (field, value) => {
+    setNewModel({ ...newModel, [field]: value,});
+  }
+  
+  /**
+   * Reset the new model to the default template
+   */
+  const resetNewModel = () => {
+    setNewModel(defaultModelTemplate);
+  };
+
+  /**
+   * Validates all model settings field
+   * @param {Model object} obj Model settings to be validated
+   * @returns true if all fields are valid, false otherwise
+   */
   function isValid(obj) {
     for (const [key, value] of Object.entries(obj)) {
-      if (["name", "model", "prompt"].includes(key)) {
-        if (value.length <= 0) {
-          return false;
-        }
-      } else if (key === "maxTokens") {
-        if (isNaN(parseInt(value)) || value < 0) {
-          return false;
-        }
+      if (["deployment_id", "model_name", "model", "prompt"].includes(key)) {
+        if (value.length <= 0) { return false; }
+        break;
+      } else if (key === "max_tokens") {
+        if (isNaN(parseInt(value)) || value < 0) { return false; }
+      } else if (key === "status" && typeof value == "boolean") {
+          break;
       } else {
-        if (isNaN(parseFloat(value)) || value < 0) {
-          return false;
-        }
-      }
+        if (isNaN(parseFloat(value)) || value < 0) { return false; }
+      } 
     }
     return true;
   }
 
+  /**
+   * Create a new model
+   */
+  const createNewModel = async () => {
+    setIsSubmitting(true);
+    await axios
+      .post(process.env.REACT_APP_API_URL + `/models/gpt`, {
+        course_id: courseid,
+        deployment_id: newModel.deployment_id,
+        model_name: newModel.model_name,
+        model: newModel.model,
+        model_description: newModel.model_description,
+        prompt: newModel.prompt,
+        max_tokens: newModel.max_tokens,
+        top_p: newModel.top_p,
+        presence_penalty: newModel.presence_penalty,
+        frequency_penalty: newModel.frequency_penalty,
+        temperature: newModel.temperature,
+        status: newModel.status,
+      })
+      .then((res) => {
+        setIsSubmitting(false);
+        getAllModels();
+        setCreateModel(false);
+      })
+      .catch((err) => {
+        setIsSubmitting(false);
+        console.log(err);
+      });
+  };
+  
+  /**
+   * Update the model settings
+   */
   const updateModel = async () => {
-    setEnabling(true);
+    setIsSubmitting(true);
+    let modelId = currentModel.model_id;
     await axios
       .patch(
         process.env.REACT_APP_API_URL + `/models/gpt?model_id=${modelId}`,
         {
-          model_name: newModelSettings.name,
-          model: newModelSettings.model,
-          prompt: newModelSettings.prompt,
-          max_tokens: newModelSettings.maxTokens,
-          top_p: newModelSettings.topP,
-          presence_penalty: newModelSettings.presence_pen,
-          frequency_penalty: newModelSettings.freq_pen,
-          temperature: newModelSettings.temperature,
+          course_id: currentModel.course_id,
+          deployment_id: currentModel.deployment_id,
+          model_name: newModel.model_name,
+          model: newModel.model,
+          model_description: newModel.model_description,
+          prompt: newModel.prompt,
+          max_tokens: newModel.max_tokens,
+          top_p: newModel.top_p,
+          presence_penalty: newModel.presence_penalty,
+          frequency_penalty: newModel.frequency_penalty,
+          temperature: newModel.temperature,
+          status: newModel.status,
         }
       )
-      .then((res) => {
-        setEnabling(false);
+      .then((res) => { 
+        setIsSubmitting(false);
+        
+        // Update the model in allModels
+        let _allModels = allModels;
+        _allModels.map((model) => {
+          if (model.model_id === currentModel.model_id) {
+            model.model_name = newModel.model_name;
+            model.model = newModel.model;
+            model.model_description = newModel.model_description;
+            model.prompt = newModel.prompt;
+            model.max_tokens = newModel.max_tokens;
+            model.top_p = newModel.top_p;
+            model.presence_penalty = newModel.presence_penalty;
+            model.frequency_penalty = newModel.frequency_penalty;
+            model.temperature = newModel.temperature;
+            model.status = newModel.status;
+          }
+        })
+        setAllModels(_allModels);
       })
       .catch((err) => {
-        setError(err);
-        // console.log(err);
-        onErrOpen();
+        setIsSubmitting(false);
+        console.log(err);
       });
   };
 
+  /**
+   * Enable the model
+   */
   const enableModel = async () => {
-    setEnabling(true);
     await axios
-      .get(
-        process.env.REACT_APP_API_URL +
-          `/models/gpt/activate?course_id=${courseid}&model_id=${modelId}`
-      )
-      .then((res) => {
-        setCurrentModel(modelId);
-        setEnabling(false);
-      })
-      .catch((err) => {
-        setError(err);
-        // console.log(err);
-        onErrOpen();
-      });
+      .get( process.env.REACT_APP_API_URL + `/models/gpt/activate?course_id=${courseid}&model_id=${modelId}`)
+      .then((res) => { setCurrentModel(modelId); })
+      .catch((err) => { console.log(err); });
   };
 
-  const fetchModelDetails = async () => {
-    return await axios
-      .get(process.env.REACT_APP_API_URL + `/models/gpt?model_id=${modelId}`)
-      .then((res) => {
-        const model_settings = res.data;
-        setModelSettings({
-          name: model_settings.model_name,
-          model: model_settings.model,
-          prompt: model_settings.prompt,
-          maxTokens: model_settings.max_tokens,
-          topP: model_settings.top_p,
-          presence_pen: model_settings.presence_penalty,
-          freq_pen: model_settings.frequency_penalty,
-          temperature: model_settings.temperature,
-        });
-        console.log(res.data.max_tokens);
-      })
-      .catch((err) => {
-        setError(err);
-        // console.log(err);
-        onErrOpen();
-      });
-  };
+  /**
+   * Disable the model
+   */
+  const getModelSettings = () => {
+    setNewModel({
+      model_name: currentModel.model_name,
+      model: currentModel.model,
+      model_description: currentModel.model_description,
+      prompt: currentModel.prompt,
+      max_tokens: currentModel.max_tokens,
+      top_p: currentModel.top_p,
+      presence_penalty: currentModel.presence_penalty,
+      frequency_penalty: currentModel.frequency_penalty,
+      temperature: currentModel.temperature,
+      status: currentModel.status,
+    });
+  }
+
+  /**
+   * Get the course deployments
+   */
+  const getCourseDeployments = async () => {
+    // const roles = await axios.get(process.env.REACT_APP_API_URL + `/course/deployments?course_id=${courseID}`)
+    await axios.get(process.env.REACT_APP_API_URL + `/course/deployment?course_id=${courseid}`)
+        .then((res) => {
+            let data = res.data;
+            setDeploymentList(data.deployments);
+            setNewModel({ ...newModel, deployment_id: data.deployments[0].deployment_id });
+        })
+}
+  /**
+   * Handles the close event of the model card
+   */
+  const handleClose = () => {
+    if (createModel) { setCreateModel(false); }
+    // Find current model in allModels
+    let _allModels = allModels;
+    _allModels.map((model) => {
+      if (model.model_id === currentModel.model_id) {
+        model.selected = false;
+      }
+    })
+    setAllModels(_allModels);
+
+    resetNewModel(); 
+    setSelectedModel(null);
+
+  }
+
+  useEffect(() => {
+    if (currentModel.model_id) { getModelSettings(); } 
+    else { resetNewModel(); }
+  }, [currentModel]);
+
+  useEffect(() => {
+    if (createModel) { getCourseDeployments(); }
+  }, [createModel]);
 
   return (
-    <>
-      <Button
-        colorScheme={colorScheme}
-        boxSizing="border-box"
-        p="10px"
-        onClick={() => {
-          onOpen();
-          fetchModelDetails();
-        }}
-        isDisabled={enabling}
-      >
-        <Box borderBottom="2px" pb="5px">
-          <Flex>
-            <Text size="lg" fontWeight="500">
-              {modelName}
-            </Text>
-          </Flex>
+    
+    <Box className="m-3">
+      <Box>
+        <Box className="d-flex justify-content-between align-items-center w-100">
+          <Heading size={"lg"} style={{ fontWeight: 700}}>
+            Model Information
+          </Heading>
+          <Tooltip title="Close">
+            <IconButton onClick={handleClose}>
+              <ClearIcon />
+            </IconButton>
+          </Tooltip>
         </Box>
-      </Button>
+        {createModel ? 
+          <Box>
+            <FormControl fullWidth size="small" className="my-2">
+              <InputLabel id="deployment-select-label">Course Deployment</InputLabel>
+              <Select 
+                placeholder="Select a course deployment"
+                required
+                variant="outlined"
+                size="small"
+                onChange={(e) => updateField("deployment_id", e.target.value)}
+                value={newModel.deployment_id}
+                name={"deployment_id"}
+                fullWidth>
+                {deploymentList.map((deployment) => ( <MenuItem value={deployment.deployment_id}>{deployment.deployment_name}</MenuItem> ))}
+              </Select>
+            </FormControl>
+          </Box>
+          : <></>
+        }
 
-      <Modal
-        isOpen={isOpen}
-        onClose={onClose}
-        closeOnOverlayClick={false}
-        scrollBehavior="inside"
-      >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>
-            <Heading size={"lg"} style={{ paddingBottom: "8px" }}>
-              {modelName}
-            </Heading>
-            <HStack style={{ margin: 0, padding: 0 }}>
-              <p>Enable Model:</p>
-              <Switch
-                id="model-status"
-                defaultChecked={modelStatus}
-                isReadOnly={modelStatus}
-                onChange={() => {
-                  enableModel();
-                  onClose();
-                }}
-              />
-            </HStack>
-          </ModalHeader>
-          <ModalBody>
-            <Divider />
+      </Box>
+      <Box>
+        <HStack style={{ margin: 0, padding: 0 }}>
+          <p>Enable Model:</p>
+          <Switch 
+            color="success"
+            checked={newModel.status}
+            onChange={() => { setNewModel({ ...newModel, status: !newModel.status }); }}
+          />
+        </HStack>
+        <Stack spacing={2}>
+            <TextField
+              className="my-2"
+              label="Name"
+              required
+              variant="outlined"
+              size="small"
+              onChange={(e) => updateField("model_name", e.target.value)}
+              value={newModel.model_name}
+              name={"name"}
+              fullWidth
+            />
 
-            <Stack spacing={2}>
-              <FormControl id={"Required Parameters"} isRequired>
-                <FormLabel>Name</FormLabel>
-                <Input
-                  onChange={updateField}
-                  value={newModelSettings.name}
-                  name={"name"}
-                />
+            <TextField
+              className="my-2"
+              label="Large-Langauge Model"
+              required
+              variant="outlined"
+              size="small"
+              onChange={(e) => updateField("model", e.target.value)}
+              value={newModel.model}
+              name={"model"}
+              fullWidth
+            />
 
-                <FormLabel>Model</FormLabel>
-                <Input
-                  onChange={updateField}
-                  value={newModelSettings.model}
-                  name={"model"}
-                />
-
-                <FormLabel>Prompt</FormLabel>
-                <Textarea
-                  onChange={updateField}
-                  value={newModelSettings.prompt}
-                  name={"prompt"}
-                  style={{ minHeight: "320px" }}
-                />
-              </FormControl>
-
-              <FormControl id={"Optional Parameters"}>
-                <FormLabel>Max Tokens</FormLabel>
-                <Input
-                  onChange={updateField}
+            <FormLabel 
+              className="mt-2"
+              id="prompt-label"
+            >Description</FormLabel>
+            <TextareaAutosize
+              className="my-2 border"
+              label="Description"
+              placeholder="Enter a description for the model"
+              required
+              onChange={(e) => updateField("model_description", e.target.value)}
+              value={newModel.model_description}
+              minRows={3}
+              style={{ 
+                width: "100%",
+                padding: "16px",
+                overflow: "auto",
+                resize: "none",
+              }}
+            />
+            
+            <FormLabel 
+              className="mt-2"
+              id="prompt-label"
+            >Prompt *</FormLabel>
+            <TextareaAutosize
+              className="my-2 border"
+              label="Prompt"
+              required
+              onChange={(e) => updateField("prompt", e.target.value)}
+              value={newModel.prompt}
+              minRows={8}
+              style={{ 
+                width: "100%",
+                padding: "16px",
+                overflow: "auto",
+              }}
+            />
+            
+            {/* GPT based fields */}
+            <Grid container>
+              <Grid xs={6}>
+                <Grid className="ms-1">
+                <TextField
+                  className="my-2"
+                  label="Max Tokens"
+                  required
+                  InputLabelProps={{ shrink: true }}
+                  variant="outlined"
+                  size="small"
+                  onChange={(e) => updateField("max_tokens", e.target.value)}
+                  value={newModel.max_tokens}
                   name={"maxTokens"}
-                  value={newModelSettings.maxTokens}
+                  fullWidth
                 />
+                </Grid>
+              </Grid>
+              <Grid xs={6}>
+                <Grid className="ms-1">
+                  <TextField
+                    className="mt-2"
+                    label="Top P"
+                    required
+                    variant="outlined"
+                    size="small"
+                    onChange={(e) => updateField("top_p", e.target.value)}
+                    value={newModel.top_p}
+                    name={"topP"}
+                    fullWidth
+                  />
+                </Grid>
+              </Grid>
 
-                <FormLabel>Top P</FormLabel>
-                <Input
-                  onChange={updateField}
-                  value={newModelSettings.topP}
-                  name={"topP"}
-                />
+              <Grid xs={6}>
+                <Grid className="ms-1">
+                  <TextField
+                    className="mt-2"
+                    label="Presence Penalty"
+                    required
+                    variant="outlined"
+                    size="small"
+                    onChange={(e) => updateField("presence_penalty", e.target.value)}
+                    value={newModel.presence_penalty}
+                    name={"presence_penalty"}
+                    fullWidth
+                  />
+                </Grid>
+              </Grid>
+              <Grid xs={6}>
+                <Grid className="ms-1">
+                  <TextField
+                    className="mt-2"
+                    label="Frequency Penalty"
+                    required
+                    variant="outlined"
+                    size="small"
+                    onChange={(e) => updateField("frequency_penalty", e.target.value)}
+                    value={newModel.frequency_penalty}
+                    name={"frequency_penalty"}
+                    fullWidth
+                  />
+                </Grid>
+              </Grid>
+              <Grid xs={6}>
+                <Grid className="ms-1">
+                  <TextField
+                    className="mt-2"
+                    label="Temperature"
+                    required
+                    variant="outlined"
+                    size="small"
+                    onChange={(e) => updateField("temperature", e.target.value)}
+                    value={newModel.temperature}
+                    name={"temperature"}
+                    fullWidth
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
 
-                <FormLabel>Presence Penalty</FormLabel>
-                <Input
-                  onChange={updateField}
-                  value={newModelSettings.presence_pen}
-                  name={"presence_pen"}
-                />
-
-                <FormLabel>Frequency Penalty</FormLabel>
-                <Input
-                  onChange={updateField}
-                  value={newModelSettings.freq_pen}
-                  name={"freq_pen"}
-                />
-
-                <FormLabel>Temperature</FormLabel>
-                <Input
-                  onChange={updateField}
-                  value={newModelSettings.temperature}
-                  name={"temperature"}
-                />
-              </FormControl>
-            </Stack>
-          </ModalBody>
-          <ModalFooter>
-            <HStack spacing={3}>
-              <Button
-                colorScheme={"green"}
-                onClick={() => {
-                  if (isValid(newModelSettings)) {
-                    onClose();
-                    updateModel();
-                    setModelSettings({
-                      name: "",
-                      model: "",
-                      prompt: "",
-                      maxTokens: 0,
-                      topP: 0.0,
-                      presence_pen: 0.0,
-                      freq_pen: 0.0,
-                    });
-                  }
-                }}
-              >
-                Submit Edits
-              </Button>
-              <Button
-                colorScheme={"blue"}
-                onClick={() => {
-                  onClose();
-                  setModelSettings({
-                    name: "",
-                    model: "",
-                    prompt: "",
-                    maxTokens: 0,
-                    topP: 0.0,
-                    presence_pen: 0.0,
-                    freq_pen: 0.0,
-                  });
-                }}
-              >
-                Close
-              </Button>
-            </HStack>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-      <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
-    </>
+        </Stack>
+      </Box>
+      <Box className="d-flex justify-content-between mt-4">
+        <Box className="d-flex">
+          {createModel ? 
+            <Box className="green-button"
+              style={{ cursor: "pointer" }}
+              onClick={() => {  if (isValid(newModel)) { createNewModel(); }  }}
+            >
+              Create Model
+            </Box>
+          : <Box className="blue-button"
+              style={{ cursor: "pointer" }}
+              onClick={() => {  if (isValid(newModel)) { updateModel(); }  }}
+            >
+              Submit Edits
+            </Box>}
+          {isSubmitting && 
+            <Box className="d-flex align-items-center ms-2">
+              <CircularProgress size={14} color="info" /> &nbsp;Submitting edits...
+            </Box>
+          }
+        </Box>
+        <Box 
+          className="red-button" 
+          onClick={() => {
+            if (createModel) { setCreateModel(false); }
+            resetNewModel(); 
+            setSelectedModel(null);
+          }}>
+          Close
+        </Box>
+      </Box>
+    </Box>
   );
 };
 

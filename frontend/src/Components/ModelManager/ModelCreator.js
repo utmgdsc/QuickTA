@@ -121,18 +121,17 @@ const ModelCreator = ({ creating, setCreating, courseid }) => {
         </Button>
       </Box>
 
-      <Modal
-        isOpen={isOpen}
-        onClose={onClose}
-        closeOnOverlayClick={false}
-        scrollBehavior="inside"
+      <Box
+        // isOpen={isOpen}
+        // onClose={onClose}
+        // closeOnOverlayClick={false}
+        // scrollBehavior="inside"
       >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>
+        <Box>
+          <Box>
             <Heading size={"lg"}>Model Creator</Heading>
-          </ModalHeader>
-          <ModalBody background="#F9F9F9">
+          </Box>
+          <Box background="#F9F9F9">
             <Stack spacing={2}>
               <FormControl id={"Required Parameters"} isRequired>
                 <FormLabel>Name</FormLabel>
@@ -215,8 +214,8 @@ const ModelCreator = ({ creating, setCreating, courseid }) => {
                 </NumberInput>
               </FormControl>
             </Stack>
-          </ModalBody>
-          <ModalFooter>
+          </Box>
+          <Box>
             <HStack spacing={3}>
               <Button
                 colorScheme={"green"}
@@ -260,9 +259,9 @@ const ModelCreator = ({ creating, setCreating, courseid }) => {
                 Close
               </Button>
             </HStack>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+          </Box>
+        </Box>
+      </Box>
       <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} />
     </>
   );
