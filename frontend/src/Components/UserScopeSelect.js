@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import TextField from '@mui/material/TextField';
 import Chip from '@mui/material/Chip';
-import { useUserScope } from '../Contexts/UserScopeContext';
+import { useUserScope } from '../contexts/UserScopeContext';
 
 /**
  * Allows users to select the scope of users to include given a list of userScope.

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import StatCard from "../components/StatCard";
-import { useDeploymentFilter } from "../../../Contexts/DeploymentFilterContext";
-import { useUserScope } from "../../../Contexts/UserScopeContext";
+import { useDeploymentFilter } from "../../../contexts/DeploymentFilterContext";
+import { useUserScope } from "../../../contexts/UserScopeContext";
 
 const ChatlogLengthCountCard = () => {
     
