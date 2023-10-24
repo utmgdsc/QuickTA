@@ -14,7 +14,8 @@ import ErrorDrawer from "../Components/ErrorDrawer";
 import SettingPage from "./SettingPage";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CoursesPage from "./CoursesPage";
-import UsersPage from "./UsersPage";
+import HistoryPage from "./HistoryPage";
+import UsersPageRevamped from "./UsersPageRevamped";
 // import { red } from "@mui/material/colors";
 
 
@@ -200,8 +201,12 @@ const App = () => {
             element={<CoursesPage UTORID={UTORid} auth={auth}/>}
           />
           <Route
+            path="/history"
+            element={<HistoryPage UTORID={UTORid} auth={auth}/>}
+          />
+          <Route
             path="/users"
-            element={<UsersPage UTORID={UTORid} auth={auth}/>}
+            element={<UsersPageRevamped UTORID={UTORid} auth={auth}/>}
           />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

@@ -15,10 +15,9 @@ import {styled} from "@mui/material/styles";
 import {DataGrid} from "@mui/x-data-grid";
 import {red} from "@mui/material/colors";
 
-const UsersPage = ({ UTORID, auth }) => {
+const HistoryPage = ({ UTORID, auth }) => {
     const [user_id, setUser_id] = useState("");
     const [is_new, setIsNew] = useState(false);
-    const [models, setModels] = useState([]);
     const [convoRows, setConvoRows] = useState([]);
     const [convoColumn, setConvoColumn] = useState([]);
     const [unenrolledRows, setUnenrolledRows] = useState([]);
@@ -129,14 +128,14 @@ const UsersPage = ({ UTORID, auth }) => {
     // Called everytime main course that is selected has changed
     const fetchPastConvos = async (user_id, course_id) => {
         // fetch all models from course id, set names and id
-        await axios.get(process.env.REACT_APP_API_URL + `/models/gpt/course?course_id=${course_id}`)
+        let lookup = await axios.get(process.env.REACT_APP_API_URL + `/models/gpt/course?course_id=${course_id}`)
                     .then((res) => {
                         if(res.data){
                             let currModels = res.data.models.reduce((acc, currModel) => {
                                 acc[currModel.model_id] = currModel.model_name;
                                 return acc;
                             }, {});
-                            setModels(currModels);
+                            return currModels;
                         }
 
                     })
@@ -146,15 +145,15 @@ const UsersPage = ({ UTORID, auth }) => {
                     });
         // fetching all convos in course
         await axios.get(process.env.REACT_APP_API_URL +
-            `/student/conversation/history?user_id=${user_id}&course_id=${course_id}&model_ids=${Object.keys(models).join(",")}`)
+            `/student/conversation/history?user_id=${user_id}&course_id=${course_id}&model_ids=${Object.keys(lookup).join(",")}`)
             .then((res) => {
                 if(res.data){
-                    setConvoRows(res.data.conversations.map((convo, index) => ({...convo, id: index})));
-
+                    setConvoRows(res.data.conversations.map((convo, index) => ({...convo, id: index, model_name: lookup[convo.model_id],
+                        start_time: convo.start_time.slice(0,10)})));
                     let convoColumns = [
-                        {field: 'id', width: 20, headerName: ""},
-                        {field: 'conversation_name', width: 100, headerName: 'Conversation Name'},
-                        {field: 'model_name', width: 150, headerName: 'Model Name'},
+                        // {field: 'id', width: 20, headerName: ""},
+                        {field: 'conversation_name', width: 250, headerName: 'Conversation Name'},
+                        {field: 'model_name', width: 300, headerName: 'Model Name'},
                         {field: 'start_time', width: 150, headerName: 'Start Time'},
                         {field: 'end_time', width: 150, headerName: 'End Time'},
                         {field: 'status', width: 150, headerName: 'Status'},
@@ -242,7 +241,7 @@ const UsersPage = ({ UTORID, auth }) => {
                             }
                         </VStack>
 
-                        <VStack p={10}>
+                        <VStack py={10}>
                                 <Text fontSize='lg'>Conversations</Text>
                                 {convoRows.length <= 0 ?
                                     <Text>No conversations in this course</Text> :
@@ -267,4 +266,4 @@ const UsersPage = ({ UTORID, auth }) => {
     ) : null;
 }
 
-export default UsersPage;
+export default HistoryPage;
