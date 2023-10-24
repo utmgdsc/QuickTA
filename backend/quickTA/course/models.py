@@ -28,7 +28,7 @@ class Course(models.Model):
         ]
 
 class CourseDeployment(models.Model):
-    deployment_id = models.CharField(default=uuid.uuid4(), max_length=50, editable=False, unique=True)
+    deployment_id = models.CharField(default=uuid.uuid4, max_length=50, editable=False, unique=True)
     deployment_name = models.TextField(max_length=1000)
     course_id = models.CharField(max_length=50)
     priority = models.IntegerField(default=0)

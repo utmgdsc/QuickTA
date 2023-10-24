@@ -1107,3 +1107,9 @@ class ChatlogLengthView(APIView):
 
         response = { "min": min, "max": max, "avg": round(total_length / total_chatlogs, 2), "total": total_length }
         return JsonResponse(response)
+    
+class GetSpecificDataView(APIView):
+    
+    def get(self, request):
+
+        return JsonResponse({})

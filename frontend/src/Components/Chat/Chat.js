@@ -332,20 +332,41 @@ const Chat = ({
                   }}
                   onClick={() => {
                     if (
-                      !(waitingForResp ||
-                      (disableAll.newConversation && messages.length === 1) ||
+                      !(waitingForResp || 
+                      (disableAll.newConversation && messages.length === 1) || 
                       (!inConvo && !currConvoID && !isOldConvo))
                     ) {
                       // open technical assessment
                       if (inConvo) {
                         setIsOpenTechAssessment(true);
                       } else {
-                        setShowNotActiveConversation(true);
-                        setTimeout(() => {
-                          setShowNotActiveConversation(false);
-                        }, 5000);
+                        
+                        // Check if there are no active conversations 
+                        let noActiveConversations = conversations.every((convo) => convo.status !== "A" );
+                        if (currConvoID && isOldConvo && noActiveConversations ) {
+                          // Create a new conversation
+                          setDisableAll((prevDisableAll) => ({
+                            inputMessage: false,
+                            sendButton: false,
+                            newConversation: true,
+                            endChat: false,
+                            oldConvoButtons: false,
+                          }));
+                          updateInConvo(false);
+                          updateConvoID("");
+                          setIsOldConvo(false);
+                          updateMessages([]);
+                          createNewConversation();
+
+                        } else {
+                          setShowNotActiveConversation(true);
+                          setTimeout(() => {
+                            setShowNotActiveConversation(false);
+                          }, 5000);
+                        }
                       }
                     } else {
+                      // Create a new conversation
                       setDisableAll((prevDisableAll) => ({
                         inputMessage: false,
                         sendButton: false,
@@ -385,6 +406,11 @@ const Chat = ({
             }}
           >
             <div>
+              {/* <p>InConvo {inConvo ? ": T" : ": F"}</p>
+              <p>New Conversation: {disableAll.newConversation ? "T" : "F"}</p>
+              <p>currConvoID: {currConvoID}</p>
+              <p>isOldConvo: {isOldConvo ? "T" : "F"} </p> */}
+              <p></p>
               {conversations.map((convo, index) => {
                 return (
                   <Box

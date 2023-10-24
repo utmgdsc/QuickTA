@@ -28,6 +28,7 @@ class Conversation(models.Model):
         null=True
     )
     conversation_log = djmodels.JSONField(default=list)
+    forced_inactive = models.CharField(max_length=1, default="")
 
     def __str__(self):
         return f"[{str(self.course_id)}] {str(self.user_id)} - Conversation {str(self.conversation_id)}"
