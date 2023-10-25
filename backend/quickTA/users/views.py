@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from django.http import JsonResponse
 from django.shortcuts import render
 from .serializers import UserSerializer, UserBatchAddSerializer
-from .models import User
+from users.models import User, UserStatistic
 from rest_framework import status
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -26,6 +26,29 @@ from course.serializers import CourseSerializer
 
 
 # Create your views here.
+class LoginView(APIView):
+    @swagger_auto_schema(
+        operation_summary="Login",
+        responses={200: UserSerializer(), 404: "User not found"},
+        manual_parameters=[
+            openapi.Parameter("utorid", openapi.IN_QUERY, description="UTORID", type=openapi.TYPE_STRING),
+        ]
+    )
+    def get(self, request):
+        """
+        Login with utorid
+        """
+        utorid = request.query_params.get('utorid', '')
+        if not(utorid): utorid = request.headers['Utorid']
+
+        if utorid == '':
+            return ErrorResponse("Bad request", status=status.HTTP_400_BAD_REQUEST)
+        
+        user = get_object_or_404(User, utorid=utorid)
+        UserStatistic.objects.create(user_id=user.user_id, operation="login")
+        serializer = UserSerializer(user)
+
+        return JsonResponse(serializer.data)
 class UserView(APIView):
 
     @swagger_auto_schema(

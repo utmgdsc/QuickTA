@@ -36,7 +36,7 @@ const App = () => {
   const getUserId = async () => {
     setIsLoading(true);
     const user = await axios
-      .get(process.env.REACT_APP_API_URL + `/user?utorid=${UTORid}`)
+      .get(process.env.REACT_APP_API_URL + `/user/login?utorid=${UTORid}`)
       .then(async (res) => {
         // User authentication
         let data = res.data;

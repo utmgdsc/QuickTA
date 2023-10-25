@@ -6,6 +6,7 @@ app_name = 'users_api'
 urlpatterns = [
     # path('/:id', user_detail),
     # path('/list', user_list),
+    path('/login', LoginView.as_view()),
     path('', UserView.as_view()),
     path('/all', UserListView.as_view()),
     path('/courses', UserCoursesListView.as_view()),

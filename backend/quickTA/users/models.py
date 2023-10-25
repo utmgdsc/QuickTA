@@ -28,3 +28,9 @@ class User(models.Model):
             models.Index(fields=['user_id'], name='user_id_idx'),
             models.Index(fields=['utorid'], name='utorid_idx'),
         ]
+
+class UserStatistic(models.Model):
+    
+    user_id = models.CharField(max_length=100)
+    operation = models.CharField(max_length=100)
+    time = models.DateTimeField(auto_now_add=True)

@@ -563,7 +563,6 @@ class CourseDeploymentView(APIView):
         """
         Creates a course deployment
         """
-        request.data['deployment_id'] = uuid1()
         serializer = CourseDeploymentSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
