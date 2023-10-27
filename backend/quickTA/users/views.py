@@ -45,7 +45,7 @@ class LoginView(APIView):
             return ErrorResponse("Bad request", status=status.HTTP_400_BAD_REQUEST)
         
         user = get_object_or_404(User, utorid=utorid)
-        UserStatistic.objects.create(user_id=user.user_id, operation="login")
+        # UserStatistic.objects.create(user_id=user.user_id, operation="login")
         serializer = UserSerializer(user)
 
         return JsonResponse(serializer.data)
@@ -405,7 +405,7 @@ class TestView(APIView):
 
         from models.models import GPTModel
 
-        GPTModel.objects.filter(temperature=0).update(deployment_id="7ffb83cd-3dbe-453f-96fc-b93c626c821b")
+        # GPTModel.objects.filter(temperature=0).update(deployment_id="7ffb83cd-3dbe-453f-96fc-b93c626c821b")
 
 
         return JsonResponse({"msg": "Test message"})

@@ -1111,5 +1111,4 @@ class ChatlogLengthView(APIView):
 class GetSpecificDataView(APIView):
     
     def get(self, request):
-
         return JsonResponse({})
