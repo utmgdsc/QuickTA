@@ -23,7 +23,7 @@ const App = () => {
   const [userId, setuserId] = useState("");
   const [model_id, setModelId] = useState("");
   const [auth, setAuth] = useState("");
-  const [UTORid, setUtorID] = useState("choiman3");
+  const [UTORid, setUtorID] = useState("");
   const [isNewUser, setIsNewUser] = useState(true);
   // const [courseName, setCourseName] = useState("");
   const {
@@ -109,7 +109,9 @@ const App = () => {
   };
 
   useEffect(() => {
-    if (UTORid) { getUserId(); }
+    if (!UTORid) { 
+      getUserId(); 
+    }
   }, [UTORid]);
 
   const MuiTheme = createTheme({

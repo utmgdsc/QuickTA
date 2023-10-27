@@ -36,3 +36,7 @@ __pycache__/*
 
 .env
 docs/node_modules/*
+
+settings.py
+*/settings.py
+frontend/.env
