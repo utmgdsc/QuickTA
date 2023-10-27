@@ -14,8 +14,10 @@ import { Chip, } from "@mui/material";
 import {styled} from "@mui/material/styles";
 import {DataGrid} from "@mui/x-data-grid";
 import {red} from "@mui/material/colors";
+import AdminConversationView from "../Components/AdminConversationView";
 
 const HistoryPage = ({ UTORID, auth }) => {
+    const [isLoading, setIsLoading] = useState(true);
     const [user_id, setUser_id] = useState("");
     const [is_new, setIsNew] = useState(false);
     const [convoRows, setConvoRows] = useState([]);
@@ -31,6 +33,7 @@ const HistoryPage = ({ UTORID, auth }) => {
     } = useDisclosure();
     const [error, setError] = useState();
     const {isOpen, onOpen, onClose} = useDisclosure();
+    const [rowIndex, setRowIndex] = useState(0);
 
     const enroll = async (course_id, course_code, semester) => {
         await axios.post(process.env.REACT_APP_API_URL + `/course/enroll?course_id=${course_id}&course_code=${course_code}&utorid=${UTORID}&user_role=${auth}&semester=${semester}`,{})
@@ -148,8 +151,16 @@ const HistoryPage = ({ UTORID, auth }) => {
             `/student/conversation/history?user_id=${user_id}&course_id=${course_id}&model_ids=${Object.keys(lookup).join(",")}`)
             .then((res) => {
                 if(res.data){
-                    setConvoRows(res.data.conversations.map((convo, index) => ({...convo, id: index, model_name: lookup[convo.model_id],
-                        start_time: convo.start_time.slice(0,10)})));
+                    setConvoRows(res.data.conversations.map((convo, index) => ({
+                        id: index,
+                        conversation_id: convo.conversation_id,
+                        conversation_name: convo.conversation_name,
+                        model_name: lookup[convo.model_id],
+                        model_id: convo.model_id,
+                        start_time: convo.start_time,
+                        end_time: convo.end_time === null ? '' : convo.end_time,
+                        status: convo.status,
+                    })));
                     let convoColumns = [
                         // {field: 'id', width: 20, headerName: ""},
                         {field: 'conversation_name', width: 250, headerName: 'Conversation Name'},
@@ -251,7 +262,18 @@ const HistoryPage = ({ UTORID, auth }) => {
                                         <StyledDataGrid
                                             rows={convoRows}
                                             columns={convoColumn}
-
+                                            onRowClick={(e) => {
+                                                // console.log(convoRows[e.row.id].conversation_id)
+                                                setRowIndex(e.row.id);
+                                                onOpen();
+                                            }}
+                                        />
+                                        <AdminConversationView
+                                            convo_id={convoRows[rowIndex].conversation_id}
+                                            isOpen={isOpen}
+                                            onClose={onClose}
+                                            UTORID={UTORID}
+                                            model_id={convoRows[rowIndex].model_id}
                                         />
                                     </div>
 

@@ -68,7 +68,6 @@ const TopNav = ({ UTORid, auth }) => {
         spacing="2vw"
         style={{
           marginRight: "2vw",
-          overflowX: "scroll",
           paddingLeft: "1vw",
         }}
       >
@@ -88,41 +87,34 @@ const TopNav = ({ UTORid, auth }) => {
           </NavLink>
         )}
         {auth === "AM" && (
-            <FormControl variant="standard">
-              <InputLabel id="demo-simple-select-standard-label">Settings</InputLabel>
-              <Select
-              label="Settings">
-                <MenuItem disabled value="">
-                  <em>Settings</em>
-                </MenuItem>
-                <MenuItem>
-                {["IS", "AM", "RS"].includes(auth) && (
-                    <NavLink to="/courses" activeClassName="active-link">
-                        Courses
-                    </NavLink>
-                )}
-                </MenuItem>
-                <MenuItem>
-                {["IS", "AM", "RS"].includes(auth) && (
-                    <NavLink to="/users" activeClassName="active-link">
-                        Users
-                    </NavLink>
-                )}
-                </MenuItem>
-                <MenuItem>
-                {["IS", "AM", "RS"].includes(auth) && (
-                    <NavLink to="/history" activeClassName="active-link">
-                        History
-                    </NavLink>
-                )}
-                </MenuItem>
-              </Select>
-            </FormControl>
-
-          // <NavLink activeClassName="active-link">
-          //   Settings
-          // </NavLink>
-
+            <div className="dropdown">
+            <div className="custom-link">
+              Settings
+            </div>
+            <div className="dropdown-content">
+              <div>
+              {["IS", "AM", "RS"].includes(auth) && (
+                  <NavLink to="/courses" >
+                      Courses
+                  </NavLink>
+              )}
+              </div>
+              <div>
+              {["IS", "AM", "RS"].includes(auth) && (
+                  <NavLink to="/users" >
+                      Users
+                  </NavLink>
+              )}
+            </div>
+              <div>
+              {["IS", "AM", "RS"].includes(auth) && (
+                  <NavLink to="/history" >
+                      History
+                  </NavLink>
+              )}
+              </div>
+            </div>
+            </div>
         )}
         {/*{["IS", "AM", "RS"].includes(auth) && (*/}
         {/*    <NavLink to="/courses" activeClassName="active-link">*/}
