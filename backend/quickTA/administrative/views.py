@@ -15,7 +15,7 @@ from users.models import User
 from django.shortcuts import get_object_or_404
 from rest_framework.serializers import *
 from rest_framework import serializers
-class ConversationSerializer(ModelSerializer):
+class AdminConversationSerializer(ModelSerializer):
 
     class Meta:
         model = Conversation
@@ -67,7 +67,7 @@ class ConversationQueryView(APIView):
                 required=False,
             )
         ],
-        responses={200: ConversationSerializer(many=True)}
+        responses={200: AdminConversationSerializer(many=True)}
     )
     def get(self, request):
         course_id = request.query_params.get("course_id", '')
@@ -91,6 +91,6 @@ class ConversationQueryView(APIView):
         conversation_ids = [chatlog.conversation_id for chatlog in chatlogs]
         conversations = Conversation.objects.filter(conversation_id__in=conversation_ids)
 
-        serializer = ConversationSerializer(conversations, many=True)
+        serializer = AdminConversationSerializer(conversations, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

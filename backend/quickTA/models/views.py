@@ -66,7 +66,7 @@ class GPTModelView(APIView):
         data = request.data
         serializer = self.create_gptmodel(data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(model_id=uuid.uuid4())
             return JsonResponse(serializer.data)
         return ErrorResponse(serializer.errors)
     
@@ -135,7 +135,7 @@ class GPTModelView(APIView):
         """
         Creates a GPT Model given the parameter specifications.
         """
-        model_id = uuid.uuid4()
+        model_id = str(uuid.uuid4())
         data['model_id'] = model_id
         serializer = GPTModelSerializer(data=data)
         return serializer

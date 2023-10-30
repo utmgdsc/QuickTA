@@ -6,7 +6,7 @@ from course.models import Course, CourseDeployment
 
 # Create your models here.
 class GPTModel(models.Model):
-    model_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    model_id = models.CharField(default="", max_length=100)
     model_name = models.TextField(max_length=100)
     model_description = models.TextField(max_length=2000, default="")
     course_id = models.CharField(max_length=100)

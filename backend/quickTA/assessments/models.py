@@ -6,13 +6,13 @@ import djongo.models as djmodels
 # Create your models here.
 
 class Assessment(models.Model):
-    assessment_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    assessment_id = models.CharField(default="", max_length=100)
     assessment_name = models.TextField()
     status = models.CharField(default="A", max_length=1)
     question_bank = djmodels.JSONField(default=[], blank=True, null=True)
 
 class AssessmentQuestion(models.Model):
-    assessment_question_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    assessment_question_id = models.CharField(default="", max_length=100)
     type = models.TextField(choices=[('Tech', 'Tech')])
     language = models.TextField(choices=[('Python', 'Python'), ('Java', 'Java'), ('SQL', 'SQL')])
     question = models.TextField()

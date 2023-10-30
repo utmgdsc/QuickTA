@@ -6,7 +6,7 @@ import djongo.models as djmodels
 # Create your models here.
 
 class Course(models.Model):
-    course_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    course_id = models.CharField(max_length=100, editable=False, unique=True)
     semester = models.CharField(max_length=10)
     course_code = models.CharField(max_length=9)
     course_name = models.TextField(max_length=1000)
@@ -28,7 +28,7 @@ class Course(models.Model):
         ]
 
 class CourseDeployment(models.Model):
-    deployment_id = models.CharField(default=uuid.uuid4, max_length=50, editable=False, unique=True)
+    deployment_id = models.CharField(max_length=50, editable=False, unique=True)
     deployment_name = models.TextField(max_length=1000)
     course_id = models.CharField(max_length=50)
     priority = models.IntegerField(default=0)

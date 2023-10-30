@@ -30,6 +30,7 @@ const ResearcherAnalytics = ({
         backgroundColor: "#F1F1F1",
         width: "100vw",
         height: "auto",
+        minHeight: "100vh"
       }}
     >
       <TopNav UTORid={UTORid} auth={auth} />

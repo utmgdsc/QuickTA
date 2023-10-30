@@ -15,22 +15,17 @@ const Dashboard = ({
 }) => {
   const [userScope, setUserScope] = useState([]); 
   const [deploymentFilter, setDeploymentFilter] = useState([]);
+  const [tabIndex, setTabIndex] = useState(1);
   return (
     <>
       <Box ml={"5vw"} mr={"5vw"}>
         <DashboardHeader
           courseCode={courseCode}
           courseName={courseName}
+          currCourse={currCourse}
           courses={courses}
           setCurrCourse={setCurrCourse}
-          currCourse={currCourse}
-          userid={userid}
-          setIsLoading={setIsLoading}
-          setCourses={setCourses}
-          userScope={userScope}
-          setUserScope={setUserScope}
-          deploymentFilter={deploymentFilter}
-          setDeploymentFilter={setDeploymentFilter}
+          setTabIndex={setTabIndex}
         />
         <DashboardBody
           courseID={currCourse.course_id}
@@ -39,6 +34,7 @@ const Dashboard = ({
           setUserScope={setUserScope}
           deploymentFilter={deploymentFilter}
           setDeploymentFilter={setDeploymentFilter}
+          tabIndex={tabIndex}
         />
       </Box>
     </>

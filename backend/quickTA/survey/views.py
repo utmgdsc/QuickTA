@@ -52,7 +52,7 @@ class SurveyQuestionView(APIView):
         """
         serializer = SurveyQuestionSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(question_id=str(uuid.uuid4()))
             return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
         return ErrorResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -139,7 +139,7 @@ class SurveyView(APIView):
         """
         serializer = SurveySerializer(data=reqeust.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(survey_id=str(uuid.uuid4()))
             return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
         return ErrorResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     

@@ -10,7 +10,8 @@ from course.models import Course
 
 # Create your models here.
 class Conversation(models.Model):
-    conversation_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    conversation_id = models.CharField(max_length=100)
+    conversation_id_str = models.CharField(default="", max_length=100)
     conversation_name = models.CharField(max_length=100, blank=True, null=True)
     course_id = models.CharField(max_length=100)
     model_id = models.CharField(max_length=100)
@@ -55,7 +56,8 @@ class Conversation(models.Model):
         }
 
 class Chatlog(models.Model):
-    chatlog_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    chatlog_id = models.CharField(max_length=100)
+    chatlog_id_str = models.CharField(default="",max_length=100)
     conversation_id = models.CharField(max_length=100)
     time = models.DateTimeField(default=datetime.now)
     is_user = models.BooleanField()

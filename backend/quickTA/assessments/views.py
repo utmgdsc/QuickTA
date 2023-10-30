@@ -58,7 +58,7 @@ class AssessmentQuestionView(APIView):
         """
         serializer = AssessmentQuestionSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(assessment_question_id=str(uuid.uuid4()))
             return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
         return ErrorResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -149,7 +149,7 @@ class AssessmentView(APIView):
         """
         serializer = AssessmentSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(assessment_id=str(uuid.uuid4()))
             return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
         return ErrorResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     

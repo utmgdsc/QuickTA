@@ -10,7 +10,7 @@ class QuestionType(Enum):
     OPEN_ENDED = 'OpenEnded'
 
 class SurveyQuestion(models.Model):
-    question_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    question_id = models.CharField(default="", max_length=100)
     type = models.TextField(choices=[('Pre', 'Pre'), ('Post', 'Post')])
     question = models.TextField()
     question_type = models.TextField(choices = [(tag.name, tag.value) for tag in QuestionType])
@@ -20,7 +20,7 @@ class SurveyQuestion(models.Model):
 
 
 class Survey(models.Model):
-    survey_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    survey_id = models.CharField(default="", max_length=100)
     survey_name = models.TextField(default="")
     active = models.TextField(choices=[('True', 'True'), ('False', 'False')])
     type = models.TextField(choices=[('Pre', 'Pre'), ('Post', 'Post')])

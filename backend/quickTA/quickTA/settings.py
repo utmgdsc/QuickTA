@@ -28,9 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-z3(ehhr-sv4@pns0y_zkh=^oh82*k2wa8g-byh%q9s$)n#cm#_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-
-ALLOWED_HOSTS = []
+DEBUG = True
 
 APPEND_SLASH = False
 
@@ -71,16 +69,19 @@ MIDDLEWARE = [
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
-    "https://quickta.utm.utoronto.ca",
-    #  'http://localhost:3000',
+    # "https://quickta.utm.utoronto.ca",
+     'http://localhost:3000',
 ]
 CORS_ORIGIN_WHITELIST = (
-  'https://quickta.utm.utoronto.ca',
-#   'http://localhost:3000',
+#   'https://quickta.utm.utoronto.ca',
+  'http://localhost:3000',
 )
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_METHODS = ['GET', 'POST', 'DELETE', 'PATCH']
-ALLOWED_HOSTS=["quickta.utm.utoronto.ca"]
+# CORS_ALLOW_CREDENTIALS = True
+# CORS_ALLOW_METHODS = ['GET', 'POST', 'DELETE', 'PATCH']
+# ALLOWED_HOSTS=[
+#     "quickta.utm.utoronto.ca", 
+#     # "localhost:3000"
+#     ]
 
 ROOT_URLCONF = 'quickTA.urls'
 

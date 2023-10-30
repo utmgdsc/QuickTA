@@ -1111,4 +1111,63 @@ class ChatlogLengthView(APIView):
 class GetSpecificDataView(APIView):
     
     def get(self, request):
+
+        # Update all user ids to strings
+        # all_users = list(User.objects.all())
+        # for user in all_users:
+        #     print(f"Updating {user.utorid} user_id: " + str(user.user_id))
+        #     User.objects.filter(utorid=user.utorid).update(user_id=str(user.user_id))
+
+        # Update all chatlog ids to strings
+        # print(Chatlog.objects.filter(chatlog_id="d59e3d6b-15e6-45c2-a709-86cbd151934e"))
+        # all_chatlogs = list(Chatlog.objects.all())
+        # for i, chatlog in enumerate(all_chatlogs):
+            # if i > 8296:
+                # chatlog_id = str(chatlog.chatlog_id)
+                # print(f"[{i}] Updating chatlog_id: {str(chatlog.chatlog_id)} - {chatlog.time}")
+                # Chatlog.objects.filter(chatlog_id=chatlog.chatlog_id).update(chatlog_id_str=chatlog_id)
+                # chatlogs = Chatlog.objects.filter(chatlog_id_str=chatlog_id).update(chatlog_id=str(chatlog.chatlog_id))
+                # print(chatlogs, chatlog.chatlog_id)
+                # chatlogs.update(chatlog_id_str=chatlog_id)
+                # Chatlog.objects.filter(chatlog_id_str=str(chatlog.chatlog_id)).update(chatlog_id=str(chatlog.chatlog_id))
+
+        # Update all converstion ids to strings
+        all_conversations = list(Conversation.objects.all())
+        for i, convo in enumerate(all_conversations):
+            print(f"[{i}] Updating conversation_id: " + str(convo.conversation_id))
+            # Conversation.objects.filter(conversation_id=convo.conversation_id).update(conversation_id_str=str(convo.conversation_id))
+            Conversation.objects.filter(conversation_id_str=str(convo.conversation_id)).update(conversation_id=str(convo.conversation_id))
+
+        # # Update all courses 
+        # all_courses = list(Course.objects.all())
+        # for i, course in enumerate(all_courses):
+        #     print(f"[{i}] Updating course_id: " + str(course.course_id))
+        #     Course.objects.filter(course_id=course.course_id).update(course_id=str(course.course_id))
+
+        # # Update all course deployments
+        # all_course_deployments = list(CourseDeployment.objects.all())
+        # for i, course_deployment in enumerate(all_course_deployments):
+        #     print(f"[{i}] Updating deployment_id: " + str(course_deployment.deployment_id))
+        #     CourseDeployment.objects.filter(deployment_id=course_deployment.deployment_id).update(deployment_id=str(course_deployment.deployment_id))
+
+        # Get all conversations of user with utorid = choiman3 with a pipeline
+        # conversations_db = db["student_conversation"]
+        # query = [
+        #     {
+        #         "$lookup": {
+        #             "from": "users_user",
+        #             "localField": "user_id",
+        #             "foreignField": "user_id",
+        #             "as": "user"
+        #         }
+        #     },
+        #     {
+        #         "$match": {
+        #             "user.utorid": "choiman3"
+        #         }
+        #     }
+        # ]
+        # result = list(conversations_db.aggregate(query))
+        # return JsonResponse({ "result": result})
+
         return JsonResponse({})

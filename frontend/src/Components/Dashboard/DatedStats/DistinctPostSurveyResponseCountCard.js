@@ -41,7 +41,7 @@ const DistinctPostSurveyResponseCountCard = () => {
     return (<StatCard
         title={"Distinct Amount of Post Survey Responses"}
         label={isLoading ? "-" : count}
-        helpText={"post survey responses submitted by users"}
+        helpText={"distinct users who have submitted post survey responses"}
       />);
 }
 

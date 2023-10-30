@@ -150,7 +150,7 @@ class CourseView(APIView):
     
     def create_course(self, serializer):
         if serializer:
-            course_id = uuid.uuid4()
+            course_id = str(uuid.uuid4())
             serializer.save(course_id=course_id)
             response = {
                 "course_id": course_id,
@@ -565,7 +565,8 @@ class CourseDeploymentView(APIView):
         """
         serializer = CourseDeploymentSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            deployment_id = str(uuid.uuid4())
+            serializer.save(deployment_id=deployment_id)
             return JsonResponse({"msg": "Course deployment created"}, status=status.HTTP_201_CREATED)
         return ErrorResponse(serializer.errors, status.HTTP_400_BAD_REQUEST)
     

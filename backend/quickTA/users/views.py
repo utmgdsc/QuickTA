@@ -41,6 +41,7 @@ class LoginView(APIView):
         utorid = request.query_params.get('utorid', '')
         if not(utorid): utorid = request.headers['Utorid']
 
+        print(utorid)
         if utorid == '':
             return ErrorResponse("Bad request", status=status.HTTP_400_BAD_REQUEST)
         
@@ -80,7 +81,6 @@ class UserView(APIView):
         serializer = UserSerializer(user)
 
         return JsonResponse(serializer.data)
-        
     
     @swagger_auto_schema(
         operation_summary="Create a new user",

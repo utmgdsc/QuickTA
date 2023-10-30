@@ -75,7 +75,7 @@ class ConversationView(APIView):
 
     
     def create_conversation(self, user, course, model):
-        course_id = uuid.uuid4()
+        course_id = str(uuid.uuid4())
         serializer = ConversationSerializer(
             data={
                 "conversation_id": str(course_id),
