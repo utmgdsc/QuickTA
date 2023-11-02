@@ -29,6 +29,7 @@ from survey.models import *
 from models.models import * 
 from survey.models import *
 from assessments.models import *
+from utils.query_helpers import *
 
 # import uri from settings
 from django.conf import settings
@@ -632,6 +633,7 @@ class UniqueUsersView(APIView):
             openapi.Parameter("course_code", openapi.IN_QUERY, description="Course code", type=openapi.TYPE_STRING),
             openapi.Parameter("semester", openapi.IN_QUERY, description="Semester ", type=openapi.TYPE_STRING),
             openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("user_roles", openapi.IN_QUERY, description="User roles", type=openapi.TYPE_STRING),
         ]
     )
     def get(self, request):
@@ -640,18 +642,24 @@ class UniqueUsersView(APIView):
         """
         params = request.query_params
         course = get_course(params)
+        user_roles = params.get('user_roles', 'ST,IS,RS,AM')
+        user_roles = user_roles.split(',')
+        user_roles = GET_COURSE_USER_ROLES(user_roles)
+        
+        user_ids = []
+        for role in user_roles:
+            user_ids.extend(getattr(course, role))
 
         collection = db["users_user"]
-        query = unique_users_query_pipeline(course.students)
-        result = collection.find(query)
-
-        unique_users = len(list(result))
-        total_students = len(course.students)
+        query = unique_users_query_pipeline(user_ids)
+        result = list(collection.find(query))
+        unique_users = len(result)
+        total_users = len(user_ids)
         
         response = {
             "unique_users": unique_users,
-            "unique_users_percentage": round((unique_users / total_students) * 100, 2),
-            "total_users": total_students,
+            "unique_users_percentage": round((unique_users / total_users) * 100, 2),
+            "total_users": total_users,
         }
 
         return JsonResponse(response)
@@ -701,7 +709,9 @@ class AverageConversationResponseRateView(APIView):
         manual_parameters=[
             openapi.Parameter("course_code", openapi.IN_QUERY, description="Course code", type=openapi.TYPE_STRING),
             openapi.Parameter("semester", openapi.IN_QUERY, description="Semester ", type=openapi.TYPE_STRING),
-            openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING)
+            openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
+             openapi.Parameter("user_roles", openapi.IN_QUERY, description="User roles", type=openapi.TYPE_STRING),
+             openapi.Parameter("deployment_ids", openapi.IN_QUERY, description="Deployment IDs (Comma-separated)", type=openapi.TYPE_STRING),
         ]
     )
     def get(self, request):
@@ -709,45 +719,59 @@ class AverageConversationResponseRateView(APIView):
         Acquires the average response rate for a course's conversation.
         """
         params = request.query_params
-        course = get_course(params)
+        # course = get_course(params)
+        user_roles = params.get('user_roles', 'ST,IS,RS,AM')
+        user_roles = user_roles.split(',')
+
+        deployment_ids = params.get('deployment_ids', '')
+        deployment_ids = deployment_ids.split(',')
 
         # Find all users with more than one conversation
-        conversations_db = db["student_conversation"]
-        query = users_with_multiple_query_pipeline()
-        user_ids = [ user['_id'] for user in list(conversations_db.aggregate(query))]
+        # conversations_db = db["users_user"]
+        # query = users_with_multiple_query_pipeline()
+        # user_ids = [ user['_id'] for user in list(conversations_db.aggregate(query))]
 
         # Find all students from this list of user_ids
-        students = User.objects.filter(user_id__in=user_ids, user_role='ST')
-        student_user_ids = [student.user_id for student in students]
+        users = User.objects.filter(user_role__in=user_roles)
+        user_ids = [user.user_id for user in users]
 
-        # Find all conversations from these students
-        conversations = Conversation.objects.filter(user_id__in=student_user_ids)
 
-        # Create buckets for each user_id with their conversations
+
+        # matching models for deployments
+        if deployment_ids: models = GPTModel.objects.filter(deployment_id__in=deployment_ids)
+        else: models = GPTModel.objects.all()
+        model_ids = [model.model_id for model in models]
+
+        # # Find all conversations from these students
+        conversations = Conversation.objects.filter(user_id__in=user_ids, model_id__in=model_ids)
+
+        # # Create buckets for each user_id with their conversations
         buckets = {}
         for convo in conversations:
             if convo.user_id not in buckets:
                 buckets[convo.user_id] = []
             buckets[convo.user_id].append(convo)
 
-        # Sort each bucket by start_time
+        # # Sort each bucket by start_time
         for user_id in buckets:
             buckets[user_id] = sorted(buckets[user_id], key=lambda k: k.start_time)
 
         deltas = []
 
-        # Find the deltas between every two successive conversations, where first conversation has status 'I'. The delta is the time between the second conversation's start_time and first conversation's end_time
+        # # Find the deltas between every two successive conversations, where first conversation has status 'I'. The delta is the time between the second conversation's start_time and first conversation's end_time
         for user_id in buckets:
             for i in range(len(buckets[user_id]) - 1):
-                if buckets[user_id][i].status == 'I':
-                    delta = buckets[user_id][i + 1].start_time - buckets[user_id][i].end_time
-                    deltas.append(delta)
+                try:
+                    if buckets[user_id][i].status == 'I':
+                        delta = buckets[user_id][i + 1].start_time - buckets[user_id][i].end_time
+                        if buckets[user_id][i + 1].start_time > buckets[user_id][i].end_time : deltas.append(delta)
+                except: pass
         
-        # Find the average delta
-        average_delta = sum(deltas, dt.timedelta()) / len(deltas)
+        # # Find the average delta
+        average_delta = sum(deltas, dt.timedelta()) / len(deltas) if len(deltas) > 0 else 0
         result = str(average_delta)
 
-        response = { "average_response_rate": result }
+        response = { "average_response_rate": result, "distribution": deltas }
         return JsonResponse(response)
 
 class ConversationPerUserDistributionView(APIView):
@@ -774,17 +798,18 @@ class ConversationPerUserDistributionView(APIView):
         query = conversations_per_user_query_pipeline(str(course.course_id), start_date, end_date)
         result = list(conversations_db.aggregate(query))
 
-        # Get Min and Max conversation_count
-        min_conversation_count = min([item['conversation_count'] for item in result])
-        max_conversation_count = max([item['conversation_count'] for item in result])
+        if result:
+            # Get Min and Max conversation_count
+            min_conversation_count = min([item['conversation_count'] for item in result])
+            max_conversation_count = max([item['conversation_count'] for item in result])
 
-        # Fill in missing conversation counts
-        for i in range(min_conversation_count, max_conversation_count + 1):
-            if i not in [item['conversation_count'] for item in result]:
-                result.append({ "conversation_count": i, "user_count": 0 })
+            # Fill in missing conversation counts
+            for i in range(min_conversation_count, max_conversation_count + 1):
+                if i not in [item['conversation_count'] for item in result]:
+                    result.append({ "conversation_count": i, "user_count": 0 })
         
-        # Sort by conversation_count
-        result = sorted(result, key=lambda k: k['conversation_count'])
+            # Sort by conversation_count
+            result = sorted(result, key=lambda k: k['conversation_count'])
 
         response = { "distribution": result }
         return JsonResponse(response)
@@ -802,26 +827,17 @@ class TotalConversationCountView(APIView):
     def get(self, request):
         query_params = request.query_params
         deployment_ids = query_params.get('deployment_ids', '')
-        user_roles = query_params.get('user_roles', '')
+        user_roles = query_params.get('user_roles', 'ST,IS,RS,AM')
         deployment_ids = deployment_ids.split(',')
         user_roles = user_roles.split(',')
 
-        # conversations_db = db["student_conversation"]
-        # query = total_conversation_count_query_pipeline(deployment_ids, user_roles)
-        # result = list(conversations_db.aggregate(query))
+        conversations_db = db["student_conversation"]
+        query = total_conversation_count(deployment_ids, user_roles)
+        result = list(conversations_db.aggregate(query))
+        if (result): result = result[0]['total_conversation_count']
+        else: result = 0 
 
-        if deployment_ids == ['']: models = GPTModel.objects.all()
-        else: models = GPTModel.objects.filter(deployment_id__in=deployment_ids)
-        model_ids = [str(model.model_id) for model in models]
-
-        if user_roles == ['']: users = User.objects.all()
-        else: users = User.objects.filter(user_role__in=user_roles)
-        user_user_ids = [str(user.user_id) for user in users]
-
-        conversations = Conversation.objects.filter(model_id__in=model_ids, user_id__in=user_user_ids)
-        count = len(conversations)
-
-        response = { "total_conversation_count": count}
+        response = { "total_conversation_count": result}
         return JsonResponse(response)
 
 class TotalChatlogCountView(APIView):
@@ -837,34 +853,17 @@ class TotalChatlogCountView(APIView):
     def get(self, request):
         query_params = request.query_params
         deployment_ids = query_params.get('deployment_ids', '')
-        user_roles = query_params.get('user_roles', '')
+        user_roles = query_params.get('user_roles', 'ST,IS,RS,AM')
         deployment_ids = deployment_ids.split(',')
         user_roles = user_roles.split(',')
 
-        # conversations_db = db["student_conversation"]
-        # query = total_conversation_count_query_pipeline(deployment_ids, user_roles)
-        # result = list(conversations_db.aggregate(query))
-
-        if deployment_ids == ['']: models = GPTModel.objects.all()
-        else: models = GPTModel.objects.filter(deployment_id__in=deployment_ids)
-        model_ids = [str(model.model_id) for model in models]
-
-        if user_roles == ['']: users = User.objects.all()
-        else: users = User.objects.filter(user_role__in=user_roles)
-        user_user_ids = [str(user.user_id) for user in users]
-
-        conversations = Conversation.objects.filter(model_id__in=model_ids, user_id__in=user_user_ids)
-        conversation_ids = [str(convo.conversation_id) for convo in conversations]
-
-        chatlog = Chatlog.objects.filter(conversation_id__in=conversation_ids)
-        count = 0
-        for c in chatlog:
-            if c.is_user:
-                count += 1
-
-        response = { "total_chatlog_count": count}
+        conversations_db = db["student_conversation"]
+        query = total_chatlog_count(deployment_ids, user_roles)
+        result = list(conversations_db.aggregate(query))
+        if (result): result = result[0]['total_user_chatlog_count']
+        else: result = 0 
+        response = { "total_chatlog_count": result}
         return JsonResponse(response)
-
 
 class TotalPostSurveyResponseView(APIView):
 
@@ -879,36 +878,18 @@ class TotalPostSurveyResponseView(APIView):
     def get(self, request):
         query_params = request.query_params
         deployment_ids = query_params.get('deployment_ids', '')
-        user_roles = query_params.get('user_roles', '')
+        user_roles = query_params.get('user_roles', 'ST,IS,RS,AM')
         deployment_ids = deployment_ids.split(',')
         user_roles = user_roles.split(',')
 
-        # conversations_db = db["student_conversation"]
-        # query = total_conversation_count_query_pipeline(deployment_ids, user_roles)
-        # result = list(conversations_db.aggregate(query))
-
-        if deployment_ids == ['']: models = GPTModel.objects.all()
-        else: models = GPTModel.objects.filter(deployment_id__in=deployment_ids)
-        model_ids = [str(model.model_id) for model in models]
-
-        if user_roles == ['']: users = User.objects.all()
-        else: users = User.objects.filter(user_role__in=user_roles)
-        user_user_ids = [str(user.user_id) for user in users]
-
-        conversations = Conversation.objects.filter(model_id__in=model_ids, user_id__in=user_user_ids)
-        conversation_ids = [str(convo.conversation_id) for convo in conversations]
-
-        survey_response = SurveyResponse.objects.filter(conversation_id__in=conversation_ids)
-        
         count = 0
-        # Get distinct number of conversation_id in survey_responses
-        conversation_ids = []
-        for s in survey_response:
-            if s.conversation_id not in conversation_ids:
-                count += 1
-                conversation_ids.append(s.conversation_id)
 
-        response = { "total_responses": count}
+        conversations_db = db["student_conversation"]
+        query = total_post_survey_response_count(deployment_ids, user_roles)
+        result = list(conversations_db.aggregate(query))
+        if result: count = result[0]['total_post_survey_response_count']
+        
+        response = { "total_responses": count }
         return JsonResponse(response)
 
 class MinMaxChatlogCountView(APIView):
@@ -924,29 +905,18 @@ class MinMaxChatlogCountView(APIView):
     def get(self, request):
         query_params = request.query_params
         deployment_ids = query_params.get('deployment_ids', '')
-        user_roles = query_params.get('user_roles', '')
+        user_roles = query_params.get('user_roles', 'ST,IS,RS,AM')
         deployment_ids = deployment_ids.split(',')
         user_roles = user_roles.split(',')
 
-        if deployment_ids == ['']: models = GPTModel.objects.all()
-        else: models = GPTModel.objects.filter(deployment_id__in=deployment_ids)
-        model_ids = [str(model.model_id) for model in models]
-
-        if user_roles == ['']: users = User.objects.all()
-        else: users = User.objects.filter(user_role__in=user_roles)
-        user_user_ids = [str(user.user_id) for user in users]
-
-        conversations = Conversation.objects.filter(model_id__in=model_ids, user_id__in=user_user_ids)
-        
-        min, max = 0, 0
-        for c in conversations:
-            chatlog_count = len(c.conversation_log) // 2
-            if chatlog_count < min: min = chatlog_count
-            if chatlog_count > max: max = chatlog_count
-
-
+        conversations_db = db["student_conversation"]
+        query = min_max_chatlog_count(deployment_ids, user_roles)
+        result = list(conversations_db.aggregate(query))
+        if (result): max, min = result[0]['max'], result[0]['min']
+        else: max, min = 0, 0
         response = { "min_chatlog_count": min, "max_chatlog_count": max}
         return JsonResponse(response)
+
     
 # Average amount of chatlogs 
 class AverageChatlogCountView(APIView):
@@ -1107,7 +1077,7 @@ class ChatlogLengthView(APIView):
 
         response = { "min": min, "max": max, "avg": round(total_length / total_chatlogs, 2), "total": total_length }
         return JsonResponse(response)
-    
+
 class GetSpecificDataView(APIView):
     
     def get(self, request):
@@ -1132,11 +1102,11 @@ class GetSpecificDataView(APIView):
                 # Chatlog.objects.filter(chatlog_id_str=str(chatlog.chatlog_id)).update(chatlog_id=str(chatlog.chatlog_id))
 
         # Update all converstion ids to strings
-        all_conversations = list(Conversation.objects.all())
-        for i, convo in enumerate(all_conversations):
-            print(f"[{i}] Updating conversation_id: " + str(convo.conversation_id))
+        # all_conversations = list(Conversation.objects.all())
+        # for i, convo in enumerate(all_conversations):
+        #     print(f"[{i}] Updating conversation_id: " + str(convo.conversation_id))
             # Conversation.objects.filter(conversation_id=convo.conversation_id).update(conversation_id_str=str(convo.conversation_id))
-            Conversation.objects.filter(conversation_id_str=str(convo.conversation_id)).update(conversation_id=str(convo.conversation_id))
+            # Conversation.objects.filter(conversation_id_str=str(convo.conversation_id)).update(conversation_id=str(convo.conversation_id))
 
         # # Update all courses 
         # all_courses = list(Course.objects.all())
@@ -1151,23 +1121,49 @@ class GetSpecificDataView(APIView):
         #     CourseDeployment.objects.filter(deployment_id=course_deployment.deployment_id).update(deployment_id=str(course_deployment.deployment_id))
 
         # Get all conversations of user with utorid = choiman3 with a pipeline
-        # conversations_db = db["student_conversation"]
-        # query = [
-        #     {
-        #         "$lookup": {
-        #             "from": "users_user",
-        #             "localField": "user_id",
-        #             "foreignField": "user_id",
-        #             "as": "user"
-        #         }
-        #     },
-        #     {
-        #         "$match": {
-        #             "user.utorid": "choiman3"
-        #         }
-        #     }
-        # ]
-        # result = list(conversations_db.aggregate(query))
-        # return JsonResponse({ "result": result})
+        conversations_db = db["student_conversation"]
+        query = [
+            {
+                "$lookup": {
+                    "from": "users_user",
+                    "localField": "user_id",
+                    "foreignField": "user_id",
+                    "as": "user"
+                }
+            },
+            {
+                "$match": {
+                    "user.utorid": "choiman3"
+                }
+            },
+            {
+                #  dont include _id
+                "$project": {
+                    "_id": 0,
+                    "user._id": 0
+                }
+            }
+        ]
+        result = list(conversations_db.aggregate(query))
+        return JsonResponse({ "result": result})
 
-        return JsonResponse({})
+class ConversationPerModelPerDeploymentView(APIView):
+
+    @swagger_auto_schema(
+        operation_summary="Get total conversation count for a course",
+        responses={200: "Success", 404: "Conversation not found"},
+        manual_parameters=[
+            openapi.Parameter("deployment_ids", openapi.IN_QUERY, description="Deployment IDs (Comma-separated)", type=openapi.TYPE_STRING),
+        ]
+    )
+    def get(self, request):
+        query_params = request.query_params
+        deployment_ids = query_params.get('deployment_ids', '')
+        deployment_ids = deployment_ids.split(',')
+
+        conversation_db = db["student_conversation"]
+        query = conversation_per_model_per_deployment_query_pipeline(deployment_ids)
+        result = list(conversation_db.aggregate(query))        
+        
+        response = { "total_chatlog_count": result}
+        return JsonResponse(response)

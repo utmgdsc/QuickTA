@@ -37,5 +37,7 @@ urlpatterns = [
     path('/v2/correct-assessment-count', CorrectAssessmentCountView.as_view(), name='correct_assessment_count'),
     path('/v2/chatlog-length-count', ChatlogLengthView.as_view(), name='avg_chatlog_length'),
 
+    path('/v2/conversation-per-model-deployment', ConversationPerModelPerDeploymentView.as_view(), name='conversation_per_model_per_deployment'),
     path('/v3', GetSpecificDataView.as_view(), name='get_specific_data'),
+
 ]

@@ -75,7 +75,7 @@ class ConversationChatlogSerializer(ModelSerializer):
     class Meta:
         model = Conversation
         fields = [
-            'conversation_id',
+            # 'conversation_id',
             'chatlogs'
         ]
         

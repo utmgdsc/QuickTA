@@ -6,6 +6,7 @@ import StatCard from "../components/StatCard";
 const ConversationResponseRateCard = ({ courseID }) => {
 
     const [avgRespTime, setAvgRespTime] = useState("");
+    
 
     /**
      * Turns a time delta string into a more readable format
