@@ -109,13 +109,14 @@ class CourseView(APIView):
 
         new_course_code = request.data.get('course_code', '')
         new_semester = request.data.get('semester', '')
+        new_course_name = request.data.get('course_name', '')
         
         if course_id: course = get_object_or_404(Course, course_id=course_id)
         else: course = get_object_or_404(Course, course_code=course_code, semester=semester)
 
         serializer = CourseSerializer(course, data=request.data, partial=True)
         if serializer.is_valid():
-            if (new_course_code == '' or new_semester == '') and Course.objects.filter(course_code=new_course_code, semester=new_semester): 
+            if (new_course_code == '' or new_semester == '' or new_course_name == '') and Course.objects.filter(course_code=new_course_code, semester=new_semester, course_name=new_course_name): 
                 return ErrorResponse("Course already exists", status.HTTP_403_FORBIDDEN)
             Course.objects.filter(course_id=course.course_id).update(**serializer.validated_data)
             return JsonResponse({"msg": "Course updated"})
