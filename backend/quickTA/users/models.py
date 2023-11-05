@@ -14,8 +14,11 @@ class User(models.Model):
     # One-off use of fixated model-id for user:
     model_id = models.CharField(max_length=100, default="", blank=True, null=True)
 
-    # For User Parameterization
+    # For detecting new users
     new_user = models.BooleanField(default=True)
+    status = djmodels.JSONField(default=[], blank=True, null=True)
+
+    # For User Parameterization
     pre_survey = djmodels.JSONField(default=[], blank=True, null=True)
     post_survey = djmodels.JSONField(default=[], blank=True, null=True)
     assessment_responses = djmodels.JSONField(default=[], blank=True, null=True)

@@ -403,9 +403,29 @@ class UserUnenrolledCoursesView(APIView):
 class TestView(APIView):
     def get(self, request):
 
-        from models.models import GPTModel
+        # from models.models import GPTModel
 
         # GPTModel.objects.filter(temperature=0).update(deployment_id="7ffb83cd-3dbe-453f-96fc-b93c626c821b")
+        all_users = User.objects.all()
+        for user in all_users:
+            model_id = user.model_id
+            User.objects.filter(user_id=user.user_id).update(status=[
+                {"deployment_id": "7ffb83cd-3dbe-453f-96fc-b93c626c821b", "new_user": user.new_user, "model_id": "", "active": False},
+                {"deployment_id": "bda97806-2847-4bf0-a841-461f8665607c", "new_user": False, "model_id": model_id, "active": False}, # new_user needs to be changed
+                {"deployment_id": "548d655f-139d-42a2-b1ff-9e66a4cd11db", "new_user": True, "model_id": "", "active": True},
+            ])
+
+        ## Migrate model ids
+        # all_users = User.objects.all()
+        # for user in all_users:
+        #     if user.utorid == 'choiman3':
+        #         old_model_id = user.model_id
+        #         User.objects.filter(user_id=user.user_id).update(
+        #             {"deployment_id": "", "model_id": },
+        #             {"deployment_id": "", "model_id": },
+        #         )
+
+
 
 
         return JsonResponse({"msg": "Test message"})
