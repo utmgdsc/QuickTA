@@ -15,6 +15,7 @@ class UserSerializer(ModelSerializer):
 
     user_role = serializers.ChoiceField(choices=USER_ROLE_CHOICES)
     courses = serializers.ListField(child=serializers.CharField(max_length=200), required=False)
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -25,10 +26,12 @@ class UserSerializer(ModelSerializer):
             'user_role',
             'courses',
             'model_id',
-            'new_user'
+            'new_user',
+            'status'
         ]
     
     def get_courses(self, obj): return [str(course) for course in obj.courses]
+    def get_status(self, obj): return [s for s in obj.status]
 
 class UserBatchAddSerializer(ModelSerializer):
 

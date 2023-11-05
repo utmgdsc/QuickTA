@@ -1,5 +1,5 @@
-import { Spinner, VStack } from "@chakra-ui/react";
 import axios from "axios";
+import { Spinner, Textarea, VStack } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { RadioGroup } from "@chakra-ui/radio";
 import { HStack } from "@chakra-ui/layout";
@@ -11,37 +11,45 @@ import { Box } from "@chakra-ui/layout";
 import { Flex } from "@chakra-ui/layout";
 import { Spacer } from "@chakra-ui/layout";
 
-const PreSurvey = ({ UTORid, isNewUser, setIsNewUser, modelId }) => {
+/**
+ * Reflection Survey Component:
+ * tailored for any SurveyQuestion [Pre/Post] 
+ * @param {string} UTORid 
+ * @param {boolean} isNewUser
+ * @param {function} setIsNewUser
+ * @param {string} modelId 
+ * @param {string} type [PRE/POST]
+ */
+const ReflectionSurvey = ({ stepId, setStepId, UTORid, surveyId, type }) => {
   const [questions, setQuestions] = useState([{}]); // [ {question: "", options: []}, ... ]
   const [currQuestion, setCurrQuestion] = useState(0);
   const [surveyID, setSurveyID] = useState("");
   const [studentResponse, setStudentResponse] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const {
-    isOpen: isErrOpen,
-    onOpen: onErrOpen,
-    onClose: onErrClose,
-  } = useDisclosure();
   const [error, setError] = useState();
 
-  let PRE_SURVEY_ID = "81abc01e-5d2e-475b-9752-6d9cf5a96105" // lab 8
-  let POST_SURVEY_ID = "9338790a-3c47-43ac-82ad-09c6cbe9a035" // lab 8
-
-  /** Fetch pre-survey questions from backend. */
-  const fetchPreSurvey = () => {
+  /** Fetch survey questions from backend. */
+  const fetchSurveyQuestions = () => {
     axios
       .get( process.env.REACT_APP_API_URL + "/survey/details",
-          { params: { survey_id: PRE_SURVEY_ID } }
+          { params: { survey_id: surveyId } }
       )
       .then((res) => {
         // console.log(res.data);
         setQuestions(res.data.questions);
         setSurveyID(res.data.survey_id);
+        
+        // Get number of questions & set student response as empty
+        let numQuestions = res.data.questions.length;
+        let _studentResponse = {}
+        for (let i = 0; i < numQuestions; i++) {
+          _studentResponse[i + 1] = "";
+        }
+        setStudentResponse(_studentResponse);
       })
       .catch((err) => {
         setError(err);
-        onErrOpen();
       });
   };
 
@@ -68,12 +76,21 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser, modelId }) => {
   const submitResponse = () => {
     setIsSubmitting(true);
     let allResponses = [];
+
+    var survey_type = "";
+    switch (type) {
+      case "PRE": survey_type = "Pre"; break;
+      case "POST": survey_type = "Post"; break;
+      case "REFLECTION": survey_type = "Post"; break;
+    }
+
     for (var response in studentResponse) {
       let data = {
         utorid: UTORid,
         question_type: questions[response - 1].question_type,
         question_id: questions[response - 1].question_id,
-        survey_type: "Pre",
+        conversation_id: "Reflection",
+        survey_type: survey_type,
         survey_id: surveyID,
         answer: studentResponse[response],
       };
@@ -82,40 +99,27 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser, modelId }) => {
 
     if (checkValidResponse() === false) {
       setError("Please answer all questions!");
-      onErrOpen();
     } else {
       axios
-        .post(
-          process.env.REACT_APP_API_URL + "/survey/questions/answer",
-          allResponses
-        )
+        .post( process.env.REACT_APP_API_URL + "/survey/questions/answer", allResponses )
         .then((res) => {
-          // console.log(res.data);
-          setIsNewUser(false);
+          // setIsNewUser(false);
           setIsSubmitting(false);
+          setStepId(stepId + 1);
         })
         .catch((err) => {
           setIsSubmitting(false);
           setError(err);
-          onErrOpen();
         });
     }
   };
 
   useEffect(() => {
     setIsLoading(true);
-    fetchPreSurvey();
+    setStudentResponse([]); // Clear student response
+    fetchSurveyQuestions();
     setIsLoading(false);
   }, []);
-
-  if (!isNewUser) {
-    return ( 
-      <Box className="d-flex flex-col align-items-center justify-content-center" style={{ width: '100vw', height: '100vh' }}>
-        <Text as="h1" style={{ fontFamily: "Poppins", fontWeight: 500, fontSize: "28px", }}>
-          Not authorized
-        </Text>
-      </Box>);
-  }
 
   return (
     <div>
@@ -123,10 +127,10 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser, modelId }) => {
         <Box className="d-flex align-items-center">
           <div className="d-flex flex-col">
             <Text as="h1" style={{ fontFamily: "Poppins", fontWeight: 500, fontSize: "28px", }}>
-              {/* Questionnaire */}
-              Pre-Task Survey 
+              {type === "PRE" && "Pre-Task Survey"}
+              {type === "POST" && "Post Task Survey"}
+              {type === "REFLECTION" && "Reflection Task"}
             </Text>
-            {/* <Text color={"gray.400"}>(For First-Time User Logins Only)</Text> */}
           </div>
         </Box>
         {isLoading ? (
@@ -158,8 +162,9 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser, modelId }) => {
                         {questions[currQuestion].answers.map(
                           (answer, answer_idx) => {
                             return (
-                              <Button style={{ fontWeight: "normal", borderRadius: "5px" }}
-                                className={
+                              <Button key={answer_idx}
+                              style={{ fontWeight: "normal", borderRadius: "5px" }}  
+                              className={
                                   studentResponse[currQuestion + 1] === "" ?
                                   "normal-border"
                                   : studentResponse[currQuestion + 1] !== answer.value
@@ -245,6 +250,36 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser, modelId }) => {
                       </HStack>
                     </RadioGroup>
                   )}
+
+                {/* Question Type: OPEN_ENDED */}
+                {questions[currQuestion] && questions[currQuestion].question_type == "OPEN_ENDED" && (
+                  <Textarea
+                    className="form-control"
+                    css={{ resize: "none" }}
+                    variant={"filled"}
+                    placeholder="Enter your response here..."
+                      style={{
+                      width: "100%",
+                      height: "30vh",
+                      borderRadius: "8px",
+                      fontSize: "14px",
+                      padding: "8px",
+                      paddingLeft: "16px",
+                      paddingRight: "16px",
+                    }}
+                    value={studentResponse[currQuestion + 1]}
+                    onChange={(e) => {
+                      console.log({
+                        ...studentResponse,
+                        [currQuestion + 1]: e.target.value,
+                      })
+                      setStudentResponse({
+                        ...studentResponse,
+                        [currQuestion + 1]: e.target.value,
+                      });
+                    }}
+                  />
+                )}
               </div>
             </VStack>
 
@@ -294,9 +329,7 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser, modelId }) => {
                     </div>
                   )}
                   <Button
-                    className={"p-2 " 
-                    + ((studentResponse[currQuestion + 1] && !isSubmitting) ? "done-button" : "disabled-border")
-                  }
+                    className={"p-2 " + ((studentResponse[currQuestion + 1] && !isSubmitting) ? "done-button" : "disabled-border")}
                     disabled={ !studentResponse[currQuestion + 1] || isSubmitting }
                     onClick={() => { submitResponse(); }}
                   >
@@ -308,9 +341,8 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser, modelId }) => {
           </div>
         )}
       </Box>
-      <ErrorDrawer isOpen={isErrOpen} onClose={onErrClose} error={error} />
     </div>
   );
 };
 
-export default PreSurvey;
+export default ReflectionSurvey;

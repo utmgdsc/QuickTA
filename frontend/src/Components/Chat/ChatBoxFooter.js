@@ -21,8 +21,8 @@ const ChatBoxFooter = ({
   setDisableAll,
   conversations,
   setConversations,
-  model_id,
-  model_ID,
+  defaultModelId,
+  selectedModelId,
   UTORid,
   isOpenTechAssessment,
   setIsOpenTechAssessment,
@@ -113,6 +113,7 @@ const ChatBoxFooter = ({
   };
 
   const handleSubmit = async () => {
+    console.log(inConvo, text)
     if (inConvo) {
       if (text) {
         setWaitForResp(true);
@@ -122,9 +123,7 @@ const ChatBoxFooter = ({
           oldConvoButtons: true,
         }));
         await getResponse();
-      } else {
-        // console.log("You must type something before asking AI for response :)");
-      }
+      } 
     } else {
       // console.log("must start a conversation to send a message to AI!");
       if (text) {
@@ -147,7 +146,7 @@ const ChatBoxFooter = ({
           .post(process.env.REACT_APP_API_URL + "/student/conversation", {
             user_id: userId,
             course_id: course_ID,
-            model_id: model_id.length === 0 ? model_ID : model_id,
+            model_id: defaultModelId ? defaultModelId : selectedModelId,
           })
           .then(async (res) => {
             let data = res.data;

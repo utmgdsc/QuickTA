@@ -2,38 +2,42 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import fileDownload from "js-file-download";
 import StatCard from "../components/StatCard";
+import { useDeploymentFilter } from "../../../Contexts/DeploymentFilterContext";
+import { useUserScope } from "../../../Contexts/UserScopeContext";
 
 const ConversationResponseRateCard = ({ courseID }) => {
 
-    const [avgRespTime, setAvgRespTime] = useState("");
-    
+  const [avgRespTime, setAvgRespTime] = useState("");
 
-    /**
-     * Turns a time delta string into a more readable format
-     * @param {Time Delta} timeDelta (ie. '1 day 3:34:39.029')
-     * @returns Parsed time delta (ie. '1 day 3h 34m 39s')
-     */
-    const parseTimeDelta = (timeDelta) => {
-        let timeDeltaArr = timeDelta.split(" ");
-        let timeDeltaStr = "";
-        for (let i = 0; i < timeDeltaArr.length; i++) {
-            if (timeDeltaArr[i].includes(":")) {
-                // drop the milliseconds and only show hour and minutes if they are non-zero
-                let timeArr = timeDeltaArr[i].split(":");
-                timeArr[2] = timeArr[2].split(".")[0];
-                if (timeArr[0] !== "0") { timeDeltaStr += `${timeArr[0]}h `; }
-                if (timeArr[1] !== "00") { 
-                  if (timeArr[1][0] === "0") { timeArr[1] = timeArr[1].substring(1); }
-                  timeDeltaStr += `${timeArr[1]}m `; 
-                }
-                if (timeArr[2][0] === "0") { timeArr[2] = timeArr[2].substring(1); }
-                timeDeltaStr += `${timeArr[2]}s`;
-            } else {
-                timeDeltaStr += `${timeDeltaArr[i]} `;
-            }
-        }
-        return timeDeltaStr;
-    };
+  const { deploymentFilter } = useDeploymentFilter();
+  const { userScope } = useUserScope();
+
+  /**
+   * Turns a time delta string into a more readable format
+   * @param {Time Delta} timeDelta (ie. '1 day 3:34:39.029')
+   * @returns Parsed time delta (ie. '1 day 3h 34m 39s')
+   */
+  const parseTimeDelta = (timeDelta) => {
+      let timeDeltaArr = timeDelta.split(" ");
+      let timeDeltaStr = "";
+      for (let i = 0; i < timeDeltaArr.length; i++) {
+          if (timeDeltaArr[i].includes(":")) {
+              // drop the milliseconds and only show hour and minutes if they are non-zero
+              let timeArr = timeDeltaArr[i].split(":");
+              timeArr[2] = timeArr[2].split(".")[0];
+              if (timeArr[0] !== "0") { timeDeltaStr += `${timeArr[0]}h `; }
+              if (timeArr[1] !== "00") { 
+                if (timeArr[1][0] === "0") { timeArr[1] = timeArr[1].substring(1); }
+                timeDeltaStr += `${timeArr[1]}m `; 
+              }
+              if (timeArr[2][0] === "0") { timeArr[2] = timeArr[2].substring(1); }
+              timeDeltaStr += `${timeArr[2]}s`;
+          } else {
+              timeDeltaStr += `${timeDeltaArr[i]} `;
+          }
+      }
+      return timeDeltaStr;
+  };
 
 
     /**
@@ -66,7 +70,12 @@ const ConversationResponseRateCard = ({ courseID }) => {
         await axios
           .get(
             process.env.REACT_APP_API_URL + `/researchers/v2/avg-conversation-response-rate`,
-              { params: { course_id: courseID } }
+              { 
+                params: { 
+                  user_roles: userScope.map((scope) => scope.id).join(","),
+                  deployment_ids: deploymentFilter.map((deployment) => deployment.deployment_id).join(","),
+               } 
+              }
           )
           .then((res) => {
             setAvgRespTime(parseTimeDelta(res.data.average_response_rate));
@@ -77,8 +86,6 @@ const ConversationResponseRateCard = ({ courseID }) => {
     useEffect(() => {
         getAverageChatlogResponseRate();
     }, []);
-      
-
 
     return (
         <StatCard

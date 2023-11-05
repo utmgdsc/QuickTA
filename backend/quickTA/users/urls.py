@@ -15,4 +15,6 @@ urlpatterns = [
     path('/user-roles', UserRolesView.as_view()),
     path('/test', TestView.as_view()),
     path('/unenrolled-courses', UserUnenrolledCoursesView.as_view()),
+    path('/survey-complete', MarkNewUserView.as_view()),
+    path('/stat', UserStatisticView.as_view()),
 ]

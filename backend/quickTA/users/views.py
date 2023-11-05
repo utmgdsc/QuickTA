@@ -40,8 +40,6 @@ class LoginView(APIView):
         """
         utorid = request.query_params.get('utorid', '')
         if not(utorid): utorid = request.headers['Utorid']
-
-        print(utorid)
         if utorid == '':
             return ErrorResponse("Bad request", status=status.HTTP_400_BAD_REQUEST)
         
@@ -400,6 +398,70 @@ class UserUnenrolledCoursesView(APIView):
         serializer = CourseSerializer(courses, many=True)
         return JsonResponse(serializer.data, safe=False)
 
+class MarkNewUserView(APIView):
+    @swagger_auto_schema(
+        operation_summary="Unmark new user",
+        manual_parameters=[
+            openapi.Parameter("utorid", openapi.IN_QUERY, description="UTORID", type=openapi.TYPE_STRING),
+            openapi.Parameter("deployment_id", openapi.IN_QUERY, description="Deployment ID", type=openapi.TYPE_STRING),
+        ]
+    )
+    def get(self, request):
+        """
+        Unmark new user
+        """
+        utorid = request.query_params.get('utorid', '')
+        deployment_id = request.query_params.get('deployment_id', '')
+
+        if utorid == '':
+            return ErrorResponse("Bad request", status=status.HTTP_400_BAD_REQUEST)
+        
+        user = get_object_or_404(User, utorid=utorid)
+
+        updated_deployments = []
+        for deployment in user.status:
+            if deployment['deployment_id'] == deployment_id:
+                deployment['new_user'] = False
+            updated_deployments.append(deployment)
+
+        User.objects.filter(user_id=user.user_id).update(status=updated_deployments)
+        UserStatistic(
+            user_id=user.user_id,
+            operation="lab_8_survey_complete",
+        ).save()
+        return JsonResponse({"msg": "User updated"})
+
+class UserStatisticView(APIView):
+
+    @swagger_auto_schema(
+        operation_summary="Get user statistics",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'user_id': openapi.Schema(type=openapi.TYPE_STRING),
+                'utorid': openapi.Schema(type=openapi.TYPE_STRING),
+                'operation': openapi.Schema(type=openapi.TYPE_STRING),
+            },
+        ),
+    )
+    def post(self, request):
+        """
+        Get user statistics
+        """
+        user_id = request.data.get('user_id', '')
+        utorid = request.data.get('utorid', '')
+        operation = request.data.get('operation', '')
+
+        if user_id == '' and utorid == '':
+            return ErrorResponse("Bad request", status=status.HTTP_400_BAD_REQUEST)
+        
+        user = get_object_or_404(User, user_id=user_id) if user_id != "" else get_object_or_404(User, utorid=utorid)
+
+        UserStatistic(
+            user_id=user.user_id,
+            operation=operation,
+        ).save()
+        return JsonResponse({"msg": "OK"})
 class TestView(APIView):
     def get(self, request):
 
@@ -407,13 +469,22 @@ class TestView(APIView):
 
         # GPTModel.objects.filter(temperature=0).update(deployment_id="7ffb83cd-3dbe-453f-96fc-b93c626c821b")
         all_users = User.objects.all()
+
+        models = [
+            "62d28ee3-45cf-4687-b83e-b49a9504c65b", # Con 1
+            "61290a38-93e5-479a-84d5-a7bc62e5dfd5", # Con 2
+            "2089d332-ef43-4b17-bf4e-141a87eef92e" # Con 3
+        ]
+        index = 0
         for user in all_users:
             model_id = user.model_id
             User.objects.filter(user_id=user.user_id).update(status=[
                 {"deployment_id": "7ffb83cd-3dbe-453f-96fc-b93c626c821b", "new_user": user.new_user, "model_id": "", "active": False},
                 {"deployment_id": "bda97806-2847-4bf0-a841-461f8665607c", "new_user": False, "model_id": model_id, "active": False}, # new_user needs to be changed
-                {"deployment_id": "548d655f-139d-42a2-b1ff-9e66a4cd11db", "new_user": True, "model_id": "", "active": True},
+                {"deployment_id": "fd582a39-2eed-42ee-b6fd-1b3c430e30cd", "new_user": True, "model_id": models[index], "active": True},
             ])
+            index += 1
+            if index == 3: index = 0
 
         ## Migrate model ids
         # all_users = User.objects.all()

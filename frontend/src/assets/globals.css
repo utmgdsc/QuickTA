@@ -264,7 +264,13 @@ dl { width: 100% }
   border: 3px solid #3e7a3ebb !important;
 }
 
-.hidden-border, .disabled-border {
+.hidden-border {
+  border: 3px solid #EEF2F6bb !important;
+  background: #eef2f6bc !important;
+  color: #000000 !important;
+}
+
+.disabled-border {
   border: 3px solid #EEF2F6bb !important;
   background: #eef2f6bc !important;
   color: #00000067 !important;

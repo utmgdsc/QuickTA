@@ -78,7 +78,7 @@ class AnswerQuestionSerializer(serializers.Serializer):
             try: 
                 Conversation.objects.get(conversation_id=conversation_id)
             except:
-                raise serializers.ValidationError(f"Conversation with ID [{conversation_id}] does not exist")
+                if conversation_id != "Reflection" :raise serializers.ValidationError(f"Conversation with ID [{conversation_id}] does not exist")
 
             SurveyResponse(
                 survey_id=survey_id,
@@ -89,6 +89,15 @@ class AnswerQuestionSerializer(serializers.Serializer):
                 answer=answer
             ).save()
             Conversation.objects.filter(conversation_id=conversation_id).update(status="I", end_time = datetime.now())
+        elif survey_type == "Reflection":
+              SurveyResponse(
+                survey_id=survey_id,
+                type=survey_type,
+                question_id=question_id,
+                user_id=user.user_id,
+                conversation_id=conversation_id,
+                answer=answer
+            ).save()
         else:
             raise serializers.ValidationError("Invalid survey_type. Must be 'pre' or 'post'")
         

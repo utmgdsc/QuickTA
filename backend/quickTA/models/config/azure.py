@@ -33,7 +33,8 @@ def completion(conversation, settings, chatlog):
             {"role": "assistant", "content": "Hello and congratulations on completing Lab 8 on file I/O and nested lists in Python! Reflecting on your experiences is a crucial step in the learning process. To get started, could you share an earlier moment (such as during the lecture) where you have encountered concepts similar to file I/O and nested lists? How does that previous experience compare with the techniques and understanding you have applied in this assignment?"},
             {"role": "user", "content": f"{chatlog}"},
         ]
-        conversation_name = get_conversation_name(chatlog)
+        # conversation_name = get_conversation_name(chatlog)
+        conversation_name = 'Lab 8 - I/O Reflection'
         
         MESSAGE = "Hello and congratulations on completing Lab 8 on file I/O and nested lists in Python! Reflecting on your experiences is a crucial step in the learning process. To get started, could you share an earlier moment (such as during the lecture) where you have encountered concepts similar to file I/O and nested lists? How does that previous experience compare with the techniques and understanding you have applied in this assignment?"
         create_chatlog(conversation.conversation_id, MESSAGE, False, conversation.start_time, None)
@@ -44,6 +45,7 @@ def completion(conversation, settings, chatlog):
     # Acquire GPT-4 response
     response = openai.ChatCompletion.create(
         model=model,
+        engine=env('AZURE_DEPLOYMENT_NAME'),
         messages=messages,
         temperature=temperature,
         top_p=top_p,
