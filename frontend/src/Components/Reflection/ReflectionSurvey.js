@@ -269,10 +269,10 @@ const ReflectionSurvey = ({ stepId, setStepId, UTORid, surveyId, type }) => {
                     }}
                     value={studentResponse[currQuestion + 1]}
                     onChange={(e) => {
-                      console.log({
-                        ...studentResponse,
-                        [currQuestion + 1]: e.target.value,
-                      })
+                      // console.log({
+                      //   ...studentResponse,
+                      //   [currQuestion + 1]: e.target.value,
+                      // })
                       setStudentResponse({
                         ...studentResponse,
                         [currQuestion + 1]: e.target.value,
