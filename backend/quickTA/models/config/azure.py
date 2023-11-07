@@ -7,17 +7,35 @@ from models.models import GPTResponse
 from student.models import Chatlog
 from datetime import timedelta
 
+from langchain.chat_models import AzureChatOpenAI
+from langchain.schema import HumanMessage, SystemMessage, AIMessage
+
+
 env = environ.Env()
 environ.Env.read_env()
-openai.api_type = 'azure'
-openai.api_base = f"https://{env('AZURE_RESOURCE_NAME')}.openai.azure.com/"
-openai.api_version = '2023-05-15'
-openai.api_key = env('AZURE_API_KEY')
+
+BASE_URL = f"https://{env('AZURE_RESOURCE_NAME')}.openai.azure.com/"
+API_KEY = env('AZURE_API_KEY')
+DEPLOYMENT_NAME = env('AZURE_DEPLOYMENT_NAME')
+
+# openai.api_type = 'azure'
+# openai.api_version = '2023-05-15'
+
+def format_conversation(messages):
+    
+    formatted_messages = []
+    for message in messages:
+        if message['role'] == "system": formatted_messages.append(SystemMessage(content=message['content']))
+        elif message['role'] == "assistant": formatted_messages.append(AIMessage(content=message['content']))
+        elif message['role'] == "user": formatted_messages.append(HumanMessage(content=message['content']))
+    return formatted_messages
 
 def completion(conversation, settings, chatlog):
 
     conversation_name = conversation.conversation_name
     model = settings['model'] if settings['model'] else "gpt-4"
+    default_message = settings['default_message']
+    default_conversation_name = settings['default_conversation_name']
     prompt = settings['prompt']
     max_tokens = settings['max_tokens']
     temperature = settings['temperature']
@@ -30,50 +48,48 @@ def completion(conversation, settings, chatlog):
     if not conversation.conversation_log:
         messages=[
             {"role": "system", "content": f"{prompt}"},
-            {"role": "assistant", "content": "Hello and congratulations on completing Lab 8 on file I/O and nested lists in Python! Reflecting on your experiences is a crucial step in the learning process. To get started, could you share an earlier moment (such as during the lecture) where you have encountered concepts similar to file I/O and nested lists? How does that previous experience compare with the techniques and understanding you have applied in this assignment?"},
+            {"role": "assistant", "content": default_message},
             {"role": "user", "content": f"{chatlog}"},
         ]
-        # conversation_name = get_conversation_name(chatlog)
-        conversation_name = 'Lab 8 - I/O Reflection'
-        
-        MESSAGE = "Hello and congratulations on completing Lab 8 on file I/O and nested lists in Python! Reflecting on your experiences is a crucial step in the learning process. To get started, could you share an earlier moment (such as during the lecture) where you have encountered concepts similar to file I/O and nested lists? How does that previous experience compare with the techniques and understanding you have applied in this assignment?"
-        create_chatlog(conversation.conversation_id, MESSAGE, False, conversation.start_time, None)
+
+        formatted_messages = [
+            SystemMessage(content=prompt),
+            AIMessage(content=default_message),
+            HumanMessage(content=chatlog)     
+        ]
+        conversation_name = get_conversation_name(chatlog, default_conversation_name)
+        create_chatlog(conversation.conversation_id, default_message, False, conversation.start_time, None)
     else:
         messages = conversation.conversation_log
         messages.append({"role": "user", "content": f"{chatlog}"})
+        formatted_messages = format_conversation(messages)
 
-    # Acquire GPT-4 response
-    response = openai.ChatCompletion.create(
-        model=model,
-        engine=env('AZURE_DEPLOYMENT_NAME'),
-        messages=messages,
-        temperature=temperature,
-        top_p=top_p,
-        max_tokens=max_tokens,
-        n=n,
-        frequency_penalty=frequency_penalty,
-        presence_penalty=presence_penalty,  
-    )
+    # Acquire azure gpt response
+    azure_model = AzureChatOpenAI(
+        openai_api_base=BASE_URL,
+        openai_api_version="2023-05-15",
+        deployment_name=DEPLOYMENT_NAME,
+        openai_api_key=API_KEY,
+        openai_api_type="azure",
+        max_tokens = settings['max_tokens'],
+        temperature = settings['temperature'],
+        top_p = settings['top_p'],
+        frequency_penalty = settings['frequency_penalty'],
+        presence_penalty = settings['presence_penalty'],
+        n = settings['n']
+    )   
+    # response = model(**formatted_messages)
+    response = azure_model(formatted_messages)
 
     # Post response processing
-    agent_response = response['choices'][0]['message']['content']
+    agent_response = response.content
     messages.append({"role": "assistant", "content": f"{agent_response}"})
     Conversation.objects.filter(conversation_id=conversation.conversation_id).update(conversation_log=messages, conversation_name=conversation_name)
-    gpt_response = GPTResponse(
-        conversation_id=str(conversation.conversation_id),
-        model_id=conversation.model_id,
-        gpt_id=response['id'],
-        object=response['object'],
-        created=response['created'],
-        model=response['model'],
-        choices=response['choices'],
-        usage=response['usage']
-    )
-    gpt_response.save()
 
     return agent_response, conversation_name
 
-def get_conversation_name(chatlog):
+def get_conversation_name(chatlog, default):
+    if (default): return default
     response = openai.Completion.create(
         model="gpt-3.5-turbo-instruct",
         prompt="Label this conversation with a name that is less than 6 words: \n\nChatlog: " + chatlog + "\n\nConversation name:",
@@ -86,8 +102,6 @@ def get_conversation_name(chatlog):
     )
     conversation_name = response['choices'][0]['text'].strip().replace("'", "").replace('"', '')
     return conversation_name
-
-    
 
 def get_response(conversation, settings, chatlog):
     response, conversation_name = completion(conversation, settings, chatlog)

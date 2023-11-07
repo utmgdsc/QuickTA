@@ -14,6 +14,14 @@ from survey.models import *
 from survey.serializers import *
 
 from utils.handlers import ErrorResponse
+from survey.queries import *
+
+import pymongo
+from django.conf import settings
+MONGO_URI = settings.DATABASES['default']['CLIENT']['host']
+client = pymongo.MongoClient(MONGO_URI)
+db = client['quickTA']
+
 
 # Create your views here.
 class SurveyQuestionView(APIView):
@@ -270,3 +278,37 @@ class AnswerQuestionView(APIView):
             serializer.create(validated_data=serializer.validated_data)
             return JsonResponse(data={"msg": "Answered question"},status=status.HTTP_200_OK)
         return ErrorResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class SurveyQuestionsFromConversationView(APIView):
+    @swagger_auto_schema(
+        # get conversaiton id and question count 
+        operation_summary="Get survey questions from conversation",
+        manual_parameters=[
+            openapi.Parameter("conversation_id", openapi.IN_QUERY, description="Conversation ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("type", openapi.IN_QUERY, description="Question Type (Comma separated)", type=openapi.TYPE_STRING)
+        ],
+        responses={200: "Question", 400: "Bad Request"}
+    )
+    def get(self, request):
+        """
+        Acquires a random assessment question from the assessment question bank.
+        """
+        conversation_id = request.query_params.get('conversation_id', '')
+        survey_types = request.query_params.get('type', '')
+        survey_types = survey_types.split(',')
+
+        # Acquire all questions from the conversation
+        conversation_db = db["student_conversation"]
+        query = get_conversation_survey_questions(conversation_id, survey_types)
+        result = list(conversation_db.aggregate(query))
+
+        questions = [q['question'] for q in result]
+        survey_id = questions[0]['survey_id']
+
+        response = {
+            "survey_id": survey_id,
+            "questions": questions
+        }
+
+        
+        return JsonResponse(response, safe=False)

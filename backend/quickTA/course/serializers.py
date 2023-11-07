@@ -71,6 +71,16 @@ class CourseModelSerializer(ModelSerializer):
 
 
 class CourseDeploymentSerializer(ModelSerializer):
+    
+    class CourseDeploymentAssessmentIdsSerializer(Serializer):
+        assessment_id = serializers.CharField(max_length=200, required=False)
+    class CourseDeploymentSurveyIdsSerializer(Serializer):
+        survey_type = serializers.CharField(max_length=200, required=False)
+        survey_id = serializers.CharField(max_length=200, required=False)
+
+    assessment_ids = CourseDeploymentAssessmentIdsSerializer(many=True, required=False)
+    survey_ids = CourseDeploymentSurveyIdsSerializer(many=True, required=False)
+
     class Meta:
         model = CourseDeployment
-        fields = ['deployment_id', 'deployment_name', 'course_id', 'priority', 'status']
+        fields = ['deployment_id', 'deployment_name', 'course_id', 'priority', 'status', 'assessment_ids', 'survey_ids']

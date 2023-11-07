@@ -28,6 +28,7 @@ const ChatBoxFooter = ({
   setIsOpenTechAssessment,
   text,
   setText,
+  currModelDefaultMessage
 }) => {
   // after conversations ends disclosure
   const {
@@ -240,6 +241,7 @@ const ChatBoxFooter = ({
           setDisableAll={setDisableAll}
           conversations={conversations}
           setConversations={setConversations}
+          currModelDefaultMessage={currModelDefaultMessage}
         />
 
         <Textarea

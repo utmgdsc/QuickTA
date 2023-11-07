@@ -354,6 +354,7 @@ class CourseModelList(APIView):
             openapi.Parameter("course_id", openapi.IN_QUERY, description="Course ID", type=openapi.TYPE_STRING),
             openapi.Parameter("course_code", openapi.IN_QUERY, description="Course Code", type=openapi.TYPE_STRING),
             openapi.Parameter("semester", openapi.IN_QUERY, description="Semester", type=openapi.TYPE_STRING),
+            openapi.Parameter("show_all", openapi.IN_QUERY, description="Show all models [True/False]", type=openapi.TYPE_BOOLEAN),
         ],
         responses={200: GPTModelSerializer(many=True), 404: "Course Not found"}
     )
@@ -361,6 +362,7 @@ class CourseModelList(APIView):
         course_id = request.query_params.get('course_id', '')
         course_code = request.query_params.get('course_code', '')
         semester = request.query_params.get('semester', '')
+        show_all = request.query_params.get('show_all', False)
 
         cache_key = f'course_model_list_{course_id}_{course_code}_{semester}'
         models = cache.get(cache_key)
@@ -370,7 +372,7 @@ class CourseModelList(APIView):
             else: course = get_object_or_404(Course, course_code=course_code, semester=semester)
 
             models = GPTModel.objects.filter(course_id=course.course_id)
-            models = [model.to_student_dict() for model in models]
+            models = [model.to_student_dict() for model in models if model.status or show_all]
         cache.set(cache_key, models, 60*60*24*7)
 
         return JsonResponse({'models': models})
@@ -526,6 +528,7 @@ class CourseDeploymentView(APIView):
             openapi.Parameter("course_code", openapi.IN_QUERY, description="Course Code", type=openapi.TYPE_STRING),
             openapi.Parameter("semester", openapi.IN_QUERY, description="Semester", type=openapi.TYPE_STRING),
             openapi.Parameter("deployment_ids", openapi.IN_QUERY, description="List of deployment IDs (Comma-Separated)", type=openapi.TYPE_STRING),
+            openapi.Parameter("show_details", openapi.IN_QUERY, description="Show deployment details [True/False]", type=openapi.TYPE_BOOLEAN),
         ],
     )
     def get(self, request):
@@ -540,6 +543,7 @@ class CourseDeploymentView(APIView):
         - semester: Semester
         """
         deployment_id = request.query_params.get('deployment_ids', [])
+        show_details = request.query_params.get('show_details', False)
         query_params = request.query_params
         course = get_course(query_params)
 
@@ -552,7 +556,7 @@ class CourseDeploymentView(APIView):
 
         if deployment_id: deployments = CourseDeployment.objects.filter(deployment_id__in=deployment_ids)
         else: deployments = CourseDeployment.objects.all()
-        return JsonResponse({ "deployments": [deployment.to_dict() for deployment in deployments]})
+        return JsonResponse({ "deployments": [deployment.to_dict(add_details=show_details) for deployment in deployments ]})
 
     @swagger_auto_schema(
         operation_summary="Create a course deployment",

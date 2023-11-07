@@ -27,7 +27,7 @@ const ChatBox = ({ messages, waitingForResp }) => {
         let paragraphs = []
         if (isUser) {
           paragraphs = message.split(/\n\n/);
-        } else {
+        } else if (message) {
           paragraphs = [message];
         }
         const chatBubbles = [];

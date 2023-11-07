@@ -26,6 +26,7 @@ const TechAssessment = ({
   setDisableAll,
   conversations,
   setConversations,
+  currModelDefaultMessage
 }) => {
   const {
     isOpen: isErrOpen,
@@ -46,13 +47,20 @@ const TechAssessment = ({
 
   // Fetch code, questions, and answer for tech assessment
   const fetchCodeQuestion = () => {
+    let questionCount = 1
     axios
       .get(
         process.env.REACT_APP_API_URL +
-          "/assessment/question/random?assessment_id=8dd15ed3-da48-487b-82ac-6c2ae12f93b6"
+          "/assessment/v2/question/random", {
+            params: {
+              conversation_id: conversation_id,
+              count: questionCount,
+          }}
       )
       .then((res) => {
-        let data = res.data;
+        // TODO: fix this for more than 1 MC question - currently forcefully set to first question
+        let data = res.data[0];
+        
         let { question, parsedCode } = parseCode(data.question);
         setCode({
           question: question,
@@ -71,15 +79,22 @@ const TechAssessment = ({
   };
 
   useEffect(() => {
-    fetchCodeQuestion();
-  }, [UTORid]);
+    if (isOpenTechAssessment) {
+      fetchCodeQuestion();
+    }
+  }, [isOpenTechAssessment]);
 
   const parseCode = (text) => {
     let start = text.indexOf("```python");
     let end = text.indexOf("```", start + 1);
-    let parsedCode = text.substring(start + 9, end);
+    var question = text;
+    var parsedCode = "";
 
-    let question = text.substring(0, start);
+    if (start !== -1 || end !== -1) {
+      parsedCode = text.substring(start + 9, end);
+      question = text.substring(0, start);
+    }
+
 
     return { question, parsedCode };
   };
@@ -110,14 +125,16 @@ const TechAssessment = ({
             {/* Code Blob */}
             <Box width={"100%"} >
               <Text>{code.question}</Text>
-              <SyntaxHighlighter
-                showLineNumbers={true}
-                wrapLongLines={true}
-                language={"python"}
-                codeTagProps={{ style: { fontSize: "12px" } }}
-              >
-                {code.code}
-              </SyntaxHighlighter>
+              {code.code && 
+                <SyntaxHighlighter
+                  showLineNumbers={true}
+                  wrapLongLines={true}
+                  language={"python"}
+                  codeTagProps={{ style: { fontSize: "12px" } }}
+                >
+                  {code.code}
+                </SyntaxHighlighter>
+              }
             </Box>
             {/* MC choices */}
             <RadioGroup display="grid" gridGap={4} mt={10}
@@ -129,7 +146,7 @@ const TechAssessment = ({
               }}
             >
               {options.map((element) => (
-                <Button
+                <Box
                   key={element.choice + element.flavor_text}
                   className={`
                     ${studentResponse != element.choice
@@ -163,7 +180,7 @@ const TechAssessment = ({
                     warp: "break-word",
                     fontSize: "14px",
                   }}>{element.flavor_text}</Text>
-                </Button>
+                </Box>
               ))}
             </RadioGroup>
           </Box>
@@ -256,11 +273,11 @@ const TechAssessment = ({
         conversation_id={conversation_id}
         setConversations={setConversations}
         UTORid={UTORid}
-        setStudentResponse={setStudentResponse}
         setDisableAllOption={setDisableAllOption}
         setAnswer={setAnswer}
         setDisplayAnswer={setDisplayAnswer}
         setAnswerFlavorText={setAnswerFlavorText}
+        currModelDefaultMessage={currModelDefaultMessage}
       />
       {/* <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} /> */}
     </>

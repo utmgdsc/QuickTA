@@ -34,14 +34,6 @@ const Chat = ({
   UTORid,
   auth,
 }) => {
-  const defaultMessages = [
-    {
-      message:
-        "Hi! I am an AI assistant designed to support you in your Python programming learning journey. I cannot give out solutions to your assignments (python code) but I can help guide you if you get stuck. The chat is monitored, if you continue asking for the solution here, the instructors would be made aware of it. How can I help you?",
-      dateSent: Temporal.Now.zonedDateTimeISO().toString(),
-      isUser: false,
-    },
-  ]
   const [messages, updateMessages] = useState([]);
   const [inConvo, updateInConvo] = useState(false);
   const [currConvoID, updateConvoID] = useState("");
@@ -190,6 +182,18 @@ const Chat = ({
       };
     } 
   }, [inConvo]);
+
+  useEffect(() => {
+    if (currModel) {
+      if (messages.length <= 1) {
+        updateMessages([{
+          message: currModel.default_message,
+          dateSent: Temporal.Now.zonedDateTimeISO().toString(),
+          isUser: false,
+        }]);
+      }
+    }
+  }, [currModel]);
 
   return (
     <Box
@@ -579,6 +583,7 @@ const Chat = ({
             UTORid={UTORid}
             text={text}
             setText={setText}
+            currModelDefaultMessage={currModel.default_message}
           />
         </Box>
       </Box>

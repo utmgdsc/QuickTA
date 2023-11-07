@@ -12,4 +12,5 @@ urlpatterns = [
     path('/question/answer', AnswerAsessmentQuestionView.as_view()),
     path('/v2/question/answer', AnswerAsessmentQuestionOnlyView.as_view()),
     path('/question/random', RandomAssessmentQuestionView.as_view()),
+    path('/v2/question/random', AssessmentQuestionBankView.as_view()),
 ]

@@ -13,6 +13,8 @@ class GPTModel(models.Model):
     course_id = models.CharField(max_length=100)
     deployment_id = models.CharField(max_length=100, default="")
     status = models.BooleanField(default=True)
+    default_message = models.TextField(max_length=100000, default="")
+    default_conversation_name = models.TextField(max_length=100000, default="")
 
     # OpenAI Completion Parameters
     model = models.TextField(max_length=40)
@@ -46,6 +48,8 @@ class GPTModel(models.Model):
             "course_id": self.course_id,
             "status": self.status,
             "model": self.model,
+            "default_message": self.default_message,
+            "default_conversation_name": self.default_conversation_name,
             "prompt": self.prompt,
             "max_tokens": self.max_tokens,
             "temperature": self.temperature,
@@ -65,13 +69,16 @@ class GPTModel(models.Model):
             "model_id": str(self.model_id),
             "model_name": self.model_name,
             "course_id": self.course_id,
-            "status": self.status
+            "status": self.status,
+            "default_message": self.default_message,
         }
     
     def get_settings(self, include_functions=False):
         settings = {
             "model": self.model,
             "model_type": self.model_type,
+            "default_message": self.default_message,
+            "default_conversation_name": self.default_conversation_name,
             "prompt": self.prompt,
             "max_tokens": self.max_tokens,
             "temperature": self.temperature,

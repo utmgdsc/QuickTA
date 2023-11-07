@@ -17,6 +17,13 @@ from drf_yasg import openapi
 from assessments.models import *
 from assessments.serializers import *
 from utils.handlers import ErrorResponse
+from assessments.queries import *
+
+import pymongo
+from django.conf import settings
+MONGO_URI = settings.DATABASES['default']['CLIENT']['host']
+client = pymongo.MongoClient(MONGO_URI)
+db = client['quickTA']
 
 # Create your views here.
 class AssessmentQuestionView(APIView):
@@ -304,3 +311,31 @@ class RandomAssessmentQuestionView(APIView):
             "choices": serializer["choices"]   
         }
         return response
+
+class AssessmentQuestionBankView(APIView):
+    @swagger_auto_schema(
+        # get conversaiton id and question count 
+        operation_summary="Get a random assessment question",
+        manual_parameters=[
+            openapi.Parameter("conversation_id", openapi.IN_QUERY, description="Conversation ID", type=openapi.TYPE_STRING),
+            openapi.Parameter("count", openapi.IN_QUERY, description="Number of questions to get", type=openapi.TYPE_INTEGER)
+        ],
+        responses={200: AssessmentQuestionSerializer(), 404: "Assessment Question not found"},
+    )
+    def get(self, request):
+        """
+        Acquires a random assessment question from the assessment question bank.
+        """
+        conversation_id = request.query_params.get('conversation_id', '')
+        count = int(request.query_params.get('count', 1))
+
+        # Acquire all applicable questions from the conversation
+        conversation_db = db["student_conversation"]
+        query = get_assessment_questions(conversation_id)
+        result = list(conversation_db.aggregate(query))
+
+        # Get count number of questions
+        questions = [random.choice(result) for _ in range(count)]
+        questions = [q['question'] for q in questions]
+        
+        return JsonResponse(questions, safe=False)

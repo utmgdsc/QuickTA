@@ -31,10 +31,10 @@ const DashboardHeader = (props) => {
   }
   return (
         <Box mt={3}>
-          <Box className="d-flex gap-2 my-2">
+          {/* <Box className="d-flex gap-2 my-2">
             <Box className="blue-button py-1 my-1" onClick={() => handleChangeTab(0)}>Main</Box>
             <Box className="blue-button py-1 my-1" onClick={() => handleChangeTab(1)}>Course Comparison</Box>
-          </Box>
+          </Box> */}
           {/* Filter Selectors */}
           <Box className="d-flex flex-col flex-md-row">
             <Box>

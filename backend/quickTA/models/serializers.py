@@ -11,6 +11,8 @@ class GPTModelSerializer(ModelSerializer):
             'course_id',
             'deployment_id',
             'status',
+            'default_conversation_name',
+            'default_message',
             'model',
             'prompt',
             'max_tokens',
