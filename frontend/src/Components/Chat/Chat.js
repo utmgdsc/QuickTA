@@ -545,7 +545,7 @@ const Chat = ({
             currConvoID={currConvoID}
           />
           {/* Chatbox main chat box - max Height: 70% */}
-          <ChatBox messages={messages} waitingForResp={waitingForResp} />
+          <ChatBox messages={messages} waitingForResponse={waitingForResp} />
 
           {/* Chatbox footer controllers - max Height: 15% */}
           <ChatBoxFooter
