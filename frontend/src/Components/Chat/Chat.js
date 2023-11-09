@@ -13,12 +13,12 @@ import ChatBoxFooter from "./ChatBoxFooter";
 import { useState, useEffect } from "react";
 import CourseSelect from "../CourseSelect";
 import ModelSelect from "../ModelSelect";
-import { CloseIcon, HamburgerIcon, SmallAddIcon } from "@chakra-ui/icons";
+import { CloseIcon, HamburgerIcon } from "@chakra-ui/icons";
 import axios from "axios";
 import "../../assets/styles.css";
 import ErrorDrawer from "../ErrorDrawer";
 import { Temporal } from "@js-temporal/polyfill";
-import { Alert, Modal } from "@mui/material";
+import { Alert } from "@mui/material";
 
 const Chat = ({
   currCourse,
@@ -57,13 +57,154 @@ const Chat = ({
   });
   const [showNotActiveConversation, setShowNotActiveConversation] = useState(false);
 
+  // Styles
+  const mainChatboxContainerStyle = {
+    background: "white",
+    border: "1px solid #EAEAEA",
+    borderTopLeftRadius: "8px",
+    borderTopRightRadius: "8px",
+    borderBottomLeftRadius: "8px",
+    borderBottomRightRadius: "8px",
+    boxShadow: "1px 2px 3px 1px rgba(0,0,0,0.12)",
+    height: "75vh",
+    minHeight: '590px',
+    display: "flex",
+    flexDirection: "row",
+  };
+
+  const conversationHistorySideBarOuterStyle = {
+    width: openConvoHistory ? "225px" : "70px",
+    height: "100%",
+    overflow: "hidden", // Hide the horizontal overflow
+    backgroundColor: "#f6f6f6",
+    borderRight: "1px solid #EAEAEA",
+  }
+
+  const conversationHistorySideBarInnerStyle = {
+    display: "flex",
+    width: "100%",
+    height: "15%",
+    padding: "20px 16px",
+    borderBottom: "1px solid #EAEAEA",
+    alignItems: "center",
+    backgroundColor: "white",
+    borderTopLeftRadius: "5px",
+    borderTopRightRadius: "5px",
+    overflow: "hidden",
+    boxSizing: "border-box",
+  }
+
+  const openConversationHistoryContainerStyle =  {
+    display: "flex",
+    justifyContent: "flex-start",
+    width: "100%",
+    boxSizing: "border-box",
+  }
+
+  const openConversationHistoryButtonStyle = {
+    padding: "8px",
+    background: "#EDF2F6",
+    borderRadius: "5px",
+    fontSize: "14px",
+  }
+
+  const newConversationContainerStyle = {
+    display: "flex",
+    justifyContent: "flex-end",
+    width: "100%",
+  }
+
+  const newConversationButtonStyle = {
+    width: "100%",
+    height: "100%",
+    borderRadius: "5px",
+    padding: "6px",
+    paddingLeft: "12px",
+    paddingRight: "12px",
+    fontFamily: "Poppins",
+    fontWeight: "600",
+    fontSize: "14px",
+    background: waitingForResp ||
+    (disableAll.newConversation && messages.length === 1) ||
+    (!inConvo && !currConvoID && !isOldConvo) ? "#DDEBF7" : "#ACCDEC",
+    color: waitingForResp ||
+    (disableAll.newConversation && messages.length === 1) ||
+    (!inConvo && !currConvoID && !isOldConvo) ? "#BBB" : "#555",
+    cursor: waitingForResp ||
+    (disableAll.newConversation && messages.length === 1) ||
+    (!inConvo && !currConvoID && !isOldConvo) ? "not-allowed" : "pointer",
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+    textOverflow: "ellipsis",
+  }
+  
+  const historicalConversationContainerStyle = {
+    height: "fit-content",
+    overflowY: "auto", // Enable vertical scrolling if needed
+    maxHeight: "calc(75vh - 100px)", // Set a maximum height
+  }
+
+  const getConversationHistoryRecordStyle = (convo) => {
+    return {
+      background: disableAll.oldConvoButtons ? "#fbfbfb" : convo.conversation_id == currConvoID ? "#f3f3f3" : "#fdfdfd",
+      display: "flex",
+      flexDirection: "row",
+      alignItems: "center",
+      padding: "10px",
+      paddingLeft: "15px",
+      borderBottom: "1px solid #EAEAEA",
+      cursor: disableAll.oldConvoButtons ? "not-allowed" : "pointer",
+      width: "100%"
+    }
+  }
+
+  const userAvatarStyle = {
+    background: "#7CA2DE",
+    fontSize: "19px",
+    width: "40px",
+    height: "40px",
+    borderRadius: "50%",
+    marginRight: "10px",
+  }
+
+  const getUserAvatarBadgeStyle = (convo) => {
+    return {
+      borderRadius: "60px", 
+      border: `3px solid ${convo.status == "A" ? "#C6F6D4" : "#FEEFD5"}`,
+      background: convo.status == "A" ? "#68D391" : "#FF6247"
+    } 
+  }
+
+  const historicalConversationNameStyle = {
+    fontSize: "14px",
+    fontWeight: "500",
+    whiteSpace: "nowrap",
+    overflow: "hidden", // Hide any overflowing text
+    textOverflow: "ellipsis", // Display ellipsis for overflow
+    maxWidth: "100%", // Adju
+  }
+
+  const chatboxContainerStyle = {
+    minWidth: openConvoHistory ? "calc(100% - 225px)" : "calc(100% - 70px)",
+    maxHeight: "75vh",
+    background: "#F9F9F9",
+    minHeight: '590px',
+  }
+
+  const showNotActiveConversationAlertStyle = {
+    position: "absolute",
+    top: "10vh",
+    left: "10vw",
+    width: "80vw",
+    zIndex: 100,
+    border: "1px solid #EAEAEA",
+    borderShadow: "1px 2px 3px 1px rgba(0,0,0,0.12)",
+    borderRadius: "8px",
+  }
+
   const getConversations = async () => {
     let params = "course_id=" + currCourse.course_id + "&user_id=" + userId;
-    axios
-      .get(
-        process.env.REACT_APP_API_URL +
-          `/student/conversation/history?${params}`
-      )
+    axios.get(process.env.REACT_APP_API_URL + `/student/conversation/history?${params}`)
       .then((res) => {
         let data = res.data;
         if (data.conversations) setConversations(data.conversations);
@@ -115,7 +256,6 @@ const Chat = ({
       });
   };
 
-
   const getConversationMessages = async (convoID) => {
     updateMessages([]);
     setWaitForResp(true);
@@ -159,10 +299,103 @@ const Chat = ({
     setWaitForResp(false);
   };
 
+  const handleNewConversation = () => {
+    if (
+      !(waitingForResp || 
+      (disableAll.newConversation && messages.length === 1) || 
+      (!inConvo && !currConvoID && !isOldConvo))
+    ) {
+      // open technical assessment
+      if (inConvo) {
+        setIsOpenTechAssessment(true);
+      } else {
+        
+        // Check if there are no active conversations 
+        let noActiveConversations = conversations.every((convo) => convo.status !== "A" );
+        if (currConvoID && isOldConvo && noActiveConversations ) {
+          // Create a new conversation
+          setDisableAll((prevDisableAll) => ({
+            inputMessage: false,
+            sendButton: false,
+            newConversation: true,
+            endChat: false,
+            oldConvoButtons: false,
+          }));
+          updateInConvo(false);
+          updateConvoID("");
+          setIsOldConvo(false);
+          updateMessages([]);
+          createNewConversation();
+
+        } else {
+          setShowNotActiveConversation(true);
+          setTimeout(() => {
+            setShowNotActiveConversation(false);
+          }, 5000);
+        }
+      }
+    } else {
+      // Create a new conversation
+      setDisableAll((prevDisableAll) => ({
+        inputMessage: false,
+        sendButton: false,
+        newConversation: true,
+        endChat: false,
+        oldConvoButtons: false,
+      }));
+      updateInConvo(false);
+      updateConvoID("");
+      setIsOldConvo(false);
+      updateMessages([]);
+      createNewConversation();
+    }
+  }
+
+  const handleGetHistoricalConversation = (convo) => {
+      if (disableAll.oldConvoButtons) return;
+      if (currConvoID !== convo.conversation_id) {
+        setText("");
+        if (convo.status == "A") {
+          // active old conversation
+          setIsOldConvo(true);
+          updateInConvo(true);
+          updateConvoID(convo.conversation_id);
+          setDisableAll((prevDisableAll) => ({
+            inputMessage: false,
+            sendButton: false,
+            newConversation: false,
+            endChat: false,
+            oldConvoButtons: false,
+          }));
+        } else {
+          // Inactive old conversation
+          updateConvoID(convo.conversation_id);
+          setIsOldConvo(true);
+          updateInConvo(false);
+          setDisableAll((prevDisableAll) => ({
+            inputMessage: true,
+            sendButton: true,
+            newConversation: false,
+            endChat: true,
+            oldConvoButtons: false,
+          }));
+        }
+      } else {
+        // current ongoing conversation
+        setDisableAll((prevDisableAll) => ({
+          inputMessage: false,
+          sendButton: false,
+          newConversation: false,
+          endChat: false,
+          oldConvoButtons: false,
+        }));
+      }
+      getConversationMessages(convo.conversation_id);
+    }
+
   useEffect(() => {
     getConversations();
   }, [currCourse]);
-
 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
@@ -196,15 +429,7 @@ const Chat = ({
   }, [currModel]);
 
   return (
-    <Box
-    className="chat-master-container"
-      ml={"10vw"}
-      mr={"10vw"}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <Box className="chat-master-container">
       {/* Course/Model selection bars */}
       <div style={{ maxWidth: "500px", height: "50px" }}>
         <div style={{ display: "flex" }}>
@@ -227,20 +452,7 @@ const Chat = ({
       </div>
 
       {/* Main Chatbox Container */}
-      <Box
-        as={"div"}
-        bgColor={"white"}
-        border={"1px solid #EAEAEA"}
-        borderTopRadius={"lg"}
-        borderBottomRadius={"lg"}
-        boxShadow={"1px 2px 3px 1px rgba(0,0,0,0.12)"}
-        style={{
-          height: "75vh",
-          minHeight: '590px',
-          display: "flex",
-          flexDirection: "row",
-        }}
-      >
+      <Box style={mainChatboxContainerStyle}>
         {/* Conversation History Side Nav Container */}
         <Box
           className={
@@ -250,279 +462,62 @@ const Chat = ({
               : " hidden")
           }
           borderBottomLeftRadius={"lg"}
-          style={{
-            width: openConvoHistory ? "20%" : "70px",
-            height: "100%",
-            overflow: "hidden", // Hide the horizontal overflow
-            backgroundColor: "#f6f6f6",
-            borderRight: "1px solid #EAEAEA",
-          }}
+          style={conversationHistorySideBarOuterStyle}
         >
-          <div
-            style={{
-              display: "flex",
-              width: "100%",
-              height: "15%",
-              padding: "20px 16px",
-              borderBottom: "1px solid #EAEAEA",
-              alignItems: "center",
-              backgroundColor: "white",
-              borderTopLeftRadius: "5px",
-              borderTopRightRadius: "5px",
-              overflow: "hidden",
-              boxSizing: "border-box",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-start",
-                width: "100%",
-
-                boxSizing: "border-box",
-              }}
-            >
+          <div style={conversationHistorySideBarInnerStyle}>
+            <div style={openConversationHistoryContainerStyle}>
               <IconButton
                 border={"1px solid #EAEAEA"}
                 aria-label="Open Conversation History Menu"
-                style={{
-                  padding: "8px",
-                  background: "#EDF2F6",
-                  borderRadius: "5px",
-                  fontSize: "14px",
-                }}
+                style={openConversationHistoryButtonStyle}
                 className="hamburger-icon"
                 icon={openConvoHistory ? <CloseIcon /> : <HamburgerIcon />}
-                onClick={() => {
-                  setOpenConvoHistory(!openConvoHistory);
-                }}
+                onClick={() => { setOpenConvoHistory(!openConvoHistory);}}
               />
             </div>
+            
             {/* New Conversation button */}
             {openConvoHistory && (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  width: "100%",
-                }}
-              >
+              <div style={newConversationContainerStyle}>
                 <Button
-                  size="sm"
-                  // isDisabled={
-                  //   waitingForResp ||
-                  //   (disableAll.newConversation && messages.length === 1) ||
-                  //   (!inConvo && !currConvoID && !isOldConvo)
-                  // }
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: "5px",
-                    padding: "6px",
-                    paddingLeft: "12px",
-                    paddingRight: "12px",
-                    fontFamily: "Poppins",
-                    fontWeight: "600",
-                    fontSize: "14px",
-                    background: waitingForResp ||
-                    (disableAll.newConversation && messages.length === 1) ||
-                    (!inConvo && !currConvoID && !isOldConvo) ? "#DDEBF7" : "#ACCDEC",
-                    color: waitingForResp ||
-                    (disableAll.newConversation && messages.length === 1) ||
-                    (!inConvo && !currConvoID && !isOldConvo) ? "#BBB" : "#555",
-                    cursor: waitingForResp ||
-                    (disableAll.newConversation && messages.length === 1) ||
-                    (!inConvo && !currConvoID && !isOldConvo) ? "not-allowed" : "pointer",
-                  }}
-                  onClick={() => {
-                    if (
-                      !(waitingForResp || 
-                      (disableAll.newConversation && messages.length === 1) || 
-                      (!inConvo && !currConvoID && !isOldConvo))
-                    ) {
-                      // open technical assessment
-                      if (inConvo) {
-                        setIsOpenTechAssessment(true);
-                      } else {
-                        
-                        // Check if there are no active conversations 
-                        let noActiveConversations = conversations.every((convo) => convo.status !== "A" );
-                        if (currConvoID && isOldConvo && noActiveConversations ) {
-                          // Create a new conversation
-                          setDisableAll((prevDisableAll) => ({
-                            inputMessage: false,
-                            sendButton: false,
-                            newConversation: true,
-                            endChat: false,
-                            oldConvoButtons: false,
-                          }));
-                          updateInConvo(false);
-                          updateConvoID("");
-                          setIsOldConvo(false);
-                          updateMessages([]);
-                          createNewConversation();
-
-                        } else {
-                          setShowNotActiveConversation(true);
-                          setTimeout(() => {
-                            setShowNotActiveConversation(false);
-                          }, 5000);
-                        }
-                      }
-                    } else {
-                      // Create a new conversation
-                      setDisableAll((prevDisableAll) => ({
-                        inputMessage: false,
-                        sendButton: false,
-                        newConversation: true,
-                        endChat: false,
-                        oldConvoButtons: false,
-                      }));
-                      updateInConvo(false);
-                      updateConvoID("");
-                      setIsOldConvo(false);
-                      updateMessages([]);
-                      createNewConversation();
-                    }
-                  }}
-                  overflow={"hidden"}
-                  whiteSpace={"nowrap"}
-                  textOverflow={"ellipsis"}
-                  ms={2}
+                  style={newConversationButtonStyle}
+                  onClick={handleNewConversation}
+                  ms={2} 
                 >
-                  <Text
-                    overflow={"hidden"}
-                    whiteSpace={"nowrap"}
-                    textOverflow={"ellipsis"}
-                  >
-                    New Conversation
-                  </Text>
-                </Button>
+                  <Text>New Conversation</Text>
+                </Button> 
               </div>
             )}
           </div>
 
-          <div
-            style={{
-              height: "fit-content",
-              overflowY: "auto", // Enable vertical scrolling if needed
-              maxHeight: "calc(75vh - 100px)", // Set a maximum height
-            }}
-          >
+          <div style={historicalConversationContainerStyle}>
             <div>
-              {/* <p>InConvo {inConvo ? ": T" : ": F"}</p>
-              <p>New Conversation: {disableAll.newConversation ? "T" : "F"}</p>
-              <p>currConvoID: {currConvoID}</p>
-              <p>isOldConvo: {isOldConvo ? "T" : "F"} </p> */}
-              <p></p>
+              {/* 
+                <p>InConvo {inConvo ? ": T" : ": F"}</p>
+                <p>New Conversation: {disableAll.newConversation ? "T" : "F"}</p>
+                <p>currConvoID: {currConvoID}</p>
+                <p>isOldConvo: {isOldConvo ? "T" : "F"} </p> 
+              */}
               {conversations.map((convo, index) => {
                 return (
                   <Box
                     key={convo.conversation_id}
                     className="conversation-history-box"
-                    style={
-                      disableAll.oldConvoButtons
-                        ? {
-                            background: "#fbfbfb",
-                            display: "flex",
-                            flexDirection: "row",
-                            alignItems: "center",
-                            padding: "10px",
-                            paddingLeft: "15px",
-                            borderBottom: "1px solid #EAEAEA",
-                            cursor: "not-allowed",
-                            width: "100%",
-                          }
-                        : {
-                            background: convo.conversation_id == currConvoID ? "#f3f3f3" : "#fdfdfd",
-                            display: "flex",
-                            flexDirection: "row",
-                            alignItems: "center",
-                            padding: "10px",
-                            paddingLeft: "15px",
-                            borderBottom: "1px solid #EAEAEA",
-                            cursor: "pointer",
-                            width: "100%",
-                          }
-                    }
-                    onClick={() => {
-                      if (disableAll.oldConvoButtons) return;
-                      if (currConvoID !== convo.conversation_id) {
-                        setText("");
-                        if (convo.status == "A") {
-                          // active old conversation
-                          setIsOldConvo(true);
-                          updateInConvo(true);
-                          updateConvoID(convo.conversation_id);
-                          setDisableAll((prevDisableAll) => ({
-                            inputMessage: false,
-                            sendButton: false,
-                            newConversation: false,
-                            endChat: false,
-                            oldConvoButtons: false,
-                          }));
-                        } else {
-                          // Inactive old conversation
-                          updateConvoID(convo.conversation_id);
-                          setIsOldConvo(true);
-                          updateInConvo(false);
-                          setDisableAll((prevDisableAll) => ({
-                            inputMessage: true,
-                            sendButton: true,
-                            newConversation: false,
-                            endChat: true,
-                            oldConvoButtons: false,
-                          }));
-                        }
-                      } else {
-                        // current ongoing conversation
-                        setDisableAll((prevDisableAll) => ({
-                          inputMessage: false,
-                          sendButton: false,
-                          newConversation: false,
-                          endChat: false,
-                          oldConvoButtons: false,
-                        }));
-                      }
-                      getConversationMessages(convo.conversation_id);
-                    }}
+                    style={getConversationHistoryRecordStyle(convo)}
+                    onClick={() => handleGetHistoricalConversation(convo)}
                   >
                     <Avatar
-                      name={
-                        convo.conversation_name
-                          ? convo.conversation_name
-                          : "C " + (index + 1)
-                      }
-                      backgroundColor="#7CA2DE"
-                      style={{
-                        fontSize: "19px",
-                        width: "40px",
-                        height: "40px",
-                        borderRadius: "50%",
-                        marginRight: "10px",
-                      }}
+                      name={convo.conversation_name ? convo.conversation_name : "C " + (index + 1)}
+                      style={userAvatarStyle}
                       alt="User Avatar"
                     >
                       <AvatarBadge
                         boxSize={"16px"}
-                        style={{ 
-                          borderRadius: "60px", 
-                          border: `3px solid ${convo.status == "A" ? "#C6F6D4" : "#FEEFD5"}`,
-                          background: convo.status == "A" ? "#68D391" : "#FF6247"
-                        }}
+                        style={getUserAvatarBadgeStyle(convo)}
                       />
                     </Avatar>
                     {openConvoHistory && (
-                      <span
-                        style={{
-                          fontSize: "14px",
-                          fontWeight: "500",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden", // Hide any overflowing text
-                          textOverflow: "ellipsis", // Display ellipsis for overflow
-                          maxWidth: "100%", // Adju
-                        }}
-                      >
+                      <span style={historicalConversationNameStyle}>
                         {convo.conversation_name
                           ? convo.conversation_name
                           : `Conversation ${conversations.length - index}`}
@@ -537,15 +532,8 @@ const Chat = ({
 
         {/* Chatbox Container */}
         <Box
-          className={
-            `chat-box` + (openConvoHistory ? " hidden" : " full-width")
-          }
-          style={{
-            minWidth: openConvoHistory ? "80%" : "calc(100% - 70px)",
-            maxHeight: "75vh",
-            background: "#F9F9F9",
-            minHeight: '590px',
-          }}
+          className={`chat-box` + (openConvoHistory ? " hidden" : " full-width")}
+          style={chatboxContainerStyle}
           borderBottomRightRadius={"8px"}
           borderTopRightRadius={"8px"}
         >
@@ -588,18 +576,7 @@ const Chat = ({
         </Box>
       </Box>
       {showNotActiveConversation &&
-        <Alert severity="warning"
-          style={{
-            position: "absolute",
-            top: "10vh",
-            left: "10vw",
-            width: "80vw",
-            zIndex: 100,
-            border: "1px solid #EAEAEA",
-            borderShadow: "1px 2px 3px 1px rgba(0,0,0,0.12)",
-            borderRadius: "8px",
-          }}
-        >
+        <Alert severity="warning" style={showNotActiveConversationAlertStyle}>
             Active conversations found! Please end your current active conversations first!
         </Alert>
       }

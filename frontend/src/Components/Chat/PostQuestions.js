@@ -15,8 +15,6 @@ import Box from '@mui/material/Box';
 import { Flex } from "@chakra-ui/layout";
 import { Spinner } from "@chakra-ui/react";
 
-
-
 const PostQuestions = ({
   isPostQOpen,
   setIsPostQOpen,
