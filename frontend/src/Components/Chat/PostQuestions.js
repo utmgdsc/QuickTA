@@ -16,10 +16,10 @@ import { Flex } from "@chakra-ui/layout";
 import { Spinner } from "@chakra-ui/react";
 
 
+
 const PostQuestions = ({
   isPostQOpen,
   setIsPostQOpen,
-  setIsOpenTechAssessment,
   setDisableAll,
   updateMessages,
   updateInConvo,
@@ -29,27 +29,21 @@ const PostQuestions = ({
   setConversations,
   UTORid,
   setDisableAllOption,
-  setAnswer,
-  setDisplayAnswer,
-  setAnswerFlavorText,
-  currModelDefaultMessage
+  currModelDefaultMessage,
+  resetTechAssessment
 }) => {
-  const [showModalIndex, setShowModalIndex] = useState(0);
-  const [error, setError] = useState();
-  const [questions, setQuestions] = useState([{}]);
-  const [optionsSelected, setOptionsSelected] = useState([]);
-  const [scaleSurveyId, setScaleSurveyId] = useState("");
-  const [open_ended_surveyId, setOpenEndedSurveyId] = useState("");
 
+  const [questions, setQuestions] = useState([]);
   const [currQuestion, setCurrQuestion] = useState(0);
   const [studentResponse, setStudentResponse] = useState([]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [surveyID, setSurveyID] = useState("");
 
   /** Fetch survey questions from backend. */
   const fetchSurveyQuestions = () => {
+    setIsLoading(true);
     axios
       .get( process.env.REACT_APP_API_URL + "/survey/v2/questions",
           { 
@@ -70,9 +64,10 @@ const PostQuestions = ({
           _studentResponse[i + 1] = "";
         }
         setStudentResponse(_studentResponse);
+        setIsLoading(false);
       })
       .catch((err) => {
-        setError(err);
+        setIsLoading(false);
       });
   };
 
@@ -127,16 +122,15 @@ const PostQuestions = ({
 
       axios
         .post(process.env.REACT_APP_API_URL + "/survey/questions/answer", allResponses)
-        .then((res) => {
-          // Clear messages and user responses
-          // console.log("Successfully submitted response!");
+        .then((res) => {          
+          // Reset Post Questions & Tech Assessment for next iteration
           setStudentResponse([]);
           setCurrQuestion(0);
           setDisableAllOption(false);
-          setAnswer("");
-          setAnswerFlavorText("");
-          setDisplayAnswer(false);
-
+          setIsSubmitting(false);
+          
+          resetTechAssessment();
+          
           // find and update current conversation
           let currConvo = conversations.find((convo) => convo.conversation_id === conversation_id);
           let newConversations = [
@@ -164,23 +158,22 @@ const PostQuestions = ({
           setIsPostQOpen(false);
         })
         .catch((err) => {
-          setError(err);
           // console.log(err);
         });
     }
   };
-
+  
+  const [open, setOpen] = useState(true);
   useEffect(() => {
     if (isPostQOpen) {
-      setIsLoading(true);
       setStudentResponse([]); // Clear student response
       fetchSurveyQuestions();
-      setIsLoading(false);
     }
   }, [isPostQOpen]);
 
   return (
     <>
+
       <Modal open={isPostQOpen}>
       <Box sx={{
           position: 'absolute',
@@ -204,7 +197,9 @@ const PostQuestions = ({
               </Text>
             </div>
           </Box>
+
           {isLoading ? (
+            <Box style={{ height: "80vh" }}>
             <VStack
               className="d-flex justify-content-center align-items-center"
               style={{ fontSize: "14px", height: "80vh" }}
@@ -214,10 +209,12 @@ const PostQuestions = ({
                 <Text ms={5}>Loading...</Text>
               </Flex>
             </VStack>
+            </Box>
           ) : ( questions && questions.length > 0 &&
             <div>
-              <VStack className="d-flex align-items-center" style={{ minHeight: "80vh" }}>
-                <div className="d-flex justify-content-center align-items-center"
+              <VStack className="d-flex align-items-center" style={{ height: "80vh", backgroundColor: "white" }}>
+                <div 
+                  className="d-flex justify-content-center align-items-center"
                   style={{ fontSize: "16px", height: "15vh" }}
                 >
                   {questions[currQuestion].question}

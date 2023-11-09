@@ -9,10 +9,10 @@ import {
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import ErrorDrawer from "../ErrorDrawer";
 import PostQuestions from "./PostQuestions";
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
+import { CircularProgress } from "@mui/material";
 
 const TechAssessment = ({
   isOpenTechAssessment,
@@ -35,47 +35,74 @@ const TechAssessment = ({
   } = useDisclosure();
   const [isPostQOpen, setIsPostQOpen] = useState(false);
   const [error, setError] = useState();
+  
   const [code, setCode] = useState({ question: "", language: "" });
   const [options, setOptions] = useState([]);
   const [studentResponse, setStudentResponse] = useState(null);
   const [answer, setAnswer] = useState("");
   const [displayAnswer, setDisplayAnswer] = useState(false);
   const [answerFlavorText, setAnswerFlavorText] = useState("");
-  const [assessement_question_id, setAssessmentQuestionID] = useState("");
+  const [assessmentQuestionID, setAssessmentQuestionID] = useState("");
   const [disableAllOption, setDisableAllOption] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const technicalAssessmentModalStyle = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: '40%',
+    bgcolor: 'background.paper',
+    boxShadow: 10,
+    pt: 2,
+    px: 4,
+    pb: 3,
+    borderRadius: '8px',
+    minWidth: '450px',
+  }
+  
+  const resetTechAssessment = () => {
+    setCode({ question: "", language: "" });
+    setOptions([]);
+    setStudentResponse(null);
+    setAnswer("");
+    setDisplayAnswer(false);
+    setAnswerFlavorText("");
+    setAssessmentQuestionID("");
+    setDisableAllOption(false);
+    setIsSubmitting(false);
+    setIsLoading(true);
+  }
 
   // Fetch code, questions, and answer for tech assessment
-  const fetchCodeQuestion = () => {
+  const fetchCodeQuestion = async () => {
+    setIsLoading(true);
     let questionCount = 1
-    axios
-      .get(
-        process.env.REACT_APP_API_URL +
-          "/assessment/v2/question/random", {
-            params: {
-              conversation_id: conversation_id,
-              count: questionCount,
-          }}
-      )
-      .then((res) => {
-        // TODO: fix this for more than 1 MC question - currently forcefully set to first question
-        let data = res.data[0];
-        
-        let { question, parsedCode } = parseCode(data.question);
-        setCode({
-          question: question,
-          code: parsedCode,
-          language: data.language,
-        });
-        setOptions(data.choices);
-        setAssessmentQuestionID(data.assessment_question_id);
-        // console.log(data.choices);
-      })
-      .catch((err) => {
-        setError(err);
-        // console.log(err);
-        onErrOpen();
+    axios.get( 
+      process.env.REACT_APP_API_URL + "/assessment/v2/question/random", {
+        params: {
+          conversation_id: conversation_id,
+          count: questionCount,
+      }}
+    ).then((res) => {
+      // TODO: fix this for more than 1 MC question - currently forcefully set to first question
+      let data = res.data[0];
+      
+      let { question, parsedCode } = parseCode(data.question);
+      setCode({
+        question: question,
+        code: parsedCode,
+        language: data.language,
       });
+      setOptions(data.choices);
+      setAssessmentQuestionID(data.assessment_question_id);
+      setIsLoading(false);
+    })
+    .catch((err) => {
+      // console.log(err);
+      setIsLoading(false);
+    });
   };
 
   useEffect(() => {
@@ -95,95 +122,85 @@ const TechAssessment = ({
       question = text.substring(0, start);
     }
 
-
     return { question, parsedCode };
   };
 
   return (
     <>
-      <Modal
-        open={isOpenTechAssessment}
-      >
-        <Box sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '40%',
-          bgcolor: 'background.paper',
-          boxShadow: 10,
-          pt: 2,
-          px: 4,
-          pb: 3,
-          borderRadius: '8px',
-          minWidth: '450px',
-          }}>
+      <Modal open={isOpenTechAssessment}>
+        <Box sx={technicalAssessmentModalStyle}>
          <Box>
             <p style={{ fontWeight: '600', fontStyle: 'Poppins', fontSize: '20px', lineHeight: '30px' }}>Technical Assessment</p>
           </Box>
-          <Box mt={4} mb={4}>
-            {/* Code Blob */}
-            <Box width={"100%"} >
-              <Text>{code.question}</Text>
-              {code.code && 
-                <SyntaxHighlighter
-                  showLineNumbers={true}
-                  wrapLongLines={true}
-                  language={"python"}
-                  codeTagProps={{ style: { fontSize: "12px" } }}
-                >
-                  {code.code}
-                </SyntaxHighlighter>
-              }
+          {isLoading ? (
+            <Box mt={4} mb={4} minHeight={400} className="h-100 d-flex justify-content-center align-items-center">
+                <CircularProgress /> 
+                <p className="ms-3">Loading...</p>
             </Box>
-            {/* MC choices */}
-            <RadioGroup display="grid" gridGap={4} mt={10}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              {options.map((element) => (
-                <Box
-                  key={element.choice + element.flavor_text}
-                  className={`
-                    ${studentResponse != element.choice
-                      ? "hidden-border"
-                      : !answer
-                      ? "selected-border"
-                      : answer == studentResponse
-                      ? "correct-border"
-                      : "wrong-border"
-                      // + 
-                    }
-                    ${disableAllOption ? 
-                    "disabled-choice" : ""}
-                  `
-                  }
+          ) : (
+            <Box mt={4} mb={4}>
+              {/* Code Blob */}
+              <Box width={"100%"} >
+                <Text>{code.question}</Text>
+                {code.code && 
+                  <SyntaxHighlighter
+                    showLineNumbers={true}
+                    wrapLongLines={true}
+                    language={"python"}
+                    codeTagProps={{ style: { fontSize: "12px" } }}
+                  >
+                    {code.code}
+                  </SyntaxHighlighter>
+                }
+              </Box>
+              {/* MC choices */}
+              <RadioGroup display="grid" gridGap={4} mt={10}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                {options.map((element) => (
+                  <Box
+                    key={element.choice + element.flavor_text}
+                    className={`
+                      ${studentResponse != element.choice
+                        ? "hidden-border"
+                        : !answer
+                        ? "selected-border"
+                        : answer == studentResponse
+                        ? "correct-border"
+                        : "wrong-border"
+                        // + 
+                      }
+                      ${disableAllOption ? 
+                      "disabled-choice" : ""}
+                    `}
 
-                  onClick={(e) => { if (!disableAllOption) setStudentResponse(element.choice); }}
-                  style={{
-                    justifyContent: "left",
-                    padding: "5px 20px",
-                    borderRadius: "8px",
-                    marginTop: "5px",
-                    fontWeight: "500",
-                    width: "85%",
-                    cursor: disableAllOption ? "not-allowed": "pointer",
-                  }}
-                >
-                  <Text margins={2} style={{
-                    fontWeight: "500",
-                    textAlign: "left",
-                    warp: "break-word",
-                    fontSize: "14px",
-                  }}>{element.flavor_text}</Text>
-                </Box>
-              ))}
-            </RadioGroup>
-          </Box>
+                    onClick={(e) => { if (!disableAllOption) setStudentResponse(element.choice); }}
+                    style={{
+                      justifyContent: "left",
+                      padding: "5px 20px",
+                      borderRadius: "8px",
+                      marginTop: "5px",
+                      fontWeight: "500",
+                      width: "85%",
+                      cursor: disableAllOption ? "not-allowed": "pointer",
+                    }}
+                  >
+                    <Text margins={2} style={{
+                      fontWeight: "500",
+                      textAlign: "left",
+                      warp: "break-word",
+                      fontSize: "14px",
+                    }}>{element.flavor_text}</Text>
+                  </Box>
+                ))}
+              </RadioGroup>
+            </Box>
+          )}
 
           {/* Next Button */}
           <Box
@@ -234,7 +251,7 @@ const TechAssessment = ({
                         utorid: UTORid,
                         conversation_id: conversation_id,
                         assessment_id: "8dd15ed3-da48-487b-82ac-6c2ae12f93b6",
-                        assessment_question_id: assessement_question_id,
+                        assessment_question_id: assessmentQuestionID,
                         answer: studentResponse,
                       }
                     )
@@ -274,12 +291,9 @@ const TechAssessment = ({
         setConversations={setConversations}
         UTORid={UTORid}
         setDisableAllOption={setDisableAllOption}
-        setAnswer={setAnswer}
-        setDisplayAnswer={setDisplayAnswer}
-        setAnswerFlavorText={setAnswerFlavorText}
         currModelDefaultMessage={currModelDefaultMessage}
+        resetTechAssessment={resetTechAssessment}
       />
-      {/* <ErrorDrawer error={error} isOpen={isErrOpen} onClose={onErrClose} /> */}
     </>
   );
 };
