@@ -1,9 +1,11 @@
 import { Text } from "@chakra-ui/react";
 import { useEffect } from "react";
 import PreSurvey from "../Components/Chat/PreSurvey";
+import ReflectionPreSurvey from "../Components/Reflection/ReflectionSurvey";
 import { LinearProgress } from "@mui/material";
+import ReflectionPage from "./ReflectionPage";
 
-const LandingPage = ({ isLoading, UTORid, isNewUser, setIsNewUser }) => {
+const LandingPage = ({ auth, isLoading, UTORid, userId, isNewUser, setIsNewUser, modelId }) => {
   useEffect(() => {
     // console.log("Landing Page: ", isLoading);
   }, [isLoading]);
@@ -27,14 +29,16 @@ const LandingPage = ({ isLoading, UTORid, isNewUser, setIsNewUser }) => {
   ];
 
   if (!isLoading) {
-    console.log("Landing Page: ", isLoading);
-    return (
-      <PreSurvey
-        UTORid={UTORid}
-        isNewUser={isNewUser}
-        setIsNewUser={setIsNewUser}
-      />
-    );
+      console.log("Landing Page: ", isLoading);
+      return (
+        <ReflectionPage
+          UTORid={UTORid}
+          userId={userId}
+          isNewUser={isNewUser}
+          setIsNewUser={setIsNewUser}
+          modelId={modelId} 
+        />
+      );
   }
 
   return (

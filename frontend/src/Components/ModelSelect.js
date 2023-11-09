@@ -4,6 +4,12 @@ import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 
+/**
+ * Selector for the current model
+ * @param {object[]} models - list of models for the current course
+ * @param {object} currModel - the current selected model's object
+ * @returns 
+ */
 const ModelSelect = ({
   models,
   setCurrModel,

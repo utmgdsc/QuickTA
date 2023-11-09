@@ -32,6 +32,7 @@ const ModelCard = ({
     deployment_id: "",
     model_name: "",
     model: "",
+    default_message: "",
     prompt: "",
     max_tokens: 0,
     top_p: 0.0,
@@ -88,6 +89,7 @@ const ModelCard = ({
         model_name: newModel.model_name,
         model: newModel.model,
         model_description: newModel.model_description,
+        default_message: newModel.default_message,
         prompt: newModel.prompt,
         max_tokens: newModel.max_tokens,
         top_p: newModel.top_p,
@@ -122,6 +124,7 @@ const ModelCard = ({
           model_name: newModel.model_name,
           model: newModel.model,
           model_description: newModel.model_description,
+          default_message: newModel.default_message,
           prompt: newModel.prompt,
           max_tokens: newModel.max_tokens,
           top_p: newModel.top_p,
@@ -141,6 +144,7 @@ const ModelCard = ({
             model.model_name = newModel.model_name;
             model.model = newModel.model;
             model.model_description = newModel.model_description;
+            model.default_message = newModel.default_message;
             model.prompt = newModel.prompt;
             model.max_tokens = newModel.max_tokens;
             model.top_p = newModel.top_p;
@@ -176,6 +180,7 @@ const ModelCard = ({
       model_name: currentModel.model_name,
       model: currentModel.model,
       model_description: currentModel.model_description,
+      default_message: currentModel.default_message,
       prompt: currentModel.prompt,
       max_tokens: currentModel.max_tokens,
       top_p: currentModel.top_p,
@@ -314,6 +319,25 @@ const ModelCard = ({
                 resize: "none",
               }}
             />
+
+            <FormLabel className="mt-2">
+              Initial Message
+              <TextareaAutosize
+                className="my-2 border"
+                label="Initial Message"
+                placeholder="Enter an initial message for the model"
+                required
+                onChange={(e) => updateField("default_message", e.target.value)}
+                value={newModel.default_message}
+                minRows={3}
+                style={{ 
+                  width: "100%",
+                  padding: "16px",
+                  overflow: "auto",
+                  resize: "none",
+                }}
+              />  
+            </FormLabel>
             
             <FormLabel 
               className="mt-2"

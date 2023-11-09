@@ -13,4 +13,7 @@ urlpatterns = [
     path('/questions/answer', AnswerQuestionView.as_view()),
     path('/active', ActiveSurveyView.as_view()),
     path('/activate', ActivateSurveyView.as_view()),
+
+    # v2 - utilizes mongo query pipeline
+    path('/v2/questions', SurveyQuestionsFromConversationView.as_view()),
 ]

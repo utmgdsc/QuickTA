@@ -2,8 +2,12 @@ import React, { useState, useEffect} from "react";
 import axios from "axios";
 import fileDownload from "js-file-download";
 import StatCard from "../components/StatCard";
+import { useDeploymentFilter } from "../../../Contexts/DeploymentFilterContext";
+import { useUserScope } from "../../../Contexts/UserScopeContext";
 
 const UniqueUsersCard = ({ courseID }) => {
+  const { deploymentFilter } = useDeploymentFilter();
+  const { userScope } = useUserScope();
   const [data, setData] = useState({
     unique_users: 0,
     total_users: 0,
@@ -41,7 +45,9 @@ const UniqueUsersCard = ({ courseID }) => {
     const getUniqueUsers = async () => {
       axios.get(
         process.env.REACT_APP_API_URL +
-        `/researchers/v2/unique-users?course_id=${courseID}&`
+        `/researchers/v2/unique-users`, {
+          params: { course_id: courseID }
+        }
       )
       .then((res) => {
         if (res.data) {

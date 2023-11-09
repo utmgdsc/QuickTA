@@ -5,8 +5,6 @@ import {
   RadioGroup,
   Textarea,
   VStack,
-  useDisclosure,
-  Radio,
   Text,
 } from "@chakra-ui/react";
 import axios from "axios";
@@ -14,12 +12,12 @@ import { useEffect, useState } from "react";
 import { Temporal } from "@js-temporal/polyfill";
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
-
+import { Flex } from "@chakra-ui/layout";
+import { Spinner } from "@chakra-ui/react";
 
 const PostQuestions = ({
   isPostQOpen,
   setIsPostQOpen,
-  setIsOpenTechAssessment,
   setDisableAll,
   updateMessages,
   updateInConvo,
@@ -28,59 +26,59 @@ const PostQuestions = ({
   conversation_id,
   setConversations,
   UTORid,
-  setStudentResponse,
   setDisableAllOption,
-  setAnswer,
-  setDisplayAnswer,
-  setAnswerFlavorText
+  currModelDefaultMessage,
+  resetTechAssessment
 }) => {
-  const [showModalIndex, setShowModalIndex] = useState(0);
-  const [error, setError] = useState();
-  const [questions, setQuestions] = useState([{}]);
-  const [optionsSelected, setOptionsSelected] = useState([]);
-  const [scaleSurveyId, setScaleSurveyId] = useState("");
-  const [openEndedQuestions, setOpenEndedQuestions] = useState([{}]);
-  const [open_ended_surveyId, setOpenEndedSurveyId] = useState("");
 
-  const fetchQuestions = () => {
+  const [questions, setQuestions] = useState([]);
+  const [currQuestion, setCurrQuestion] = useState(0);
+  const [studentResponse, setStudentResponse] = useState([]);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [surveyID, setSurveyID] = useState("");
+
+  /** Fetch survey questions from backend. */
+  const fetchSurveyQuestions = () => {
+    setIsLoading(true);
     axios
-      .get(
-        process.env.REACT_APP_API_URL +
-          "/survey/details?survey_id=1d26169c-aad0-41e3-b74b-30d6511a56f0"
+      .get( process.env.REACT_APP_API_URL + "/survey/v2/questions",
+          { 
+            params: { 
+            conversation_id: conversation_id,
+            type: "Post",
+          }}
       )
       .then((res) => {
+        // console.log(res.data);
         setQuestions(res.data.questions);
-        setScaleSurveyId(res.data.survey_id);
-        // fetch prompt question here
-        axios
-          .get(
-            process.env.REACT_APP_API_URL +
-              "/survey/details?survey_id=428964a0-2ac5-4669-b8d8-2cc48927fb1d"
-          )
-          .then((res2) => {
-            setQuestions([...res.data.questions, ...res2.data.questions]);
-            setOpenEndedQuestions(res2.data.questions);
-            setOpenEndedSurveyId(res2.data.survey_id);
-          })
-          .catch((err) => {
-            setError("Error fetching prompt question");
-            setError(err);
-            // console.log(err);
-          });
+        setSurveyID(res.data.survey_id);
+        
+        // Get number of questions & set student response as empty
+        let numQuestions = res.data.questions.length;
+        let _studentResponse = {}
+        for (let i = 0; i < numQuestions; i++) {
+          _studentResponse[i + 1] = "";
+        }
+        setStudentResponse(_studentResponse);
+        setIsLoading(false);
       })
       .catch((err) => {
-        setError(err);
-        // console.log(err);
+        setIsLoading(false);
       });
   };
 
+  /**
+   * Checks if all questions are answered.
+   * @returns true if all questions are answered, false otherwise.
+   */
   const checkValidResponse = () => {
     for (let i = 0; i < questions.length; i++) {
       if (
-        (optionsSelected[questions[i].question_type] === "OPEN_ENDED" &&
-          optionsSelected[questions[i].open_ended_answer] === "") ||
-        (optionsSelected[questions[i].question_type] === "SCALE" &&
-          optionsSelected[questions[i].answer] <= 0)
+        (studentResponse[questions[i].question_type] === "OPEN_ENDED" ||
+          studentResponse[questions[i].question_type] === "MULTIPLE_CHOICE") &&
+        studentResponse[questions[i].answer] <= 0
       ) {
         return false;
       }
@@ -88,25 +86,23 @@ const PostQuestions = ({
     return true;
   };
 
+  /**
+   * Submits student response to backend.
+   */
   const submitResponse = () => {
+    setIsSubmitting(true);
     let allResponses = [];
-    for (var option in optionsSelected) {
+    
+    for (var response in studentResponse) {
       let data = {
         utorid: UTORid,
-        question_type: questions[option - 1].question_type,
+        question_type: questions[response - 1].question_type,
+        question_id: questions[response - 1].question_id,
         conversation_id: conversation_id,
-        question_id: questions[option - 1].question_id,
         survey_type: "Post",
-        answer: optionsSelected[option],
+        survey_id: surveyID,
+        answer: studentResponse[response],
       };
-
-      if (data.question_type === "SCALE") {
-        data.survey_id = scaleSurveyId;
-      } else if (data.question_type === "OPEN_ENDED") {
-        data.survey_id = open_ended_surveyId;
-      }
-      console.log(optionsSelected[option], data.answer);
-
       allResponses.push(data);
     }
 
@@ -123,31 +119,21 @@ const PostQuestions = ({
       });
 
       axios
-        .post(
-          process.env.REACT_APP_API_URL + "/survey/questions/answer",
-          allResponses
-        )
-        .then((res) => {
-          // Clear messages, response
-          // console.log("Successfully submitted response!");
-          setOptionsSelected([]);
-          setStudentResponse(null);
+        .post(process.env.REACT_APP_API_URL + "/survey/questions/answer", allResponses)
+        .then((res) => {          
+          // Reset Post Questions & Tech Assessment for next iteration
+          setStudentResponse([]);
+          setCurrQuestion(0);
           setDisableAllOption(false);
-          setAnswer("");
-          setDisplayAnswer(false);
-          setAnswerFlavorText("");
-
-          // find current conversation
-          let currConvo = conversations.find(
-            (convo) => convo.conversation_id === conversation_id
-          );
-
-          // update conversation
+          setIsSubmitting(false);
+          
+          resetTechAssessment();
+          
+          // find and update current conversation
+          let currConvo = conversations.find((convo) => convo.conversation_id === conversation_id);
           let newConversations = [
-            { ...currConvo, status: "I" },
-            ...conversations.filter(
-              (convo) => convo.conversation_id !== conversation_id
-            ),
+              { ...currConvo, status: "I" },
+              ...conversations.filter((convo) => convo.conversation_id !== conversation_id),
           ];
           setConversations(newConversations);
 
@@ -155,8 +141,7 @@ const PostQuestions = ({
           updateConvoID("");
           updateMessages([
             {
-              message:
-                "Hi! I am an AI assistant designed to support you in your Python programming learning journey. I cannot give out solutions to your assignments (python code) but I can help guide you if you get stuck. The chat is monitored, if you continue asking for the solution here, the instructors would be made aware of it. How can I help you?",
+              message: currModelDefaultMessage,
               dateSent: Temporal.Now.zonedDateTimeISO().toString(),
               isUser: false,
             },
@@ -168,24 +153,26 @@ const PostQuestions = ({
             inputMessage: false,
             oldConvoButtons: false,
           });
+          setIsPostQOpen(false);
         })
         .catch((err) => {
-          setError(err);
           // console.log(err);
         });
     }
   };
-
+  
+  const [open, setOpen] = useState(true);
   useEffect(() => {
-    fetchQuestions();
-  }, [UTORid]);
+    if (isPostQOpen) {
+      setStudentResponse([]); // Clear student response
+      fetchSurveyQuestions();
+    }
+  }, [isPostQOpen]);
 
   return (
     <>
-      <Modal
-        open={isPostQOpen}
-        // onClose={() => setIsPostQOpen(false)}
-      >
+
+      <Modal open={isPostQOpen}>
       <Box sx={{
           position: 'absolute',
           top: '50%',
@@ -199,188 +186,227 @@ const PostQuestions = ({
           pb: 3,
           borderRadius: '8px',
           minWidth: '450px',
-          }}>
-        {showModalIndex == 0 && <Box>
-            <Box>
-            <p style={{ fontWeight: '600', fontStyle: 'Poppins', fontSize: '20px', lineHeight: '30px' }}>Post Questions</p>
-            </Box>
-            <Box style={{
-                  overflowY: "scroll",
-                  overflowX: "scroll",
-                  width: "100%",
-                }}>
-              <div>
-                {questions.map((question, question_idx) => {
-                  if (question_idx < 4)
-                    return (
-                    <VStack py={2} key={question_idx}>
-                      <div
-                        style={{
-                          fontSize: "14px",
-                        }}
-                      >
-                        {question_idx + 1 + "."} {question.question}
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "row",
-                          margin: "30px 0px",
-                        }}
-                      >
-                        <div className="scale-question">
-                          <RadioGroup
-                            onChange={(value) => {
-                              setOptionsSelected({
-                                ...optionsSelected,
-                                [question_idx + 1]: value,
-                              });
-                              // console.log(optionsSelected);
-                            }}
-                            value={parseInt(optionsSelected[question_idx + 1])}
-                            display="grid"
-                            gridGap={4}
-                          >
-                              <HStack direction="row" spacing={10}>
-                                {question.answers &&
-                                  question.answers.map((answer, answer_idx) => {
-                                    return (
-                                      <div
-                                        key={answer_idx}
-                                        className="answer-option"
-                                      >
-                                        <label>
-                                          <Button
-                                            value={answer.value}
-                                            className={`
-                                            grey-button  
-                                            ${optionsSelected[question_idx + 1] ==
-                                              answer.value
-                                                ? "selected-border"
-                                                : "hidden-border"}
-                                            `
-                                            }
-                                            onClick={(e) => {
-                                              setOptionsSelected({
-                                                ...optionsSelected,
-                                                [question_idx + 1]:
-                                                  e.target.value,
-                                              });
-                                            }}
-                                          >
-                                            {answer.value}
-                                          </Button>
-                                          <div className="answer-posttext">
-                                            {answer.text}
-                                          </div>
-                                        </label>
-                                      </div>
-                                    );
-                                  })}
-                              </HStack>
-                            </RadioGroup>
-                          </div>
-                        </div>
-                      </VStack>
-                    );
-                })}
-              </div>
-            </Box>
-            <HStack>
-              <Button
-                className="grey-button"
-                onClick={() => {
-                  setIsPostQOpen(false);
-                  setIsOpenTechAssessment(true);
-                }}
-              >
-                Back
-              </Button>
-              <Spacer />
-              <Button
-              className={`grey-button ${
-                 (optionsSelected[1] === undefined ||
-                  optionsSelected[2] === undefined ||
-                  optionsSelected[3] === undefined ||
-                  optionsSelected[4] === undefined) ?
-                  "disabled-choice" : ""
-              }`}
-                onClick={() => {
-                  if (!(optionsSelected[1] === undefined ||
-                    optionsSelected[2] === undefined ||
-                    optionsSelected[3] === undefined ||
-                    optionsSelected[4] === undefined)) {
-                      setShowModalIndex(1);
-                      // console.log("Submit button clicked");
-                    }
-                }}
-              >
-                Next
-              </Button>
-            </HStack>
-          </Box>}
-          {showModalIndex == 1 &&  
-          <Box>
-          <Box>
-            <p style={{ fontWeight: '600', fontStyle: 'Poppins', fontSize: '20px', lineHeight: '30px' }}>Open-Ended Response</p>
+        }}>
+        <Box>
+          <Box className="d-flex align-items-center">
+            <div className="d-flex flex-col">
+              <Text as="h1" style={{ fontFamily: "Poppins", fontWeight: 500, fontSize: "28px", }}>
+                Post-Session Questions
+              </Text>
+            </div>
           </Box>
-            <Box>
-              <div style={{ paddingBottom: "40px" }}>
-                <Text style={{ fontFamily: "Poppins" }}>
-                  {openEndedQuestions[0].question}
-                </Text>
-              </div>
-              <Textarea
-                name={"prompt"}
-                style={{
-                  width: "100%",
-                  height: "200px",
-                  borderRadius: "8px",
-                  padding: "8px",
-                  paddingLeft: "16px",
-                  paddingRight: "16px",
-                  color: "#4A5568",
-                  background: "#EDF2F6",
-                }}
-                placeholder={"Enter your response here"}
-                onChange={(e) => {
-                  setOptionsSelected({
-                    ...optionsSelected,
-                    5: e.target.value,
-                  });
-                }}
-              >
-                {optionsSelected[5]}
-              </Textarea>
-            </Box>
-            <HStack>
-              <Button
-                className="grey-button"
-                onClick={() => { setShowModalIndex(0); }}>
-                Back
-              </Button>
-              <Spacer />
-              <Button
-                className={`grey-button ${
-                  optionsSelected[5] === "" ? "disabled-choice" : ""
-                }`}
-                color={"white"}
-                background={optionsSelected[5] === "" ? "gray.500" : "blue.500"}
-                onClick={() => {
-                  if (optionsSelected[5] === "") {
-                    // console.log("Please enter a response");
-                  } else {
-                    setShowModalIndex(0);
-                    setIsPostQOpen(false);
-                    submitResponse();
-                  }
-                }}
-              >
-                Submit
-              </Button>
 
-            </HStack>
-          </Box>}
+          {isLoading ? (
+            <Box style={{ height: "80vh" }}>
+            <VStack
+              className="d-flex justify-content-center align-items-center"
+              style={{ fontSize: "14px", height: "80vh" }}
+            >
+              <Flex>
+                <Spinner size={"md"} />
+                <Text ms={5}>Loading...</Text>
+              </Flex>
+            </VStack>
+            </Box>
+          ) : ( questions && questions.length > 0 &&
+            <div>
+              <VStack className="d-flex align-items-center" style={{ height: "80vh", backgroundColor: "white" }}>
+                <div 
+                  className="d-flex justify-content-center align-items-center"
+                  style={{ fontSize: "16px", height: "15vh" }}
+                >
+                  {questions[currQuestion].question}
+                </div>
+                <div
+                  className="d-flex justify-content-center align-items-center flex-row w-100"
+                  style={{ minHeight: "65vh" }}
+                >
+                  {/* Question Type: MULTIPLE CHOICE  */}
+                  {questions[currQuestion] && questions[currQuestion].question_type == "MULTIPLE_CHOICE" && (
+                      <div>
+                        <RadioGroup display="grid" gridGap={4}>
+                          {questions[currQuestion].answers.map(
+                            (answer, answer_idx) => {
+                              return (
+                                <Button key={answer_idx}
+                                style={{ fontWeight: "normal", borderRadius: "5px" }}  
+                                className={
+                                    studentResponse[currQuestion + 1] === "" ?
+                                    "normal-border"
+                                    : studentResponse[currQuestion + 1] !== answer.value
+                                      ? "normal-border"
+                                      : "selected-border"
+                                  }
+                                  onClick={(e) => {
+                                    setStudentResponse({
+                                      ...studentResponse,
+                                      [currQuestion + 1]: answer.value,
+                                    });
+                                  }}
+                                >
+                                  <Text className="m-2">{answer.text}</Text>
+                                </Button>
+                              );
+                            }
+                          )}
+                        </RadioGroup>
+                      </div>
+                    )}
+
+                  {/* Question Type: SCALE */}
+                  {questions[currQuestion] &&
+                    questions[currQuestion].question_type == "SCALE" && (
+                      <RadioGroup display="grid" gridGap={4}>
+                        <HStack
+                          spacing={7}
+                          style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            width: "100%",
+                            justifyContent: "center",
+                            alignItems: "center",
+                          }}
+                        >
+                          {questions[currQuestion].answers.map(
+                            (answer, answer_idx) => {
+                              return (
+                                <div>
+                                  <span
+                                    style={{
+                                      position: "absolute",
+                                      marginLeft: "-30px",
+                                      marginTop: "-50px",
+                                      fontSize: "14px",
+                                      width: "100px",
+                                      minHeight: "50px",
+                                      textAlign: "center",
+                                      display: "flex",
+                                      justifyContent: "center",
+                                      alignItems: "center",
+                                    }}
+                                  >
+                                    {answer.text}
+                                  </span>
+                                  <Button
+                                    style={{
+                                      fontWeight: "normal",
+                                      borderRadius: "5px",
+                                      padding: "10px 15px",
+                                    }}
+                                    className={
+                                      studentResponse[currQuestion + 1] === "" ?
+                                      "normal-border"
+                                      : studentResponse[currQuestion + 1] !== answer.value
+                                        ? "normal-border"
+                                        : "selected-border"
+                                    }
+                                    onClick={(e) => {
+                                      setStudentResponse({
+                                        ...studentResponse,
+                                        [currQuestion + 1]: answer.value,
+                                      });
+                                    }}
+                                  >
+                                    <Text>{answer.value}</Text>
+                                  </Button>
+                                </div>
+                              );
+                            }
+                          )}
+                        </HStack>
+                      </RadioGroup>
+                    )}
+
+                  {/* Question Type: OPEN_ENDED */}
+                  {questions[currQuestion] && questions[currQuestion].question_type == "OPEN_ENDED" && (
+                    <Textarea
+                      className="form-control"
+                      css={{ resize: "none" }}
+                      variant={"filled"}
+                      placeholder="Enter your response here..."
+                        style={{
+                        width: "100%",
+                        height: "30vh",
+                        borderRadius: "8px",
+                        fontSize: "14px",
+                        padding: "8px",
+                        paddingLeft: "16px",
+                        paddingRight: "16px",
+                      }}
+                      value={studentResponse[currQuestion + 1]}
+                      onChange={(e) => {
+                        console.log({
+                          ...studentResponse,
+                          [currQuestion + 1]: e.target.value,
+                        })
+                        setStudentResponse({
+                          ...studentResponse,
+                          [currQuestion + 1]: e.target.value,
+                        });
+                      }}
+                    />
+                  )}
+                </div>
+              </VStack>
+
+              {/* Survey actions */}
+              <Box>
+                {currQuestion != questions.length - 1 ? (
+                  <Flex>
+                    {currQuestion != 0 && (
+                      <Button
+                        className="normal-border p-2"
+                        style={{ borderRadius: "5px" }}
+                        onClick={() => { setCurrQuestion(currQuestion - 1); }}
+                      >
+                        Previous
+                      </Button>
+                    )}
+                    <Spacer />
+                    <Button
+                      className={studentResponse[currQuestion + 1] ?  " normal-border" : " disabled-border"}
+                      style={{ borderRadius: "5px", padding: "10px 15px"}}
+                      disabled={!studentResponse[currQuestion + 1]}
+                      onClick={() => { setCurrQuestion(currQuestion + 1); }}
+                    >
+                      Next
+                    </Button>
+                  </Flex>
+                ) : (
+                  <Flex
+                    style={{
+                      alignItems: "center",
+                    }}
+                  >
+                    <Button
+                    className="normal-border p-2"
+                    style={{ borderRadius: "5px" }}
+                      onClick={() => {
+                        setCurrQuestion(currQuestion - 1);
+                      }}
+                    >
+                      Back
+                    </Button>
+                    <Spacer />
+                    {isSubmitting && (
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        <Spinner color="gray" size={"xs"} style={{ marginRight: "5px" }} />
+                        <Text color="gray" fontSize={"12px"}> Saving response...&nbsp; </Text>
+                      </div>
+                    )}
+                    <Button
+                      className={"p-2 " + ((studentResponse[currQuestion + 1] && !isSubmitting) ? "done-button" : "disabled-border")}
+                      disabled={ !studentResponse[currQuestion + 1] || isSubmitting }
+                      onClick={() => { submitResponse(); }}
+                    >
+                      Done
+                    </Button>
+                  </Flex>
+                )}
+              </Box>
+            </div>
+          )}
+      </Box>
         </Box>
 
       </Modal>

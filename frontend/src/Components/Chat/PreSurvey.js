@@ -11,7 +11,7 @@ import { Box } from "@chakra-ui/layout";
 import { Flex } from "@chakra-ui/layout";
 import { Spacer } from "@chakra-ui/layout";
 
-const PreSurvey = ({ UTORid, isNewUser, setIsNewUser }) => {
+const PreSurvey = ({ UTORid, isNewUser, setIsNewUser, modelId }) => {
   const [questions, setQuestions] = useState([{}]); // [ {question: "", options: []}, ... ]
   const [currQuestion, setCurrQuestion] = useState(0);
   const [surveyID, setSurveyID] = useState("");
@@ -25,11 +25,14 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser }) => {
   } = useDisclosure();
   const [error, setError] = useState();
 
+  let PRE_SURVEY_ID = "81abc01e-5d2e-475b-9752-6d9cf5a96105" // lab 8
+  let POST_SURVEY_ID = "9338790a-3c47-43ac-82ad-09c6cbe9a035" // lab 8
+
+  /** Fetch pre-survey questions from backend. */
   const fetchPreSurvey = () => {
     axios
-      .get(
-        process.env.REACT_APP_API_URL +
-          "/survey/details?survey_id=d18676a6-4419-4ae6-beda-97bc26377942"
+      .get( process.env.REACT_APP_API_URL + "/survey/details",
+          { params: { survey_id: PRE_SURVEY_ID } }
       )
       .then((res) => {
         // console.log(res.data);
@@ -42,6 +45,10 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser }) => {
       });
   };
 
+  /**
+   * Checks if all questions are answered.
+   * @returns true if all questions are answered, false otherwise.
+   */
   const checkValidResponse = () => {
     for (let i = 0; i < questions.length; i++) {
       if (
@@ -55,6 +62,9 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser }) => {
     return true;
   };
 
+  /**
+   * Submits student response to backend.
+   */
   const submitResponse = () => {
     setIsSubmitting(true);
     let allResponses = [];
@@ -113,9 +123,10 @@ const PreSurvey = ({ UTORid, isNewUser, setIsNewUser }) => {
         <Box className="d-flex align-items-center">
           <div className="d-flex flex-col">
             <Text as="h1" style={{ fontFamily: "Poppins", fontWeight: 500, fontSize: "28px", }}>
-              Questionnaire
+              {/* Questionnaire */}
+              Pre-Task Survey 
             </Text>
-            <Text color={"gray.400"}>(For First-Time User Logins Only)</Text>
+            {/* <Text color={"gray.400"}>(For First-Time User Logins Only)</Text> */}
           </div>
         </Box>
         {isLoading ? (

@@ -34,11 +34,23 @@ class CourseDeployment(models.Model):
     priority = models.IntegerField(default=0)
     status = models.CharField(default="A", max_length=1) # A or I - Active or Inactive
 
-    def to_dict(self):
-        return {
+    # Deployment-wide settings
+    assessment_ids = djmodels.JSONField(default=[], blank=True, null=True) # { "assessment_id": assessment_id }
+    survey_ids = djmodels.JSONField(default=[], blank=True, null=True) # { "survey_type": Pre/Post, "survey_id": survey_id }
+
+
+
+    def to_dict(self, add_details=False):
+        deployment = {
             'deployment_id': self.deployment_id,
             'deployment_name': self.deployment_name,
             'course_id': self.course_id,
             'priority': self.priority,
             'status': self.status
         }
+
+        if add_details:
+            deployment['assessment_ids'] = self.assessment_ids
+            deployment['survey_ids'] = self.survey_ids
+
+        return deployment

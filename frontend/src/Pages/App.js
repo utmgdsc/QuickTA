@@ -21,10 +21,10 @@ const App = () => {
   const [currCourse, setCurrCourse] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setuserId] = useState("");
-  const [model_id, setModelId] = useState("");
+  const [modelId, setModelId] = useState("");
   const [auth, setAuth] = useState("");
   const [UTORid, setUtorID] = useState("choiman3");
-  const [isNewUser, setIsNewUser] = useState(true);
+  const [isNewUser, setIsNewUser] = useState(null);
   // const [courseName, setCourseName] = useState("");
   const {
     isOpen: isErrOpen,
@@ -40,14 +40,33 @@ const App = () => {
       .then(async (res) => {
         // User authentication
         let data = res.data;
-        setIsNewUser(data.new_user);
+        setAuth(data.user_role);
+        
+        /**
+         * Prior settings
+         */
+        // setIsNewUser(data.new_user);
+        // setuserId(data.user_id);
+        // setUtorID(data.utorid);
+        // await getAllCourses(data.courses);
+        // if (res.data.user_role === "ST") { setModelId(data.model_id); }
+        // need to get active deployment and set model id
+
+        /**
+         * Lab 8 settings:
+         * 1. Acquire current deployment settings.
+         * 2. Acquire model id if user is a student.
+         */
+        let curr_deployment = data.status.find((details) => details.deployment_id == "fd582a39-2eed-42ee-b6fd-1b3c430e30cd")
+        // console.log(curr_deployment);
+        setIsNewUser(curr_deployment.new_user);
         setuserId(data.user_id);
         setUtorID(data.utorid);
+        // if (data.user_role === "ST") {
+        setModelId(curr_deployment.model_id);
+        // }
         await getAllCourses(data.courses);
 
-        setAuth(res.data.user_role);
-        if (res.data.user_role === "ST") { setModelId(data.model_id); }
-        
         // Check if user is new
         return res.data.user_id;
       })
@@ -124,31 +143,32 @@ const App = () => {
   return <ThemeProvider theme={MuiTheme}>
     {(isLoading ? (
       <LandingPage isLoading={isLoading} />
+    ) : isNewUser || auth === "ST" ? (
+      <LandingPage
+        auth={auth}
+        isLoading={isLoading}
+        UTORid={UTORid}
+        userId={userId}
+        isNewUser={isNewUser}
+        setIsNewUser={setIsNewUser}
+        modelId={modelId}
+      />
     ) : (
       <>
         <Routes>
           <Route
             path="/"
             element={
-              isNewUser ? (
-                <LandingPage
-                  isLoading={isLoading}
-                  UTORid={UTORid}
-                  isNewUser={isNewUser}
-                  setIsNewUser={setIsNewUser}
-                />
-              ) : (
-                <StudentPage
-                  UTORid={UTORid}
-                  auth={auth}
-                  currCourse={currCourse}
-                  setCurrCourse={setCurrCourse}
-                  courses={courses}
-                  semester={currCourse.semester}
-                  userId={userId}
-                  model_id={model_id}
-                />
-              )
+              <StudentPage
+                UTORid={UTORid}
+                auth={auth}
+                currCourse={currCourse}
+                setCurrCourse={setCurrCourse}
+                courses={courses}
+                semester={currCourse.semester}
+                userId={userId}
+                modelId={modelId}
+              />
             }
           />
           <Route

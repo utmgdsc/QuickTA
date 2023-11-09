@@ -76,7 +76,7 @@ class ConversationChatlogSerializer(ModelSerializer):
         model = Conversation
         fields = [
             # 'conversation_id',
-            'chatlogs',
+            'chatlogs'
         ]
         
     def get_chatlogs(self, obj):

@@ -15,7 +15,7 @@ const Dashboard = ({
 }) => {
   const [userScope, setUserScope] = useState([]); 
   const [deploymentFilter, setDeploymentFilter] = useState([]);
-  const [tabIndex, setTabIndex] = useState(1);
+  const [tabIndex, setTabIndex] = useState(0);
   return (
     <>
       <Box ml={"5vw"} mr={"5vw"}>
