@@ -156,6 +156,12 @@ dl { width: 100% }
   .top-nav-buttons {
     display: hidden !important;
   }
+
+  .chatbox-topnav-buttons {
+    display: flex;
+    align-items: center !important;
+    flex-direction: row;
+  }
 }
 
 @media (max-width: 640px) {
@@ -172,8 +178,7 @@ dl { width: 100% }
   }
   .chatbox-topnav-buttons {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    align-items: end;
     flex-direction: column;
   }
 
