@@ -5,8 +5,43 @@ import {
   Heading,
 } from "@chakra-ui/react";
 import { NavLink } from "react-router-dom";
+import {useEffect, useRef, useState} from "react";
 
 const TopNav = ({ UTORid, auth }) => {
+  const [open, setOpen] = useState(false);
+  const anchorRef = useRef(null);
+
+  const handleToggle = () => {
+    setOpen((prevOpen) => !prevOpen);
+  };
+
+  const handleClose = (event) => {
+    if (anchorRef.current && anchorRef.current.contains(event.target)) {
+      return;
+    }
+
+    setOpen(false);
+  };
+
+  function handleListKeyDown(event) {
+    if (event.key === 'Tab') {
+      event.preventDefault();
+      setOpen(false);
+    } else if (event.key === 'Escape') {
+      setOpen(false);
+    }
+  }
+
+  // return focus to the button when we transitioned from !open -> open
+  const prevOpen = useRef(open);
+  useEffect(() => {
+    if (prevOpen.current === true && open === false) {
+      anchorRef.current.focus();
+    }
+
+    prevOpen.current = open;
+  }, [open]);
+
   return (
     <HStack
       style={{
@@ -29,7 +64,6 @@ const TopNav = ({ UTORid, auth }) => {
         spacing="2vw"
         style={{
           marginRight: "2vw",
-          overflowX: "scroll",
           paddingLeft: "1vw",
         }}
       >
@@ -49,14 +83,34 @@ const TopNav = ({ UTORid, auth }) => {
           </NavLink>
         )}
         {auth === "AM" && (
-          <NavLink to="/settings" activeClassName="active-link">
-            Settings
-          </NavLink>
-        )}
-        {["IS", "AM", "RS"].includes(auth) && (
-            <NavLink to="/courses" activeClassName="active-link">
-                Courses
-            </NavLink>
+            <div className="dropdown">
+            <div className="custom-link">
+              Settings
+            </div>
+            <div className="dropdown-content">
+              <div>
+              {["IS", "AM", "RS"].includes(auth) && (
+                  <NavLink to="/courses" >
+                      Courses
+                  </NavLink>
+              )}
+              </div>
+              <div>
+              {["IS", "AM", "RS"].includes(auth) && (
+                  <NavLink to="/users" >
+                      Users
+                  </NavLink>
+              )}
+            </div>
+              <div>
+              {["IS", "AM", "RS"].includes(auth) && (
+                  <NavLink to="/history" >
+                      History
+                  </NavLink>
+              )}
+              </div>
+            </div>
+            </div>
         )}
       </HStack>
 
