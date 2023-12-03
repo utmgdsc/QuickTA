@@ -331,24 +331,14 @@ return UTORID.length !== 0 ? (
                         xs={12}
                         mb={"1vw"}
                       >
-                        {/*<Typography>Start Date</Typography>*/}
-                        {/*<TextField */}
-                        {/*  name="start_date"*/}
-                        {/*  onChange={updateField}*/}
-                        {/*  value={editPage.start_date}*/}
-                        {/*></TextField>*/}
+
                       </Grid>
                       <Grid
                         item
                         xs={12}
                         mb={"1vw"}
                       >
-                        {/*<Typography>End Date</Typography>*/}
-                        {/*<TextField */}
-                        {/*  onChange={updateField}*/}
-                        {/*  name="end_date"*/}
-                        {/*  value={editPage.end_date}*/}
-                        {/*></TextField>*/}
+
                       </Grid>
                       <Grid 
                         item
@@ -409,7 +399,7 @@ return UTORID.length !== 0 ? (
                   // height='400px'
                   // overflow='scroll'
               >
-                  <Grid item xs={12} mb={"3vw"}>
+                  <Grid item xs={12} mb={"1vw"}>
                       <Box  ml={"6vw"} mr={"6vw"} pb={"10px"} >
                         {
                           isLoading ? <div className="d-flex justify-content-center align-items-center" style={{height: "385px"}}> <CircularProgress /> </div>

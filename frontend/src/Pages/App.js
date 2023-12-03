@@ -14,7 +14,8 @@ import ErrorDrawer from "../Components/ErrorDrawer";
 import SettingPage from "./SettingPage";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CoursesPage from "./CoursesPage";
-
+import HistoryPage from "./HistoryPage";
+import UsersPage from "./UsersPage";
 
 const App = () => {
   const [courses, setCourses] = useState([]);
@@ -206,18 +207,17 @@ const App = () => {
               />
             }
           />
-          {/* TO BE FIXED */}
-          {/* <Route
-            path="/filters"
-            element={<ResearcherFilterPage UTORid={UTORid} auth={auth} />}
-          /> */}
           <Route
-            path="/settings"
-            element={<SettingPage UTORID={UTORid} auth={auth} />}
+            path="/users"
+            element={<UsersPage UTORID={UTORid} auth={auth}/>}
           />
           <Route
             path="/courses"
             element={<CoursesPage UTORID={UTORid} auth={auth}/>}
+          />
+          <Route
+            path="/history"
+            element={<HistoryPage UTORID={UTORid} auth={auth}/>}
           />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
